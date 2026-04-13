@@ -10,11 +10,36 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      DB_URL: ${{ secrets.SUPABASE_DIRECT_URL }}
-      DIRECT_URL: ${{ secrets.SUPABASE_DIRECT_URL }}
-      DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+      SUPABASE_DIRECT_URL: ${{ secrets.SUPABASE_DIRECT_URL }}
+      SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+      VARS_SUPABASE_DIRECT_URL: ${{ vars.SUPABASE_DIRECT_URL }}
+      VARS_SUPABASE_DATABASE_URL: ${{ vars.SUPABASE_DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Resolve DB URL
+        run: |
+          DB_URL="${SUPABASE_DIRECT_URL:-$DIRECT_URL}"
+          if [ -z "$DB_URL" ]; then
+            DB_URL="${VARS_SUPABASE_DIRECT_URL}"
+          fi
+          if [ -z "$DB_URL" ]; then
+            DB_URL="${SUPABASE_DATABASE_URL:-$DATABASE_URL}"
+          fi
+          if [ -z "$DB_URL" ]; then
+            DB_URL="${VARS_SUPABASE_DATABASE_URL}"
+          fi
+
+          echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
+          if [ -n "$DB_URL" ]; then
+            echo "HAS_DB_URL=true" >> "$GITHUB_ENV"
+            echo "Database URL found. Migration step will run."
+          else
+            echo "HAS_DB_URL=false" >> "$GITHUB_ENV"
+            echo "No database secret found. Migration step will be skipped."
+          fi
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -25,12 +50,14 @@ jobs:
         run: go build -v ./...
 
       - name: Install golang-migrate
+        if: env.HAS_DB_URL == 'true'
         run: |
           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.19.1/migrate.linux-amd64.tar.gz | tar xvz
           sudo mv migrate /usr/local/bin/migrate
           which migrate
 
       - name: Run migrations
+        if: env.HAS_DB_URL == 'true'
         run: make migrateup
 
       - name: Test
