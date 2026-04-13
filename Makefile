@@ -1,25 +1,30 @@
-DB_URL=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
+-include app.env
 
-postgres:
-	docker run --name postgres --network bank-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:14-alpine
+DB_URL ?= $(if $(strip $(DIRECT_URL)),$(DIRECT_URL),$(DATABASE_URL))
 
-createdb:
-	docker exec -it postgres createdb --username=root --owner=root simple_bank
-
-dropdb:
-	docker exec -it postgres dropdb simple_bank
+export DB_URL
+export DIRECT_URL
+export DATABASE_URL
+export SERVER_ADDRESS
 
 migrateup:
+	@$(MAKE) check-db-url
 	migrate -path db/migration -database "$(DB_URL)" -verbose up
 
 migrateup1:
+	@$(MAKE) check-db-url
 	migrate -path db/migration -database "$(DB_URL)" -verbose up 1
 
 migratedown:
+	@$(MAKE) check-db-url
 	migrate -path db/migration -database "$(DB_URL)" -verbose down
 
 migratedown1:
+	@$(MAKE) check-db-url
 	migrate -path db/migration -database "$(DB_URL)" -verbose down 1
+
+check-db-url:
+	@test -n "$(DB_URL)" || (echo "DB_URL, DIRECT_URL, or DATABASE_URL is required" && exit 1)
 
 sqlc:
 	sqlc generate
@@ -31,6 +36,6 @@ server:
 	go run main.go
 
 mock:
-	mockgen -package mockdb -destination db/mock/store.go github.com/techschool/simplebank/db/sqlc Store
+	mockgen -package mockdb -destination db/mock/store.go mem_pan/db/sqlc Store
 
-.PHONY: postgres createdb dropdb migrateup migrateup1 migratedown migratedown1 sqlc test server mock
+.PHONY: migrateup migrateup1 migratedown migratedown1 check-db-url sqlc test server mock

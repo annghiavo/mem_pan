@@ -1,0 +1,25 @@
+# Local environment files
+app.env
+.env
+.env.*
+
+# Go build artifacts
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Coverage and profiling
+*.coverprofile
+*.cov
+*.out
+coverage.out
+api.cover.out
+
+# Editor/OS files
+.vscode/
+.idea/
+.DS_Store
