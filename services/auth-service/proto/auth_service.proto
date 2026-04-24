@@ -1,0 +1,189 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "rpc_register_user.proto";
+import "rpc_login_user.proto";
+import "rpc_refresh_token.proto";
+import "rpc_logout.proto";
+import "rpc_verify_email.proto";
+import "rpc_resend_verification.proto";
+import "rpc_forgot_password.proto";
+import "rpc_reset_password.proto";
+import "rpc_get_user.proto";
+import "rpc_update_user.proto";
+import "rpc_change_password.proto";
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "Auth Service API";
+        version: "1.0";
+    };
+    security_definitions: {
+        security: {
+            key: "BearerAuth";
+            value: {
+                type: TYPE_API_KEY;
+                in: IN_HEADER;
+                name: "Authorization";
+            };
+        };
+    };
+    consumes: "application/json";
+    produces: "application/json";
+};
+
+service AuthService {
+    rpc RegisterUser (RegisterUserRequest) returns (RegisterUserResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/register"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Register a new user account";
+            summary: "Register user";
+            tags: "auth";
+        };
+    }
+
+    rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/login"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Login and receive access + refresh tokens";
+            summary: "Login user";
+            tags: "auth";
+        };
+    }
+
+    rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/refresh"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Use a refresh token to obtain a new access token";
+            summary: "Refresh access token";
+            tags: "auth";
+        };
+    }
+
+    rpc Logout (LogoutRequest) returns (LogoutResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/logout"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Revoke the refresh token and end the session";
+            summary: "Logout";
+            tags: "auth";
+        };
+    }
+
+    rpc VerifyEmail (VerifyEmailRequest) returns (VerifyEmailResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/verify-email"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Verify a user email address using the token sent via email";
+            summary: "Verify email";
+            tags: "auth";
+        };
+    }
+
+    rpc ResendVerification (ResendVerificationRequest) returns (ResendVerificationResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/resend-verification"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Resend the email verification link";
+            summary: "Resend verification email";
+            tags: "auth";
+        };
+    }
+
+    rpc ForgotPassword (ForgotPasswordRequest) returns (ForgotPasswordResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/forgot-password"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Request a password reset link sent to the user email";
+            summary: "Forgot password";
+            tags: "auth";
+        };
+    }
+
+    rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/reset-password"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Reset the user password using the token from the reset email";
+            summary: "Reset password";
+            tags: "auth";
+        };
+    }
+
+    rpc GetUser (GetUserRequest) returns (GetUserResponse) {
+        option (google.api.http) = {
+            get: "/v1/users/me"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Get the authenticated user's profile";
+            summary: "Get current user";
+            tags: "users";
+            security: {
+                security_requirement: {
+                    key: "BearerAuth";
+                    value: {};
+                }
+            };
+        };
+    }
+
+    rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse) {
+        option (google.api.http) = {
+            patch: "/v1/users/me"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Update the authenticated user's profile";
+            summary: "Update current user";
+            tags: "users";
+            security: {
+                security_requirement: {
+                    key: "BearerAuth";
+                    value: {};
+                }
+            };
+        };
+    }
+
+    rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordResponse) {
+        option (google.api.http) = {
+            patch: "/v1/users/me/password"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Change the authenticated user's password";
+            summary: "Change password";
+            tags: "users";
+            security: {
+                security_requirement: {
+                    key: "BearerAuth";
+                    value: {};
+                }
+            };
+        };
+    }
+}

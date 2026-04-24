@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message ResendVerificationRequest {
+    string email = 1;
+}
+
+message ResendVerificationResponse {
+    string message = 1;
+}

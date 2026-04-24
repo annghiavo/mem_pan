@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message LogoutRequest {
+    string refresh_token = 1;
+}
+
+message LogoutResponse {}

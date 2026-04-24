@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pb;
+
+import "user.proto";
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message UpdateUserRequest {
+    optional string full_name  = 1;
+    optional string avatar_url = 2;
+}
+
+message UpdateUserResponse {
+    User user = 1;
+}

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message User {
+    string user_id       = 1;
+    string username      = 2;
+    string email         = 3;
+    string full_name     = 4;
+    string avatar_url    = 5;
+    string role          = 6;
+    bool   email_verified = 7;
+    google.protobuf.Timestamp created_at = 8;
+}

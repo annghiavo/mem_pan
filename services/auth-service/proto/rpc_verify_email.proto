@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message VerifyEmailRequest {
+    string token = 1;
+}
+
+message VerifyEmailResponse {
+    string message = 1;
+}

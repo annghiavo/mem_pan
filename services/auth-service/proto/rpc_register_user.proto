@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;
+
+import "user.proto";
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message RegisterUserRequest {
+    string username  = 1;
+    string email     = 2;
+    string password  = 3;
+    string full_name = 4;
+}
+
+message RegisterUserResponse {
+    User user = 1;
+}

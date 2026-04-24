@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+import "user.proto";
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message GetUserRequest {}
+
+message GetUserResponse {
+    User user = 1;
+}
