@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "rpc_study.proto";
+
+option go_package = "mem_pan/services/study-service/pb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "Study Service API";
+        version: "1.0";
+    };
+    security_definitions: {
+        security: {
+            key: "BearerAuth";
+            value: {
+                type: TYPE_API_KEY;
+                in: IN_HEADER;
+                name: "Authorization";
+            };
+        };
+    };
+    consumes: "application/json";
+    produces: "application/json";
+};
+
+service StudyService {
+    rpc StartSession (StartSessionRequest) returns (StartSessionResponse) {
+        option (google.api.http) = { post: "/v1/study/sessions"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Start a study session for a deck"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc GetSession (GetSessionRequest) returns (GetSessionResponse) {
+        option (google.api.http) = { get: "/v1/study/sessions/{session_id}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Get session status and card queue"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc ReviewCard (ReviewCardRequest) returns (ReviewCardResponse) {
+        option (google.api.http) = { post: "/v1/study/sessions/{session_id}/review"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Submit rating (1-4) for a card and compute FSRS"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc FinishSession (FinishSessionRequest) returns (FinishSessionResponse) {
+        option (google.api.http) = { post: "/v1/study/sessions/{session_id}/finish"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Finish a study session"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc GetDueCards (GetDueCardsRequest) returns (GetDueCardsResponse) {
+        option (google.api.http) = { get: "/v1/study/due" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "List cards due today across all decks"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+}

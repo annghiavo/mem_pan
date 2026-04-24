@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+package pb;
+
+import "models.proto";
+
+option go_package = "mem_pan/services/deck-service/pb";
+
+message ListDecksRequest {
+    int32 page      = 1;
+    int32 page_size = 2;
+}
+
+message ListDecksResponse {
+    repeated Deck decks = 1;
+    int64         total = 2;
+}
+
+message CreateDeckRequest {
+    string name        = 1;
+    string description = 2;
+    bool   is_public   = 3;
+}
+
+message CreateDeckResponse {
+    Deck deck = 1;
+}
+
+message ListPublicDecksRequest {
+    int32  page      = 1;
+    int32  page_size = 2;
+}
+
+message ListPublicDecksResponse {
+    repeated Deck decks = 1;
+    int64         total = 2;
+}
+
+message GetDeckRequest {
+    string deck_id = 1;
+}
+
+message GetDeckResponse {
+    Deck deck = 1;
+}
+
+message UpdateDeckRequest {
+    string deck_id     = 1;
+    string name        = 2;
+    string description = 3;
+}
+
+message UpdateDeckResponse {
+    Deck deck = 1;
+}
+
+message DeleteDeckRequest {
+    string deck_id = 1;
+}
+
+message DeleteDeckResponse {
+    bool success = 1;
+}
+
+message UpdateDeckSettingsRequest {
+    string       deck_id  = 1;
+    DeckSettings settings = 2;
+}
+
+message UpdateDeckSettingsResponse {
+    Deck deck = 1;
+}
+
+message UpdateDeckVisibilityRequest {
+    string deck_id   = 1;
+    bool   is_public = 2;
+}
+
+message UpdateDeckVisibilityResponse {
+    Deck deck = 1;
+}
+
+message CloneDeckRequest {
+    string deck_id = 1;
+}
+
+message CloneDeckResponse {
+    Deck deck = 1;
+}
+
+message GetDeckStatsRequest {
+    string deck_id = 1;
+}
+
+message GetDeckStatsResponse {
+    DeckStats stats = 1;
+}
+
+message ListDeckCardsRequest {
+    string deck_id = 1;
+}
+
+message ListDeckCardsResponse {
+    repeated Card cards = 1;
+}
+
+message CreateCardRequest {
+    string deck_id       = 1;
+    string content_front = 2;
+    string content_back  = 3;
+    string image_url     = 4;
+    int32  position      = 5;
+}
+
+message CreateCardResponse {
+    Card card = 1;
+}
+
+message BulkCardItem {
+    string content_front = 1;
+    string content_back  = 2;
+    string image_url     = 3;
+}
+
+message BulkCreateCardsRequest {
+    string             deck_id = 1;
+    repeated BulkCardItem cards = 2;
+}
+
+message BulkCreateCardsResponse {
+    repeated Card cards   = 1;
+    int32         created = 2;
+}

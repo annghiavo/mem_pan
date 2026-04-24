@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package pb;
+
+import "models.proto";
+
+option go_package = "mem_pan/services/deck-service/pb";
+
+message ListFoldersRequest {}
+
+message ListFoldersResponse {
+    repeated Folder folders = 1;
+}
+
+message CreateFolderRequest {
+    string name        = 1;
+    string description = 2;
+}
+
+message CreateFolderResponse {
+    Folder folder = 1;
+}
+
+message GetFolderRequest {
+    string folder_id = 1;
+}
+
+message GetFolderResponse {
+    FolderWithDecks data = 1;
+}
+
+message UpdateFolderRequest {
+    string folder_id   = 1;
+    string name        = 2;
+    string description = 3;
+}
+
+message UpdateFolderResponse {
+    Folder folder = 1;
+}
+
+message DeleteFolderRequest {
+    string folder_id = 1;
+}
+
+message DeleteFolderResponse {
+    bool success = 1;
+}
+
+message AddDeckToFolderRequest {
+    string folder_id = 1;
+    string deck_id   = 2;
+}
+
+message AddDeckToFolderResponse {
+    bool success = 1;
+}
+
+message RemoveDeckFromFolderRequest {
+    string folder_id = 1;
+    string deck_id   = 2;
+}
+
+message RemoveDeckFromFolderResponse {
+    bool success = 1;
+}

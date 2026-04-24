@@ -15,6 +15,7 @@ import "rpc_reset_password.proto";
 import "rpc_get_user.proto";
 import "rpc_update_user.proto";
 import "rpc_change_password.proto";
+import "rpc_verify_token.proto";
 
 option go_package = "mem_pan/services/auth-service/pb";
 
@@ -186,4 +187,7 @@ service AuthService {
             };
         };
     }
+
+    // Internal service-to-service RPC — not exposed via HTTP gateway.
+    rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenResponse) {}
 }

@@ -1,0 +1,469 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Study Service API",
+    "version": "1.0"
+  },
+  "tags": [
+    {
+      "name": "StudyService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/study/due": {
+      "get": {
+        "summary": "List cards due today across all decks",
+        "operationId": "StudyService_GetDueCards",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbGetDueCardsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/study/sessions": {
+      "post": {
+        "summary": "Start a study session for a deck",
+        "operationId": "StudyService_StartSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbStartSessionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbStartSessionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/study/sessions/{sessionId}": {
+      "get": {
+        "summary": "Get session status and card queue",
+        "operationId": "StudyService_GetSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbGetSessionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/study/sessions/{sessionId}/finish": {
+      "post": {
+        "summary": "Finish a study session",
+        "operationId": "StudyService_FinishSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbFinishSessionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StudyServiceFinishSessionBody"
+            }
+          }
+        ],
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/study/sessions/{sessionId}/review": {
+      "post": {
+        "summary": "Submit rating (1-4) for a card and compute FSRS",
+        "operationId": "StudyService_ReviewCard",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbReviewCardResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StudyServiceReviewCardBody"
+            }
+          }
+        ],
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "StudyServiceFinishSessionBody": {
+      "type": "object"
+    },
+    "StudyServiceReviewCardBody": {
+      "type": "object",
+      "properties": {
+        "cardId": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "durationMs": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "pbDueCard": {
+      "type": "object",
+      "properties": {
+        "cardId": {
+          "type": "string"
+        },
+        "deckId": {
+          "type": "string"
+        },
+        "userCardId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "nextReviewDate": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "pbFinishSessionResponse": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "$ref": "#/definitions/pbStudySession"
+        }
+      }
+    },
+    "pbGetDueCardsResponse": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/pbDueCard"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "pbGetSessionResponse": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "$ref": "#/definitions/pbStudySession"
+        }
+      }
+    },
+    "pbReviewCardResponse": {
+      "type": "object",
+      "properties": {
+        "userCard": {
+          "$ref": "#/definitions/pbUserCardState"
+        }
+      }
+    },
+    "pbSessionCardItem": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cardId": {
+          "type": "string"
+        },
+        "userCardId": {
+          "type": "string"
+        },
+        "reviewed": {
+          "type": "boolean"
+        },
+        "rating": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "pbStartSessionRequest": {
+      "type": "object",
+      "properties": {
+        "deckId": {
+          "type": "string"
+        },
+        "newCardsLimit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reviewLimit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "pbStartSessionResponse": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "$ref": "#/definitions/pbStudySession"
+        }
+      }
+    },
+    "pbStudySession": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "deckId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "totalCards": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "completedCards": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/pbSessionCardItem"
+          }
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "pbUserCardState": {
+      "type": "object",
+      "properties": {
+        "userCardId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "cardId": {
+          "type": "string"
+        },
+        "deckId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "stability": {
+          "type": "number",
+          "format": "double"
+        },
+        "difficulty": {
+          "type": "number",
+          "format": "double"
+        },
+        "reps": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "lapses": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "scheduledDays": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "nextReviewDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastReviewDate": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

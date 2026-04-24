@@ -1,0 +1,48 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "query"
+    schema: "migration"
+    gen:
+      go:
+        package: "db"
+        out: "../internal/db"
+        emit_json_tags: true
+        emit_empty_slices: true
+        overrides:
+          - db_type: "card_state"
+            go_type: "string"
+          - db_type: "session_status"
+            go_type: "string"
+          - column: "user_cards.last_review_date"
+            go_type:
+              import: "database/sql"
+              type: "NullTime"
+          - column: "study_sessions.finished_at"
+            go_type:
+              import: "database/sql"
+              type: "NullTime"
+          - column: "session_cards.reviewed_at"
+            go_type:
+              import: "database/sql"
+              type: "NullTime"
+          - column: "session_cards.rating"
+            go_type:
+              import: "database/sql"
+              type: "NullInt32"
+          - column: "revlogs.session_id"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "NullUUID"
+          - column: "user_fsrs_weights.trained_on_reviews"
+            go_type:
+              import: "database/sql"
+              type: "NullInt32"
+          - column: "user_fsrs_weights.training_loss"
+            go_type:
+              import: "database/sql"
+              type: "NullFloat64"
+          - column: "user_fsrs_weights.weights"
+            go_type:
+              import: "github.com/lib/pq"
+              type: "Float64Array"

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message VerifyTokenRequest {
+    string access_token = 1;
+}
+
+message VerifyTokenResponse {
+    string user_id   = 1;
+    string username  = 2;
+    string role      = 3;
+    string token_id  = 4;
+    google.protobuf.Timestamp expired_at = 5;
+}

@@ -1,0 +1,30 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "query"
+    schema: "migration"
+    gen:
+      go:
+        package: "db"
+        out: "../internal/db"
+        emit_json_tags: true
+        emit_empty_slices: true
+        overrides:
+          - db_type: "content_status"
+            go_type: "string"
+          - column: "notes.image_url"
+            go_type:
+              import: "database/sql"
+              type: "NullString"
+          - column: "decks.description"
+            go_type:
+              import: "database/sql"
+              type: "NullString"
+          - column: "decks.cloned_from"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "NullUUID"
+          - column: "folders.description"
+            go_type:
+              import: "database/sql"
+              type: "NullString"

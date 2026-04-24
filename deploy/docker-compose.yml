@@ -1,0 +1,84 @@
+services:
+  traefik:
+    image: traefik:v3.3
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "8000:80"
+      - "8090:8080"  # Traefik dashboard: http://localhost:8090
+    volumes:
+      - /tmp/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - gateway
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ..
+      dockerfile: services/auth-service/Dockerfile
+    env_file:
+      - ../services/auth-service/app.env
+    expose:
+      - "8080"
+      - "9090"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.entrypoints=web"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/v1/auth`) || PathPrefix(`/v1/users`)"
+      - "traefik.http.services.auth.loadbalancer.server.port=8080"
+    networks:
+      - gateway
+    restart: unless-stopped
+
+  deck-service:
+    build:
+      context: ..
+      dockerfile: services/deck-service/Dockerfile
+    env_file:
+      - ../services/deck-service/app.env
+    environment:
+      - AUTH_SERVICE_ADDRESS=auth-service:9090
+    depends_on:
+      - auth-service
+    expose:
+      - "8081"
+      - "9091"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.deck.entrypoints=web"
+      - "traefik.http.routers.deck.rule=PathPrefix(`/v1/decks`) || PathPrefix(`/v1/folders`) || PathPrefix(`/v1/cards`)"
+      - "traefik.http.services.deck.loadbalancer.server.port=8081"
+    networks:
+      - gateway
+    restart: unless-stopped
+
+  study-service:
+    build:
+      context: ..
+      dockerfile: services/study-service/Dockerfile
+    env_file:
+      - ../services/study-service/app.env
+    environment:
+      - AUTH_SERVICE_ADDRESS=auth-service:9090
+      - DECK_SERVICE_ADDRESS=deck-service:9091
+    depends_on:
+      - auth-service
+      - deck-service
+    expose:
+      - "8082"
+      - "9092"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.study.entrypoints=web"
+      - "traefik.http.routers.study.rule=PathPrefix(`/v1/study`)"
+      - "traefik.http.services.study.loadbalancer.server.port=8082"
+    networks:
+      - gateway
+    restart: unless-stopped
+
+networks:
+  gateway:
+    driver: bridge

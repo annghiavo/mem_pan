@@ -1,0 +1,218 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "rpc_folder.proto";
+import "rpc_deck.proto";
+import "rpc_card.proto";
+
+option go_package = "mem_pan/services/deck-service/pb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "Deck Service API";
+        version: "1.0";
+    };
+    security_definitions: {
+        security: {
+            key: "BearerAuth";
+            value: {
+                type: TYPE_API_KEY;
+                in: IN_HEADER;
+                name: "Authorization";
+            };
+        };
+    };
+    consumes: "application/json";
+    produces: "application/json";
+};
+
+service DeckService {
+    // Folders
+    rpc ListFolders (ListFoldersRequest) returns (ListFoldersResponse) {
+        option (google.api.http) = { get: "/v1/folders" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "List folders"; tags: "folders";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc CreateFolder (CreateFolderRequest) returns (CreateFolderResponse) {
+        option (google.api.http) = { post: "/v1/folders"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Create folder"; tags: "folders";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc GetFolder (GetFolderRequest) returns (GetFolderResponse) {
+        option (google.api.http) = { get: "/v1/folders/{folder_id}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Get folder with decks"; tags: "folders";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc UpdateFolder (UpdateFolderRequest) returns (UpdateFolderResponse) {
+        option (google.api.http) = { patch: "/v1/folders/{folder_id}"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Update folder"; tags: "folders";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc DeleteFolder (DeleteFolderRequest) returns (DeleteFolderResponse) {
+        option (google.api.http) = { delete: "/v1/folders/{folder_id}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Delete folder"; tags: "folders";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc AddDeckToFolder (AddDeckToFolderRequest) returns (AddDeckToFolderResponse) {
+        option (google.api.http) = { post: "/v1/folders/{folder_id}/decks/{deck_id}"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Add deck to folder"; tags: "folders";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc RemoveDeckFromFolder (RemoveDeckFromFolderRequest) returns (RemoveDeckFromFolderResponse) {
+        option (google.api.http) = { delete: "/v1/folders/{folder_id}/decks/{deck_id}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Remove deck from folder"; tags: "folders";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    // Decks
+    rpc ListDecks (ListDecksRequest) returns (ListDecksResponse) {
+        option (google.api.http) = { get: "/v1/decks" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "List my decks"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc CreateDeck (CreateDeckRequest) returns (CreateDeckResponse) {
+        option (google.api.http) = { post: "/v1/decks"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Create deck"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc ListPublicDecks (ListPublicDecksRequest) returns (ListPublicDecksResponse) {
+        option (google.api.http) = { get: "/v1/decks/public" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Search public decks"; tags: "decks";
+        };
+    }
+
+    rpc GetDeck (GetDeckRequest) returns (GetDeckResponse) {
+        option (google.api.http) = { get: "/v1/decks/{deck_id}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Get deck detail"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc UpdateDeck (UpdateDeckRequest) returns (UpdateDeckResponse) {
+        option (google.api.http) = { put: "/v1/decks/{deck_id}"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Update deck info"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc DeleteDeck (DeleteDeckRequest) returns (DeleteDeckResponse) {
+        option (google.api.http) = { delete: "/v1/decks/{deck_id}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Delete deck"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc UpdateDeckSettings (UpdateDeckSettingsRequest) returns (UpdateDeckSettingsResponse) {
+        option (google.api.http) = { patch: "/v1/decks/{deck_id}/settings"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Update deck settings"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc UpdateDeckVisibility (UpdateDeckVisibilityRequest) returns (UpdateDeckVisibilityResponse) {
+        option (google.api.http) = { patch: "/v1/decks/{deck_id}/visibility"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Toggle deck visibility"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc CloneDeck (CloneDeckRequest) returns (CloneDeckResponse) {
+        option (google.api.http) = { post: "/v1/decks/{deck_id}/clone"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Clone a deck"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc GetDeckStats (GetDeckStatsRequest) returns (GetDeckStatsResponse) {
+        option (google.api.http) = { get: "/v1/decks/{deck_id}/stats" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Get deck statistics"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc ListDeckCards (ListDeckCardsRequest) returns (ListDeckCardsResponse) {
+        option (google.api.http) = { get: "/v1/decks/{deck_id}/cards" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "List cards in deck"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc CreateCard (CreateCardRequest) returns (CreateCardResponse) {
+        option (google.api.http) = { post: "/v1/decks/{deck_id}/cards"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Create card in deck"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc BulkCreateCards (BulkCreateCardsRequest) returns (BulkCreateCardsResponse) {
+        option (google.api.http) = { post: "/v1/decks/{deck_id}/cards/bulk"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Bulk import cards"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    // Cards
+    rpc GetCard (GetCardRequest) returns (GetCardResponse) {
+        option (google.api.http) = { get: "/v1/cards/{card_id}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Get card detail"; tags: "cards";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc UpdateCard (UpdateCardRequest) returns (UpdateCardResponse) {
+        option (google.api.http) = { put: "/v1/cards/{card_id}"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Update card content"; tags: "cards";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc DeleteCard (DeleteCardRequest) returns (DeleteCardResponse) {
+        option (google.api.http) = { delete: "/v1/cards/{card_id}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Delete card"; tags: "cards";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+}

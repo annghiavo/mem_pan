@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "mem_pan/services/study-service/pb";
+
+message UserCardState {
+    string                    user_card_id     = 1;
+    string                    user_id          = 2;
+    string                    card_id          = 3;
+    string                    deck_id          = 4;
+    string                    state            = 5;
+    double                    stability        = 6;
+    double                    difficulty       = 7;
+    int32                     reps             = 8;
+    int32                     lapses           = 9;
+    int32                     scheduled_days   = 10;
+    google.protobuf.Timestamp next_review_date = 11;
+    google.protobuf.Timestamp last_review_date = 12;
+}
+
+message SessionCardItem {
+    int32  position     = 1;
+    string card_id      = 2;
+    string user_card_id = 3;
+    bool   reviewed     = 4;
+    int32  rating       = 5;
+}
+
+message StudySession {
+    string                    session_id       = 1;
+    string                    user_id          = 2;
+    string                    deck_id          = 3;
+    string                    status           = 4;
+    int32                     total_cards      = 5;
+    int32                     completed_cards  = 6;
+    repeated SessionCardItem  cards            = 7;
+    google.protobuf.Timestamp started_at       = 8;
+    google.protobuf.Timestamp finished_at      = 9;
+}
+
+message DueCard {
+    string                    card_id          = 1;
+    string                    deck_id          = 2;
+    string                    user_card_id     = 3;
+    string                    state            = 4;
+    google.protobuf.Timestamp next_review_date = 5;
+}

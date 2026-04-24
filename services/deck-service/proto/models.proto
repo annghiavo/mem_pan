@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "mem_pan/services/deck-service/pb";
+
+message Folder {
+    string folder_id   = 1;
+    string user_id     = 2;
+    string name        = 3;
+    string description = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+}
+
+message FolderWithDecks {
+    Folder        folder = 1;
+    repeated Deck decks  = 2;
+}
+
+message DeckSettings {
+    string quiz_type       = 1;
+    string answer_side     = 2;
+    bool   strict_typing   = 3;
+    bool   partial_correct = 4;
+    int32  new_cards_per_day = 5;
+    int32  reviews_per_day   = 6;
+}
+
+message Deck {
+    string       deck_id     = 1;
+    string       user_id     = 2;
+    string       name        = 3;
+    string       description = 4;
+    bool         is_public   = 5;
+    string       status      = 6;
+    DeckSettings settings    = 7;
+    int32        card_count  = 8;
+    string       cloned_from = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}
+
+message Card {
+    string card_id       = 1;
+    string user_id       = 2;
+    string deck_id       = 3;
+    string note_id       = 4;
+    int32  position      = 5;
+    string content_front = 6;
+    string content_back  = 7;
+    string image_url     = 8;
+    google.protobuf.Timestamp created_at = 9;
+}
+
+message DeckStats {
+    string deck_id      = 1;
+    int32  total_cards  = 2;
+}

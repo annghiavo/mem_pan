@@ -12,7 +12,7 @@ THIRD_PARTY := third_party
 PB_OUT      := pb
 SWAGGER_OUT := doc/swagger
 
-.PHONY: proto sqlc migrateup migrateup1 migratedown migratedown1 run
+.PHONY: proto sqlc migrateup migrateup1 migratedown migratedown1 run evans
 
 proto:
 	mkdir -p $(PB_OUT) $(SWAGGER_OUT)
@@ -50,3 +50,6 @@ check-db-url:
 
 run:
 	go run cmd/server/main.go
+
+evans:
+	evans --host localhost --port 9090 -r repl
