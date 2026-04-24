@@ -1,0 +1,11 @@
+go 1.26.2
+
+use (
+	.
+	./services/admin-service
+	./services/auth-service
+	./services/deck-service
+	./services/stats-service
+	./services/study-service
+	./services/worker-service
+)

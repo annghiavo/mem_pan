@@ -26,16 +26,19 @@ migratedown1:
 check-db-url:
 	@test -n "$(DB_URL)" || (echo "DB_URL, DIRECT_URL, or DATABASE_URL is required" && exit 1)
 
-sqlc:
-	sqlc generate
+sqlc-all:
+	for dir in services/*/db; do \
+		echo "Generating $$dir..."; \
+		(cd $$dir && sqlc generate); \
+	done
 
 test:
 	go test -v -cover -short ./...
 
-server:
+run:
 	go run main.go
 
-mock:
+mock	:
 	mockgen -package mockdb -destination db/mock/store.go mem_pan/db/sqlc Store
 
-.PHONY: migrateup migrateup1 migratedown migratedown1 check-db-url sqlc test server mock
+.PHONY: migrateup migrateup1 migratedown migratedown1 check-db-url sqlc-all test run mock
