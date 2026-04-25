@@ -19,6 +19,7 @@ type UserCardRepository interface {
 	ListDueUserCards(ctx context.Context, arg db.ListDueUserCardsParams) ([]db.UserCard, error)
 	ListDueUserCardsByDeck(ctx context.Context, arg db.ListDueUserCardsByDeckParams) ([]db.UserCard, error)
 	ListNewUserCardsByDeck(ctx context.Context, arg db.ListNewUserCardsByDeckParams) ([]db.UserCard, error)
+	ListUserCardsByDeck(ctx context.Context, arg db.ListUserCardsByDeckParams) ([]db.UserCard, error)
 }
 
 type userCardRepository struct {
@@ -59,4 +60,8 @@ func (r *userCardRepository) ListDueUserCardsByDeck(ctx context.Context, arg db.
 
 func (r *userCardRepository) ListNewUserCardsByDeck(ctx context.Context, arg db.ListNewUserCardsByDeckParams) ([]db.UserCard, error) {
 	return r.q.ListNewUserCardsByDeck(ctx, arg)
+}
+
+func (r *userCardRepository) ListUserCardsByDeck(ctx context.Context, arg db.ListUserCardsByDeckParams) ([]db.UserCard, error) {
+	return r.q.ListUserCardsByDeck(ctx, arg)
 }

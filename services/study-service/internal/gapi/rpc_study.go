@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"mem_pan/services/study-service/internal/service"
 	"mem_pan/services/study-service/pb"
@@ -132,12 +133,70 @@ func (s *Server) GetDueCards(ctx context.Context, req *pb.GetDueCardsRequest) (*
 	out := make([]*pb.DueCard, len(cards))
 	for i, uc := range cards {
 		out[i] = &pb.DueCard{
-			CardId:          uc.CardID.String(),
-			DeckId:          uc.DeckID.String(),
-			UserCardId:      uc.UserCardID.String(),
-			State:           uc.State,
-			NextReviewDate:  userCardToPb(uc).NextReviewDate,
+			CardId:         uc.CardID.String(),
+			DeckId:         uc.DeckID.String(),
+			UserCardId:     uc.UserCardID.String(),
+			State:          uc.State,
+			NextReviewDate: userCardToPb(uc).NextReviewDate,
 		}
 	}
 	return &pb.GetDueCardsResponse{Cards: out, Total: int32(len(out))}, nil
+}
+
+func (s *Server) GetRecentSessionCards(ctx context.Context, _ *pb.GetRecentSessionCardsRequest) (*pb.GetRecentSessionCardsResponse, error) {
+	payload, err := s.authorizeUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := s.studySvc.GetRecentSessionCards(ctx, payload.UserID)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &pb.GetRecentSessionCardsResponse{Session: sessionResultToPb(result)}, nil
+}
+
+func (s *Server) GetRecentDecks(ctx context.Context, _ *pb.GetRecentDecksRequest) (*pb.GetRecentDecksResponse, error) {
+	payload, err := s.authorizeUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	decks, err := s.studySvc.GetRecentDecks(ctx, payload.UserID)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+
+	out := make([]*pb.RecentDeckItem, len(decks))
+	for i, d := range decks {
+		out[i] = &pb.RecentDeckItem{
+			DeckId:         d.DeckID.String(),
+			LastAccessedAt: timestamppb.New(d.LastAccessedAt),
+		}
+	}
+	return &pb.GetRecentDecksResponse{Decks: out}, nil
+}
+
+func (s *Server) GetDeckProgress(ctx context.Context, req *pb.GetDeckProgressRequest) (*pb.DeckProgressResponse, error) {
+	payload, err := s.authorizeUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	deckID, err := uuid.Parse(req.DeckId)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid deck_id")
+	}
+
+	progress, err := s.studySvc.GetDeckProgress(ctx, payload.UserID, deckID)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &pb.DeckProgressResponse{
+		DeckId:         progress.DeckID.String(),
+		NewCount:       progress.NewCount,
+		StudyingCount:  progress.StudyingCount,
+		MemorizedCount: progress.MemorizedCount,
+		TotalCount:     progress.TotalCount,
+	}, nil
 }

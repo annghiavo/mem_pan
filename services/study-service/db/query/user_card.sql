@@ -49,3 +49,8 @@ WHERE user_id = $1
   AND state = 'new'
 ORDER BY created_at
 LIMIT $3;
+
+-- name: ListUserCardsByDeck :many
+SELECT * FROM user_cards
+WHERE user_id = $1 AND deck_id = $2
+ORDER BY state, created_at;

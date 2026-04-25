@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -79,6 +80,31 @@ RETURNING session_id, user_id, deck_id, status, total_cards, completed_cards, la
 
 func (q *Queries) FinishStudySession(ctx context.Context, sessionID uuid.UUID) (StudySession, error) {
 	row := q.db.QueryRowContext(ctx, finishStudySession, sessionID)
+	var i StudySession
+	err := row.Scan(
+		&i.SessionID,
+		&i.UserID,
+		&i.DeckID,
+		&i.Status,
+		&i.TotalCards,
+		&i.CompletedCards,
+		&i.LastCompletedIndex,
+		&i.StartedAt,
+		&i.FinishedAt,
+		&i.LastAccessedAt,
+	)
+	return i, err
+}
+
+const getMostRecentSession = `-- name: GetMostRecentSession :one
+SELECT session_id, user_id, deck_id, status, total_cards, completed_cards, last_completed_index, started_at, finished_at, last_accessed_at FROM study_sessions
+WHERE user_id = $1
+ORDER BY last_accessed_at DESC
+LIMIT 1
+`
+
+func (q *Queries) GetMostRecentSession(ctx context.Context, userID uuid.UUID) (StudySession, error) {
+	row := q.db.QueryRowContext(ctx, getMostRecentSession, userID)
 	var i StudySession
 	err := row.Scan(
 		&i.SessionID,
@@ -171,4 +197,39 @@ func (q *Queries) IncrementCompletedCards(ctx context.Context, sessionID uuid.UU
 		&i.LastAccessedAt,
 	)
 	return i, err
+}
+
+const listRecentDecks = `-- name: ListRecentDecks :many
+SELECT DISTINCT ON (deck_id) deck_id, last_accessed_at
+FROM study_sessions
+WHERE user_id = $1
+ORDER BY deck_id, last_accessed_at DESC
+`
+
+type ListRecentDecksRow struct {
+	DeckID         uuid.UUID `json:"deck_id"`
+	LastAccessedAt time.Time `json:"last_accessed_at"`
+}
+
+func (q *Queries) ListRecentDecks(ctx context.Context, userID uuid.UUID) ([]ListRecentDecksRow, error) {
+	rows, err := q.db.QueryContext(ctx, listRecentDecks, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListRecentDecksRow{}
+	for rows.Next() {
+		var i ListRecentDecksRow
+		if err := rows.Scan(&i.DeckID, &i.LastAccessedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

@@ -16,9 +16,73 @@
     "application/json"
   ],
   "paths": {
+    "/v1/study/decks/recent": {
+      "get": {
+        "summary": "Get list of recently studied decks ordered by last access",
+        "operationId": "StudyService_GetRecentDecks",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbGetRecentDecksResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/study/decks/{deckId}/progress": {
+      "get": {
+        "summary": "Get card progress counts for a deck (new/studying/memorized)",
+        "operationId": "StudyService_GetDeckProgress",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbDeckProgressResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/study/due": {
       "get": {
-        "summary": "List cards due today across all decks",
+        "summary": "List cards due today across all decks or by deck (pass deck_id query param)",
         "operationId": "StudyService_GetDueCards",
         "responses": {
           "200": {
@@ -80,6 +144,34 @@
             }
           }
         ],
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/study/sessions/recent/cards": {
+      "get": {
+        "summary": "Get card list from the most recently studied session",
+        "operationId": "StudyService_GetRecentSessionCards",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbGetRecentSessionCardsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
         "tags": [
           "study"
         ],
@@ -235,6 +327,30 @@
         }
       }
     },
+    "pbDeckProgressResponse": {
+      "type": "object",
+      "properties": {
+        "deckId": {
+          "type": "string"
+        },
+        "newCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "studyingCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "memorizedCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalCount": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
     "pbDueCard": {
       "type": "object",
       "properties": {
@@ -280,11 +396,43 @@
         }
       }
     },
+    "pbGetRecentDecksResponse": {
+      "type": "object",
+      "properties": {
+        "decks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/pbRecentDeckItem"
+          }
+        }
+      }
+    },
+    "pbGetRecentSessionCardsResponse": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "$ref": "#/definitions/pbStudySession"
+        }
+      }
+    },
     "pbGetSessionResponse": {
       "type": "object",
       "properties": {
         "session": {
           "$ref": "#/definitions/pbStudySession"
+        }
+      }
+    },
+    "pbRecentDeckItem": {
+      "type": "object",
+      "properties": {
+        "deckId": {
+          "type": "string"
+        },
+        "lastAccessedAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },

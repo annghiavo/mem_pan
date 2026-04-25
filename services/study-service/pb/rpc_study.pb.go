@@ -538,6 +538,223 @@ func (x *GetDueCardsResponse) GetTotal() int32 {
 	return 0
 }
 
+type GetRecentSessionCardsRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *GetRecentSessionCardsRequest) Reset() {
+	*x = GetRecentSessionCardsRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_rpc_study_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRecentSessionCardsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRecentSessionCardsRequest) ProtoMessage() {}
+
+func (x *GetRecentSessionCardsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_study_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRecentSessionCardsRequest.ProtoReflect.Descriptor instead.
+func (*GetRecentSessionCardsRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_study_proto_rawDescGZIP(), []int{10}
+}
+
+type GetRecentSessionCardsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Session *StudySession `protobuf:"bytes,1,opt,name=session,proto3" json:"session,omitempty"`
+}
+
+func (x *GetRecentSessionCardsResponse) Reset() {
+	*x = GetRecentSessionCardsResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_rpc_study_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRecentSessionCardsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRecentSessionCardsResponse) ProtoMessage() {}
+
+func (x *GetRecentSessionCardsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_study_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRecentSessionCardsResponse.ProtoReflect.Descriptor instead.
+func (*GetRecentSessionCardsResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_study_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetRecentSessionCardsResponse) GetSession() *StudySession {
+	if x != nil {
+		return x.Session
+	}
+	return nil
+}
+
+type GetRecentDecksRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *GetRecentDecksRequest) Reset() {
+	*x = GetRecentDecksRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_rpc_study_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRecentDecksRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRecentDecksRequest) ProtoMessage() {}
+
+func (x *GetRecentDecksRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_study_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRecentDecksRequest.ProtoReflect.Descriptor instead.
+func (*GetRecentDecksRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_study_proto_rawDescGZIP(), []int{12}
+}
+
+type GetRecentDecksResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Decks []*RecentDeckItem `protobuf:"bytes,1,rep,name=decks,proto3" json:"decks,omitempty"`
+}
+
+func (x *GetRecentDecksResponse) Reset() {
+	*x = GetRecentDecksResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_rpc_study_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRecentDecksResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRecentDecksResponse) ProtoMessage() {}
+
+func (x *GetRecentDecksResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_study_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRecentDecksResponse.ProtoReflect.Descriptor instead.
+func (*GetRecentDecksResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_study_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetRecentDecksResponse) GetDecks() []*RecentDeckItem {
+	if x != nil {
+		return x.Decks
+	}
+	return nil
+}
+
+type GetDeckProgressRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	DeckId string `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
+}
+
+func (x *GetDeckProgressRequest) Reset() {
+	*x = GetDeckProgressRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_rpc_study_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetDeckProgressRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDeckProgressRequest) ProtoMessage() {}
+
+func (x *GetDeckProgressRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_study_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDeckProgressRequest.ProtoReflect.Descriptor instead.
+func (*GetDeckProgressRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_study_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetDeckProgressRequest) GetDeckId() string {
+	if x != nil {
+		return x.DeckId
+	}
+	return ""
+}
+
 var File_rpc_study_proto protoreflect.FileDescriptor
 
 var file_rpc_study_proto_rawDesc = []byte{
@@ -591,10 +808,25 @@ var file_rpc_study_proto_rawDesc = []byte{
 	0x05, 0x63, 0x61, 0x72, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0b, 0x2e, 0x70,
 	0x62, 0x2e, 0x44, 0x75, 0x65, 0x43, 0x61, 0x72, 0x64, 0x52, 0x05, 0x63, 0x61, 0x72, 0x64, 0x73,
 	0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52,
-	0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x42, 0x23, 0x5a, 0x21, 0x6d, 0x65, 0x6d, 0x5f, 0x70, 0x61,
-	0x6e, 0x2f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2f, 0x73, 0x74, 0x75, 0x64, 0x79,
-	0x2d, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x22, 0x1e, 0x0a, 0x1c, 0x47, 0x65, 0x74, 0x52, 0x65, 0x63,
+	0x65, 0x6e, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x43, 0x61, 0x72, 0x64, 0x73, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x4b, 0x0a, 0x1d, 0x47, 0x65, 0x74, 0x52, 0x65, 0x63,
+	0x65, 0x6e, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x43, 0x61, 0x72, 0x64, 0x73, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2a, 0x0a, 0x07, 0x73, 0x65, 0x73, 0x73, 0x69,
+	0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x74,
+	0x75, 0x64, 0x79, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x07, 0x73, 0x65, 0x73, 0x73,
+	0x69, 0x6f, 0x6e, 0x22, 0x17, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x52, 0x65, 0x63, 0x65, 0x6e, 0x74,
+	0x44, 0x65, 0x63, 0x6b, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x42, 0x0a, 0x16,
+	0x47, 0x65, 0x74, 0x52, 0x65, 0x63, 0x65, 0x6e, 0x74, 0x44, 0x65, 0x63, 0x6b, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x28, 0x0a, 0x05, 0x64, 0x65, 0x63, 0x6b, 0x73, 0x18,
+	0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x70, 0x62, 0x2e, 0x52, 0x65, 0x63, 0x65, 0x6e,
+	0x74, 0x44, 0x65, 0x63, 0x6b, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x64, 0x65, 0x63, 0x6b, 0x73,
+	0x22, 0x31, 0x0a, 0x16, 0x47, 0x65, 0x74, 0x44, 0x65, 0x63, 0x6b, 0x50, 0x72, 0x6f, 0x67, 0x72,
+	0x65, 0x73, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x64, 0x65,
+	0x63, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x64, 0x65, 0x63,
+	0x6b, 0x49, 0x64, 0x42, 0x23, 0x5a, 0x21, 0x6d, 0x65, 0x6d, 0x5f, 0x70, 0x61, 0x6e, 0x2f, 0x73,
+	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2f, 0x73, 0x74, 0x75, 0x64, 0x79, 0x2d, 0x73, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -609,33 +841,41 @@ func file_rpc_study_proto_rawDescGZIP() []byte {
 	return file_rpc_study_proto_rawDescData
 }
 
-var file_rpc_study_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_rpc_study_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_rpc_study_proto_goTypes = []interface{}{
-	(*StartSessionRequest)(nil),   // 0: pb.StartSessionRequest
-	(*StartSessionResponse)(nil),  // 1: pb.StartSessionResponse
-	(*GetSessionRequest)(nil),     // 2: pb.GetSessionRequest
-	(*GetSessionResponse)(nil),    // 3: pb.GetSessionResponse
-	(*ReviewCardRequest)(nil),     // 4: pb.ReviewCardRequest
-	(*ReviewCardResponse)(nil),    // 5: pb.ReviewCardResponse
-	(*FinishSessionRequest)(nil),  // 6: pb.FinishSessionRequest
-	(*FinishSessionResponse)(nil), // 7: pb.FinishSessionResponse
-	(*GetDueCardsRequest)(nil),    // 8: pb.GetDueCardsRequest
-	(*GetDueCardsResponse)(nil),   // 9: pb.GetDueCardsResponse
-	(*StudySession)(nil),          // 10: pb.StudySession
-	(*UserCardState)(nil),         // 11: pb.UserCardState
-	(*DueCard)(nil),               // 12: pb.DueCard
+	(*StartSessionRequest)(nil),           // 0: pb.StartSessionRequest
+	(*StartSessionResponse)(nil),          // 1: pb.StartSessionResponse
+	(*GetSessionRequest)(nil),             // 2: pb.GetSessionRequest
+	(*GetSessionResponse)(nil),            // 3: pb.GetSessionResponse
+	(*ReviewCardRequest)(nil),             // 4: pb.ReviewCardRequest
+	(*ReviewCardResponse)(nil),            // 5: pb.ReviewCardResponse
+	(*FinishSessionRequest)(nil),          // 6: pb.FinishSessionRequest
+	(*FinishSessionResponse)(nil),         // 7: pb.FinishSessionResponse
+	(*GetDueCardsRequest)(nil),            // 8: pb.GetDueCardsRequest
+	(*GetDueCardsResponse)(nil),           // 9: pb.GetDueCardsResponse
+	(*GetRecentSessionCardsRequest)(nil),  // 10: pb.GetRecentSessionCardsRequest
+	(*GetRecentSessionCardsResponse)(nil), // 11: pb.GetRecentSessionCardsResponse
+	(*GetRecentDecksRequest)(nil),         // 12: pb.GetRecentDecksRequest
+	(*GetRecentDecksResponse)(nil),        // 13: pb.GetRecentDecksResponse
+	(*GetDeckProgressRequest)(nil),        // 14: pb.GetDeckProgressRequest
+	(*StudySession)(nil),                  // 15: pb.StudySession
+	(*UserCardState)(nil),                 // 16: pb.UserCardState
+	(*DueCard)(nil),                       // 17: pb.DueCard
+	(*RecentDeckItem)(nil),                // 18: pb.RecentDeckItem
 }
 var file_rpc_study_proto_depIdxs = []int32{
-	10, // 0: pb.StartSessionResponse.session:type_name -> pb.StudySession
-	10, // 1: pb.GetSessionResponse.session:type_name -> pb.StudySession
-	11, // 2: pb.ReviewCardResponse.user_card:type_name -> pb.UserCardState
-	10, // 3: pb.FinishSessionResponse.session:type_name -> pb.StudySession
-	12, // 4: pb.GetDueCardsResponse.cards:type_name -> pb.DueCard
-	5,  // [5:5] is the sub-list for method output_type
-	5,  // [5:5] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	15, // 0: pb.StartSessionResponse.session:type_name -> pb.StudySession
+	15, // 1: pb.GetSessionResponse.session:type_name -> pb.StudySession
+	16, // 2: pb.ReviewCardResponse.user_card:type_name -> pb.UserCardState
+	15, // 3: pb.FinishSessionResponse.session:type_name -> pb.StudySession
+	17, // 4: pb.GetDueCardsResponse.cards:type_name -> pb.DueCard
+	15, // 5: pb.GetRecentSessionCardsResponse.session:type_name -> pb.StudySession
+	18, // 6: pb.GetRecentDecksResponse.decks:type_name -> pb.RecentDeckItem
+	7,  // [7:7] is the sub-list for method output_type
+	7,  // [7:7] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_rpc_study_proto_init() }
@@ -765,6 +1005,66 @@ func file_rpc_study_proto_init() {
 				return nil
 			}
 		}
+		file_rpc_study_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRecentSessionCardsRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_rpc_study_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRecentSessionCardsResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_rpc_study_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRecentDecksRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_rpc_study_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRecentDecksResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_rpc_study_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetDeckProgressRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -772,7 +1072,7 @@ func file_rpc_study_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_rpc_study_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

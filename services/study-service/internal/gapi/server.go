@@ -1,7 +1,9 @@
 package gapi
 
 import (
+	"context"
 	"errors"
+	"log"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -43,7 +45,12 @@ func toGRPCError(err error) error {
 		return status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, domain.ErrDeckEmpty):
 		return status.Error(codes.FailedPrecondition, err.Error())
+	case errors.Is(err, context.DeadlineExceeded):
+		return status.Error(codes.DeadlineExceeded, "request timed out")
+	case errors.Is(err, context.Canceled):
+		return status.Error(codes.Canceled, "request canceled")
 	default:
+		log.Printf("unhandled error: %v", err)
 		return status.Error(codes.Internal, "internal server error")
 	}
 }

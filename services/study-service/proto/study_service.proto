@@ -5,6 +5,7 @@ package pb;
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 import "rpc_study.proto";
+import "study_models.proto";
 
 option go_package = "mem_pan/services/study-service/pb";
 
@@ -63,7 +64,31 @@ service StudyService {
     rpc GetDueCards (GetDueCardsRequest) returns (GetDueCardsResponse) {
         option (google.api.http) = { get: "/v1/study/due" };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            summary: "List cards due today across all decks"; tags: "study";
+            summary: "List cards due today across all decks or by deck (pass deck_id query param)"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc GetRecentSessionCards (GetRecentSessionCardsRequest) returns (GetRecentSessionCardsResponse) {
+        option (google.api.http) = { get: "/v1/study/sessions/recent/cards" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Get card list from the most recently studied session"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc GetRecentDecks (GetRecentDecksRequest) returns (GetRecentDecksResponse) {
+        option (google.api.http) = { get: "/v1/study/decks/recent" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Get list of recently studied decks ordered by last access"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc GetDeckProgress (GetDeckProgressRequest) returns (DeckProgressResponse) {
+        option (google.api.http) = { get: "/v1/study/decks/{deck_id}/progress" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Get card progress counts for a deck (new/studying/memorized)"; tags: "study";
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }

@@ -18,6 +18,8 @@ type StudySessionRepository interface {
 	FinishStudySession(ctx context.Context, id uuid.UUID) (db.StudySession, error)
 	AbandonStudySession(ctx context.Context, id uuid.UUID) (db.StudySession, error)
 	IncrementCompletedCards(ctx context.Context, id uuid.UUID) (db.StudySession, error)
+	GetMostRecentSession(ctx context.Context, userID uuid.UUID) (db.StudySession, error)
+	ListRecentDecks(ctx context.Context, userID uuid.UUID) ([]db.ListRecentDecksRow, error)
 }
 
 type studySessionRepository struct {
@@ -49,13 +51,33 @@ func (r *studySessionRepository) GetOngoingSessionByDeck(ctx context.Context, ar
 }
 
 func (r *studySessionRepository) FinishStudySession(ctx context.Context, id uuid.UUID) (db.StudySession, error) {
-	return r.q.FinishStudySession(ctx, id)
+	s, err := r.q.FinishStudySession(ctx, id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.StudySession{}, domain.ErrSessionNotFound
+	}
+	return s, err
 }
 
 func (r *studySessionRepository) AbandonStudySession(ctx context.Context, id uuid.UUID) (db.StudySession, error) {
-	return r.q.AbandonStudySession(ctx, id)
+	s, err := r.q.AbandonStudySession(ctx, id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.StudySession{}, domain.ErrSessionNotFound
+	}
+	return s, err
 }
 
 func (r *studySessionRepository) IncrementCompletedCards(ctx context.Context, id uuid.UUID) (db.StudySession, error) {
 	return r.q.IncrementCompletedCards(ctx, id)
+}
+
+func (r *studySessionRepository) GetMostRecentSession(ctx context.Context, userID uuid.UUID) (db.StudySession, error) {
+	s, err := r.q.GetMostRecentSession(ctx, userID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.StudySession{}, domain.ErrSessionNotFound
+	}
+	return s, err
+}
+
+func (r *studySessionRepository) ListRecentDecks(ctx context.Context, userID uuid.UUID) ([]db.ListRecentDecksRow, error) {
+	return r.q.ListRecentDecks(ctx, userID)
 }

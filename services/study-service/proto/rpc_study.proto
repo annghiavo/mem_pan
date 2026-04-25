@@ -51,3 +51,19 @@ message GetDueCardsResponse {
     repeated DueCard cards = 1;
     int32            total = 2;
 }
+
+message GetRecentSessionCardsRequest {}
+
+message GetRecentSessionCardsResponse {
+    StudySession session = 1;
+}
+
+message GetRecentDecksRequest {}
+
+message GetRecentDecksResponse {
+    repeated RecentDeckItem decks = 1;
+}
+
+message GetDeckProgressRequest {
+    string deck_id = 1;
+}

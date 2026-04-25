@@ -19,11 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	StudyService_StartSession_FullMethodName  = "/pb.StudyService/StartSession"
-	StudyService_GetSession_FullMethodName    = "/pb.StudyService/GetSession"
-	StudyService_ReviewCard_FullMethodName    = "/pb.StudyService/ReviewCard"
-	StudyService_FinishSession_FullMethodName = "/pb.StudyService/FinishSession"
-	StudyService_GetDueCards_FullMethodName   = "/pb.StudyService/GetDueCards"
+	StudyService_StartSession_FullMethodName          = "/pb.StudyService/StartSession"
+	StudyService_GetSession_FullMethodName            = "/pb.StudyService/GetSession"
+	StudyService_ReviewCard_FullMethodName            = "/pb.StudyService/ReviewCard"
+	StudyService_FinishSession_FullMethodName         = "/pb.StudyService/FinishSession"
+	StudyService_GetDueCards_FullMethodName           = "/pb.StudyService/GetDueCards"
+	StudyService_GetRecentSessionCards_FullMethodName = "/pb.StudyService/GetRecentSessionCards"
+	StudyService_GetRecentDecks_FullMethodName        = "/pb.StudyService/GetRecentDecks"
+	StudyService_GetDeckProgress_FullMethodName       = "/pb.StudyService/GetDeckProgress"
 )
 
 // StudyServiceClient is the client API for StudyService service.
@@ -35,6 +38,9 @@ type StudyServiceClient interface {
 	ReviewCard(ctx context.Context, in *ReviewCardRequest, opts ...grpc.CallOption) (*ReviewCardResponse, error)
 	FinishSession(ctx context.Context, in *FinishSessionRequest, opts ...grpc.CallOption) (*FinishSessionResponse, error)
 	GetDueCards(ctx context.Context, in *GetDueCardsRequest, opts ...grpc.CallOption) (*GetDueCardsResponse, error)
+	GetRecentSessionCards(ctx context.Context, in *GetRecentSessionCardsRequest, opts ...grpc.CallOption) (*GetRecentSessionCardsResponse, error)
+	GetRecentDecks(ctx context.Context, in *GetRecentDecksRequest, opts ...grpc.CallOption) (*GetRecentDecksResponse, error)
+	GetDeckProgress(ctx context.Context, in *GetDeckProgressRequest, opts ...grpc.CallOption) (*DeckProgressResponse, error)
 }
 
 type studyServiceClient struct {
@@ -90,6 +96,33 @@ func (c *studyServiceClient) GetDueCards(ctx context.Context, in *GetDueCardsReq
 	return out, nil
 }
 
+func (c *studyServiceClient) GetRecentSessionCards(ctx context.Context, in *GetRecentSessionCardsRequest, opts ...grpc.CallOption) (*GetRecentSessionCardsResponse, error) {
+	out := new(GetRecentSessionCardsResponse)
+	err := c.cc.Invoke(ctx, StudyService_GetRecentSessionCards_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *studyServiceClient) GetRecentDecks(ctx context.Context, in *GetRecentDecksRequest, opts ...grpc.CallOption) (*GetRecentDecksResponse, error) {
+	out := new(GetRecentDecksResponse)
+	err := c.cc.Invoke(ctx, StudyService_GetRecentDecks_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *studyServiceClient) GetDeckProgress(ctx context.Context, in *GetDeckProgressRequest, opts ...grpc.CallOption) (*DeckProgressResponse, error) {
+	out := new(DeckProgressResponse)
+	err := c.cc.Invoke(ctx, StudyService_GetDeckProgress_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StudyServiceServer is the server API for StudyService service.
 // All implementations must embed UnimplementedStudyServiceServer
 // for forward compatibility
@@ -99,6 +132,9 @@ type StudyServiceServer interface {
 	ReviewCard(context.Context, *ReviewCardRequest) (*ReviewCardResponse, error)
 	FinishSession(context.Context, *FinishSessionRequest) (*FinishSessionResponse, error)
 	GetDueCards(context.Context, *GetDueCardsRequest) (*GetDueCardsResponse, error)
+	GetRecentSessionCards(context.Context, *GetRecentSessionCardsRequest) (*GetRecentSessionCardsResponse, error)
+	GetRecentDecks(context.Context, *GetRecentDecksRequest) (*GetRecentDecksResponse, error)
+	GetDeckProgress(context.Context, *GetDeckProgressRequest) (*DeckProgressResponse, error)
 	mustEmbedUnimplementedStudyServiceServer()
 }
 
@@ -120,6 +156,15 @@ func (UnimplementedStudyServiceServer) FinishSession(context.Context, *FinishSes
 }
 func (UnimplementedStudyServiceServer) GetDueCards(context.Context, *GetDueCardsRequest) (*GetDueCardsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDueCards not implemented")
+}
+func (UnimplementedStudyServiceServer) GetRecentSessionCards(context.Context, *GetRecentSessionCardsRequest) (*GetRecentSessionCardsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRecentSessionCards not implemented")
+}
+func (UnimplementedStudyServiceServer) GetRecentDecks(context.Context, *GetRecentDecksRequest) (*GetRecentDecksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRecentDecks not implemented")
+}
+func (UnimplementedStudyServiceServer) GetDeckProgress(context.Context, *GetDeckProgressRequest) (*DeckProgressResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDeckProgress not implemented")
 }
 func (UnimplementedStudyServiceServer) mustEmbedUnimplementedStudyServiceServer() {}
 
@@ -224,6 +269,60 @@ func _StudyService_GetDueCards_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StudyService_GetRecentSessionCards_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRecentSessionCardsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceServer).GetRecentSessionCards(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StudyService_GetRecentSessionCards_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceServer).GetRecentSessionCards(ctx, req.(*GetRecentSessionCardsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StudyService_GetRecentDecks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRecentDecksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceServer).GetRecentDecks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StudyService_GetRecentDecks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceServer).GetRecentDecks(ctx, req.(*GetRecentDecksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StudyService_GetDeckProgress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDeckProgressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceServer).GetDeckProgress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StudyService_GetDeckProgress_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceServer).GetDeckProgress(ctx, req.(*GetDeckProgressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StudyService_ServiceDesc is the grpc.ServiceDesc for StudyService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -250,6 +349,18 @@ var StudyService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetDueCards",
 			Handler:    _StudyService_GetDueCards_Handler,
+		},
+		{
+			MethodName: "GetRecentSessionCards",
+			Handler:    _StudyService_GetRecentSessionCards_Handler,
+		},
+		{
+			MethodName: "GetRecentDecks",
+			Handler:    _StudyService_GetRecentDecks_Handler,
+		},
+		{
+			MethodName: "GetDeckProgress",
+			Handler:    _StudyService_GetDeckProgress_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

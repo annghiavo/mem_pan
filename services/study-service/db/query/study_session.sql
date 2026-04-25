@@ -34,3 +34,15 @@ UPDATE study_sessions SET
     last_accessed_at     = NOW()
 WHERE session_id = $1
 RETURNING *;
+
+-- name: GetMostRecentSession :one
+SELECT * FROM study_sessions
+WHERE user_id = $1
+ORDER BY last_accessed_at DESC
+LIMIT 1;
+
+-- name: ListRecentDecks :many
+SELECT DISTINCT ON (deck_id) deck_id, last_accessed_at
+FROM study_sessions
+WHERE user_id = $1
+ORDER BY deck_id, last_accessed_at DESC;

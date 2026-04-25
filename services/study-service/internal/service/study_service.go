@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -42,12 +43,28 @@ type SessionResult struct {
 	Cards   []db.SessionCard
 }
 
+type RecentDeck struct {
+	DeckID         uuid.UUID
+	LastAccessedAt time.Time
+}
+
+type DeckProgress struct {
+	DeckID         uuid.UUID
+	NewCount       int32
+	StudyingCount  int32
+	MemorizedCount int32
+	TotalCount     int32
+}
+
 type StudyService interface {
 	StartSession(ctx context.Context, p StartSessionParams) (*SessionResult, error)
 	GetSession(ctx context.Context, sessionID, userID uuid.UUID) (*SessionResult, error)
 	ReviewCard(ctx context.Context, p ReviewCardParams) (db.UserCard, error)
 	FinishSession(ctx context.Context, sessionID, userID uuid.UUID) (*SessionResult, error)
 	GetDueCards(ctx context.Context, userID uuid.UUID, deckID *uuid.UUID) ([]db.UserCard, error)
+	GetRecentSessionCards(ctx context.Context, userID uuid.UUID) (*SessionResult, error)
+	GetRecentDecks(ctx context.Context, userID uuid.UUID) ([]RecentDeck, error)
+	GetDeckProgress(ctx context.Context, userID, deckID uuid.UUID) (*DeckProgress, error)
 }
 
 type studyService struct {
@@ -329,4 +346,58 @@ func (s *studyService) GetDueCards(ctx context.Context, userID uuid.UUID, deckID
 		UserID: userID,
 		Limit:  1000,
 	})
+}
+
+func (s *studyService) GetRecentSessionCards(ctx context.Context, userID uuid.UUID) (*SessionResult, error) {
+	session, err := s.sessionRepo.GetMostRecentSession(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	cards, err := s.sessionCardRepo.ListSessionCards(ctx, session.SessionID)
+	if err != nil {
+		return nil, err
+	}
+	return &SessionResult{Session: session, Cards: cards}, nil
+}
+
+func (s *studyService) GetRecentDecks(ctx context.Context, userID uuid.UUID) ([]RecentDeck, error) {
+	rows, err := s.sessionRepo.ListRecentDecks(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	// Sort by most recent first (DISTINCT ON orders by deck_id).
+	sort.Slice(rows, func(i, j int) bool {
+		return rows[i].LastAccessedAt.After(rows[j].LastAccessedAt)
+	})
+	result := make([]RecentDeck, len(rows))
+	for i, r := range rows {
+		result[i] = RecentDeck{
+			DeckID:         r.DeckID,
+			LastAccessedAt: r.LastAccessedAt,
+		}
+	}
+	return result, nil
+}
+
+func (s *studyService) GetDeckProgress(ctx context.Context, userID, deckID uuid.UUID) (*DeckProgress, error) {
+	cards, err := s.userCardRepo.ListUserCardsByDeck(ctx, db.ListUserCardsByDeckParams{
+		UserID: userID,
+		DeckID: deckID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	progress := &DeckProgress{DeckID: deckID}
+	for _, c := range cards {
+		switch c.State {
+		case string(db.CardStateNew):
+			progress.NewCount++
+		case string(db.CardStateLearning), string(db.CardStateRelearning):
+			progress.StudyingCount++
+		case string(db.CardStateReview):
+			progress.MemorizedCount++
+		}
+		progress.TotalCount++
+	}
+	return progress, nil
 }

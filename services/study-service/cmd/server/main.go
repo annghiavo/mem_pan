@@ -15,8 +15,10 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 
 	"mem_pan/services/study-service/config"
 	"mem_pan/services/study-service/doc"
@@ -88,7 +90,7 @@ func main() {
 func runGRPCServer(cfg config.Config, studySvc service.StudyService, authClient authclient.Client) {
 	server := gapi.NewServer(studySvc, authClient)
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(errorLoggingInterceptor))
 	pb.RegisterStudyServiceServer(grpcServer, server)
 	reflection.Register(grpcServer)
 
@@ -136,4 +138,14 @@ func runHTTPGateway(cfg config.Config) {
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("HTTP gateway failed: %v", err)
 	}
+}
+
+func errorLoggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	resp, err := handler(ctx, req)
+	if err != nil {
+		if s, ok := status.FromError(err); ok && s.Code() == codes.Internal {
+			log.Printf("method=%s status=internal", info.FullMethod)
+		}
+	}
+	return resp, err
 }

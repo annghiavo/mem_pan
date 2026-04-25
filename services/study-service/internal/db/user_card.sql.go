@@ -234,6 +234,56 @@ func (q *Queries) ListNewUserCardsByDeck(ctx context.Context, arg ListNewUserCar
 	return items, nil
 }
 
+const listUserCardsByDeck = `-- name: ListUserCardsByDeck :many
+SELECT user_card_id, user_id, card_id, deck_id, state, stability, difficulty, reps, lapses, scheduled_days, t_avg, next_review_date, last_review_date, created_at, updated_at FROM user_cards
+WHERE user_id = $1 AND deck_id = $2
+ORDER BY state, created_at
+`
+
+type ListUserCardsByDeckParams struct {
+	UserID uuid.UUID `json:"user_id"`
+	DeckID uuid.UUID `json:"deck_id"`
+}
+
+func (q *Queries) ListUserCardsByDeck(ctx context.Context, arg ListUserCardsByDeckParams) ([]UserCard, error) {
+	rows, err := q.db.QueryContext(ctx, listUserCardsByDeck, arg.UserID, arg.DeckID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []UserCard{}
+	for rows.Next() {
+		var i UserCard
+		if err := rows.Scan(
+			&i.UserCardID,
+			&i.UserID,
+			&i.CardID,
+			&i.DeckID,
+			&i.State,
+			&i.Stability,
+			&i.Difficulty,
+			&i.Reps,
+			&i.Lapses,
+			&i.ScheduledDays,
+			&i.TAvg,
+			&i.NextReviewDate,
+			&i.LastReviewDate,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateUserCardFSRS = `-- name: UpdateUserCardFSRS :one
 UPDATE user_cards SET
     state            = $2,
