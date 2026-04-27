@@ -279,6 +279,8 @@ func (s *Server) CreateCard(ctx context.Context, req *pb.CreateCardRequest) (*pb
 		ContentBack:  req.ContentBack,
 		ImageURL:     nullStrFromProto(req.ImageUrl),
 		Position:     req.Position,
+		LangFront:    req.LangFront,
+		LangBack:     req.LangBack,
 	})
 	if err != nil {
 		return nil, toGRPCError(err)
@@ -310,6 +312,8 @@ func (s *Server) BulkCreateCards(ctx context.Context, req *pb.BulkCreateCardsReq
 			ContentBack:  c.ContentBack,
 			ImageURL:     nullStrFromProto(c.ImageUrl),
 			Position:     int32(i),
+			LangFront:    c.LangFront,
+			LangBack:     c.LangBack,
 		}
 	}
 

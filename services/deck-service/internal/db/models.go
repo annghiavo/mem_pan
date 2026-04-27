@@ -14,6 +14,59 @@ import (
 	"github.com/google/uuid"
 )
 
+type CardLanguage string
+
+const (
+	CardLanguageVi       CardLanguage = "vi"
+	CardLanguageEn       CardLanguage = "en"
+	CardLanguageEs       CardLanguage = "es"
+	CardLanguageFr       CardLanguage = "fr"
+	CardLanguageIt       CardLanguage = "it"
+	CardLanguageDe       CardLanguage = "de"
+	CardLanguageRu       CardLanguage = "ru"
+	CardLanguageJa       CardLanguage = "ja"
+	CardLanguageJaRomaji CardLanguage = "ja_romaji"
+	CardLanguageZhHans   CardLanguage = "zh_hans"
+	CardLanguageZhHant   CardLanguage = "zh_hant"
+	CardLanguageZhPinyin CardLanguage = "zh_pinyin"
+	CardLanguageKo       CardLanguage = "ko"
+)
+
+func (e *CardLanguage) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = CardLanguage(s)
+	case string:
+		*e = CardLanguage(s)
+	default:
+		return fmt.Errorf("unsupported scan type for CardLanguage: %T", src)
+	}
+	return nil
+}
+
+type NullCardLanguage struct {
+	CardLanguage CardLanguage `json:"card_language"`
+	Valid        bool         `json:"valid"` // Valid is true if CardLanguage is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullCardLanguage) Scan(value interface{}) error {
+	if value == nil {
+		ns.CardLanguage, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.CardLanguage.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullCardLanguage) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.CardLanguage), nil
+}
+
 type ContentStatus string
 
 const (
@@ -103,4 +156,6 @@ type Note struct {
 	ImageUrl     sql.NullString `json:"image_url"`
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
+	LangFront    string         `json:"lang_front"`
+	LangBack     string         `json:"lang_back"`
 }

@@ -54,10 +54,17 @@ message RecentDeckItem {
     google.protobuf.Timestamp last_accessed_at = 2;
 }
 
+message ProgressTag {
+    string          label    = 1;
+    int32           count    = 2;
+    repeated string card_ids = 3;
+}
+
 message DeckProgressResponse {
     string deck_id         = 1;
     int32  new_count       = 2;
-    int32  studying_count  = 3;
+    int32  learn_count     = 3;
     int32  memorized_count = 4;
     int32  total_count     = 5;
+    repeated ProgressTag tags = 6;
 }

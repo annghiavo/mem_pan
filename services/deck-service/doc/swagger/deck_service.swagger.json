@@ -950,6 +950,12 @@
         "position": {
           "type": "integer",
           "format": "int32"
+        },
+        "langFront": {
+          "type": "string"
+        },
+        "langBack": {
+          "type": "string"
         }
       }
     },
@@ -963,6 +969,12 @@
           "type": "string"
         },
         "imageUrl": {
+          "type": "string"
+        },
+        "langFront": {
+          "type": "string"
+        },
+        "langBack": {
           "type": "string"
         }
       }
@@ -1024,6 +1036,12 @@
         },
         "imageUrl": {
           "type": "string"
+        },
+        "langFront": {
+          "type": "string"
+        },
+        "langBack": {
+          "type": "string"
         }
       }
     },
@@ -1074,6 +1092,12 @@
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "langFront": {
+          "type": "string"
+        },
+        "langBack": {
+          "type": "string"
         }
       }
     },

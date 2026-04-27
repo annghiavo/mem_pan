@@ -16,6 +16,8 @@ type CreateCardParams struct {
 	ContentBack  string
 	ImageURL     *string
 	Position     int32
+	LangFront    string
+	LangBack     string
 }
 
 type UpdateCardParams struct {
@@ -24,6 +26,8 @@ type UpdateCardParams struct {
 	ContentFront *string
 	ContentBack  *string
 	ImageURL     *string
+	LangFront    *string
+	LangBack     *string
 }
 
 type CardService interface {
@@ -62,11 +66,22 @@ func (s *cardService) CreateCard(ctx context.Context, p CreateCardParams) (db.Ge
 		return db.GetCardByIDRow{}, domain.ErrForbidden
 	}
 
+	langFront := p.LangFront
+	if langFront == "" {
+		langFront = "en"
+	}
+	langBack := p.LangBack
+	if langBack == "" {
+		langBack = "en"
+	}
+
 	note, err := s.noteRepo.CreateNote(ctx, db.CreateNoteParams{
 		UserID:       p.UserID,
 		ContentFront: p.ContentFront,
 		ContentBack:  p.ContentBack,
 		ImageUrl:     nullStr(p.ImageURL),
+		LangFront:    langFront,
+		LangBack:     langBack,
 	})
 	if err != nil {
 		return db.GetCardByIDRow{}, err
@@ -94,6 +109,8 @@ func (s *cardService) CreateCard(ctx context.Context, p CreateCardParams) (db.Ge
 		ContentFront: note.ContentFront,
 		ContentBack:  note.ContentBack,
 		ImageUrl:     note.ImageUrl,
+		LangFront:    note.LangFront,
+		LangBack:     note.LangBack,
 	}, nil
 }
 
@@ -113,11 +130,21 @@ func (s *cardService) BulkCreateCards(ctx context.Context, userID, deckID uuid.U
 		if item.Position == 0 {
 			item.Position = int32(i)
 		}
+		lf := item.LangFront
+		if lf == "" {
+			lf = "en"
+		}
+		lb := item.LangBack
+		if lb == "" {
+			lb = "en"
+		}
 		note, err := s.noteRepo.CreateNote(ctx, db.CreateNoteParams{
 			UserID:       userID,
 			ContentFront: item.ContentFront,
 			ContentBack:  item.ContentBack,
 			ImageUrl:     nullStr(item.ImageURL),
+			LangFront:    lf,
+			LangBack:     lb,
 		})
 		if err != nil {
 			return results, err
@@ -141,6 +168,8 @@ func (s *cardService) BulkCreateCards(ctx context.Context, userID, deckID uuid.U
 			ContentFront: note.ContentFront,
 			ContentBack:  note.ContentBack,
 			ImageUrl:     note.ImageUrl,
+			LangFront:    note.LangFront,
+			LangBack:     note.LangBack,
 		})
 	}
 	if len(results) > 0 {
@@ -192,6 +221,8 @@ func (s *cardService) UpdateCard(ctx context.Context, p UpdateCardParams) (db.Ge
 		ContentFront: nullStr(p.ContentFront),
 		ContentBack:  nullStr(p.ContentBack),
 		ImageUrl:     nullStr(p.ImageURL),
+		LangFront:    nullLang(p.LangFront),
+		LangBack:     nullLang(p.LangBack),
 	})
 	if err != nil {
 		return db.GetCardByIDRow{}, err
@@ -207,6 +238,8 @@ func (s *cardService) UpdateCard(ctx context.Context, p UpdateCardParams) (db.Ge
 		ContentFront: updated.ContentFront,
 		ContentBack:  updated.ContentBack,
 		ImageUrl:     updated.ImageUrl,
+		LangFront:    updated.LangFront,
+		LangBack:     updated.LangBack,
 	}, nil
 }
 

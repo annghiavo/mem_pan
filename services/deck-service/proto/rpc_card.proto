@@ -19,6 +19,8 @@ message UpdateCardRequest {
     string content_front = 2;
     string content_back  = 3;
     string image_url     = 4;
+    string lang_front    = 5;
+    string lang_back     = 6;
 }
 
 message UpdateCardResponse {

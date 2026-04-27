@@ -53,6 +53,8 @@ message Card {
     string content_back  = 7;
     string image_url     = 8;
     google.protobuf.Timestamp created_at = 9;
+    string lang_front    = 10;
+    string lang_back     = 11;
 }
 
 message DeckStats {

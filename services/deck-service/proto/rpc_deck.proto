@@ -110,6 +110,8 @@ message CreateCardRequest {
     string content_back  = 3;
     string image_url     = 4;
     int32  position      = 5;
+    string lang_front    = 6;
+    string lang_back     = 7;
 }
 
 message CreateCardResponse {
@@ -120,6 +122,8 @@ message BulkCardItem {
     string content_front = 1;
     string content_back  = 2;
     string image_url     = 3;
+    string lang_front    = 4;
+    string lang_back     = 5;
 }
 
 message BulkCreateCardsRequest {

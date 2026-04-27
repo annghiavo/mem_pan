@@ -192,11 +192,20 @@ func (s *Server) GetDeckProgress(ctx context.Context, req *pb.GetDeckProgressReq
 	if err != nil {
 		return nil, toGRPCError(err)
 	}
+	tags := make([]*pb.ProgressTag, len(progress.Tags))
+	for i, t := range progress.Tags {
+		cardIDs := make([]string, len(t.CardIDs))
+		for j, id := range t.CardIDs {
+			cardIDs[j] = id.String()
+		}
+		tags[i] = &pb.ProgressTag{Label: t.Label, Count: t.Count, CardIds: cardIDs}
+	}
 	return &pb.DeckProgressResponse{
 		DeckId:         progress.DeckID.String(),
 		NewCount:       progress.NewCount,
-		StudyingCount:  progress.StudyingCount,
+		LearnCount:     progress.LearnCount,
 		MemorizedCount: progress.MemorizedCount,
 		TotalCount:     progress.TotalCount,
+		Tags:           tags,
 	}, nil
 }

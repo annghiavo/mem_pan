@@ -12,6 +12,8 @@ sql:
         overrides:
           - db_type: "content_status"
             go_type: "string"
+          - db_type: "card_language"
+            go_type: "string"
           - column: "notes.image_url"
             go_type:
               import: "database/sql"

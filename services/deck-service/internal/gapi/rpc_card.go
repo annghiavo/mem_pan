@@ -46,6 +46,8 @@ func (s *Server) UpdateCard(ctx context.Context, req *pb.UpdateCardRequest) (*pb
 		ContentFront: nullStrFromProto(req.ContentFront),
 		ContentBack:  nullStrFromProto(req.ContentBack),
 		ImageURL:     nullStrFromProto(req.ImageUrl),
+		LangFront:    nullStrFromProto(req.LangFront),
+		LangBack:     nullStrFromProto(req.LangBack),
 	})
 	if err != nil {
 		return nil, toGRPCError(err)

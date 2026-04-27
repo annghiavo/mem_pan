@@ -121,6 +121,8 @@ func dbCardRowToPb(c db.GetCardByIDRow) *pb.Card {
 		Position:     c.Position,
 		ContentFront: c.ContentFront,
 		ContentBack:  c.ContentBack,
+		LangFront:    c.LangFront,
+		LangBack:     c.LangBack,
 		CreatedAt:    timestamppb.New(c.CreatedAt),
 	}
 	if c.ImageUrl.Valid {
@@ -138,6 +140,8 @@ func dbListCardRowToPb(c db.ListCardsByDeckRow) *pb.Card {
 		Position:     c.Position,
 		ContentFront: c.ContentFront,
 		ContentBack:  c.ContentBack,
+		LangFront:    c.LangFront,
+		LangBack:     c.LangBack,
 		CreatedAt:    timestamppb.New(c.CreatedAt),
 	}
 	if c.ImageUrl.Valid {

@@ -13,9 +13,9 @@ import (
 )
 
 const createNote = `-- name: CreateNote :one
-INSERT INTO notes (user_id, content_front, content_back, image_url)
-VALUES ($1, $2, $3, $4)
-RETURNING note_id, user_id, content_front, content_back, image_url, created_at, updated_at
+INSERT INTO notes (user_id, content_front, content_back, image_url, lang_front, lang_back)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING note_id, user_id, content_front, content_back, image_url, created_at, updated_at, lang_front, lang_back
 `
 
 type CreateNoteParams struct {
@@ -23,6 +23,8 @@ type CreateNoteParams struct {
 	ContentFront string         `json:"content_front"`
 	ContentBack  string         `json:"content_back"`
 	ImageUrl     sql.NullString `json:"image_url"`
+	LangFront    string         `json:"lang_front"`
+	LangBack     string         `json:"lang_back"`
 }
 
 func (q *Queries) CreateNote(ctx context.Context, arg CreateNoteParams) (Note, error) {
@@ -31,6 +33,8 @@ func (q *Queries) CreateNote(ctx context.Context, arg CreateNoteParams) (Note, e
 		arg.ContentFront,
 		arg.ContentBack,
 		arg.ImageUrl,
+		arg.LangFront,
+		arg.LangBack,
 	)
 	var i Note
 	err := row.Scan(
@@ -41,6 +45,8 @@ func (q *Queries) CreateNote(ctx context.Context, arg CreateNoteParams) (Note, e
 		&i.ImageUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LangFront,
+		&i.LangBack,
 	)
 	return i, err
 }
@@ -60,7 +66,7 @@ func (q *Queries) DeleteNote(ctx context.Context, arg DeleteNoteParams) error {
 }
 
 const getNoteByID = `-- name: GetNoteByID :one
-SELECT note_id, user_id, content_front, content_back, image_url, created_at, updated_at FROM notes WHERE note_id = $1 LIMIT 1
+SELECT note_id, user_id, content_front, content_back, image_url, created_at, updated_at, lang_front, lang_back FROM notes WHERE note_id = $1 LIMIT 1
 `
 
 func (q *Queries) GetNoteByID(ctx context.Context, noteID uuid.UUID) (Note, error) {
@@ -74,6 +80,8 @@ func (q *Queries) GetNoteByID(ctx context.Context, noteID uuid.UUID) (Note, erro
 		&i.ImageUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LangFront,
+		&i.LangBack,
 	)
 	return i, err
 }
@@ -83,17 +91,21 @@ UPDATE notes
 SET content_front = COALESCE($1, content_front),
     content_back  = COALESCE($2, content_back),
     image_url     = COALESCE($3, image_url),
+    lang_front    = COALESCE($4, lang_front),
+    lang_back     = COALESCE($5, lang_back),
     updated_at    = now()
-WHERE note_id = $4 AND user_id = $5
-RETURNING note_id, user_id, content_front, content_back, image_url, created_at, updated_at
+WHERE note_id = $6 AND user_id = $7
+RETURNING note_id, user_id, content_front, content_back, image_url, created_at, updated_at, lang_front, lang_back
 `
 
 type UpdateNoteParams struct {
-	ContentFront sql.NullString `json:"content_front"`
-	ContentBack  sql.NullString `json:"content_back"`
-	ImageUrl     sql.NullString `json:"image_url"`
-	NoteID       uuid.UUID      `json:"note_id"`
-	UserID       uuid.UUID      `json:"user_id"`
+	ContentFront sql.NullString   `json:"content_front"`
+	ContentBack  sql.NullString   `json:"content_back"`
+	ImageUrl     sql.NullString   `json:"image_url"`
+	LangFront    NullCardLanguage `json:"lang_front"`
+	LangBack     NullCardLanguage `json:"lang_back"`
+	NoteID       uuid.UUID        `json:"note_id"`
+	UserID       uuid.UUID        `json:"user_id"`
 }
 
 func (q *Queries) UpdateNote(ctx context.Context, arg UpdateNoteParams) (Note, error) {
@@ -101,6 +113,8 @@ func (q *Queries) UpdateNote(ctx context.Context, arg UpdateNoteParams) (Note, e
 		arg.ContentFront,
 		arg.ContentBack,
 		arg.ImageUrl,
+		arg.LangFront,
+		arg.LangBack,
 		arg.NoteID,
 		arg.UserID,
 	)
@@ -113,6 +127,8 @@ func (q *Queries) UpdateNote(ctx context.Context, arg UpdateNoteParams) (Note, e
 		&i.ImageUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LangFront,
+		&i.LangBack,
 	)
 	return i, err
 }

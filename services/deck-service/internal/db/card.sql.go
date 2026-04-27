@@ -72,7 +72,7 @@ func (q *Queries) DeleteCard(ctx context.Context, arg DeleteCardParams) error {
 
 const getCardByID = `-- name: GetCardByID :one
 SELECT c.card_id, c.user_id, c.deck_id, c.note_id, c.position, c.created_at,
-       n.content_front, n.content_back, n.image_url
+       n.content_front, n.content_back, n.image_url, n.lang_front, n.lang_back
 FROM cards c
 JOIN notes n ON c.note_id = n.note_id
 WHERE c.card_id = $1
@@ -89,6 +89,8 @@ type GetCardByIDRow struct {
 	ContentFront string         `json:"content_front"`
 	ContentBack  string         `json:"content_back"`
 	ImageUrl     sql.NullString `json:"image_url"`
+	LangFront    string         `json:"lang_front"`
+	LangBack     string         `json:"lang_back"`
 }
 
 func (q *Queries) GetCardByID(ctx context.Context, cardID uuid.UUID) (GetCardByIDRow, error) {
@@ -104,13 +106,15 @@ func (q *Queries) GetCardByID(ctx context.Context, cardID uuid.UUID) (GetCardByI
 		&i.ContentFront,
 		&i.ContentBack,
 		&i.ImageUrl,
+		&i.LangFront,
+		&i.LangBack,
 	)
 	return i, err
 }
 
 const listCardsByDeck = `-- name: ListCardsByDeck :many
 SELECT c.card_id, c.user_id, c.deck_id, c.note_id, c.position, c.created_at,
-       n.content_front, n.content_back, n.image_url
+       n.content_front, n.content_back, n.image_url, n.lang_front, n.lang_back
 FROM cards c
 JOIN notes n ON c.note_id = n.note_id
 WHERE c.deck_id = $1
@@ -127,6 +131,8 @@ type ListCardsByDeckRow struct {
 	ContentFront string         `json:"content_front"`
 	ContentBack  string         `json:"content_back"`
 	ImageUrl     sql.NullString `json:"image_url"`
+	LangFront    string         `json:"lang_front"`
+	LangBack     string         `json:"lang_back"`
 }
 
 func (q *Queries) ListCardsByDeck(ctx context.Context, deckID uuid.UUID) ([]ListCardsByDeckRow, error) {
@@ -148,6 +154,8 @@ func (q *Queries) ListCardsByDeck(ctx context.Context, deckID uuid.UUID) ([]List
 			&i.ContentFront,
 			&i.ContentBack,
 			&i.ImageUrl,
+			&i.LangFront,
+			&i.LangBack,
 		); err != nil {
 			return nil, err
 		}

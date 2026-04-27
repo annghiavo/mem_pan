@@ -337,7 +337,7 @@
           "type": "integer",
           "format": "int32"
         },
-        "studyingCount": {
+        "learnCount": {
           "type": "integer",
           "format": "int32"
         },
@@ -348,6 +348,13 @@
         "totalCount": {
           "type": "integer",
           "format": "int32"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/pbProgressTag"
+          }
         }
       }
     },
@@ -421,6 +428,24 @@
       "properties": {
         "session": {
           "$ref": "#/definitions/pbStudySession"
+        }
+      }
+    },
+    "pbProgressTag": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "cardIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

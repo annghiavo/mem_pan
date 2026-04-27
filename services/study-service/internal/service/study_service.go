@@ -48,12 +48,19 @@ type RecentDeck struct {
 	LastAccessedAt time.Time
 }
 
+type ProgressTag struct {
+	Label   string
+	Count   int32
+	CardIDs []uuid.UUID
+}
+
 type DeckProgress struct {
 	DeckID         uuid.UUID
 	NewCount       int32
-	StudyingCount  int32
+	LearnCount     int32
 	MemorizedCount int32
 	TotalCount     int32
+	Tags           []ProgressTag
 }
 
 type StudyService interface {
@@ -387,17 +394,29 @@ func (s *studyService) GetDeckProgress(ctx context.Context, userID, deckID uuid.
 	if err != nil {
 		return nil, err
 	}
+	newIDs := make([]uuid.UUID, 0)
+	learnIDs := make([]uuid.UUID, 0)
+	memorizedIDs := make([]uuid.UUID, 0)
+
 	progress := &DeckProgress{DeckID: deckID}
 	for _, c := range cards {
 		switch c.State {
 		case string(db.CardStateNew):
 			progress.NewCount++
+			newIDs = append(newIDs, c.CardID)
 		case string(db.CardStateLearning), string(db.CardStateRelearning):
-			progress.StudyingCount++
+			progress.LearnCount++
+			learnIDs = append(learnIDs, c.CardID)
 		case string(db.CardStateReview):
 			progress.MemorizedCount++
+			memorizedIDs = append(memorizedIDs, c.CardID)
 		}
 		progress.TotalCount++
+	}
+	progress.Tags = []ProgressTag{
+		{Label: "new", Count: progress.NewCount, CardIDs: newIDs},
+		{Label: "learning", Count: progress.LearnCount, CardIDs: learnIDs},
+		{Label: "memorized", Count: progress.MemorizedCount, CardIDs: memorizedIDs},
 	}
 	return progress, nil
 }
