@@ -914,6 +914,67 @@
           }
         ]
       }
+    },
+    "/v1/import/parse": {
+      "post": {
+        "summary": "Parse CSV/TSV/PDF file and preview cards",
+        "description": "Upload a file directly via multipart/form-data. The parsed card pairs are returned for review before committing with BulkCreateCards.",
+        "operationId": "DeckService_ParseImportFile",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbParseImportFileResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid request (missing file, unsupported type, parse error).",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid authorization token.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "description": "The CSV, TSV, or PDF file to parse."
+          },
+          {
+            "name": "file_type",
+            "in": "formData",
+            "required": true,
+            "type": "string",
+            "enum": ["csv", "tsv", "pdf"],
+            "description": "Format of the uploaded file."
+          }
+        ],
+        "tags": [
+          "import"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -1313,6 +1374,12 @@
       "properties": {
         "deck": {
           "$ref": "#/definitions/pbDeck"
+        },
+        "creatorUsername": {
+          "type": "string"
+        },
+        "creatorAvatar": {
+          "type": "string"
         }
       }
     },
@@ -1385,6 +1452,33 @@
         "total": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "pbParseImportFileResponse": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/pbParsedCard"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "pbParsedCard": {
+      "type": "object",
+      "properties": {
+        "front": {
+          "type": "string"
+        },
+        "back": {
+          "type": "string"
         }
       }
     },

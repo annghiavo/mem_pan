@@ -103,7 +103,13 @@ func (s *Server) GetDeck(ctx context.Context, req *pb.GetDeckRequest) (*pb.GetDe
 	if err != nil {
 		return nil, toGRPCError(err)
 	}
-	return &pb.GetDeckResponse{Deck: dbDeckToPb(deck)}, nil
+
+	resp := &pb.GetDeckResponse{Deck: dbDeckToPb(deck)}
+	if creator, err := s.authClient.GetUserByID(ctx, deck.UserID); err == nil {
+		resp.CreatorUsername = creator.Username
+		resp.CreatorAvatar = creator.AvatarURL
+	}
+	return resp, nil
 }
 
 func (s *Server) UpdateDeck(ctx context.Context, req *pb.UpdateDeckRequest) (*pb.UpdateDeckResponse, error) {

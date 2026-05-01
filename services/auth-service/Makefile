@@ -12,7 +12,7 @@ THIRD_PARTY := third_party
 PB_OUT      := pb
 SWAGGER_OUT := doc/swagger
 
-.PHONY: proto sqlc migrateup migrateup1 migratedown migratedown1 run evans
+.PHONY: proto sqlc migrateup migrateup1 migratedown migratedown1 run evans test
 
 proto:
 	mkdir -p $(PB_OUT) $(SWAGGER_OUT)
@@ -53,3 +53,6 @@ run:
 
 evans:
 	evans --host localhost --port 9090 -r repl
+
+test:
+	go test -v -cover ./...

@@ -41,7 +41,9 @@ message GetDeckRequest {
 }
 
 message GetDeckResponse {
-    Deck deck = 1;
+    Deck   deck             = 1;
+    string creator_username = 2;
+    string creator_avatar   = 3;
 }
 
 message UpdateDeckRequest {

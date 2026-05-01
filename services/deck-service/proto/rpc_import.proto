@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "mem_pan/services/deck-service/pb";
+
+message ParsedCard {
+    string front = 1;
+    string back  = 2;
+}
+
+message ParseImportFileRequest {
+    bytes  file_content = 1;
+    string file_type    = 2; // "csv", "tsv", or "pdf"
+}
+
+message ParseImportFileResponse {
+    repeated ParsedCard cards = 1;
+    int32               total = 2;
+}

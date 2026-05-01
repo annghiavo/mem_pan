@@ -16,6 +16,8 @@ import "rpc_get_user.proto";
 import "rpc_update_user.proto";
 import "rpc_change_password.proto";
 import "rpc_verify_token.proto";
+import "rpc_upload_avatar.proto";
+import "rpc_get_user_by_id.proto";
 
 option go_package = "mem_pan/services/auth-service/pb";
 
@@ -188,6 +190,38 @@ service AuthService {
         };
     }
 
-    // Internal service-to-service RPC — not exposed via HTTP gateway.
+    rpc UploadAvatar (UploadAvatarRequest) returns (UploadAvatarResponse) {
+        option (google.api.http) = {
+            post: "/v1/users/me/avatar"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Upload profile picture";
+            description: "Upload a profile picture for the authenticated user. Send the image as base64-encoded bytes. Accepted types: jpeg, png, gif, webp. Max 5 MB. The image is stored on Cloudinary.";
+            tags: "users";
+            operation_id: "AuthService_UploadAvatar";
+            security: {
+                security_requirement: {
+                    key: "BearerAuth";
+                    value: {};
+                }
+            };
+            responses: {
+                key: "400";
+                value: { description: "Invalid image bytes or unsupported file type."; }
+            };
+            responses: {
+                key: "401";
+                value: { description: "Missing or invalid access token."; }
+            };
+            responses: {
+                key: "500";
+                value: { description: "Upload or database error."; }
+            };
+        };
+    }
+
+    // Internal service-to-service RPCs — not exposed via HTTP gateway.
     rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenResponse) {}
+    rpc GetUserByID (GetUserByIDRequest) returns (GetUserByIDResponse) {}
 }

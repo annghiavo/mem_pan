@@ -354,6 +354,57 @@
         ]
       }
     },
+    "/v1/users/me/avatar": {
+      "post": {
+        "summary": "Upload profile picture",
+        "description": "Upload a profile picture for the authenticated user. Send the image as base64-encoded bytes. Accepted types: jpeg, png, gif, webp. Max 5 MB. The image is stored on Cloudinary.",
+        "operationId": "AuthService_UploadAvatar",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUploadAvatarResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid image bytes or unsupported file type.",
+            "schema": {}
+          },
+          "401": {
+            "description": "Missing or invalid access token.",
+            "schema": {}
+          },
+          "500": {
+            "description": "Upload or database error.",
+            "schema": {}
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUploadAvatarRequest"
+            }
+          }
+        ],
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/users/me/password": {
       "patch": {
         "summary": "Change password",
@@ -422,6 +473,14 @@
       "properties": {
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "pbGetUserByIDResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/pbUser"
         }
       }
     },
@@ -576,6 +635,30 @@
       "properties": {
         "user": {
           "$ref": "#/definitions/pbUser"
+        }
+      }
+    },
+    "pbUploadAvatarRequest": {
+      "type": "object",
+      "properties": {
+        "avatar": {
+          "type": "string",
+          "format": "byte",
+          "description": "Raw image bytes (base64-encoded in JSON). Accepted types: jpeg, png, gif, webp. Max 5 MB."
+        }
+      }
+    },
+    "pbUploadAvatarResponse": {
+      "type": "object",
+      "properties": {
+        "avatarUrl": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
         }
       }
     },

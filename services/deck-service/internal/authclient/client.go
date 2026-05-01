@@ -19,9 +19,16 @@ type Payload struct {
 	Role     string
 }
 
+// UserProfile holds public profile fields fetched from auth-service.
+type UserProfile struct {
+	Username  string
+	AvatarURL string
+}
+
 // Client verifies access tokens by calling auth-service over gRPC.
 type Client interface {
 	VerifyToken(ctx context.Context, accessToken string) (*Payload, error)
+	GetUserByID(ctx context.Context, userID uuid.UUID) (*UserProfile, error)
 	Close() error
 }
 
@@ -60,6 +67,20 @@ func (c *grpcClient) VerifyToken(ctx context.Context, accessToken string) (*Payl
 		UserID:   userID,
 		Username: resp.Username,
 		Role:     resp.Role,
+	}, nil
+}
+
+func (c *grpcClient) GetUserByID(ctx context.Context, userID uuid.UUID) (*UserProfile, error) {
+	resp, err := c.authSvc.GetUserByID(ctx, &authpb.GetUserByIDRequest{UserId: userID.String()})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "auth service unavailable")
+	}
+	if resp.User == nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+	return &UserProfile{
+		Username:  resp.User.Username,
+		AvatarURL: resp.User.AvatarUrl,
 	}, nil
 }
 

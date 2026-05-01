@@ -15,6 +15,7 @@ type Config struct {
 	RefreshTokenDuration      time.Duration
 	VerificationTokenDuration time.Duration
 	ResetTokenDuration        time.Duration
+	CloudinaryURL             string
 }
 
 func Load() (Config, error) {
@@ -27,12 +28,16 @@ func Load() (Config, error) {
 		RefreshTokenDuration:      getDuration("REFRESH_TOKEN_DURATION", 7*24*time.Hour),
 		VerificationTokenDuration: getDuration("VERIFICATION_TOKEN_DURATION", 24*time.Hour),
 		ResetTokenDuration:        getDuration("RESET_TOKEN_DURATION", 1*time.Hour),
+		CloudinaryURL:             getEnv("CLOUDINARY_URL", ""),
 	}
 	if cfg.DBUrl == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")
 	}
 	if len(cfg.PasetoSymmetricKey) != 32 {
 		return Config{}, fmt.Errorf("PASETO_SYMMETRIC_KEY must be exactly 32 characters, got %d", len(cfg.PasetoSymmetricKey))
+	}
+	if cfg.CloudinaryURL == "" {
+		return Config{}, fmt.Errorf("CLOUDINARY_URL is required")
 	}
 	return cfg, nil
 }

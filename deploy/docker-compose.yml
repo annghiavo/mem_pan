@@ -49,7 +49,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.deck.entrypoints=web"
-      - "traefik.http.routers.deck.rule=PathPrefix(`/v1/decks`) || PathPrefix(`/v1/folders`) || PathPrefix(`/v1/cards`)"
+      - "traefik.http.routers.deck.rule=PathPrefix(`/v1/decks`) || PathPrefix(`/v1/folders`) || PathPrefix(`/v1/cards`) || PathPrefix(`/v1/import`)"
       - "traefik.http.services.deck.loadbalancer.server.port=8081"
     networks:
       - gateway

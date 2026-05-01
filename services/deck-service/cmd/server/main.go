@@ -63,25 +63,19 @@ func main() {
 	deckSvc := service.NewDeckService(deckRepo, cardRepo)
 	cardSvc := service.NewCardService(cardRepo, noteRepo, deckRepo)
 
+	server := gapi.NewServer(folderSvc, deckSvc, cardSvc, authClient)
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	go runGRPCServer(cfg, folderSvc, deckSvc, cardSvc, authClient)
-	go runHTTPGateway(cfg)
+	go runGRPCServer(cfg, server)
+	go runHTTPGateway(cfg, server)
 
 	<-quit
 	log.Println("deck-service shutting down")
 }
 
-func runGRPCServer(
-	cfg config.Config,
-	folderSvc service.FolderService,
-	deckSvc service.DeckService,
-	cardSvc service.CardService,
-	authClient authclient.Client,
-) {
-	server := gapi.NewServer(folderSvc, deckSvc, cardSvc, authClient)
-
+func runGRPCServer(cfg config.Config, server *gapi.Server) {
 	grpcServer := grpc.NewServer()
 	pb.RegisterDeckServiceServer(grpcServer, server)
 	reflection.Register(grpcServer)
@@ -97,7 +91,7 @@ func runGRPCServer(
 	}
 }
 
-func runHTTPGateway(cfg config.Config) {
+func runHTTPGateway(cfg config.Config, srv *gapi.Server) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -115,9 +109,10 @@ func runHTTPGateway(cfg config.Config) {
 
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFiles))))
+	httpMux.HandleFunc("POST /v1/import/parse", srv.ServeParseImportFile)
 	httpMux.Handle("/", grpcMux)
 
-	srv := &http.Server{
+	httpServer := &http.Server{
 		Addr:         cfg.HTTPServerAddress,
 		Handler:      httpMux,
 		ReadTimeout:  15 * time.Second,
@@ -127,7 +122,7 @@ func runHTTPGateway(cfg config.Config) {
 
 	log.Printf("HTTP gateway listening on %s", cfg.HTTPServerAddress)
 	log.Printf("Swagger UI available at http://%s/swagger/", cfg.HTTPServerAddress)
-	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("HTTP gateway failed: %v", err)
 	}
 }

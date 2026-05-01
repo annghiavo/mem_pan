@@ -7,6 +7,7 @@ import "protoc-gen-openapiv2/options/annotations.proto";
 import "rpc_folder.proto";
 import "rpc_deck.proto";
 import "rpc_card.proto";
+import "rpc_import.proto";
 
 option go_package = "mem_pan/services/deck-service/pb";
 
@@ -187,6 +188,15 @@ service DeckService {
         option (google.api.http) = { post: "/v1/decks/{deck_id}/cards/bulk"; body: "*" };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
             summary: "Bulk import cards"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    // Import
+    rpc ParseImportFile (ParseImportFileRequest) returns (ParseImportFileResponse) {
+        option (google.api.http) = { post: "/v1/import/parse"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Parse CSV/PDF file and preview cards"; tags: "import";
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }

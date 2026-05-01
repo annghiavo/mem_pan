@@ -12,7 +12,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -29,6 +31,8 @@ import (
 )
 
 func main() {
+	_ = godotenv.Load("app.env")
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal(err)
@@ -53,6 +57,11 @@ func main() {
 		log.Fatal("token maker:", err)
 	}
 
+	cld, err := cloudinary.NewFromURL(cfg.CloudinaryURL)
+	if err != nil {
+		log.Fatal("cloudinary:", err)
+	}
+
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	verifyTokenRepo := repository.NewVerificationTokenRepository(db)
@@ -69,16 +78,15 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	go runGRPCServer(cfg, authSvc, userSvc, tokenMaker)
-	go runHTTPGateway(cfg)
+	gapiServer := gapi.NewServer(authSvc, userSvc, tokenMaker, cld)
+	go runGRPCServer(cfg, gapiServer)
+	go runHTTPGateway(cfg, gapiServer)
 
 	<-quit
 	log.Println("auth-service shutting down")
 }
 
-func runGRPCServer(cfg config.Config, authSvc service.AuthService, userSvc service.UserService, tokenMaker token.Maker) {
-	server := gapi.NewServer(authSvc, userSvc, tokenMaker)
-
+func runGRPCServer(cfg config.Config, server *gapi.Server) {
 	grpcServer := grpc.NewServer()
 	pb.RegisterAuthServiceServer(grpcServer, server)
 	reflection.Register(grpcServer)
@@ -94,7 +102,7 @@ func runGRPCServer(cfg config.Config, authSvc service.AuthService, userSvc servi
 	}
 }
 
-func runHTTPGateway(cfg config.Config) {
+func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -112,6 +120,7 @@ func runHTTPGateway(cfg config.Config) {
 
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFiles))))
+	httpMux.HandleFunc("/v1/users/me/avatar", gapiServer.UploadAvatarHTTP)
 	httpMux.Handle("/", grpcMux)
 
 	srv := &http.Server{

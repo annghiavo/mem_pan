@@ -39,6 +39,7 @@ const (
 	DeckService_ListDeckCards_FullMethodName        = "/pb.DeckService/ListDeckCards"
 	DeckService_CreateCard_FullMethodName           = "/pb.DeckService/CreateCard"
 	DeckService_BulkCreateCards_FullMethodName      = "/pb.DeckService/BulkCreateCards"
+	DeckService_ParseImportFile_FullMethodName      = "/pb.DeckService/ParseImportFile"
 	DeckService_GetCard_FullMethodName              = "/pb.DeckService/GetCard"
 	DeckService_UpdateCard_FullMethodName           = "/pb.DeckService/UpdateCard"
 	DeckService_DeleteCard_FullMethodName           = "/pb.DeckService/DeleteCard"
@@ -70,6 +71,8 @@ type DeckServiceClient interface {
 	ListDeckCards(ctx context.Context, in *ListDeckCardsRequest, opts ...grpc.CallOption) (*ListDeckCardsResponse, error)
 	CreateCard(ctx context.Context, in *CreateCardRequest, opts ...grpc.CallOption) (*CreateCardResponse, error)
 	BulkCreateCards(ctx context.Context, in *BulkCreateCardsRequest, opts ...grpc.CallOption) (*BulkCreateCardsResponse, error)
+	// Import
+	ParseImportFile(ctx context.Context, in *ParseImportFileRequest, opts ...grpc.CallOption) (*ParseImportFileResponse, error)
 	// Cards
 	GetCard(ctx context.Context, in *GetCardRequest, opts ...grpc.CallOption) (*GetCardResponse, error)
 	UpdateCard(ctx context.Context, in *UpdateCardRequest, opts ...grpc.CallOption) (*UpdateCardResponse, error)
@@ -264,6 +267,15 @@ func (c *deckServiceClient) BulkCreateCards(ctx context.Context, in *BulkCreateC
 	return out, nil
 }
 
+func (c *deckServiceClient) ParseImportFile(ctx context.Context, in *ParseImportFileRequest, opts ...grpc.CallOption) (*ParseImportFileResponse, error) {
+	out := new(ParseImportFileResponse)
+	err := c.cc.Invoke(ctx, DeckService_ParseImportFile_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *deckServiceClient) GetCard(ctx context.Context, in *GetCardRequest, opts ...grpc.CallOption) (*GetCardResponse, error) {
 	out := new(GetCardResponse)
 	err := c.cc.Invoke(ctx, DeckService_GetCard_FullMethodName, in, out, opts...)
@@ -317,6 +329,8 @@ type DeckServiceServer interface {
 	ListDeckCards(context.Context, *ListDeckCardsRequest) (*ListDeckCardsResponse, error)
 	CreateCard(context.Context, *CreateCardRequest) (*CreateCardResponse, error)
 	BulkCreateCards(context.Context, *BulkCreateCardsRequest) (*BulkCreateCardsResponse, error)
+	// Import
+	ParseImportFile(context.Context, *ParseImportFileRequest) (*ParseImportFileResponse, error)
 	// Cards
 	GetCard(context.Context, *GetCardRequest) (*GetCardResponse, error)
 	UpdateCard(context.Context, *UpdateCardRequest) (*UpdateCardResponse, error)
@@ -387,6 +401,9 @@ func (UnimplementedDeckServiceServer) CreateCard(context.Context, *CreateCardReq
 }
 func (UnimplementedDeckServiceServer) BulkCreateCards(context.Context, *BulkCreateCardsRequest) (*BulkCreateCardsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BulkCreateCards not implemented")
+}
+func (UnimplementedDeckServiceServer) ParseImportFile(context.Context, *ParseImportFileRequest) (*ParseImportFileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ParseImportFile not implemented")
 }
 func (UnimplementedDeckServiceServer) GetCard(context.Context, *GetCardRequest) (*GetCardResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCard not implemented")
@@ -770,6 +787,24 @@ func _DeckService_BulkCreateCards_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeckService_ParseImportFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ParseImportFileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).ParseImportFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_ParseImportFile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).ParseImportFile(ctx, req.(*ParseImportFileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DeckService_GetCard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetCardRequest)
 	if err := dec(in); err != nil {
@@ -910,6 +945,10 @@ var DeckService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "BulkCreateCards",
 			Handler:    _DeckService_BulkCreateCards_Handler,
+		},
+		{
+			MethodName: "ParseImportFile",
+			Handler:    _DeckService_ParseImportFile_Handler,
 		},
 		{
 			MethodName: "GetCard",

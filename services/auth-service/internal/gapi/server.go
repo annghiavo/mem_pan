@@ -3,6 +3,7 @@ package gapi
 import (
 	"errors"
 
+	"github.com/cloudinary/cloudinary-go/v2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -19,13 +20,15 @@ type Server struct {
 	authSvc    service.AuthService
 	userSvc    service.UserService
 	tokenMaker token.Maker
+	cld        *cloudinary.Cloudinary
 }
 
-func NewServer(authSvc service.AuthService, userSvc service.UserService, tokenMaker token.Maker) *Server {
+func NewServer(authSvc service.AuthService, userSvc service.UserService, tokenMaker token.Maker, cld *cloudinary.Cloudinary) *Server {
 	return &Server{
 		authSvc:    authSvc,
 		userSvc:    userSvc,
 		tokenMaker: tokenMaker,
+		cld:        cld,
 	}
 }
 

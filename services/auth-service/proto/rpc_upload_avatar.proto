@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message UploadAvatarRequest {
+    // Raw image bytes (base64-encoded in JSON). Accepted types: jpeg, png, gif, webp. Max 5 MB.
+    bytes avatar = 1;
+}
+
+message UploadAvatarResponse {
+    string avatar_url = 1;
+    string user_id    = 2;
+    string username   = 3;
+}
