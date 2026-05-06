@@ -206,6 +206,41 @@ func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) 
 	return err
 }
 
+const updateUserRole = `-- name: UpdateUserRole :one
+UPDATE users
+SET role       = $2,
+    updated_at = now()
+WHERE email = $1
+RETURNING user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at
+`
+
+type UpdateUserRoleParams struct {
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
+func (q *Queries) UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUserRole, arg.Email, arg.Role)
+	var i User
+	err := row.Scan(
+		&i.UserID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.FullName,
+		&i.AvatarUrl,
+		&i.Role,
+		&i.IsBanned,
+		&i.BannedAt,
+		&i.BannedReason,
+		&i.EmailVerified,
+		&i.LastLoginAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET full_name  = COALESCE($1, full_name),

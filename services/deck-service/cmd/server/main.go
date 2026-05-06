@@ -24,6 +24,7 @@ import (
 	"mem_pan/services/deck-service/internal/gapi"
 	"mem_pan/services/deck-service/internal/repository"
 	"mem_pan/services/deck-service/internal/service"
+	"mem_pan/services/deck-service/internal/uploader"
 	"mem_pan/services/deck-service/pb"
 )
 
@@ -63,7 +64,17 @@ func main() {
 	deckSvc := service.NewDeckService(deckRepo, cardRepo)
 	cardSvc := service.NewCardService(cardRepo, noteRepo, deckRepo)
 
-	server := gapi.NewServer(folderSvc, deckSvc, cardSvc, authClient)
+	var imageUploader uploader.ImageUploader
+	if cfg.CloudinaryURL != "" {
+		imageUploader, err = uploader.NewCloudinary(cfg.CloudinaryURL)
+		if err != nil {
+			log.Fatal("cloudinary init:", err)
+		}
+	} else {
+		log.Println("CLOUDINARY_URL not set — image upload disabled")
+	}
+
+	server := gapi.NewServer(folderSvc, deckSvc, cardSvc, authClient, imageUploader)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -110,6 +121,9 @@ func runHTTPGateway(cfg config.Config, srv *gapi.Server) {
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFiles))))
 	httpMux.HandleFunc("POST /v1/import/parse", srv.ServeParseImportFile)
+	httpMux.HandleFunc("POST /v1/cards/upload-image", srv.ServeUploadCardImage)
+	httpMux.HandleFunc("POST /v1/decks/{deck_id}/cards", srv.ServeCreateCard)
+	httpMux.HandleFunc("PUT /v1/cards/{card_id}", srv.ServeUpdateCard)
 	httpMux.Handle("/", grpcMux)
 
 	httpServer := &http.Server{

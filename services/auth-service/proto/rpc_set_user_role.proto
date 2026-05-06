@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message SetUserRoleRequest {
+    string email = 1;
+    string role  = 2;
+}
+
+message SetUserRoleResponse {
+    string user_id  = 1;
+    string email    = 2;
+    string username = 3;
+    string role     = 4;
+}

@@ -10,6 +10,7 @@ type Config struct {
 	GRPCServerAddress   string
 	HTTPServerAddress   string
 	AuthServiceAddress  string
+	CloudinaryURL       string
 }
 
 func Load() (Config, error) {
@@ -18,6 +19,7 @@ func Load() (Config, error) {
 		GRPCServerAddress:  getEnv("GRPC_SERVER_ADDRESS", ":9091"),
 		HTTPServerAddress:  getEnv("HTTP_SERVER_ADDRESS", ":8081"),
 		AuthServiceAddress: getEnv("AUTH_SERVICE_ADDRESS", "localhost:9090"),
+		CloudinaryURL:      os.Getenv("CLOUDINARY_URL"),
 	}
 	if cfg.DBUrl == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")

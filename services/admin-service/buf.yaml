@@ -1,0 +1,23 @@
+version: "1"
+packages:
+  - id: github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
+    version: v2.20.0
+  - id: github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
+    version: v2.20.0
+  - id: google.golang.org/grpc/cmd/protoc-gen-go-grpc
+    version: v1.3.0
+  - id: google.golang.org/protobuf/cmd/protoc-gen-go
+    version: v1.34.1
+plugins:
+  - name: go
+    out: pb
+    opt: paths=source_relative
+  - name: go-grpc
+    out: pb
+    opt: paths=source_relative
+  - name: grpc-gateway
+    out: pb
+    opt: paths=source_relative
+  - name: openapiv2
+    out: doc/swagger
+    opt: allow_merge=true,merge_file_name=admin_service

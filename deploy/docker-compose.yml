@@ -78,6 +78,28 @@ services:
     networks:
       - gateway
     restart: unless-stopped
+    
+  admin-service:
+    build:
+      context: ..
+      dockerfile: services/admin-service/Dockerfile
+    env_file:
+      - ../services/admin-service/app.env
+    environment:
+      - AUTH_SERVICE_ADDRESS=auth-service:9090
+    depends_on:
+      - auth-service
+    expose:
+      - "8083"
+      - "9093"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.admin.entrypoints=web"
+      - "traefik.http.routers.admin.rule=PathPrefix(`/v1/admin`)"
+      - "traefik.http.services.admin.loadbalancer.server.port=8083"
+    networks:
+      - gateway
+    restart: unless-stopped
 
 networks:
   gateway:

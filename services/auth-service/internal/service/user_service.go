@@ -26,6 +26,7 @@ type UserService interface {
 	GetProfile(ctx context.Context, userID uuid.UUID) (db.User, error)
 	UpdateProfile(ctx context.Context, userID uuid.UUID, params UpdateProfileParams) (db.User, error)
 	ChangePassword(ctx context.Context, params ChangePasswordParams) error
+	SetUserRole(ctx context.Context, email, role string) (db.User, error)
 }
 
 type userService struct {
@@ -45,6 +46,13 @@ func (s *userService) UpdateProfile(ctx context.Context, userID uuid.UUID, param
 		UserID:    userID,
 		FullName:  domain.NullStr(params.FullName),
 		AvatarUrl: domain.NullStr(params.AvatarURL),
+	})
+}
+
+func (s *userService) SetUserRole(ctx context.Context, email, role string) (db.User, error) {
+	return s.userRepo.UpdateUserRole(ctx, db.UpdateUserRoleParams{
+		Email: email,
+		Role:  role,
 	})
 }
 

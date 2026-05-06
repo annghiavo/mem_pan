@@ -33,6 +33,7 @@ const (
 	AuthService_UploadAvatar_FullMethodName       = "/pb.AuthService/UploadAvatar"
 	AuthService_VerifyToken_FullMethodName        = "/pb.AuthService/VerifyToken"
 	AuthService_GetUserByID_FullMethodName        = "/pb.AuthService/GetUserByID"
+	AuthService_SetUserRole_FullMethodName        = "/pb.AuthService/SetUserRole"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -54,6 +55,7 @@ type AuthServiceClient interface {
 	// Internal service-to-service RPCs — not exposed via HTTP gateway.
 	VerifyToken(ctx context.Context, in *VerifyTokenRequest, opts ...grpc.CallOption) (*VerifyTokenResponse, error)
 	GetUserByID(ctx context.Context, in *GetUserByIDRequest, opts ...grpc.CallOption) (*GetUserByIDResponse, error)
+	SetUserRole(ctx context.Context, in *SetUserRoleRequest, opts ...grpc.CallOption) (*SetUserRoleResponse, error)
 }
 
 type authServiceClient struct {
@@ -190,6 +192,15 @@ func (c *authServiceClient) GetUserByID(ctx context.Context, in *GetUserByIDRequ
 	return out, nil
 }
 
+func (c *authServiceClient) SetUserRole(ctx context.Context, in *SetUserRoleRequest, opts ...grpc.CallOption) (*SetUserRoleResponse, error) {
+	out := new(SetUserRoleResponse)
+	err := c.cc.Invoke(ctx, AuthService_SetUserRole_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
@@ -209,6 +220,7 @@ type AuthServiceServer interface {
 	// Internal service-to-service RPCs — not exposed via HTTP gateway.
 	VerifyToken(context.Context, *VerifyTokenRequest) (*VerifyTokenResponse, error)
 	GetUserByID(context.Context, *GetUserByIDRequest) (*GetUserByIDResponse, error)
+	SetUserRole(context.Context, *SetUserRoleRequest) (*SetUserRoleResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -257,6 +269,9 @@ func (UnimplementedAuthServiceServer) VerifyToken(context.Context, *VerifyTokenR
 }
 func (UnimplementedAuthServiceServer) GetUserByID(context.Context, *GetUserByIDRequest) (*GetUserByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserByID not implemented")
+}
+func (UnimplementedAuthServiceServer) SetUserRole(context.Context, *SetUserRoleRequest) (*SetUserRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetUserRole not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 
@@ -523,6 +538,24 @@ func _AuthService_GetUserByID_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_SetUserRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetUserRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).SetUserRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_SetUserRole_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).SetUserRole(ctx, req.(*SetUserRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -585,6 +618,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserByID",
 			Handler:    _AuthService_GetUserByID_Handler,
+		},
+		{
+			MethodName: "SetUserRole",
+			Handler:    _AuthService_SetUserRole_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -12,6 +12,7 @@ import (
 	"mem_pan/services/deck-service/internal/db"
 	"mem_pan/services/deck-service/internal/domain"
 	"mem_pan/services/deck-service/internal/service"
+	"mem_pan/services/deck-service/internal/uploader"
 	"mem_pan/services/deck-service/pb"
 )
 
@@ -21,6 +22,7 @@ type Server struct {
 	deckSvc    service.DeckService
 	cardSvc    service.CardService
 	authClient authclient.Client
+	uploader   uploader.ImageUploader
 }
 
 func NewServer(
@@ -28,12 +30,14 @@ func NewServer(
 	deckSvc service.DeckService,
 	cardSvc service.CardService,
 	authClient authclient.Client,
+	imageUploader uploader.ImageUploader,
 ) *Server {
 	return &Server{
 		folderSvc:  folderSvc,
 		deckSvc:    deckSvc,
 		cardSvc:    cardSvc,
 		authClient: authClient,
+		uploader:   imageUploader,
 	}
 }
 

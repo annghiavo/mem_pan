@@ -18,6 +18,7 @@ type UserRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (db.User, error)
 	GetUserByUsername(ctx context.Context, username string) (db.User, error)
 	UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.User, error)
+	UpdateUserRole(ctx context.Context, arg db.UpdateUserRoleParams) (db.User, error)
 	UpdatePassword(ctx context.Context, arg db.UpdatePasswordParams) error
 	UpdateLastLogin(ctx context.Context, id uuid.UUID) error
 	MarkEmailVerified(ctx context.Context, id uuid.UUID) error
@@ -74,6 +75,14 @@ func (r *userRepository) GetUserByUsername(ctx context.Context, username string)
 
 func (r *userRepository) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.User, error) {
 	u, err := r.q.UpdateUser(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.User{}, domain.ErrUserNotFound
+	}
+	return u, err
+}
+
+func (r *userRepository) UpdateUserRole(ctx context.Context, arg db.UpdateUserRoleParams) (db.User, error) {
+	u, err := r.q.UpdateUserRole(ctx, arg)
 	if errors.Is(err, sql.ErrNoRows) {
 		return db.User{}, domain.ErrUserNotFound
 	}

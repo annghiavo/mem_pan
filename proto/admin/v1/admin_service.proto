@@ -1,0 +1,152 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "mem_pan/services/admin-service/pb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "Admin Service API";
+        version: "1.0";
+    };
+    security_definitions: {
+        security: {
+            key: "BearerAuth";
+            value: {
+                type: TYPE_API_KEY;
+                in: IN_HEADER;
+                name: "Authorization";
+            };
+        };
+    };
+    consumes: "application/json";
+    produces: "application/json";
+};
+
+service AdminService {
+    // Reports
+    rpc ListReports (ListReportsRequest) returns (ListReportsResponse) {
+        option (google.api.http) = { get: "/v1/admin/reports" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] See list of reports"; tags: "admin";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc ProcessReport (ProcessReportRequest) returns (ProcessReportResponse) {
+        option (google.api.http) = { patch: "/v1/admin/reports/{report_id}"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] Report processing (resolve/dismiss)"; tags: "admin";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    // Users
+    rpc ListUsers (ListUsersRequest) returns (ListUsersResponse) {
+        option (google.api.http) = { get: "/v1/admin/users" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] List of users, filter banned"; tags: "admin";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc BanUser (BanUserRequest) returns (BanUserResponse) {
+        option (google.api.http) = { patch: "/v1/admin/users/{user_id}/ban"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] Ban/unban user"; tags: "admin";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    // Decks
+    rpc UpdateDeckStatus (UpdateDeckStatusRequest) returns (UpdateDeckStatusResponse) {
+        option (google.api.http) = { patch: "/v1/admin/decks/{deck_id}/status"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] Hide or delete the offending deck"; tags: "admin";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+}
+
+// Message definitions
+message Report {
+    string report_id = 1;
+    string reporter_id = 2;
+    string target_type = 3;
+    string target_id = 4;
+    string reason_category = 5;
+    string description = 6;
+    string status = 7;
+    string assigned_to = 8;
+    string admin_note = 9;
+    string resolution = 10;
+    string resolved_by = 11;
+    string resolved_at = 12;
+    string created_at = 13;
+    string updated_at = 14;
+}
+
+message ListReportsRequest {
+    int32 page_size = 1;
+    string page_token = 2;
+    string status_filter = 3;
+}
+
+message ListReportsResponse {
+    repeated Report reports = 1;
+    string next_page_token = 2;
+}
+
+message ProcessReportRequest {
+    string report_id = 1;
+    string action = 2; // "resolve", "dismiss"
+    string resolution = 3;
+    string admin_note = 4;
+}
+
+message ProcessReportResponse {
+    Report report = 1;
+}
+
+message User {
+    string id = 1;
+    string username = 2;
+    string email = 3;
+    bool is_banned = 4;
+    string created_at = 5;
+}
+
+message ListUsersRequest {
+    int32 page_size = 1;
+    string page_token = 2;
+    bool filter_banned = 3;
+}
+
+message ListUsersResponse {
+    repeated User users = 1;
+    string next_page_token = 2;
+}
+
+message BanUserRequest {
+    string user_id = 1;
+    bool ban = 2; // true to ban, false to unban
+    string reason = 3;
+}
+
+message BanUserResponse {
+    User user = 1;
+}
+
+message UpdateDeckStatusRequest {
+    string deck_id = 1;
+    string status = 2; // "hidden", "deleted", "active"
+    string reason = 3;
+}
+
+message UpdateDeckStatusResponse {
+    string deck_id = 1;
+    string status = 2;
+}
