@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package pb;
+package study;
 
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
@@ -89,6 +89,30 @@ service StudyService {
         option (google.api.http) = { get: "/v1/study/decks/{deck_id}/progress" };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
             summary: "Get card progress counts for a deck (new/studying/memorized)"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc GetDeckSettings (GetStudyDeckSettingsRequest) returns (GetStudyDeckSettingsResponse) {
+        option (google.api.http) = { get: "/v1/study/decks/{deck_id}/settings" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Get study settings for a deck"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc UpdateDeckSettings (UpdateStudyDeckSettingsRequest) returns (UpdateStudyDeckSettingsResponse) {
+        option (google.api.http) = { put: "/v1/study/decks/{deck_id}/settings"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Update study settings for a deck"; tags: "study";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc CheckAnswer (CheckAnswerRequest) returns (CheckAnswerResponse) {
+        option (google.api.http) = { post: "/v1/study/decks/{deck_id}/check-answer"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Check a written answer against the correct answer using deck grading settings"; tags: "study";
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }

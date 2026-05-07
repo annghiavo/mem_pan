@@ -10,7 +10,7 @@ services:
       - "8000:80"
       - "8090:8080"  # Traefik dashboard: http://localhost:8090
     volumes:
-      - /tmp/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - gateway
     restart: unless-stopped

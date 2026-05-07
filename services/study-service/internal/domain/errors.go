@@ -10,4 +10,6 @@ var (
 	ErrForbidden        = errors.New("access denied")
 	ErrInvalidRating    = errors.New("rating must be between 1 and 4")
 	ErrDeckEmpty        = errors.New("no cards available to study in this deck")
+	ErrSettingsNotFound = errors.New("deck study settings not found")
+	ErrInvalidStrictness = errors.New("strictness_level must be 'flexible' or 'strict'")
 )

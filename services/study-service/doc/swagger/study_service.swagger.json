@@ -24,7 +24,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbGetRecentDecksResponse"
+              "$ref": "#/definitions/studyGetRecentDecksResponse"
             }
           },
           "default": {
@@ -44,6 +44,50 @@
         ]
       }
     },
+    "/v1/study/decks/{deckId}/check-answer": {
+      "post": {
+        "summary": "Check a written answer against the correct answer using deck grading settings",
+        "operationId": "StudyService_CheckAnswer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/studyCheckAnswerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StudyServiceCheckAnswerBody"
+            }
+          }
+        ],
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/study/decks/{deckId}/progress": {
       "get": {
         "summary": "Get card progress counts for a deck (new/studying/memorized)",
@@ -52,7 +96,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbDeckProgressResponse"
+              "$ref": "#/definitions/studyDeckProgressResponse"
             }
           },
           "default": {
@@ -80,6 +124,84 @@
         ]
       }
     },
+    "/v1/study/decks/{deckId}/settings": {
+      "get": {
+        "summary": "Get study settings for a deck",
+        "operationId": "StudyService_GetDeckSettings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/studyGetStudyDeckSettingsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update study settings for a deck",
+        "operationId": "StudyService_UpdateDeckSettings",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/studyUpdateStudyDeckSettingsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StudyServiceUpdateDeckSettingsBody"
+            }
+          }
+        ],
+        "tags": [
+          "study"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/study/due": {
       "get": {
         "summary": "List cards due today across all decks or by deck (pass deck_id query param)",
@@ -88,7 +210,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbGetDueCardsResponse"
+              "$ref": "#/definitions/studyGetDueCardsResponse"
             }
           },
           "default": {
@@ -124,7 +246,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbStartSessionResponse"
+              "$ref": "#/definitions/studyStartSessionResponse"
             }
           },
           "default": {
@@ -140,7 +262,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/pbStartSessionRequest"
+              "$ref": "#/definitions/studyStartSessionRequest"
             }
           }
         ],
@@ -162,7 +284,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbGetRecentSessionCardsResponse"
+              "$ref": "#/definitions/studyGetRecentSessionCardsResponse"
             }
           },
           "default": {
@@ -190,7 +312,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbGetSessionResponse"
+              "$ref": "#/definitions/studyGetSessionResponse"
             }
           },
           "default": {
@@ -226,7 +348,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbFinishSessionResponse"
+              "$ref": "#/definitions/studyFinishSessionResponse"
             }
           },
           "default": {
@@ -270,7 +392,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/pbReviewCardResponse"
+              "$ref": "#/definitions/studyReviewCardResponse"
             }
           },
           "default": {
@@ -308,6 +430,17 @@
     }
   },
   "definitions": {
+    "StudyServiceCheckAnswerBody": {
+      "type": "object",
+      "properties": {
+        "userAnswer": {
+          "type": "string"
+        },
+        "correctAnswer": {
+          "type": "string"
+        }
+      }
+    },
     "StudyServiceFinishSessionBody": {
       "type": "object"
     },
@@ -327,7 +460,55 @@
         }
       }
     },
-    "pbDeckProgressResponse": {
+    "StudyServiceUpdateDeckSettingsBody": {
+      "type": "object",
+      "properties": {
+        "settings": {
+          "$ref": "#/definitions/studyStudySettings"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "studyCheckAnswerResponse": {
+      "type": "object",
+      "properties": {
+        "isCorrect": {
+          "type": "boolean"
+        },
+        "score": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "studyDeckProgressResponse": {
       "type": "object",
       "properties": {
         "deckId": {
@@ -353,12 +534,12 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/pbProgressTag"
+            "$ref": "#/definitions/studyProgressTag"
           }
         }
       }
     },
-    "pbDueCard": {
+    "studyDueCard": {
       "type": "object",
       "properties": {
         "cardId": {
@@ -379,22 +560,22 @@
         }
       }
     },
-    "pbFinishSessionResponse": {
+    "studyFinishSessionResponse": {
       "type": "object",
       "properties": {
         "session": {
-          "$ref": "#/definitions/pbStudySession"
+          "$ref": "#/definitions/studyStudySession"
         }
       }
     },
-    "pbGetDueCardsResponse": {
+    "studyGetDueCardsResponse": {
       "type": "object",
       "properties": {
         "cards": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/pbDueCard"
+            "$ref": "#/definitions/studyDueCard"
           }
         },
         "total": {
@@ -403,35 +584,43 @@
         }
       }
     },
-    "pbGetRecentDecksResponse": {
+    "studyGetRecentDecksResponse": {
       "type": "object",
       "properties": {
         "decks": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/pbRecentDeckItem"
+            "$ref": "#/definitions/studyRecentDeckItem"
           }
         }
       }
     },
-    "pbGetRecentSessionCardsResponse": {
+    "studyGetRecentSessionCardsResponse": {
       "type": "object",
       "properties": {
         "session": {
-          "$ref": "#/definitions/pbStudySession"
+          "$ref": "#/definitions/studyStudySession"
         }
       }
     },
-    "pbGetSessionResponse": {
+    "studyGetSessionResponse": {
       "type": "object",
       "properties": {
         "session": {
-          "$ref": "#/definitions/pbStudySession"
+          "$ref": "#/definitions/studyStudySession"
         }
       }
     },
-    "pbProgressTag": {
+    "studyGetStudyDeckSettingsResponse": {
+      "type": "object",
+      "properties": {
+        "settings": {
+          "$ref": "#/definitions/studyStudySettings"
+        }
+      }
+    },
+    "studyProgressTag": {
       "type": "object",
       "properties": {
         "label": {
@@ -449,7 +638,7 @@
         }
       }
     },
-    "pbRecentDeckItem": {
+    "studyRecentDeckItem": {
       "type": "object",
       "properties": {
         "deckId": {
@@ -461,15 +650,15 @@
         }
       }
     },
-    "pbReviewCardResponse": {
+    "studyReviewCardResponse": {
       "type": "object",
       "properties": {
         "userCard": {
-          "$ref": "#/definitions/pbUserCardState"
+          "$ref": "#/definitions/studyUserCardState"
         }
       }
     },
-    "pbSessionCardItem": {
+    "studySessionCardItem": {
       "type": "object",
       "properties": {
         "position": {
@@ -491,7 +680,7 @@
         }
       }
     },
-    "pbStartSessionRequest": {
+    "studyStartSessionRequest": {
       "type": "object",
       "properties": {
         "deckId": {
@@ -507,15 +696,15 @@
         }
       }
     },
-    "pbStartSessionResponse": {
+    "studyStartSessionResponse": {
       "type": "object",
       "properties": {
         "session": {
-          "$ref": "#/definitions/pbStudySession"
+          "$ref": "#/definitions/studyStudySession"
         }
       }
     },
-    "pbStudySession": {
+    "studyStudySession": {
       "type": "object",
       "properties": {
         "sessionId": {
@@ -542,7 +731,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/pbSessionCardItem"
+            "$ref": "#/definitions/studySessionCardItem"
           }
         },
         "startedAt": {
@@ -555,7 +744,47 @@
         }
       }
     },
-    "pbUserCardState": {
+    "studyStudySettings": {
+      "type": "object",
+      "properties": {
+        "shuffleTerms": {
+          "type": "boolean"
+        },
+        "textToSpeech": {
+          "type": "boolean"
+        },
+        "answerWithTerm": {
+          "type": "boolean"
+        },
+        "answerWithDefinition": {
+          "type": "boolean"
+        },
+        "questionTypeFlashcards": {
+          "type": "boolean"
+        },
+        "questionTypeMultipleChoice": {
+          "type": "boolean"
+        },
+        "questionTypeWritten": {
+          "type": "boolean"
+        },
+        "strictnessLevel": {
+          "type": "string"
+        },
+        "requireRetypingCorrectAnswer": {
+          "type": "boolean"
+        }
+      }
+    },
+    "studyUpdateStudyDeckSettingsResponse": {
+      "type": "object",
+      "properties": {
+        "settings": {
+          "$ref": "#/definitions/studyStudySettings"
+        }
+      }
+    },
+    "studyUserCardState": {
       "type": "object",
       "properties": {
         "userCardId": {
@@ -600,34 +829,6 @@
         "lastReviewDate": {
           "type": "string",
           "format": "date-time"
-        }
-      }
-    },
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "@type": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": {}
-    },
-    "rpcStatus": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "message": {
-          "type": "string"
-        },
-        "details": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/protobufAny"
-          }
         }
       }
     }

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package pb;
+package study;
 
 import "google/protobuf/timestamp.proto";
 
@@ -67,4 +67,16 @@ message DeckProgressResponse {
     int32  memorized_count = 4;
     int32  total_count     = 5;
     repeated ProgressTag tags = 6;
+}
+
+message StudySettings {
+    bool   shuffle_terms                   = 1;
+    bool   text_to_speech                  = 2;
+    bool   answer_with_term                = 3;
+    bool   answer_with_definition          = 4;
+    bool   question_type_flashcards        = 5;
+    bool   question_type_multiple_choice   = 6;
+    bool   question_type_written           = 7;
+    string strictness_level                = 8;
+    bool   require_retyping_correct_answer = 9;
 }

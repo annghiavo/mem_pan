@@ -1,7 +1,7 @@
 -- name: UpsertUserCard :one
 INSERT INTO user_cards (user_id, card_id, deck_id)
 VALUES ($1, $2, $3)
-ON CONFLICT (user_id, card_id) DO UPDATE
+ON CONFLICT (user_id, card_id, deck_id) DO UPDATE
     SET updated_at = CURRENT_TIMESTAMP
 RETURNING *;
 
@@ -9,7 +9,7 @@ RETURNING *;
 SELECT * FROM user_cards WHERE user_card_id = $1;
 
 -- name: GetUserCardByUserAndCard :one
-SELECT * FROM user_cards WHERE user_id = $1 AND card_id = $2;
+SELECT * FROM user_cards WHERE user_id = $1 AND card_id = $2 AND deck_id = $3;
 
 -- name: UpdateUserCardFSRS :one
 UPDATE user_cards SET

@@ -18,14 +18,16 @@ import (
 
 type Server struct {
 	pb.UnimplementedStudyServiceServer
-	studySvc   service.StudyService
-	authClient authclient.Client
+	studySvc    service.StudyService
+	settingsSvc service.SettingsService
+	authClient  authclient.Client
 }
 
-func NewServer(studySvc service.StudyService, authClient authclient.Client) *Server {
+func NewServer(studySvc service.StudyService, settingsSvc service.SettingsService, authClient authclient.Client) *Server {
 	return &Server{
-		studySvc:   studySvc,
-		authClient: authClient,
+		studySvc:    studySvc,
+		settingsSvc: settingsSvc,
+		authClient:  authClient,
 	}
 }
 
@@ -108,4 +110,18 @@ func userCardToPb(uc db.UserCard) *pb.UserCardState {
 		out.LastReviewDate = timestamppb.New(uc.LastReviewDate.Time)
 	}
 	return out
+}
+
+func dbSettingsToPb(s db.DeckStudySetting) *pb.StudySettings {
+	return &pb.StudySettings{
+		ShuffleTerms:                 s.ShuffleTerms,
+		TextToSpeech:                 s.TextToSpeech,
+		AnswerWithTerm:               s.AnswerWithTerm,
+		AnswerWithDefinition:         s.AnswerWithDefinition,
+		QuestionTypeFlashcards:       s.QuestionTypeFlashcards,
+		QuestionTypeMultipleChoice:   s.QuestionTypeMultipleChoice,
+		QuestionTypeWritten:          s.QuestionTypeWritten,
+		StrictnessLevel:              s.StrictnessLevel,
+		RequireRetypingCorrectAnswer: s.RequireRetypingCorrectAnswer,
+	}
 }

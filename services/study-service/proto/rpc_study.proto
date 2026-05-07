@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package pb;
+package study;
 
 import "study_models.proto";
 
@@ -66,4 +66,32 @@ message GetRecentDecksResponse {
 
 message GetDeckProgressRequest {
     string deck_id = 1;
+}
+
+message GetStudyDeckSettingsRequest {
+    string deck_id = 1;
+}
+
+message GetStudyDeckSettingsResponse {
+    StudySettings settings = 1;
+}
+
+message UpdateStudyDeckSettingsRequest {
+    string        deck_id  = 1;
+    StudySettings settings = 2;
+}
+
+message UpdateStudyDeckSettingsResponse {
+    StudySettings settings = 1;
+}
+
+message CheckAnswerRequest {
+    string deck_id        = 1;
+    string user_answer    = 2;
+    string correct_answer = 3;
+}
+
+message CheckAnswerResponse {
+    bool  is_correct = 1;
+    float score      = 2;
 }

@@ -67,6 +67,7 @@ func main() {
 	sessionCardRepo := repository.NewSessionCardRepository(database)
 	revlogRepo := repository.NewRevlogRepository(database)
 	weightsRepo := repository.NewFsrsWeightsRepository(database)
+	deckSettingsRepo := repository.NewDeckSettingsRepository(database)
 
 	studySvc := service.NewStudyService(
 		userCardRepo,
@@ -76,19 +77,20 @@ func main() {
 		weightsRepo,
 		deckClient,
 	)
+	settingsSvc := service.NewSettingsService(deckSettingsRepo)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	go runGRPCServer(cfg, studySvc, authClient)
+	go runGRPCServer(cfg, studySvc, settingsSvc, authClient)
 	go runHTTPGateway(cfg)
 
 	<-quit
 	log.Println("study-service shutting down")
 }
 
-func runGRPCServer(cfg config.Config, studySvc service.StudyService, authClient authclient.Client) {
-	server := gapi.NewServer(studySvc, authClient)
+func runGRPCServer(cfg config.Config, studySvc service.StudyService, settingsSvc service.SettingsService, authClient authclient.Client) {
+	server := gapi.NewServer(studySvc, settingsSvc, authClient)
 
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(errorLoggingInterceptor))
 	pb.RegisterStudyServiceServer(grpcServer, server)
