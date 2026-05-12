@@ -1,0 +1,28 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "query/"
+    schema: "migration/"
+    gen:
+      go:
+        package: "db"
+        out: "../internal/db"
+        emit_json_tags: true
+        emit_empty_slices: true
+        overrides:
+          - column: "user_stats.last_studied_date"
+            go_type:
+              import: "database/sql"
+              type: "NullTime"
+          - column: "user_stats.username"
+            go_type:
+              import: "database/sql"
+              type: "NullString"
+          - column: "user_stats.avatar_url"
+            go_type:
+              import: "database/sql"
+              type: "NullString"
+          - column: "deck_stats.deck_name"
+            go_type:
+              import: "database/sql"
+              type: "NullString"

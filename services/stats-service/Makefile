@@ -5,7 +5,7 @@ export DB_URL DIRECT_URL DATABASE_URL SERVER_ADDRESS \
 	GRPC_SERVER_ADDRESS HTTP_SERVER_ADDRESS
 
 PROTO_DIR   := proto
-THIRD_PARTY := third_party
+THIRD_PARTY := ../admin-service/third_party
 PB_OUT      := pb
 SWAGGER_OUT := doc/swagger
 

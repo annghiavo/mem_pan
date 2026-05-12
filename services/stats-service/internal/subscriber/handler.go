@@ -1,0 +1,270 @@
+package subscriber
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"log"
+	"time"
+
+	"github.com/google/uuid"
+
+	"mem_pan/services/stats-service/internal/db"
+	"mem_pan/services/stats-service/internal/events"
+	"mem_pan/services/stats-service/internal/repository"
+)
+
+const masteredStabilityThreshold = 21.0
+
+type Handler struct {
+	repo repository.StatsRepository
+}
+
+func NewHandler(repo repository.StatsRepository) *Handler {
+	return &Handler{repo: repo}
+}
+
+func (h *Handler) Dispatch(ctx context.Context, eventType string, data []byte) error {
+	switch eventType {
+	case events.TypeUserRegistered:
+		return h.handleUserRegistered(ctx, data)
+	case events.TypeDeckCreated:
+		return h.handleDeckCreated(ctx, data)
+	case events.TypeDeckUpdated:
+		return h.handleDeckUpdated(ctx, data)
+	case events.TypeCardCreated:
+		return h.handleCardCreated(ctx, data)
+	case events.TypeCardReviewed:
+		return h.handleCardReviewed(ctx, data)
+	default:
+		log.Printf("[stats] unknown event type %q — skipping", eventType)
+		return nil
+	}
+}
+
+func (h *Handler) handleUserRegistered(ctx context.Context, data []byte) error {
+	var e events.UserRegistered
+	if err := json.Unmarshal(data, &e); err != nil {
+		return err
+	}
+
+	userID, err := uuid.Parse(e.UserID)
+	if err != nil {
+		return err
+	}
+
+	_, err = h.repo.CreateUserStats(ctx, userID, e.Username, e.AvatarURL)
+	if err != nil {
+		log.Printf("[stats] CreateUserStats %s: %v", userID, err)
+	}
+	return err
+}
+
+func (h *Handler) handleDeckCreated(ctx context.Context, data []byte) error {
+	var e events.DeckCreated
+	if err := json.Unmarshal(data, &e); err != nil {
+		return err
+	}
+
+	deckID, err := uuid.Parse(e.DeckID)
+	if err != nil {
+		return err
+	}
+	userID, err := uuid.Parse(e.UserID)
+	if err != nil {
+		return err
+	}
+
+	return h.repo.CreateDeckStats(ctx, deckID, userID, e.DeckName)
+}
+
+func (h *Handler) handleDeckUpdated(ctx context.Context, data []byte) error {
+	var e events.DeckUpdated
+	if err := json.Unmarshal(data, &e); err != nil {
+		return err
+	}
+
+	deckID, err := uuid.Parse(e.DeckID)
+	if err != nil {
+		return err
+	}
+
+	return h.repo.UpdateDeckName(ctx, deckID, e.DeckName)
+}
+
+func (h *Handler) handleCardCreated(ctx context.Context, data []byte) error {
+	var e events.CardCreated
+	if err := json.Unmarshal(data, &e); err != nil {
+		return err
+	}
+
+	deckID, err := uuid.Parse(e.DeckID)
+	if err != nil {
+		return err
+	}
+	userID, err := uuid.Parse(e.UserID)
+	if err != nil {
+		return err
+	}
+
+	if err := h.repo.IncrementDeckTotalCards(ctx, deckID); err != nil {
+		return err
+	}
+	return h.repo.IncrementUserCards(ctx, userID)
+}
+
+func (h *Handler) handleCardReviewed(ctx context.Context, data []byte) error {
+	var e events.CardReviewed
+	if err := json.Unmarshal(data, &e); err != nil {
+		return err
+	}
+
+	userID, err := uuid.Parse(e.UserID)
+	if err != nil {
+		return err
+	}
+	deckID, err := uuid.Parse(e.DeckID)
+	if err != nil {
+		return err
+	}
+
+	isCorrect := e.Rating >= 3
+
+	// 1. Increment overall review counters
+	var correct, incorrect int32
+	if isCorrect {
+		correct = 1
+	} else {
+		incorrect = 1
+	}
+	if err := h.repo.IncrementReview(ctx, db.IncrementReviewParams{
+		UserID:           userID,
+		TotalReviews:     1,
+		TotalStudyTimeMs: e.DurationMs,
+		TotalCorrect:     correct,
+		TotalIncorrect:   incorrect,
+	}); err != nil {
+		return err
+	}
+
+	// 2. Update streak based on review time
+	if err := h.updateStreak(ctx, userID, e.ReviewTime); err != nil {
+		log.Printf("[stats] updateStreak %s: %v", userID, err)
+	}
+
+	// 3. Upsert daily stats
+	studyDate := e.ReviewTime.UTC().Truncate(24 * time.Hour)
+	var newCardsCount int32
+	if e.IsNewCard {
+		newCardsCount = 1
+	}
+	if err := h.repo.UpsertDailyStats(ctx, db.UpsertDailyStatsParams{
+		UserID:        userID,
+		StudyDate:     studyDate,
+		ReviewsCount:  1,
+		NewCardsCount: newCardsCount,
+		StudyTimeMs:   e.DurationMs,
+		CorrectCount:  correct,
+	}); err != nil {
+		return err
+	}
+
+	// 4. Shift card state counts in deck_stats
+	newDelta, learningDelta, reviewDelta, masteredDelta := computeStateDelta(
+		e.StateBefore, e.StateAfter, e.StabilityAfter,
+	)
+	if newDelta != 0 || learningDelta != 0 || reviewDelta != 0 || masteredDelta != 0 {
+		if err := h.repo.ShiftDeckCardStates(ctx, db.ShiftDeckCardStatesParams{
+			DeckID:        deckID,
+			NewCards:      newDelta,
+			LearningCards: learningDelta,
+			ReviewCards:   reviewDelta,
+			MasteredCards: masteredDelta,
+		}); err != nil {
+			log.Printf("[stats] ShiftDeckCardStates %s: %v", deckID, err)
+		}
+	}
+
+	// 5. Update today's deck progress snapshot from latest deck_stats
+	if err := h.snapshotDeckProgress(ctx, deckID, userID, studyDate); err != nil {
+		log.Printf("[stats] snapshotDeckProgress %s: %v", deckID, err)
+	}
+
+	return nil
+}
+
+func (h *Handler) updateStreak(ctx context.Context, userID uuid.UUID, reviewTime time.Time) error {
+	row, err := h.repo.GetUserStats(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	today := reviewTime.UTC().Truncate(24 * time.Hour)
+	newStreak := computeStreak(row.LastStudiedDate, today, row.CurrentStreak)
+
+	return h.repo.UpdateStreak(ctx, userID, newStreak, today)
+}
+
+func computeStreak(last sql.NullTime, today time.Time, current int32) int32 {
+	if !last.Valid {
+		return 1
+	}
+	lastDay := last.Time.UTC().Truncate(24 * time.Hour)
+	if lastDay.Equal(today) {
+		return current
+	}
+	if lastDay.Equal(today.AddDate(0, 0, -1)) {
+		return current + 1
+	}
+	return 1
+}
+
+// computeStateDelta returns (newDelta, learningDelta, reviewDelta, masteredDelta)
+// representing how each bucket in deck_stats should change.
+func computeStateDelta(before, after string, stabilityAfter float64) (newD, learnD, reviewD, masteredD int32) {
+	// Decrement the "before" bucket
+	switch before {
+	case "new":
+		newD = -1
+	case "learning", "relearning":
+		learnD = -1
+	case "review":
+		if stabilityAfter < masteredStabilityThreshold {
+			reviewD = -1
+		} else {
+			masteredD = -1
+		}
+	}
+
+	// Increment the "after" bucket
+	switch after {
+	case "new":
+		newD++
+	case "learning", "relearning":
+		learnD++
+	case "review":
+		if stabilityAfter >= masteredStabilityThreshold {
+			masteredD++
+		} else {
+			reviewD++
+		}
+	}
+
+	return
+}
+
+func (h *Handler) snapshotDeckProgress(ctx context.Context, deckID, userID uuid.UUID, date time.Time) error {
+	ds, err := h.repo.GetDeckStats(ctx, deckID)
+	if err != nil {
+		return err
+	}
+	return h.repo.UpsertDeckProgressSnapshot(ctx, db.UpsertDeckProgressSnapshotParams{
+		DeckID:        deckID,
+		UserID:        userID,
+		SnapshotDate:  date,
+		NewCount:      ds.NewCards,
+		LearningCount: ds.LearningCards,
+		ReviewCount:   ds.ReviewCards,
+		MasteredCount: ds.MasteredCards,
+	})
+}

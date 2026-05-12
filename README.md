@@ -1,6 +1,6 @@
 # mem_pan
 
-export PATH=$PATH:/home/user/go/bin && make migrateup
+export PATH=$PATH:/home/anvo/go/bin && make migrateup
 
 CSV/TSV — two-column rows, auto-detected separator, blank rows skipped, BOM-safe           
   - PDF — Quizlet-style numbered two-column tables, text-selectable only                       

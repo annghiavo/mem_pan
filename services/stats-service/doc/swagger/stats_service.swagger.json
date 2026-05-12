@@ -1,0 +1,428 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Stats Service API",
+    "version": "1.0"
+  },
+  "tags": [
+    {
+      "name": "StatsService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/stats/decks/{deckId}": {
+      "get": {
+        "summary": "Get stats for a specific deck",
+        "operationId": "StatsService_GetDeckStats",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/statsGetDeckStatsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "stats"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/stats/decks/{deckId}/progress": {
+      "get": {
+        "summary": "Get deck card-state progress timeline",
+        "operationId": "StatsService_GetDeckProgress",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/statsGetDeckProgressResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "stats"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/stats/me": {
+      "get": {
+        "summary": "Get current user overall stats",
+        "operationId": "StatsService_GetMyStats",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/statsGetMyStatsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "stats"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/stats/me/decks": {
+      "get": {
+        "summary": "List stats for all decks owned by the current user",
+        "operationId": "StatsService_ListMyDeckStats",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/statsListMyDeckStatsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "stats"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/stats/me/heatmap": {
+      "get": {
+        "summary": "Get daily study heatmap for a date range",
+        "operationId": "StatsService_GetHeatmap",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/statsGetHeatmapResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "stats"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "statsDailyStatEntry": {
+      "type": "object",
+      "properties": {
+        "studyDate": {
+          "type": "string"
+        },
+        "reviewsCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "newCardsCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "studyTimeMs": {
+          "type": "string",
+          "format": "int64"
+        },
+        "correctCount": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "statsDeckProgressEntry": {
+      "type": "object",
+      "properties": {
+        "snapshotDate": {
+          "type": "string"
+        },
+        "newCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "learningCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reviewCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "masteredCount": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "statsDeckStat": {
+      "type": "object",
+      "properties": {
+        "deckId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "totalCards": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "newCards": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "learningCards": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reviewCards": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "masteredCards": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "dueToday": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deckName": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "statsGetDeckProgressResponse": {
+      "type": "object",
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/statsDeckProgressEntry"
+          }
+        }
+      }
+    },
+    "statsGetDeckStatsResponse": {
+      "type": "object",
+      "properties": {
+        "stats": {
+          "$ref": "#/definitions/statsDeckStat"
+        }
+      }
+    },
+    "statsGetHeatmapResponse": {
+      "type": "object",
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/statsDailyStatEntry"
+          }
+        }
+      }
+    },
+    "statsGetMyStatsResponse": {
+      "type": "object",
+      "properties": {
+        "stats": {
+          "$ref": "#/definitions/statsUserStats"
+        }
+      }
+    },
+    "statsListMyDeckStatsResponse": {
+      "type": "object",
+      "properties": {
+        "decks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/statsDeckStat"
+          }
+        }
+      }
+    },
+    "statsUserStats": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "totalCards": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalReviews": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalStudyTimeMs": {
+          "type": "string",
+          "format": "int64"
+        },
+        "currentStreak": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "longestStreak": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "lastStudiedDate": {
+          "type": "string"
+        },
+        "totalCorrect": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalIncorrect": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "username": {
+          "type": "string"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}
