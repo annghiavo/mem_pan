@@ -7,15 +7,18 @@ Stats service là một **projection service** — không phải source of truth
 ## Architecture
 
 ```
-auth-service   ──┐
-deck-service   ──┼──► Pub/Sub topics ──► stats-service subscriber ──► PostgreSQL projections
-study-service  ──┘                              │
-                                                └──► gRPC + HTTP API ──► client
+auth-service   ──┐                         POST /internal/pubsub
+deck-service   ──┼──► Pub/Sub topics ──► (Google calls stats-service) ──► PostgreSQL projections
+study-service  ──┘        push ↑                                                    │
+                     subscriptions                                                   │
+                                                                  gRPC + HTTP API ──► client
 ```
 
-- **Write path:** Event consumers cập nhật projection tables bất đồng bộ (delay vài giây là OK)
+Dùng **Pub/Sub push subscription** — stats-service không cần poll. Khi có message mới, Google Pub/Sub chủ động gọi `POST /internal/pubsub` trên stats-service. Stats-service trả về `204` để ACK, hoặc `5xx` để NACK (Pub/Sub sẽ retry với exponential back-off).
+
+- **Write path:** Pub/Sub gọi push endpoint → handler cập nhật projections bất đồng bộ
 - **Read path:** gRPC handlers query thẳng từ projection tables, không join cross-service
-- **Rebuild:** Có thể replay toàn bộ events từ Pub/Sub topic retention để build lại từ đầu
+- **Rebuild:** Seek subscription về thời điểm cũ → Pub/Sub replay lại toàn bộ messages
 
 ---
 
@@ -33,13 +36,12 @@ study-service  ──┘                              │
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
-| `PUBSUB_PROJECT_ID` | ✅ | — | GCP project ID |
 | `AUTH_SERVICE_ADDRESS` | | `localhost:9090` | Auth service gRPC address |
 | `GRPC_SERVER_ADDRESS` | | `:9094` | gRPC listen address |
 | `HTTP_SERVER_ADDRESS` | | `:8084` | HTTP gateway listen address |
-| `PUBSUB_USER_EVENTS_SUB` | | `stats-user-events-sub` | Subscription cho user events |
-| `PUBSUB_DECK_EVENTS_SUB` | | `stats-deck-events-sub` | Subscription cho deck events |
-| `PUBSUB_STUDY_EVENTS_SUB` | | `stats-study-events-sub` | Subscription cho study events |
+| `PUBSUB_PUSH_SECRET` | | _(empty)_ | Shared secret appended as `?token=` on push endpoint URL — nên set trong production |
+
+> Không cần `PUBSUB_PROJECT_ID` hay subscription names nữa. Stats-service chỉ là HTTP server thụ động — Pub/Sub tự biết endpoint từ config subscription trên GCP.
 
 ---
 
@@ -324,29 +326,33 @@ Các giá trị âm được bảo vệ bằng `GREATEST(0, ...)` ở tầng SQL
 
 ---
 
-## Google Cloud Pub/Sub Setup
+## Google Cloud Pub/Sub — Push Model
+
+Thay vì stats-service chủ động poll Pub/Sub, **Google Pub/Sub chủ động gọi vào** stats-service mỗi khi có message mới. Stats-service chỉ cần expose một HTTP endpoint và không cần Pub/Sub SDK.
+
+```
+Pub/Sub topic có message mới
+        │
+        ▼
+Google gọi POST https://stats-service/internal/pubsub?token=SECRET
+        │
+        ▼
+PushHandler decode message → Dispatch → DB
+        │
+        ▼
+Trả 204 No Content  →  Google xác nhận đã nhận (ACK)
+Trả 5xx             →  Google retry với exponential back-off (NACK)
+```
 
 ### Concepts
 
 | Term | Ý nghĩa |
 |------|---------|
-| **Topic** | Kênh phát sự kiện. Publisher gửi message vào topic. |
-| **Subscription** | Một consumer "đăng ký" vào topic. Mỗi subscription nhận độc lập bản sao của message. |
-| **Message** | Payload dạng bytes + attributes. Stats service dùng JSON. |
-| **Ack / Nack** | Ack = xử lý thành công, xóa khỏi queue. Nack = thất bại, redelivery sau. |
-| **Retention** | Topic giữ message trong N ngày kể cả sau khi acked — dùng để replay lại toàn bộ lịch sử. |
-
-### Pub/Sub flow trong project này
-
-```
-Publisher (auth/deck/study-service)          Consumer (stats-service)
-─────────────────────────────────            ─────────────────────────────
-topic: user-events          ──────────────►  subscription: stats-user-events-sub
-topic: deck-events          ──────────────►  subscription: stats-deck-events-sub
-topic: study-events         ──────────────►  subscription: stats-study-events-sub
-```
-
-Mỗi topic có thể có nhiều subscriptions — ví dụ `study-events` có thể đồng thời được subscribe bởi stats-service, worker-service, notification-service mà không ảnh hưởng lẫn nhau.
+| **Topic** | Kênh phát sự kiện. Publisher gửi message vào đây. |
+| **Push Subscription** | Pub/Sub gọi một URL cụ thể mỗi khi có message mới. Khác với pull subscription — consumer không cần poll. |
+| **ACK** | HTTP 2xx — message được xử lý thành công, Pub/Sub xóa khỏi queue. |
+| **NACK** | HTTP 5xx hoặc timeout — message bị redelivery sau một khoảng thời gian (retry). |
+| **Retention** | Topic giữ message trong N ngày kể cả sau khi acked — dùng để seek (replay) lại lịch sử. |
 
 ---
 
@@ -357,8 +363,6 @@ Mỗi topic có thể có nhiều subscriptions — ví dụ `study-events` có 
 ```bash
 # macOS
 brew install --cask google-cloud-sdk
-
-# Hoặc download từ https://cloud.google.com/sdk/docs/install
 
 gcloud auth login
 gcloud config set project YOUR_PROJECT_ID
@@ -380,151 +384,180 @@ gcloud pubsub topics update deck-events  --message-retention-duration=7d
 gcloud pubsub topics update study-events --message-retention-duration=7d
 ```
 
-#### Tạo subscriptions cho stats-service
+#### Tạo push subscriptions trỏ vào stats-service
+
+Mỗi subscription dùng cùng một endpoint. `event_type` trong body phân biệt loại event.
 
 ```bash
-# User events
+PUSH_ENDPOINT="https://stats-service.example.com/internal/pubsub?token=YOUR_SECRET"
+
 gcloud pubsub subscriptions create stats-user-events-sub \
   --topic=user-events \
+  --push-endpoint="$PUSH_ENDPOINT" \
   --ack-deadline=60 \
   --message-retention-duration=7d
 
-# Deck events
 gcloud pubsub subscriptions create stats-deck-events-sub \
   --topic=deck-events \
+  --push-endpoint="$PUSH_ENDPOINT" \
   --ack-deadline=60 \
   --message-retention-duration=7d
 
-# Study events (volume cao nhất)
 gcloud pubsub subscriptions create stats-study-events-sub \
   --topic=study-events \
+  --push-endpoint="$PUSH_ENDPOINT" \
   --ack-deadline=60 \
   --message-retention-duration=7d
 ```
 
-> **`--ack-deadline=60`**: Service có 60 giây để xử lý mỗi message trước khi Pub/Sub redeliver. Tăng lên nếu DB thường bị slow.
+> **`--ack-deadline=60`**: Nếu stats-service không trả về response trong 60 giây, Pub/Sub coi là NACK và retry. Tăng lên nếu DB thường chậm.
 
-#### IAM permissions
+> **`?token=YOUR_SECRET`**: Set giá trị này trùng với `PUBSUB_PUSH_SECRET` trong env của stats-service.
 
-Stats-service cần role `roles/pubsub.subscriber` trên project:
+#### IAM — cho phép Pub/Sub gọi stats-service (Cloud Run)
+
+Nếu stats-service deploy trên Cloud Run với authentication bật, cần cấp quyền cho Pub/Sub service account:
 
 ```bash
-# Nếu chạy trên Cloud Run với service account riêng
-gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
-  --member="serviceAccount:stats-service@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
-  --role="roles/pubsub.subscriber"
+# Lấy Pub/Sub service account của project
+PROJECT_NUMBER=$(gcloud projects describe YOUR_PROJECT_ID --format='value(projectNumber)')
+PUBSUB_SA="service-${PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com"
 
-# Publisher services (auth/deck/study) cần role publisher
+# Cấp quyền invoke Cloud Run
+gcloud run services add-iam-policy-binding stats-service \
+  --region=YOUR_REGION \
+  --member="serviceAccount:$PUBSUB_SA" \
+  --role="roles/run.invoker"
+```
+
+#### IAM — publisher services
+
+```bash
+# auth-service, deck-service, study-service cần publish vào topics
 gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
   --member="serviceAccount:auth-service@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/pubsub.publisher"
+
+gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+  --member="serviceAccount:deck-service@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/pubsub.publisher"
+
+gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+  --member="serviceAccount:study-service@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/pubsub.publisher"
 ```
 
 ---
 
-### 2. Local Development — Pub/Sub Emulator
+### 2. Push Message Format
 
-Không cần kết nối GCP thật khi dev local. Dùng Pub/Sub emulator:
+Khi Pub/Sub gọi endpoint, body có dạng:
 
-#### Cài đặt
-
-```bash
-gcloud components install pubsub-emulator
+```json
+{
+  "message": {
+    "data": "<base64-encoded bytes>",
+    "messageId": "1234567890",
+    "publishTime": "2026-05-12T10:00:00Z",
+    "attributes": {}
+  },
+  "subscription": "projects/my-project/subscriptions/stats-study-events-sub"
+}
 ```
 
-Hoặc dùng Docker:
+`message.data` là base64 của JSON `events.Envelope`:
 
-```bash
-docker run --rm -p 8085:8085 \
-  google/cloud-sdk:latest \
-  gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+```json
+{
+  "event_type": "card.reviewed",
+  "data": { "user_id": "...", "rating": 4, ... }
+}
 ```
 
-#### Chạy emulator và set env
+Stats-service tự decode base64 → unmarshal envelope → dispatch theo `event_type`.
+
+---
+
+### 3. Local Development
+
+Pub/Sub push yêu cầu URL công khai (HTTPS). Có hai lựa chọn khi dev local:
+
+#### Lựa chọn A — ngrok (đơn giản nhất)
+
+```bash
+# Cài ngrok: https://ngrok.com/download
+ngrok http 8084
+# ngrok sẽ in ra: Forwarding https://abc123.ngrok.io -> localhost:8084
+```
+
+Dùng URL ngrok để tạo push subscription trên GCP:
+
+```bash
+gcloud pubsub subscriptions modify-push-config stats-study-events-sub \
+  --push-endpoint="https://abc123.ngrok.io/internal/pubsub?token=dev-secret"
+```
+
+#### Lựa chọn B — Pub/Sub Emulator (không cần internet)
+
+Emulator hỗ trợ push. Chạy emulator và tạo subscription với `pushEndpoint` trỏ vào localhost:
 
 ```bash
 # Terminal 1: chạy emulator
-gcloud beta emulators pubsub start --host-port=localhost:8085
+docker run --rm -p 8085:8085 google/cloud-sdk \
+  gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
 
-# Terminal 2: set env vars để Go SDK tự redirect sang emulator
-export PUBSUB_EMULATOR_HOST=localhost:8085
-export PUBSUB_PROJECT_ID=local-project
-```
-
-Khi `PUBSUB_EMULATOR_HOST` được set, `pubsub.NewClient()` tự động kết nối emulator — không cần thay code.
-
-#### Tạo topics và subscriptions trên emulator
-
-Emulator không giữ state sau khi restart, nên cần tạo lại mỗi lần. Tạo một script setup:
-
-```bash
-#!/bin/bash
-# scripts/setup_pubsub_local.sh
-
-export PUBSUB_EMULATOR_HOST=localhost:8085
+# Terminal 2: tạo topics và push subscriptions
 PROJECT=local-project
+PUSH_URL="http://host.docker.internal:8084/internal/pubsub"
 
 # Tạo topics
 curl -s -X PUT "http://localhost:8085/v1/projects/$PROJECT/topics/user-events"
 curl -s -X PUT "http://localhost:8085/v1/projects/$PROJECT/topics/deck-events"
 curl -s -X PUT "http://localhost:8085/v1/projects/$PROJECT/topics/study-events"
 
-# Tạo subscriptions
+# Tạo push subscriptions
 curl -s -X PUT "http://localhost:8085/v1/projects/$PROJECT/subscriptions/stats-user-events-sub" \
   -H "Content-Type: application/json" \
-  -d '{"topic":"projects/'"$PROJECT"'/topics/user-events","ackDeadlineSeconds":60}'
+  -d "{\"topic\":\"projects/$PROJECT/topics/user-events\",\"pushConfig\":{\"pushEndpoint\":\"$PUSH_URL\"},\"ackDeadlineSeconds\":60}"
 
 curl -s -X PUT "http://localhost:8085/v1/projects/$PROJECT/subscriptions/stats-deck-events-sub" \
   -H "Content-Type: application/json" \
-  -d '{"topic":"projects/'"$PROJECT"'/topics/deck-events","ackDeadlineSeconds":60}'
+  -d "{\"topic\":\"projects/$PROJECT/topics/deck-events\",\"pushConfig\":{\"pushEndpoint\":\"$PUSH_URL\"},\"ackDeadlineSeconds\":60}"
 
 curl -s -X PUT "http://localhost:8085/v1/projects/$PROJECT/subscriptions/stats-study-events-sub" \
   -H "Content-Type: application/json" \
-  -d '{"topic":"projects/'"$PROJECT"'/topics/study-events","ackDeadlineSeconds":60}'
-
-echo "Done. Topics and subscriptions created on emulator."
+  -d "{\"topic\":\"projects/$PROJECT/topics/study-events\",\"pushConfig\":{\"pushEndpoint\":\"$PUSH_URL\"},\"ackDeadlineSeconds\":60}"
 ```
 
-```bash
-chmod +x scripts/setup_pubsub_local.sh
-./scripts/setup_pubsub_local.sh
-```
+#### Test thủ công — gọi push endpoint trực tiếp
 
-#### Publish test message thủ công
+Không cần Pub/Sub emulator, có thể giả lập push bằng `curl`:
 
 ```bash
-# Publish một card.reviewed event để test stats-service
-curl -s -X POST \
-  "http://localhost:8085/v1/projects/local-project/topics/study-events:publish" \
+# Tạo payload: base64-encode event envelope
+PAYLOAD=$(echo -n '{"event_type":"card.reviewed","data":{"user_id":"00000000-0000-0000-0000-000000000001","card_id":"00000000-0000-0000-0000-000000000002","deck_id":"00000000-0000-0000-0000-000000000003","rating":4,"duration_ms":3000,"state_before":"new","state_after":"learning","stability_after":1.5,"is_new_card":true,"review_time":"2026-05-12T10:00:00Z"}}' | base64 -w 0)
+
+curl -s -X POST "http://localhost:8084/internal/pubsub?token=dev-secret" \
   -H "Content-Type: application/json" \
-  -d '{
-    "messages": [{
-      "data": "'"$(echo -n '{
-        "event_type": "card.reviewed",
-        "data": {
-          "user_id": "00000000-0000-0000-0000-000000000001",
-          "card_id": "00000000-0000-0000-0000-000000000002",
-          "deck_id": "00000000-0000-0000-0000-000000000003",
-          "rating": 4,
-          "duration_ms": 3000,
-          "state_before": "new",
-          "state_after": "learning",
-          "stability_after": 1.5,
-          "is_new_card": true,
-          "review_time": "2026-05-12T10:00:00Z"
-        }
-      }' | base64 -w 0)"'"
-    }]
-  }'
+  -d "{
+    \"message\": {
+      \"data\": \"$PAYLOAD\",
+      \"messageId\": \"test-001\",
+      \"publishTime\": \"2026-05-12T10:00:00Z\"
+    },
+    \"subscription\": \"projects/local/subscriptions/stats-study-events-sub\"
+  }"
+
+# Kết quả mong đợi: HTTP 204 No Content
 ```
 
 ---
 
-### 3. Implement Publisher trong các services khác
+### 4. Implement Publisher trong các services khác
 
-Các services (auth, deck, study) cần publish events theo đúng format. Pattern chuẩn để thêm vào:
+Các services (auth, deck, study) cần publish events. Stats-service không cần Pub/Sub SDK — chỉ publishers cần.
 
-#### Tạo publisher helper
+#### Publisher helper
 
 ```go
 // internal/publisher/pubsub.go (trong auth-service, deck-service, study-service)
@@ -555,23 +588,20 @@ func (p *PubSubPublisher) Publish(ctx context.Context, eventType string, payload
     if err != nil {
         return err
     }
-
     env := Envelope{EventType: eventType, Data: data}
     body, err := json.Marshal(env)
     if err != nil {
         return err
     }
-
     result := p.topic.Publish(ctx, &pubsub.Message{Data: body})
-    _, err = result.Get(ctx) // blocks until ack from server
+    _, err = result.Get(ctx)
     return err
 }
 ```
 
-#### Sử dụng trong study-service sau khi user review card
+#### Sử dụng trong study-service
 
 ```go
-// Sau khi lưu revlog thành công, publish event
 err = publisher.Publish(ctx, "card.reviewed", events.CardReviewed{
     UserID:         userID.String(),
     CardID:         cardID.String(),
@@ -585,84 +615,45 @@ err = publisher.Publish(ctx, "card.reviewed", events.CardReviewed{
     ReviewTime:     time.Now().UTC(),
 })
 if err != nil {
-    // Log nhưng không fail request — stats là best-effort
+    // Không fail request — stats là best-effort, eventual consistency
     log.Printf("[publisher] card.reviewed: %v", err)
 }
-```
-
-> **Quan trọng:** Lỗi publish **không nên** fail request của user. Stats là eventually consistent — nếu publish thất bại, event đó bị mất cho đến khi rebuild. Nack chỉ dùng phía consumer để retry.
-
----
-
-### 4. Authentication với GCP
-
-#### Trên Cloud Run (Production)
-
-Cloud Run tự động inject service account credentials. Không cần config thêm gì — `pubsub.NewClient()` dùng [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) tự động.
-
-#### Chạy local với GCP thật (không dùng emulator)
-
-```bash
-# Authenticate với user account (dùng khi dev)
-gcloud auth application-default login
-
-# Hoặc dùng service account key file
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account-key.json"
-```
-
-#### Dùng service account key (CI/CD)
-
-```bash
-# Tạo service account
-gcloud iam service-accounts create stats-service \
-  --display-name="Stats Service"
-
-# Tạo key file
-gcloud iam service-accounts keys create ./stats-service-key.json \
-  --iam-account=stats-service@YOUR_PROJECT_ID.iam.gserviceaccount.com
-
-# Grant permissions
-gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
-  --member="serviceAccount:stats-service@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
-  --role="roles/pubsub.subscriber"
 ```
 
 ---
 
 ### 5. Monitoring & Troubleshooting
 
-#### Xem subscription backlog (số messages chưa xử lý)
+#### Xem subscription backlog
 
 ```bash
 gcloud pubsub subscriptions describe stats-study-events-sub
-# Nhìn vào: numUndeliveredMessages
+# Nhìn vào numUndeliveredMessages
 ```
 
-Hoặc qua Cloud Console: **Pub/Sub → Subscriptions → stats-study-events-sub → Metrics**
+Cloud Console: **Pub/Sub → Subscriptions → Metrics tab**
 
-#### Xem dead-letter messages
-
-Nếu muốn capture messages bị nack quá nhiều lần, tạo dead-letter topic:
+#### Dead-letter topic (capture messages bị nack liên tục)
 
 ```bash
 gcloud pubsub topics create stats-dead-letter
 
-gcloud pubsub subscriptions modify-push-config stats-study-events-sub \
+gcloud pubsub subscriptions update stats-study-events-sub \
   --dead-letter-topic=stats-dead-letter \
   --max-delivery-attempts=5
 ```
 
-#### Seek (replay events từ một thời điểm)
+#### Seek — replay events từ một thời điểm
 
-Dùng khi cần rebuild projections từ một mốc thời gian cụ thể:
+Dùng khi cần rebuild projections từ đầu:
 
 ```bash
-# Seek subscription về 24 giờ trước (replay lại tất cả events trong 24h)
+# Replay lại 24 giờ qua
 gcloud pubsub subscriptions seek stats-study-events-sub \
   --time="2026-05-11T00:00:00Z"
 ```
 
-Sau khi seek, stats-service sẽ nhận lại tất cả messages từ thời điểm đó. Vì queries dùng `ON CONFLICT DO UPDATE`, việc replay sẽ idempotent với hầu hết events.
+Pub/Sub sẽ push lại tất cả messages từ thời điểm đó. Vì queries dùng `ON CONFLICT DO UPDATE`, replay là idempotent với hầu hết events.
 
 ---
 

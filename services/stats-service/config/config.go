@@ -11,10 +11,10 @@ type Config struct {
 	HTTPServerAddress  string
 	AuthServiceAddress string
 
-	PubSubProjectID string
-	UserEventsSub   string
-	DeckEventsSub   string
-	StudyEventsSub  string
+	// PubSubPushSecret is an optional shared secret appended to the push
+	// endpoint URL as ?token=<secret>. Pub/Sub includes it on every request
+	// so the handler can reject traffic from other sources.
+	PubSubPushSecret string
 }
 
 func Load() (Config, error) {
@@ -25,16 +25,10 @@ func Load() (Config, error) {
 
 		AuthServiceAddress: getEnv("AUTH_SERVICE_ADDRESS", "localhost:9090"),
 
-		PubSubProjectID: getEnv("PUBSUB_PROJECT_ID", ""),
-		UserEventsSub:   getEnv("PUBSUB_USER_EVENTS_SUB", "stats-user-events-sub"),
-		DeckEventsSub:   getEnv("PUBSUB_DECK_EVENTS_SUB", "stats-deck-events-sub"),
-		StudyEventsSub:  getEnv("PUBSUB_STUDY_EVENTS_SUB", "stats-study-events-sub"),
+		PubSubPushSecret: getEnv("PUBSUB_PUSH_SECRET", ""),
 	}
 	if cfg.DBUrl == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")
-	}
-	if cfg.PubSubProjectID == "" {
-		return Config{}, fmt.Errorf("PUBSUB_PROJECT_ID is required")
 	}
 	return cfg, nil
 }

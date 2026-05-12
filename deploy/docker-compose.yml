@@ -101,6 +101,28 @@ services:
       - gateway
     restart: unless-stopped
 
+  stats-service:
+    build:
+      context: ..
+      dockerfile: services/stats-service/Dockerfile
+    env_file:
+      - ../services/stats-service/app.env
+    environment:
+      - AUTH_SERVICE_ADDRESS=auth-service:9090
+    depends_on:
+      - auth-service
+    expose:
+      - "8084"
+      - "9094"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.stats.entrypoints=web"
+      - "traefik.http.routers.stats.rule=PathPrefix(`/v1/stats`)"
+      - "traefik.http.services.stats.loadbalancer.server.port=8084"
+    networks:
+      - gateway
+    restart: unless-stopped
+
 networks:
   gateway:
     driver: bridge

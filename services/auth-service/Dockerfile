@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM golang:1.26.2-alpine AS builder
 WORKDIR /workspace
 COPY . .
 WORKDIR /workspace/services/auth-service

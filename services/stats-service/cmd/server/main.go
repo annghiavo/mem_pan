@@ -12,7 +12,6 @@ import (
 	"syscall"
 	"time"
 
-	"cloud.google.com/go/pubsub"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
@@ -58,40 +57,25 @@ func main() {
 	repo := repository.New(database)
 	statsSvc := service.New(repo)
 
-	psClient, err := pubsub.NewClient(context.Background(), cfg.PubSubProjectID)
-	if err != nil {
-		log.Fatal("pubsub client:", err)
-	}
-	defer psClient.Close()
-
 	handler := subscriber.NewHandler(repo)
-	sub := subscriber.New(psClient, handler)
+	pushHandler := subscriber.NewPushHandler(handler, cfg.PubSubPushSecret)
 
-	server := gapi.NewServer(statsSvc, authClient)
+	grpcServer := gapi.NewServer(statsSvc, authClient)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	go runGRPCServer(cfg, grpcServer)
+	go runHTTPServer(cfg, grpcServer, pushHandler)
 
-	go func() {
-		<-quit
-		log.Println("stats-service shutting down")
-		cancel()
-	}()
-
-	go runGRPCServer(cfg, server)
-	go runHTTPGateway(cfg)
-
-	// Subscriber blocks until ctx is cancelled
-	sub.Start(ctx, cfg.UserEventsSub, cfg.DeckEventsSub, cfg.StudyEventsSub)
+	<-quit
+	log.Println("stats-service shutting down")
 }
 
 func runGRPCServer(cfg config.Config, server *gapi.Server) {
-	grpcServer := grpc.NewServer()
-	pb.RegisterStatsServiceServer(grpcServer, server)
-	reflection.Register(grpcServer)
+	s := grpc.NewServer()
+	pb.RegisterStatsServiceServer(s, server)
+	reflection.Register(s)
 
 	lis, err := net.Listen("tcp", cfg.GRPCServerAddress)
 	if err != nil {
@@ -99,18 +83,17 @@ func runGRPCServer(cfg config.Config, server *gapi.Server) {
 	}
 
 	log.Printf("gRPC server listening on %s", cfg.GRPCServerAddress)
-	if err := grpcServer.Serve(lis); err != nil {
+	if err := s.Serve(lis); err != nil {
 		log.Fatalf("gRPC server failed: %v", err)
 	}
 }
 
-func runHTTPGateway(cfg config.Config) {
+func runHTTPServer(cfg config.Config, grpcServer *gapi.Server, pushHandler *subscriber.PushHandler) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	grpcMux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-
 	if err := pb.RegisterStatsServiceHandlerFromEndpoint(ctx, grpcMux, cfg.GRPCServerAddress, opts); err != nil {
 		log.Fatalf("failed to register HTTP gateway: %v", err)
 	}
@@ -120,20 +103,24 @@ func runHTTPGateway(cfg config.Config) {
 		log.Fatalf("swagger fs.Sub: %v", err)
 	}
 
-	httpMux := http.NewServeMux()
-	httpMux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFiles))))
-	httpMux.Handle("/", grpcMux)
+	mux := http.NewServeMux()
+	mux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFiles))))
+	// Pub/Sub push endpoint — registered before "/" so it takes priority.
+	mux.Handle("/internal/pubsub", pushHandler)
+	mux.Handle("/", grpcMux)
 
 	httpServer := &http.Server{
 		Addr:         cfg.HTTPServerAddress,
-		Handler:      httpMux,
+		Handler:      mux,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
 
-	log.Printf("HTTP gateway listening on %s", cfg.HTTPServerAddress)
+	log.Printf("HTTP server listening on %s", cfg.HTTPServerAddress)
+	log.Printf("Pub/Sub push endpoint: POST %s/internal/pubsub", cfg.HTTPServerAddress)
+	log.Printf("Swagger UI: http://%s/swagger/", cfg.HTTPServerAddress)
 	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("HTTP gateway failed: %v", err)
+		log.Fatalf("HTTP server failed: %v", err)
 	}
 }

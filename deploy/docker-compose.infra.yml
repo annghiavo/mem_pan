@@ -1,0 +1,37 @@
+# Run alongside docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.infra.yml up
+#
+# The pubsub-setup container creates the topic and push subscription once
+# both the emulator and stats-service are reachable.
+
+services:
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+    expose:
+      - "8085"
+    networks:
+      - gateway
+    restart: unless-stopped
+
+  pubsub-setup:
+    image: curlimages/curl:latest
+    depends_on:
+      - pubsub-emulator
+      - stats-service
+    environment:
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_TOPIC=mem-pan-events
+      - PUBSUB_SUBSCRIPTION=stats-push-sub
+      - PUBSUB_PUSH_SECRET=dev-secret
+      - STATS_SERVICE_HOST=stats-service:8084
+    volumes:
+      - ./pubsub-setup:/scripts:ro
+    entrypoint: sh /scripts/init.sh
+    networks:
+      - gateway
+    restart: on-failure
+
+networks:
+  gateway:
