@@ -10,7 +10,11 @@ THIRD_PARTY := ../deck-service/third_party
 PB_OUT      := pb
 SWAGGER_OUT := doc/swagger
 
-.PHONY: proto sqlc migrateup migrateup1 migratedown migratedown1 run evans
+COVER_OUT  := coverage.out
+COVER_HTML := coverage.html
+
+.PHONY: proto sqlc migrateup migrateup1 migratedown migratedown1 run evans \
+        test test/cover test/html test/clean
 
 proto:
 	mkdir -p $(PB_OUT) $(SWAGGER_OUT)
@@ -51,3 +55,17 @@ run:
 
 evans:
 	evans --host localhost --port 9092 -r repl
+
+test:
+	go test -v -cover -short ./...
+
+test/cover:
+	go test -v -cover -short ./... -coverprofile=$(COVER_OUT) -covermode=atomic
+	go tool cover -func=$(COVER_OUT)
+
+test/html: test/cover
+	go tool cover -html=$(COVER_OUT) -o $(COVER_HTML)
+	@echo "Coverage report written to $(COVER_HTML)"
+
+test/clean:
+	rm -f $(COVER_OUT) $(COVER_HTML)
