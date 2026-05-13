@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"log"
+
 	"github.com/google/uuid"
 
 	"mem_pan/services/deck-service/internal/db"
 	"mem_pan/services/deck-service/internal/domain"
+	"mem_pan/services/deck-service/internal/publisher"
 	"mem_pan/services/deck-service/internal/repository"
 )
 
@@ -43,17 +46,24 @@ type cardService struct {
 	cardRepo repository.CardRepository
 	noteRepo repository.NoteRepository
 	deckRepo repository.DeckRepository
+	pub      publisher.EventPublisher
 }
 
 func NewCardService(
 	cardRepo repository.CardRepository,
 	noteRepo repository.NoteRepository,
 	deckRepo repository.DeckRepository,
+	pubs ...publisher.EventPublisher,
 ) CardService {
+	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
+	if len(pubs) > 0 {
+		pub = pubs[0]
+	}
 	return &cardService{
 		cardRepo: cardRepo,
 		noteRepo: noteRepo,
 		deckRepo: deckRepo,
+		pub:      pub,
 	}
 }
 
@@ -99,7 +109,7 @@ func (s *cardService) CreateCard(ctx context.Context, p CreateCardParams) (db.Ge
 
 	_ = s.deckRepo.IncrementCardCount(ctx, p.DeckID)
 
-	return db.GetCardByIDRow{
+	result := db.GetCardByIDRow{
 		CardID:       card.CardID,
 		UserID:       card.UserID,
 		DeckID:       card.DeckID,
@@ -111,7 +121,16 @@ func (s *cardService) CreateCard(ctx context.Context, p CreateCardParams) (db.Ge
 		ImageUrl:     note.ImageUrl,
 		LangFront:    note.LangFront,
 		LangBack:     note.LangBack,
-	}, nil
+	}
+	if pubErr := s.pub.PublishCardCreated(ctx, publisher.CardCreatedEvent{
+		CardID:    card.CardID.String(),
+		DeckID:    card.DeckID.String(),
+		UserID:    card.UserID.String(),
+		CreatedAt: card.CreatedAt,
+	}); pubErr != nil {
+		log.Printf("[publisher] card.created: %v", pubErr)
+	}
+	return result, nil
 }
 
 func (s *cardService) BulkCreateCards(ctx context.Context, userID, deckID uuid.UUID, items []CreateCardParams) ([]db.GetCardByIDRow, error) {
@@ -171,6 +190,14 @@ func (s *cardService) BulkCreateCards(ctx context.Context, userID, deckID uuid.U
 			LangFront:    note.LangFront,
 			LangBack:     note.LangBack,
 		})
+		if pubErr := s.pub.PublishCardCreated(ctx, publisher.CardCreatedEvent{
+			CardID:    card.CardID.String(),
+			DeckID:    card.DeckID.String(),
+			UserID:    card.UserID.String(),
+			CreatedAt: card.CreatedAt,
+		}); pubErr != nil {
+			log.Printf("[publisher] card.created: %v", pubErr)
+		}
 	}
 	if len(results) > 0 {
 		for range results {

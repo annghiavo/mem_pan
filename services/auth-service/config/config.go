@@ -16,6 +16,8 @@ type Config struct {
 	VerificationTokenDuration time.Duration
 	ResetTokenDuration        time.Duration
 	CloudinaryURL             string
+	PubSubProjectID           string
+	PubSubTopic               string
 }
 
 func Load() (Config, error) {
@@ -29,6 +31,8 @@ func Load() (Config, error) {
 		VerificationTokenDuration: getDuration("VERIFICATION_TOKEN_DURATION", 24*time.Hour),
 		ResetTokenDuration:        getDuration("RESET_TOKEN_DURATION", 1*time.Hour),
 		CloudinaryURL:             getEnv("CLOUDINARY_URL", ""),
+		PubSubProjectID:           getEnv("PUBSUB_PROJECT_ID", ""),
+		PubSubTopic:               getEnv("PUBSUB_TOPIC", "user-events"),
 	}
 	if cfg.DBUrl == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")

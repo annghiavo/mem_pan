@@ -65,7 +65,12 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	verifyTokenRepo := repository.NewVerificationTokenRepository(db)
-	pub := publisher.NewNoopPublisher()
+	var pub publisher.EventPublisher
+	if cfg.PubSubProjectID != "" {
+		pub = publisher.NewPubSubPublisher(cfg.PubSubProjectID, cfg.PubSubTopic)
+	} else {
+		pub = publisher.NewNoopPublisher()
+	}
 
 	authSvc := service.NewAuthService(
 		userRepo, refreshTokenRepo, verifyTokenRepo,

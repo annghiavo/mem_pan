@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"sort"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"mem_pan/services/study-service/internal/deckclient"
 	"mem_pan/services/study-service/internal/domain"
 	"mem_pan/services/study-service/internal/fsrs"
+	"mem_pan/services/study-service/internal/publisher"
 	"mem_pan/services/study-service/internal/repository"
 )
 
@@ -81,6 +83,7 @@ type studyService struct {
 	revlogRepo      repository.RevlogRepository
 	weightsRepo     repository.FsrsWeightsRepository
 	deckClient      deckclient.Client
+	pub             publisher.EventPublisher
 }
 
 func NewStudyService(
@@ -90,7 +93,12 @@ func NewStudyService(
 	revlogRepo repository.RevlogRepository,
 	weightsRepo repository.FsrsWeightsRepository,
 	deckClient deckclient.Client,
+	pubs ...publisher.EventPublisher,
 ) StudyService {
+	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
+	if len(pubs) > 0 {
+		pub = pubs[0]
+	}
 	return &studyService{
 		userCardRepo:    userCardRepo,
 		sessionRepo:     sessionRepo,
@@ -98,6 +106,7 @@ func NewStudyService(
 		revlogRepo:      revlogRepo,
 		weightsRepo:     weightsRepo,
 		deckClient:      deckClient,
+		pub:             pub,
 	}
 }
 
@@ -312,6 +321,21 @@ func (s *studyService) ReviewCard(ctx context.Context, p ReviewCardParams) (db.U
 	_, err = s.sessionRepo.IncrementCompletedCards(ctx, p.SessionID)
 	if err != nil {
 		return db.UserCard{}, err
+	}
+
+	if pubErr := s.pub.PublishCardReviewed(ctx, publisher.CardReviewedEvent{
+		UserID:         p.UserID.String(),
+		CardID:         uc.CardID.String(),
+		DeckID:         uc.DeckID.String(),
+		Rating:         p.Rating,
+		DurationMs:     int64(p.DurationMS),
+		StateBefore:    uc.State,
+		StateAfter:     updatedUC.State,
+		StabilityAfter: updatedUC.Stability,
+		IsNewCard:      uc.State == string(db.CardStateNew),
+		ReviewTime:     now,
+	}); pubErr != nil {
+		log.Printf("[publisher] card.reviewed: %v", pubErr)
 	}
 
 	return updatedUC, nil

@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/google/uuid"
 
 	"mem_pan/services/deck-service/internal/db"
 	"mem_pan/services/deck-service/internal/domain"
+	"mem_pan/services/deck-service/internal/publisher"
 	"mem_pan/services/deck-service/internal/repository"
 )
 
@@ -72,19 +74,36 @@ type DeckService interface {
 type deckService struct {
 	deckRepo repository.DeckRepository
 	cardRepo repository.CardRepository
+	pub      publisher.EventPublisher
 }
 
-func NewDeckService(deckRepo repository.DeckRepository, cardRepo repository.CardRepository) DeckService {
-	return &deckService{deckRepo: deckRepo, cardRepo: cardRepo}
+func NewDeckService(deckRepo repository.DeckRepository, cardRepo repository.CardRepository, pubs ...publisher.EventPublisher) DeckService {
+	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
+	if len(pubs) > 0 {
+		pub = pubs[0]
+	}
+	return &deckService{deckRepo: deckRepo, cardRepo: cardRepo, pub: pub}
 }
 
 func (s *deckService) CreateDeck(ctx context.Context, p CreateDeckParams) (db.Deck, error) {
-	return s.deckRepo.CreateDeck(ctx, db.CreateDeckParams{
+	deck, err := s.deckRepo.CreateDeck(ctx, db.CreateDeckParams{
 		UserID:      p.UserID,
 		Name:        p.Name,
 		Description: nullStr(p.Description),
 		IsPublic:    p.IsPublic,
 	})
+	if err != nil {
+		return db.Deck{}, err
+	}
+	if pubErr := s.pub.PublishDeckCreated(ctx, publisher.DeckCreatedEvent{
+		DeckID:    deck.DeckID.String(),
+		UserID:    deck.UserID.String(),
+		DeckName:  deck.Name,
+		CreatedAt: deck.CreatedAt,
+	}); pubErr != nil {
+		log.Printf("[publisher] deck.created: %v", pubErr)
+	}
+	return deck, nil
 }
 
 func (s *deckService) GetDeck(ctx context.Context, deckID, userID uuid.UUID, publicOK bool) (db.Deck, error) {
@@ -148,12 +167,23 @@ func (s *deckService) UpdateDeck(ctx context.Context, p UpdateDeckParams) (db.De
 	if deck.UserID != p.UserID {
 		return db.Deck{}, domain.ErrForbidden
 	}
-	return s.deckRepo.UpdateDeck(ctx, db.UpdateDeckParams{
+	updated, err := s.deckRepo.UpdateDeck(ctx, db.UpdateDeckParams{
 		DeckID:      p.DeckID,
 		UserID:      p.UserID,
 		Name:        nullStr(p.Name),
 		Description: nullStr(p.Description),
 	})
+	if err != nil {
+		return db.Deck{}, err
+	}
+	if pubErr := s.pub.PublishDeckUpdated(ctx, publisher.DeckUpdatedEvent{
+		DeckID:   updated.DeckID.String(),
+		UserID:   updated.UserID.String(),
+		DeckName: updated.Name,
+	}); pubErr != nil {
+		log.Printf("[publisher] deck.updated: %v", pubErr)
+	}
+	return updated, nil
 }
 
 func (s *deckService) DeleteDeck(ctx context.Context, deckID, userID uuid.UUID) error {

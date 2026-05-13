@@ -11,6 +11,8 @@ type Config struct {
 	HTTPServerAddress   string
 	AuthServiceAddress  string
 	CloudinaryURL       string
+	PubSubProjectID     string
+	PubSubTopic         string
 }
 
 func Load() (Config, error) {
@@ -20,6 +22,8 @@ func Load() (Config, error) {
 		HTTPServerAddress:  getEnv("HTTP_SERVER_ADDRESS", ":8081"),
 		AuthServiceAddress: getEnv("AUTH_SERVICE_ADDRESS", "localhost:9090"),
 		CloudinaryURL:      os.Getenv("CLOUDINARY_URL"),
+		PubSubProjectID:    getEnv("PUBSUB_PROJECT_ID", ""),
+		PubSubTopic:        getEnv("PUBSUB_TOPIC", "deck-events"),
 	}
 	if cfg.DBUrl == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")

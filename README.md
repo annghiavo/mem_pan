@@ -8,3 +8,7 @@ CSV/TSV — two-column rows, auto-detected separator, blank rows skipped, BOM-sa
                                                                                                
   The note about the header row becoming a card is worth calling out — it's a common surprise  
   with CSV imports.
+
+  check docker disk usage:
+  docker system df
+  docker system prune -a -f

@@ -15,12 +15,44 @@ services:
       - gateway
     restart: unless-stopped
 
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+    expose:
+      - "8085"
+    networks:
+      - gateway
+    restart: unless-stopped
+
+  pubsub-setup:
+    image: curlimages/curl:latest
+    depends_on:
+      - pubsub-emulator
+      - stats-service
+    environment:
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_PUSH_SECRET=dev-secret
+      - STATS_SERVICE_HOST=stats-service:8084
+    volumes:
+      - ./pubsub-setup:/scripts:ro
+    entrypoint: sh /scripts/init.sh
+    networks:
+      - gateway
+    restart: on-failure
+
   auth-service:
     build:
       context: ..
       dockerfile: services/auth-service/Dockerfile
     env_file:
       - ../services/auth-service/app.env
+    environment:
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_TOPIC=user-events
+    depends_on:
+      - pubsub-emulator
     expose:
       - "8080"
       - "9090"
@@ -41,8 +73,12 @@ services:
       - ../services/deck-service/app.env
     environment:
       - AUTH_SERVICE_ADDRESS=auth-service:9090
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_TOPIC=deck-events
     depends_on:
       - auth-service
+      - pubsub-emulator
     expose:
       - "8081"
       - "9091"
@@ -64,9 +100,13 @@ services:
     environment:
       - AUTH_SERVICE_ADDRESS=auth-service:9090
       - DECK_SERVICE_ADDRESS=deck-service:9091
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_TOPIC=study-events
     depends_on:
       - auth-service
       - deck-service
+      - pubsub-emulator
     expose:
       - "8082"
       - "9092"
@@ -78,7 +118,7 @@ services:
     networks:
       - gateway
     restart: unless-stopped
-    
+
   admin-service:
     build:
       context: ..

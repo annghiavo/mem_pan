@@ -22,6 +22,7 @@ import (
 	"mem_pan/services/deck-service/doc"
 	"mem_pan/services/deck-service/internal/authclient"
 	"mem_pan/services/deck-service/internal/gapi"
+	"mem_pan/services/deck-service/internal/publisher"
 	"mem_pan/services/deck-service/internal/repository"
 	"mem_pan/services/deck-service/internal/service"
 	"mem_pan/services/deck-service/internal/uploader"
@@ -60,9 +61,16 @@ func main() {
 	cardRepo := repository.NewCardRepository(database)
 	folderDeckRepo := repository.NewFolderDeckRepository(database)
 
+	var pub publisher.EventPublisher
+	if cfg.PubSubProjectID != "" {
+		pub = publisher.NewPubSubPublisher(cfg.PubSubProjectID, cfg.PubSubTopic)
+	} else {
+		pub = publisher.NewNoopPublisher()
+	}
+
 	folderSvc := service.NewFolderService(folderRepo, folderDeckRepo, deckRepo)
-	deckSvc := service.NewDeckService(deckRepo, cardRepo)
-	cardSvc := service.NewCardService(cardRepo, noteRepo, deckRepo)
+	deckSvc := service.NewDeckService(deckRepo, cardRepo, pub)
+	cardSvc := service.NewCardService(cardRepo, noteRepo, deckRepo, pub)
 
 	var imageUploader uploader.ImageUploader
 	if cfg.CloudinaryURL != "" {

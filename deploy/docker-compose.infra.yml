@@ -1,8 +1,9 @@
 # Run alongside docker-compose.yml:
 #   docker compose -f docker-compose.yml -f docker-compose.infra.yml up
 #
-# The pubsub-setup container creates the topic and push subscription once
-# both the emulator and stats-service are reachable.
+# This file adds the Pub/Sub emulator and wires up the push subscriptions.
+# It also injects PUBSUB_* env vars into the publisher services so they
+# can reach the emulator.
 
 services:
   pubsub-emulator:
@@ -22,8 +23,6 @@ services:
     environment:
       - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
       - PUBSUB_PROJECT_ID=local-dev
-      - PUBSUB_TOPIC=mem-pan-events
-      - PUBSUB_SUBSCRIPTION=stats-push-sub
       - PUBSUB_PUSH_SECRET=dev-secret
       - STATS_SERVICE_HOST=stats-service:8084
     volumes:
@@ -32,6 +31,31 @@ services:
     networks:
       - gateway
     restart: on-failure
+
+  # Override publisher services to inject Pub/Sub emulator config.
+  auth-service:
+    depends_on:
+      - pubsub-emulator
+    environment:
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_TOPIC=user-events
+
+  deck-service:
+    depends_on:
+      - pubsub-emulator
+    environment:
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_TOPIC=deck-events
+
+  study-service:
+    depends_on:
+      - pubsub-emulator
+    environment:
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_TOPIC=study-events
 
 networks:
   gateway:

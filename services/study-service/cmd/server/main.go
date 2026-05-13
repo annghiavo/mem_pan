@@ -25,6 +25,7 @@ import (
 	"mem_pan/services/study-service/internal/authclient"
 	"mem_pan/services/study-service/internal/deckclient"
 	"mem_pan/services/study-service/internal/gapi"
+	"mem_pan/services/study-service/internal/publisher"
 	"mem_pan/services/study-service/internal/repository"
 	"mem_pan/services/study-service/internal/service"
 	"mem_pan/services/study-service/pb"
@@ -69,6 +70,13 @@ func main() {
 	weightsRepo := repository.NewFsrsWeightsRepository(database)
 	deckSettingsRepo := repository.NewDeckSettingsRepository(database)
 
+	var pub publisher.EventPublisher
+	if cfg.PubSubProjectID != "" {
+		pub = publisher.NewPubSubPublisher(cfg.PubSubProjectID, cfg.PubSubTopic)
+	} else {
+		pub = publisher.NewNoopPublisher()
+	}
+
 	studySvc := service.NewStudyService(
 		userCardRepo,
 		sessionRepo,
@@ -76,6 +84,7 @@ func main() {
 		revlogRepo,
 		weightsRepo,
 		deckClient,
+		pub,
 	)
 	settingsSvc := service.NewSettingsService(deckSettingsRepo)
 
