@@ -5,6 +5,7 @@ use (
 	./services/admin-service
 	./services/auth-service
 	./services/deck-service
+	./services/notification-service
 	./services/stats-service
 	./services/study-service
 	./services/worker-service

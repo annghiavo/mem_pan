@@ -29,11 +29,13 @@ services:
     depends_on:
       - pubsub-emulator
       - stats-service
+      - notification-service
     environment:
       - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
       - PUBSUB_PROJECT_ID=local-dev
       - PUBSUB_PUSH_SECRET=dev-secret
       - STATS_SERVICE_HOST=stats-service:8084
+      - NOTIFICATION_SERVICE_HOST=notification-service:8085
     volumes:
       - ./pubsub-setup:/scripts:ro
     entrypoint: sh /scripts/init.sh
@@ -159,6 +161,30 @@ services:
       - "traefik.http.routers.stats.entrypoints=web"
       - "traefik.http.routers.stats.rule=PathPrefix(`/v1/stats`)"
       - "traefik.http.services.stats.loadbalancer.server.port=8084"
+    networks:
+      - gateway
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: ..
+      dockerfile: services/notification-service/Dockerfile
+    env_file:
+      - ../services/notification-service/app.env
+    environment:
+      - AUTH_SERVICE_ADDRESS=auth-service:9090
+      - PUBSUB_PUSH_SECRET=dev-secret
+    depends_on:
+      - auth-service
+      - pubsub-emulator
+    expose:
+      - "8085"
+      - "9095"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.notification.entrypoints=web"
+      - "traefik.http.routers.notification.rule=PathPrefix(`/v1/notifications`)"
+      - "traefik.http.services.notification.loadbalancer.server.port=8085"
     networks:
       - gateway
     restart: unless-stopped

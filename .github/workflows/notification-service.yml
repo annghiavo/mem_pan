@@ -1,0 +1,69 @@
+name: notification-service
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/notification-service/**'
+      - 'go.work'
+      - 'go.work.sum'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'services/notification-service/**'
+      - 'go.work'
+      - 'go.work.sum'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: notification-service
+    defaults:
+      run:
+        working-directory: services/notification-service
+    env:
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.26'
+          cache-dependency-path: services/notification-service/go.sum
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Resolve DB URL
+        run: |
+          DB_URL="${DIRECT_URL:-$DATABASE_URL}"
+          if [ -n "$DB_URL" ]; then
+            echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
+            echo "HAS_DB_URL=true" >> "$GITHUB_ENV"
+          else
+            echo "HAS_DB_URL=false" >> "$GITHUB_ENV"
+            echo "No database secret found. Migration step will be skipped."
+          fi
+
+      - name: Install golang-migrate
+        if: env.HAS_DB_URL == 'true'
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.19.1/migrate.linux-amd64.tar.gz | tar xvz
+          sudo mv migrate /usr/local/bin/migrate
+
+      - name: Run migrations
+        if: env.HAS_DB_URL == 'true'
+        run: make migrateup
+
+      - name: Test
+        run: make test/cover
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: services/notification-service/coverage.out
+          retention-days: 7

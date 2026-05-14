@@ -23,3 +23,6 @@ api.cover.out
 .vscode/
 .idea/
 .DS_Store
+
+# Firebase service account credentials
+services/notification-service/*-firebase-adminsdk-*.json
