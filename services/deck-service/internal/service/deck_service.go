@@ -96,10 +96,13 @@ func (s *deckService) CreateDeck(ctx context.Context, p CreateDeckParams) (db.De
 		return db.Deck{}, err
 	}
 	if pubErr := s.pub.PublishDeckCreated(ctx, publisher.DeckCreatedEvent{
-		DeckID:    deck.DeckID.String(),
-		UserID:    deck.UserID.String(),
-		DeckName:  deck.Name,
-		CreatedAt: deck.CreatedAt,
+		DeckID:      deck.DeckID.String(),
+		UserID:      deck.UserID.String(),
+		DeckName:    deck.Name,
+		Description: nullStrVal(deck.Description),
+		IsPublic:    deck.IsPublic,
+		CardCount:   deck.CardCount,
+		CreatedAt:   deck.CreatedAt,
 	}); pubErr != nil {
 		log.Printf("[publisher] deck.created: %v", pubErr)
 	}
@@ -177,9 +180,13 @@ func (s *deckService) UpdateDeck(ctx context.Context, p UpdateDeckParams) (db.De
 		return db.Deck{}, err
 	}
 	if pubErr := s.pub.PublishDeckUpdated(ctx, publisher.DeckUpdatedEvent{
-		DeckID:   updated.DeckID.String(),
-		UserID:   updated.UserID.String(),
-		DeckName: updated.Name,
+		DeckID:      updated.DeckID.String(),
+		UserID:      updated.UserID.String(),
+		DeckName:    updated.Name,
+		Description: nullStrVal(updated.Description),
+		IsPublic:    updated.IsPublic,
+		CardCount:   updated.CardCount,
+		UpdatedAt:   updated.UpdatedAt,
 	}); pubErr != nil {
 		log.Printf("[publisher] deck.updated: %v", pubErr)
 	}
@@ -194,10 +201,19 @@ func (s *deckService) DeleteDeck(ctx context.Context, deckID, userID uuid.UUID) 
 	if deck.UserID != userID {
 		return domain.ErrForbidden
 	}
-	return s.deckRepo.SoftDeleteDeck(ctx, db.SoftDeleteDeckParams{
+	if err := s.deckRepo.SoftDeleteDeck(ctx, db.SoftDeleteDeckParams{
 		DeckID: deckID,
 		UserID: userID,
-	})
+	}); err != nil {
+		return err
+	}
+	if pubErr := s.pub.PublishDeckDeleted(ctx, publisher.DeckDeletedEvent{
+		DeckID: deckID.String(),
+		UserID: userID.String(),
+	}); pubErr != nil {
+		log.Printf("[publisher] deck.deleted: %v", pubErr)
+	}
+	return nil
 }
 
 func (s *deckService) UpdateSettings(ctx context.Context, deckID, userID uuid.UUID, settings DeckSettings) (db.Deck, error) {
@@ -226,11 +242,26 @@ func (s *deckService) UpdateVisibility(ctx context.Context, deckID, userID uuid.
 	if deck.UserID != userID {
 		return db.Deck{}, domain.ErrForbidden
 	}
-	return s.deckRepo.UpdateDeckVisibility(ctx, db.UpdateDeckVisibilityParams{
+	updated, err := s.deckRepo.UpdateDeckVisibility(ctx, db.UpdateDeckVisibilityParams{
 		DeckID:   deckID,
 		UserID:   userID,
 		IsPublic: isPublic,
 	})
+	if err != nil {
+		return db.Deck{}, err
+	}
+	if pubErr := s.pub.PublishDeckUpdated(ctx, publisher.DeckUpdatedEvent{
+		DeckID:      updated.DeckID.String(),
+		UserID:      updated.UserID.String(),
+		DeckName:    updated.Name,
+		Description: nullStrVal(updated.Description),
+		IsPublic:    updated.IsPublic,
+		CardCount:   updated.CardCount,
+		UpdatedAt:   updated.UpdatedAt,
+	}); pubErr != nil {
+		log.Printf("[publisher] deck.updated (visibility): %v", pubErr)
+	}
+	return updated, nil
 }
 
 func (s *deckService) CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uuid.UUID) (db.Deck, error) {

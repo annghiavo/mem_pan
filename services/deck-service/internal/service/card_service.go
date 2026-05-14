@@ -123,10 +123,13 @@ func (s *cardService) CreateCard(ctx context.Context, p CreateCardParams) (db.Ge
 		LangBack:     note.LangBack,
 	}
 	if pubErr := s.pub.PublishCardCreated(ctx, publisher.CardCreatedEvent{
-		CardID:    card.CardID.String(),
-		DeckID:    card.DeckID.String(),
-		UserID:    card.UserID.String(),
-		CreatedAt: card.CreatedAt,
+		CardID:       card.CardID.String(),
+		DeckID:       card.DeckID.String(),
+		UserID:       card.UserID.String(),
+		NoteID:       card.NoteID.String(),
+		ContentFront: note.ContentFront,
+		ContentBack:  note.ContentBack,
+		CreatedAt:    card.CreatedAt,
 	}); pubErr != nil {
 		log.Printf("[publisher] card.created: %v", pubErr)
 	}
@@ -191,10 +194,13 @@ func (s *cardService) BulkCreateCards(ctx context.Context, userID, deckID uuid.U
 			LangBack:     note.LangBack,
 		})
 		if pubErr := s.pub.PublishCardCreated(ctx, publisher.CardCreatedEvent{
-			CardID:    card.CardID.String(),
-			DeckID:    card.DeckID.String(),
-			UserID:    card.UserID.String(),
-			CreatedAt: card.CreatedAt,
+			CardID:       card.CardID.String(),
+			DeckID:       card.DeckID.String(),
+			UserID:       card.UserID.String(),
+			NoteID:       card.NoteID.String(),
+			ContentFront: note.ContentFront,
+			ContentBack:  note.ContentBack,
+			CreatedAt:    card.CreatedAt,
 		}); pubErr != nil {
 			log.Printf("[publisher] card.created: %v", pubErr)
 		}
@@ -255,7 +261,7 @@ func (s *cardService) UpdateCard(ctx context.Context, p UpdateCardParams) (db.Ge
 		return db.GetCardByIDRow{}, err
 	}
 
-	return db.GetCardByIDRow{
+	result := db.GetCardByIDRow{
 		CardID:       card.CardID,
 		UserID:       card.UserID,
 		DeckID:       card.DeckID,
@@ -267,7 +273,18 @@ func (s *cardService) UpdateCard(ctx context.Context, p UpdateCardParams) (db.Ge
 		ImageUrl:     updated.ImageUrl,
 		LangFront:    updated.LangFront,
 		LangBack:     updated.LangBack,
-	}, nil
+	}
+	if pubErr := s.pub.PublishCardUpdated(ctx, publisher.CardUpdatedEvent{
+		CardID:       card.CardID.String(),
+		DeckID:       card.DeckID.String(),
+		UserID:       card.UserID.String(),
+		NoteID:       card.NoteID.String(),
+		ContentFront: updated.ContentFront,
+		ContentBack:  updated.ContentBack,
+	}); pubErr != nil {
+		log.Printf("[publisher] card.updated: %v", pubErr)
+	}
+	return result, nil
 }
 
 func (s *cardService) DeleteCard(ctx context.Context, cardID, userID uuid.UUID) error {
@@ -289,6 +306,13 @@ func (s *cardService) DeleteCard(ctx context.Context, cardID, userID uuid.UUID) 
 		UserID: userID,
 	})
 	_ = s.deckRepo.DecrementCardCount(ctx, card.DeckID)
+	if pubErr := s.pub.PublishCardDeleted(ctx, publisher.CardDeletedEvent{
+		CardID: cardID.String(),
+		DeckID: card.DeckID.String(),
+		UserID: userID.String(),
+	}); pubErr != nil {
+		log.Printf("[publisher] card.deleted: %v", pubErr)
+	}
 	return nil
 }
 

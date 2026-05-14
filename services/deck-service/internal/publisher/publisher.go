@@ -13,29 +13,86 @@ import (
 )
 
 type DeckCreatedEvent struct {
-	DeckID    string    `json:"deck_id"`
-	UserID    string    `json:"user_id"`
-	DeckName  string    `json:"deck_name"`
-	CreatedAt time.Time `json:"created_at"`
+	DeckID      string    `json:"deck_id"`
+	UserID      string    `json:"user_id"`
+	DeckName    string    `json:"deck_name"`
+	Description string    `json:"description"`
+	IsPublic    bool      `json:"is_public"`
+	CardCount   int32     `json:"card_count"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type DeckUpdatedEvent struct {
-	DeckID   string `json:"deck_id"`
+	DeckID      string    `json:"deck_id"`
+	UserID      string    `json:"user_id"`
+	DeckName    string    `json:"deck_name"`
+	Description string    `json:"description"`
+	IsPublic    bool      `json:"is_public"`
+	CardCount   int32     `json:"card_count"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type DeckDeletedEvent struct {
+	DeckID string `json:"deck_id"`
+	UserID string `json:"user_id"`
+}
+
+type FolderCreatedEvent struct {
+	FolderID    string    `json:"folder_id"`
+	UserID      string    `json:"user_id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+type FolderUpdatedEvent struct {
+	FolderID    string    `json:"folder_id"`
+	UserID      string    `json:"user_id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type FolderDeletedEvent struct {
+	FolderID string `json:"folder_id"`
 	UserID   string `json:"user_id"`
-	DeckName string `json:"deck_name"`
 }
 
 type CardCreatedEvent struct {
-	CardID    string    `json:"card_id"`
-	DeckID    string    `json:"deck_id"`
-	UserID    string    `json:"user_id"`
-	CreatedAt time.Time `json:"created_at"`
+	CardID       string    `json:"card_id"`
+	DeckID       string    `json:"deck_id"`
+	UserID       string    `json:"user_id"`
+	NoteID       string    `json:"note_id"`
+	ContentFront string    `json:"content_front"`
+	ContentBack  string    `json:"content_back"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
+type CardUpdatedEvent struct {
+	CardID       string `json:"card_id"`
+	DeckID       string `json:"deck_id"`
+	UserID       string `json:"user_id"`
+	NoteID       string `json:"note_id"`
+	ContentFront string `json:"content_front"`
+	ContentBack  string `json:"content_back"`
+}
+
+type CardDeletedEvent struct {
+	CardID string `json:"card_id"`
+	DeckID string `json:"deck_id"`
+	UserID string `json:"user_id"`
 }
 
 type EventPublisher interface {
 	PublishDeckCreated(ctx context.Context, event DeckCreatedEvent) error
 	PublishDeckUpdated(ctx context.Context, event DeckUpdatedEvent) error
+	PublishDeckDeleted(ctx context.Context, event DeckDeletedEvent) error
+	PublishFolderCreated(ctx context.Context, event FolderCreatedEvent) error
+	PublishFolderUpdated(ctx context.Context, event FolderUpdatedEvent) error
+	PublishFolderDeleted(ctx context.Context, event FolderDeletedEvent) error
 	PublishCardCreated(ctx context.Context, event CardCreatedEvent) error
+	PublishCardUpdated(ctx context.Context, event CardUpdatedEvent) error
+	PublishCardDeleted(ctx context.Context, event CardDeletedEvent) error
 }
 
 // noopPublisher logs events without sending them anywhere.
@@ -43,22 +100,38 @@ type noopPublisher struct{}
 
 func NewNoopPublisher() EventPublisher { return &noopPublisher{} }
 
-func (p *noopPublisher) PublishDeckCreated(_ context.Context, event DeckCreatedEvent) error {
+func (p *noopPublisher) logEvent(kind string, event any) error {
 	b, _ := json.Marshal(event)
-	log.Printf("[event] deck.created: %s", b)
+	log.Printf("[event] %s: %s", kind, b)
 	return nil
 }
 
-func (p *noopPublisher) PublishDeckUpdated(_ context.Context, event DeckUpdatedEvent) error {
-	b, _ := json.Marshal(event)
-	log.Printf("[event] deck.updated: %s", b)
-	return nil
+func (p *noopPublisher) PublishDeckCreated(_ context.Context, e DeckCreatedEvent) error {
+	return p.logEvent("deck.created", e)
 }
-
-func (p *noopPublisher) PublishCardCreated(_ context.Context, event CardCreatedEvent) error {
-	b, _ := json.Marshal(event)
-	log.Printf("[event] card.created: %s", b)
-	return nil
+func (p *noopPublisher) PublishDeckUpdated(_ context.Context, e DeckUpdatedEvent) error {
+	return p.logEvent("deck.updated", e)
+}
+func (p *noopPublisher) PublishDeckDeleted(_ context.Context, e DeckDeletedEvent) error {
+	return p.logEvent("deck.deleted", e)
+}
+func (p *noopPublisher) PublishFolderCreated(_ context.Context, e FolderCreatedEvent) error {
+	return p.logEvent("folder.created", e)
+}
+func (p *noopPublisher) PublishFolderUpdated(_ context.Context, e FolderUpdatedEvent) error {
+	return p.logEvent("folder.updated", e)
+}
+func (p *noopPublisher) PublishFolderDeleted(_ context.Context, e FolderDeletedEvent) error {
+	return p.logEvent("folder.deleted", e)
+}
+func (p *noopPublisher) PublishCardCreated(_ context.Context, e CardCreatedEvent) error {
+	return p.logEvent("card.created", e)
+}
+func (p *noopPublisher) PublishCardUpdated(_ context.Context, e CardUpdatedEvent) error {
+	return p.logEvent("card.updated", e)
+}
+func (p *noopPublisher) PublishCardDeleted(_ context.Context, e CardDeletedEvent) error {
+	return p.logEvent("card.deleted", e)
 }
 
 type envelope struct {
@@ -116,14 +189,30 @@ func (p *httpPublisher) publish(ctx context.Context, eventType string, payload a
 	return nil
 }
 
-func (p *httpPublisher) PublishDeckCreated(ctx context.Context, event DeckCreatedEvent) error {
-	return p.publish(ctx, "deck.created", event)
+func (p *httpPublisher) PublishDeckCreated(ctx context.Context, e DeckCreatedEvent) error {
+	return p.publish(ctx, "deck.created", e)
 }
-
-func (p *httpPublisher) PublishDeckUpdated(ctx context.Context, event DeckUpdatedEvent) error {
-	return p.publish(ctx, "deck.updated", event)
+func (p *httpPublisher) PublishDeckUpdated(ctx context.Context, e DeckUpdatedEvent) error {
+	return p.publish(ctx, "deck.updated", e)
 }
-
-func (p *httpPublisher) PublishCardCreated(ctx context.Context, event CardCreatedEvent) error {
-	return p.publish(ctx, "card.created", event)
+func (p *httpPublisher) PublishDeckDeleted(ctx context.Context, e DeckDeletedEvent) error {
+	return p.publish(ctx, "deck.deleted", e)
+}
+func (p *httpPublisher) PublishFolderCreated(ctx context.Context, e FolderCreatedEvent) error {
+	return p.publish(ctx, "folder.created", e)
+}
+func (p *httpPublisher) PublishFolderUpdated(ctx context.Context, e FolderUpdatedEvent) error {
+	return p.publish(ctx, "folder.updated", e)
+}
+func (p *httpPublisher) PublishFolderDeleted(ctx context.Context, e FolderDeletedEvent) error {
+	return p.publish(ctx, "folder.deleted", e)
+}
+func (p *httpPublisher) PublishCardCreated(ctx context.Context, e CardCreatedEvent) error {
+	return p.publish(ctx, "card.created", e)
+}
+func (p *httpPublisher) PublishCardUpdated(ctx context.Context, e CardUpdatedEvent) error {
+	return p.publish(ctx, "card.updated", e)
+}
+func (p *httpPublisher) PublishCardDeleted(ctx context.Context, e CardDeletedEvent) error {
+	return p.publish(ctx, "card.deleted", e)
 }

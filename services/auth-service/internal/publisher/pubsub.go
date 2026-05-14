@@ -69,6 +69,10 @@ func (p *httpPublisher) PublishUserRegistered(ctx context.Context, event UserReg
 	return p.publish(ctx, "user.registered", event)
 }
 
+func (p *httpPublisher) PublishUserUpdated(ctx context.Context, event UserUpdatedEvent) error {
+	return p.publish(ctx, "user.updated", event)
+}
+
 func (p *httpPublisher) PublishEmailVerificationRequested(ctx context.Context, event EmailVerificationRequestedEvent) error {
 	return p.publish(ctx, "email.verification_requested", event)
 }

@@ -96,6 +96,19 @@ func (mr *MockUserRepositoryMockRecorder) UpdateUser(ctx, arg any) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockUserRepository)(nil).UpdateUser), ctx, arg)
 }
 
+func (m *MockUserRepository) UpdateUserRole(ctx context.Context, arg db.UpdateUserRoleParams) (db.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserRole", ctx, arg)
+	ret0, _ := ret[0].(db.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockUserRepositoryMockRecorder) UpdateUserRole(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserRole", reflect.TypeOf((*MockUserRepository)(nil).UpdateUserRole), ctx, arg)
+}
+
 func (m *MockUserRepository) UpdatePassword(ctx context.Context, arg db.UpdatePasswordParams) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdatePassword", ctx, arg)

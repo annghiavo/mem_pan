@@ -42,6 +42,18 @@ func (mr *MockEventPublisherMockRecorder) PublishUserRegistered(ctx, event any) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishUserRegistered", reflect.TypeOf((*MockEventPublisher)(nil).PublishUserRegistered), ctx, event)
 }
 
+func (m *MockEventPublisher) PublishUserUpdated(ctx context.Context, event publisher.UserUpdatedEvent) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PublishUserUpdated", ctx, event)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (mr *MockEventPublisherMockRecorder) PublishUserUpdated(ctx, event any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishUserUpdated", reflect.TypeOf((*MockEventPublisher)(nil).PublishUserUpdated), ctx, event)
+}
+
 func (m *MockEventPublisher) PublishEmailVerificationRequested(ctx context.Context, event publisher.EmailVerificationRequestedEvent) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PublishEmailVerificationRequested", ctx, event)

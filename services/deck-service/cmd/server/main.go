@@ -68,7 +68,7 @@ func main() {
 		pub = publisher.NewNoopPublisher()
 	}
 
-	folderSvc := service.NewFolderService(folderRepo, folderDeckRepo, deckRepo)
+	folderSvc := service.NewFolderService(folderRepo, folderDeckRepo, deckRepo, pub)
 	deckSvc := service.NewDeckService(deckRepo, cardRepo, pub)
 	cardSvc := service.NewCardService(cardRepo, noteRepo, deckRepo, pub)
 

@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
+	"log"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"mem_pan/services/auth-service/internal/db"
 	"mem_pan/services/auth-service/internal/domain"
+	"mem_pan/services/auth-service/internal/publisher"
 	"mem_pan/services/auth-service/internal/repository"
 )
 
@@ -30,11 +32,16 @@ type UserService interface {
 }
 
 type userService struct {
-	userRepo repository.UserRepository
+	userRepo  repository.UserRepository
+	publisher publisher.EventPublisher
 }
 
-func NewUserService(userRepo repository.UserRepository) UserService {
-	return &userService{userRepo: userRepo}
+func NewUserService(userRepo repository.UserRepository, pubs ...publisher.EventPublisher) UserService {
+	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
+	if len(pubs) > 0 {
+		pub = pubs[0]
+	}
+	return &userService{userRepo: userRepo, publisher: pub}
 }
 
 func (s *userService) GetProfile(ctx context.Context, userID uuid.UUID) (db.User, error) {
@@ -42,11 +49,23 @@ func (s *userService) GetProfile(ctx context.Context, userID uuid.UUID) (db.User
 }
 
 func (s *userService) UpdateProfile(ctx context.Context, userID uuid.UUID, params UpdateProfileParams) (db.User, error) {
-	return s.userRepo.UpdateUser(ctx, db.UpdateUserParams{
+	user, err := s.userRepo.UpdateUser(ctx, db.UpdateUserParams{
 		UserID:    userID,
 		FullName:  domain.NullStr(params.FullName),
 		AvatarUrl: domain.NullStr(params.AvatarURL),
 	})
+	if err != nil {
+		return db.User{}, err
+	}
+	if pubErr := s.publisher.PublishUserUpdated(ctx, publisher.UserUpdatedEvent{
+		UserID:    user.UserID,
+		Username:  user.Username,
+		FullName:  user.FullName.String,
+		AvatarURL: user.AvatarUrl.String,
+	}); pubErr != nil {
+		log.Printf("[publisher] user.updated: %v", pubErr)
+	}
+	return user, nil
 }
 
 func (s *userService) SetUserRole(ctx context.Context, email, role string) (db.User, error) {

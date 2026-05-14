@@ -6,6 +6,7 @@ use (
 	./services/auth-service
 	./services/deck-service
 	./services/notification-service
+	./services/search-service
 	./services/stats-service
 	./services/study-service
 	./services/worker-service

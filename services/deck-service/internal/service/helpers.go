@@ -13,6 +13,13 @@ func nullStr(s *string) sql.NullString {
 	return sql.NullString{String: *s, Valid: true}
 }
 
+func nullStrVal(s sql.NullString) string {
+	if s.Valid {
+		return s.String
+	}
+	return ""
+}
+
 func nullLang(s *string) db.NullCardLanguage {
 	if s == nil {
 		return db.NullCardLanguage{}

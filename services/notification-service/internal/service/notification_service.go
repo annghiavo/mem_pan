@@ -108,6 +108,8 @@ func (s *service) log(ctx context.Context, userID, notifType, channel, recipient
 		msg := sendErr.Error()
 		errMsg = &msg
 		log.Printf("[notification] failed to send %s via %s to %s: %v", notifType, channel, recipient, sendErr)
+	} else {
+		log.Printf("[notification] sent %s via %s to %s", notifType, channel, recipient)
 	}
 
 	var uidPtr *uuid.UUID

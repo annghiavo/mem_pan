@@ -8,7 +8,7 @@ services:
       - "--entrypoints.web.address=:80"
     ports:
       - "8000:80"
-      - "8090:8080"  # Traefik dashboard: http://localhost:8090
+      - "8090:8080" # Traefik dashboard: http://localhost:8090
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
@@ -30,12 +30,14 @@ services:
       - pubsub-emulator
       - stats-service
       - notification-service
+      - search-service
     environment:
       - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
       - PUBSUB_PROJECT_ID=local-dev
       - PUBSUB_PUSH_SECRET=dev-secret
       - STATS_SERVICE_HOST=stats-service:8084
       - NOTIFICATION_SERVICE_HOST=notification-service:8085
+      - SEARCH_SERVICE_HOST=search-service:8086
     volumes:
       - ./pubsub-setup:/scripts:ro
     entrypoint: sh /scripts/init.sh
@@ -165,6 +167,30 @@ services:
       - gateway
     restart: unless-stopped
 
+  search-service:
+    build:
+      context: ..
+      dockerfile: services/search-service/Dockerfile
+    env_file:
+      - ../services/search-service/app.env
+    environment:
+      - AUTH_SERVICE_ADDRESS=auth-service:9090
+      - PUBSUB_PUSH_SECRET=dev-secret
+    depends_on:
+      - auth-service
+      - pubsub-emulator
+    expose:
+      - "8086"
+      - "9096"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.search.entrypoints=web"
+      - "traefik.http.routers.search.rule=PathPrefix(`/v1/search`)"
+      - "traefik.http.services.search.loadbalancer.server.port=8086"
+    networks:
+      - gateway
+    restart: unless-stopped
+
   notification-service:
     build:
       context: ..
@@ -174,6 +200,8 @@ services:
     environment:
       - AUTH_SERVICE_ADDRESS=auth-service:9090
       - PUBSUB_PUSH_SECRET=dev-secret
+    volumes:
+      - ../services/notification-service/mempan-cac51-firebase-adminsdk-fbsvc-b4257c1459.json:/mempan-cac51-firebase-adminsdk-fbsvc-b4257c1459.json:ro
     depends_on:
       - auth-service
       - pubsub-emulator

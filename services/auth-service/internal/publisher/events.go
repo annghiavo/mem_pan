@@ -13,8 +13,16 @@ type UserRegisteredEvent struct {
 	UserID    uuid.UUID `json:"user_id"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
+	FullName  string    `json:"full_name"`
 	AvatarURL string    `json:"avatar_url"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type UserUpdatedEvent struct {
+	UserID    uuid.UUID `json:"user_id"`
+	Username  string    `json:"username"`
+	FullName  string    `json:"full_name"`
+	AvatarURL string    `json:"avatar_url"`
 }
 
 type EmailVerificationRequestedEvent struct {
@@ -33,6 +41,7 @@ type PasswordResetRequestedEvent struct {
 
 type EventPublisher interface {
 	PublishUserRegistered(ctx context.Context, event UserRegisteredEvent) error
+	PublishUserUpdated(ctx context.Context, event UserUpdatedEvent) error
 	PublishEmailVerificationRequested(ctx context.Context, event EmailVerificationRequestedEvent) error
 	PublishPasswordResetRequested(ctx context.Context, event PasswordResetRequestedEvent) error
 }
@@ -46,6 +55,12 @@ func NewNoopPublisher() EventPublisher {
 func (p *noopPublisher) PublishUserRegistered(_ context.Context, event UserRegisteredEvent) error {
 	b, _ := json.Marshal(event)
 	log.Printf("[event] user_registered: %s", b)
+	return nil
+}
+
+func (p *noopPublisher) PublishUserUpdated(_ context.Context, event UserUpdatedEvent) error {
+	b, _ := json.Marshal(event)
+	log.Printf("[event] user_updated: %s", b)
 	return nil
 }
 

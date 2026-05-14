@@ -78,7 +78,7 @@ func main() {
 		cfg.AccessTokenDuration, cfg.RefreshTokenDuration,
 		cfg.VerificationTokenDuration, cfg.ResetTokenDuration,
 	)
-	userSvc := service.NewUserService(userRepo)
+	userSvc := service.NewUserService(userRepo, pub)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

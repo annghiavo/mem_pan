@@ -143,6 +143,8 @@ func (s *authService) Register(ctx context.Context, params RegisterParams) (db.U
 		UserID:    user.UserID,
 		Username:  user.Username,
 		Email:     user.Email,
+		FullName:  user.FullName.String,
+		AvatarURL: user.AvatarUrl.String,
 		CreatedAt: user.CreatedAt,
 	})
 

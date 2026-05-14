@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package search;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "mem_pan/services/search-service/pb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "Search Service API";
+        version: "1.0";
+    };
+    security_definitions: {
+        security: {
+            key: "BearerAuth";
+            value: {
+                type: TYPE_API_KEY;
+                in: IN_HEADER;
+                name: "Authorization";
+            };
+        };
+    };
+    consumes: "application/json";
+    produces: "application/json";
+};
+
+service SearchService {
+    rpc SearchDecks(SearchDecksRequest) returns (SearchDecksResponse) {
+        option (google.api.http) = {
+            get: "/v1/search/decks"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Search decks (public by default; pass scope=mine for caller's own).";
+            tags: "search";
+        };
+    }
+
+    rpc SearchFolders(SearchFoldersRequest) returns (SearchFoldersResponse) {
+        option (google.api.http) = {
+            get: "/v1/search/folders"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Search folders owned by the caller.";
+            tags: "search";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc SearchCards(SearchCardsRequest) returns (SearchCardsResponse) {
+        option (google.api.http) = {
+            get: "/v1/search/cards"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Search cards owned by the caller (optionally scoped to a deck).";
+            tags: "search";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc SearchUsers(SearchUsersRequest) returns (SearchUsersResponse) {
+        option (google.api.http) = {
+            get: "/v1/search/users"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Search users by username or full name.";
+            tags: "search";
+        };
+    }
+}
+
+enum DeckSearchScope {
+    DECK_SCOPE_UNSPECIFIED = 0;
+    DECK_SCOPE_PUBLIC = 1;
+    DECK_SCOPE_MINE = 2;
+    DECK_SCOPE_ALL = 3;
+}
+
+message SearchDecksRequest {
+    string query = 1;
+    DeckSearchScope scope = 2;
+    int32 page = 3;
+    int32 page_size = 4;
+}
+
+message SearchDecksResponse {
+    repeated DeckHit hits = 1;
+    int64 total = 2;
+}
+
+message DeckHit {
+    string deck_id = 1;
+    string user_id = 2;
+    string name = 3;
+    string description = 4;
+    bool is_public = 5;
+    int32 card_count = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+    double score = 9;
+}
+
+message SearchFoldersRequest {
+    string query = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+}
+
+message SearchFoldersResponse {
+    repeated FolderHit hits = 1;
+    int64 total = 2;
+}
+
+message FolderHit {
+    string folder_id = 1;
+    string user_id = 2;
+    string name = 3;
+    string description = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+    double score = 7;
+}
+
+message SearchCardsRequest {
+    string query = 1;
+    string deck_id = 2; // optional; if set, results are filtered to this deck
+    int32 page = 3;
+    int32 page_size = 4;
+}
+
+message SearchCardsResponse {
+    repeated CardHit hits = 1;
+    int64 total = 2;
+}
+
+message CardHit {
+    string card_id = 1;
+    string user_id = 2;
+    string deck_id = 3;
+    string note_id = 4;
+    string content_front = 5;
+    string content_back = 6;
+    google.protobuf.Timestamp created_at = 7;
+    double score = 8;
+}
+
+message SearchUsersRequest {
+    string query = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+}
+
+message SearchUsersResponse {
+    repeated UserHit hits = 1;
+    int64 total = 2;
+}
+
+message UserHit {
+    string user_id = 1;
+    string username = 2;
+    string full_name = 3;
+    string avatar_url = 4;
+    google.protobuf.Timestamp created_at = 5;
+    double score = 6;
+}
