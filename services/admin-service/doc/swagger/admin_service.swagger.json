@@ -60,6 +60,206 @@
         ]
       }
     },
+    "/v1/admin/email-templates": {
+      "get": {
+        "summary": "[Admin] List email templates",
+        "operationId": "AdminService_ListEmailTemplates",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/adminListEmailTemplatesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "admin-email-templates"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/admin/email-templates/{templateKey}": {
+      "get": {
+        "summary": "[Admin] Get email template",
+        "operationId": "AdminService_GetEmailTemplate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/adminEmailTemplate"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "templateKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "admin-email-templates"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "[Admin] Update email template content",
+        "operationId": "AdminService_UpdateEmailTemplate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/adminEmailTemplate"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "templateKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminServiceUpdateEmailTemplateBody"
+            }
+          }
+        ],
+        "tags": [
+          "admin-email-templates"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/admin/email-templates/{templateKey}:preview": {
+      "post": {
+        "summary": "[Admin] Render email template preview",
+        "operationId": "AdminService_PreviewEmailTemplate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/adminPreviewEmailTemplateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "templateKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminServicePreviewEmailTemplateBody"
+            }
+          }
+        ],
+        "tags": [
+          "admin-email-templates"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/admin/email-templates/{templateKey}:test": {
+      "post": {
+        "summary": "[Admin] Send a test email using a template",
+        "operationId": "AdminService_SendTestEmail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/adminSendTestEmailResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "templateKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminServiceSendTestEmailBody"
+            }
+          }
+        ],
+        "tags": [
+          "admin-email-templates"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/admin/reports": {
       "get": {
         "summary": "[Admin] See list of reports",
@@ -298,6 +498,20 @@
         }
       }
     },
+    "AdminServicePreviewEmailTemplateBody": {
+      "type": "object",
+      "properties": {
+        "locale": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "AdminServiceProcessReportBody": {
       "type": "object",
       "properties": {
@@ -313,6 +527,23 @@
         }
       }
     },
+    "AdminServiceSendTestEmailBody": {
+      "type": "object",
+      "properties": {
+        "locale": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "AdminServiceUpdateDeckStatusBody": {
       "type": "object",
       "properties": {
@@ -325,11 +556,85 @@
         }
       }
     },
+    "AdminServiceUpdateEmailTemplateBody": {
+      "type": "object",
+      "properties": {
+        "locale": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "htmlBody": {
+          "type": "string"
+        },
+        "textBody": {
+          "type": "string"
+        }
+      }
+    },
     "adminBanUserResponse": {
       "type": "object",
       "properties": {
         "user": {
           "$ref": "#/definitions/adminUser"
+        }
+      }
+    },
+    "adminEmailTemplate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "templateKey": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "htmlBody": {
+          "type": "string"
+        },
+        "textBody": {
+          "type": "string"
+        },
+        "variables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isActive": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "adminListEmailTemplatesResponse": {
+      "type": "object",
+      "properties": {
+        "templates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/adminEmailTemplate"
+          }
         }
       }
     },
@@ -359,6 +664,20 @@
           }
         },
         "nextPageToken": {
+          "type": "string"
+        }
+      }
+    },
+    "adminPreviewEmailTemplateResponse": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "type": "string"
+        },
+        "htmlBody": {
+          "type": "string"
+        },
+        "textBody": {
           "type": "string"
         }
       }
@@ -440,6 +759,14 @@
         }
       },
       "title": "Message definitions"
+    },
+    "adminSendTestEmailResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
     },
     "adminUpdateDeckStatusResponse": {
       "type": "object",

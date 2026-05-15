@@ -199,6 +199,578 @@ func (*UnregisterDeviceTokenResponse) Descriptor() ([]byte, []int) {
 	return file_notification_service_proto_rawDescGZIP(), []int{3}
 }
 
+type EmailTemplate struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TemplateKey   string                 `protobuf:"bytes,2,opt,name=template_key,json=templateKey,proto3" json:"template_key,omitempty"`
+	Locale        string                 `protobuf:"bytes,3,opt,name=locale,proto3" json:"locale,omitempty"`
+	Subject       string                 `protobuf:"bytes,4,opt,name=subject,proto3" json:"subject,omitempty"`
+	HtmlBody      string                 `protobuf:"bytes,5,opt,name=html_body,json=htmlBody,proto3" json:"html_body,omitempty"`
+	TextBody      string                 `protobuf:"bytes,6,opt,name=text_body,json=textBody,proto3" json:"text_body,omitempty"`
+	Variables     []string               `protobuf:"bytes,7,rep,name=variables,proto3" json:"variables,omitempty"`
+	IsActive      bool                   `protobuf:"varint,8,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	Version       int32                  `protobuf:"varint,9,opt,name=version,proto3" json:"version,omitempty"`
+	UpdatedBy     string                 `protobuf:"bytes,10,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EmailTemplate) Reset() {
+	*x = EmailTemplate{}
+	mi := &file_notification_service_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EmailTemplate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmailTemplate) ProtoMessage() {}
+
+func (x *EmailTemplate) ProtoReflect() protoreflect.Message {
+	mi := &file_notification_service_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmailTemplate.ProtoReflect.Descriptor instead.
+func (*EmailTemplate) Descriptor() ([]byte, []int) {
+	return file_notification_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *EmailTemplate) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *EmailTemplate) GetTemplateKey() string {
+	if x != nil {
+		return x.TemplateKey
+	}
+	return ""
+}
+
+func (x *EmailTemplate) GetLocale() string {
+	if x != nil {
+		return x.Locale
+	}
+	return ""
+}
+
+func (x *EmailTemplate) GetSubject() string {
+	if x != nil {
+		return x.Subject
+	}
+	return ""
+}
+
+func (x *EmailTemplate) GetHtmlBody() string {
+	if x != nil {
+		return x.HtmlBody
+	}
+	return ""
+}
+
+func (x *EmailTemplate) GetTextBody() string {
+	if x != nil {
+		return x.TextBody
+	}
+	return ""
+}
+
+func (x *EmailTemplate) GetVariables() []string {
+	if x != nil {
+		return x.Variables
+	}
+	return nil
+}
+
+func (x *EmailTemplate) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+func (x *EmailTemplate) GetVersion() int32 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *EmailTemplate) GetUpdatedBy() string {
+	if x != nil {
+		return x.UpdatedBy
+	}
+	return ""
+}
+
+func (x *EmailTemplate) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *EmailTemplate) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type ListEmailTemplatesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEmailTemplatesRequest) Reset() {
+	*x = ListEmailTemplatesRequest{}
+	mi := &file_notification_service_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEmailTemplatesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEmailTemplatesRequest) ProtoMessage() {}
+
+func (x *ListEmailTemplatesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notification_service_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEmailTemplatesRequest.ProtoReflect.Descriptor instead.
+func (*ListEmailTemplatesRequest) Descriptor() ([]byte, []int) {
+	return file_notification_service_proto_rawDescGZIP(), []int{5}
+}
+
+type ListEmailTemplatesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Templates     []*EmailTemplate       `protobuf:"bytes,1,rep,name=templates,proto3" json:"templates,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEmailTemplatesResponse) Reset() {
+	*x = ListEmailTemplatesResponse{}
+	mi := &file_notification_service_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEmailTemplatesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEmailTemplatesResponse) ProtoMessage() {}
+
+func (x *ListEmailTemplatesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_notification_service_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEmailTemplatesResponse.ProtoReflect.Descriptor instead.
+func (*ListEmailTemplatesResponse) Descriptor() ([]byte, []int) {
+	return file_notification_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ListEmailTemplatesResponse) GetTemplates() []*EmailTemplate {
+	if x != nil {
+		return x.Templates
+	}
+	return nil
+}
+
+type GetEmailTemplateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TemplateKey   string                 `protobuf:"bytes,1,opt,name=template_key,json=templateKey,proto3" json:"template_key,omitempty"`
+	Locale        string                 `protobuf:"bytes,2,opt,name=locale,proto3" json:"locale,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetEmailTemplateRequest) Reset() {
+	*x = GetEmailTemplateRequest{}
+	mi := &file_notification_service_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetEmailTemplateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetEmailTemplateRequest) ProtoMessage() {}
+
+func (x *GetEmailTemplateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notification_service_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetEmailTemplateRequest.ProtoReflect.Descriptor instead.
+func (*GetEmailTemplateRequest) Descriptor() ([]byte, []int) {
+	return file_notification_service_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetEmailTemplateRequest) GetTemplateKey() string {
+	if x != nil {
+		return x.TemplateKey
+	}
+	return ""
+}
+
+func (x *GetEmailTemplateRequest) GetLocale() string {
+	if x != nil {
+		return x.Locale
+	}
+	return ""
+}
+
+type UpdateEmailTemplateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TemplateKey   string                 `protobuf:"bytes,1,opt,name=template_key,json=templateKey,proto3" json:"template_key,omitempty"`
+	Locale        string                 `protobuf:"bytes,2,opt,name=locale,proto3" json:"locale,omitempty"`
+	Subject       string                 `protobuf:"bytes,3,opt,name=subject,proto3" json:"subject,omitempty"`
+	HtmlBody      string                 `protobuf:"bytes,4,opt,name=html_body,json=htmlBody,proto3" json:"html_body,omitempty"`
+	TextBody      string                 `protobuf:"bytes,5,opt,name=text_body,json=textBody,proto3" json:"text_body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateEmailTemplateRequest) Reset() {
+	*x = UpdateEmailTemplateRequest{}
+	mi := &file_notification_service_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEmailTemplateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEmailTemplateRequest) ProtoMessage() {}
+
+func (x *UpdateEmailTemplateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notification_service_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEmailTemplateRequest.ProtoReflect.Descriptor instead.
+func (*UpdateEmailTemplateRequest) Descriptor() ([]byte, []int) {
+	return file_notification_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdateEmailTemplateRequest) GetTemplateKey() string {
+	if x != nil {
+		return x.TemplateKey
+	}
+	return ""
+}
+
+func (x *UpdateEmailTemplateRequest) GetLocale() string {
+	if x != nil {
+		return x.Locale
+	}
+	return ""
+}
+
+func (x *UpdateEmailTemplateRequest) GetSubject() string {
+	if x != nil {
+		return x.Subject
+	}
+	return ""
+}
+
+func (x *UpdateEmailTemplateRequest) GetHtmlBody() string {
+	if x != nil {
+		return x.HtmlBody
+	}
+	return ""
+}
+
+func (x *UpdateEmailTemplateRequest) GetTextBody() string {
+	if x != nil {
+		return x.TextBody
+	}
+	return ""
+}
+
+type PreviewEmailTemplateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TemplateKey   string                 `protobuf:"bytes,1,opt,name=template_key,json=templateKey,proto3" json:"template_key,omitempty"`
+	Locale        string                 `protobuf:"bytes,2,opt,name=locale,proto3" json:"locale,omitempty"`
+	Data          map[string]string      `protobuf:"bytes,3,rep,name=data,proto3" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PreviewEmailTemplateRequest) Reset() {
+	*x = PreviewEmailTemplateRequest{}
+	mi := &file_notification_service_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PreviewEmailTemplateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreviewEmailTemplateRequest) ProtoMessage() {}
+
+func (x *PreviewEmailTemplateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notification_service_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreviewEmailTemplateRequest.ProtoReflect.Descriptor instead.
+func (*PreviewEmailTemplateRequest) Descriptor() ([]byte, []int) {
+	return file_notification_service_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *PreviewEmailTemplateRequest) GetTemplateKey() string {
+	if x != nil {
+		return x.TemplateKey
+	}
+	return ""
+}
+
+func (x *PreviewEmailTemplateRequest) GetLocale() string {
+	if x != nil {
+		return x.Locale
+	}
+	return ""
+}
+
+func (x *PreviewEmailTemplateRequest) GetData() map[string]string {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type PreviewEmailTemplateResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Subject       string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`
+	HtmlBody      string                 `protobuf:"bytes,2,opt,name=html_body,json=htmlBody,proto3" json:"html_body,omitempty"`
+	TextBody      string                 `protobuf:"bytes,3,opt,name=text_body,json=textBody,proto3" json:"text_body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PreviewEmailTemplateResponse) Reset() {
+	*x = PreviewEmailTemplateResponse{}
+	mi := &file_notification_service_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PreviewEmailTemplateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreviewEmailTemplateResponse) ProtoMessage() {}
+
+func (x *PreviewEmailTemplateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_notification_service_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreviewEmailTemplateResponse.ProtoReflect.Descriptor instead.
+func (*PreviewEmailTemplateResponse) Descriptor() ([]byte, []int) {
+	return file_notification_service_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *PreviewEmailTemplateResponse) GetSubject() string {
+	if x != nil {
+		return x.Subject
+	}
+	return ""
+}
+
+func (x *PreviewEmailTemplateResponse) GetHtmlBody() string {
+	if x != nil {
+		return x.HtmlBody
+	}
+	return ""
+}
+
+func (x *PreviewEmailTemplateResponse) GetTextBody() string {
+	if x != nil {
+		return x.TextBody
+	}
+	return ""
+}
+
+type SendTestEmailRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TemplateKey   string                 `protobuf:"bytes,1,opt,name=template_key,json=templateKey,proto3" json:"template_key,omitempty"`
+	Locale        string                 `protobuf:"bytes,2,opt,name=locale,proto3" json:"locale,omitempty"`
+	To            string                 `protobuf:"bytes,3,opt,name=to,proto3" json:"to,omitempty"`
+	Data          map[string]string      `protobuf:"bytes,4,rep,name=data,proto3" json:"data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SendTestEmailRequest) Reset() {
+	*x = SendTestEmailRequest{}
+	mi := &file_notification_service_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendTestEmailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendTestEmailRequest) ProtoMessage() {}
+
+func (x *SendTestEmailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notification_service_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendTestEmailRequest.ProtoReflect.Descriptor instead.
+func (*SendTestEmailRequest) Descriptor() ([]byte, []int) {
+	return file_notification_service_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *SendTestEmailRequest) GetTemplateKey() string {
+	if x != nil {
+		return x.TemplateKey
+	}
+	return ""
+}
+
+func (x *SendTestEmailRequest) GetLocale() string {
+	if x != nil {
+		return x.Locale
+	}
+	return ""
+}
+
+func (x *SendTestEmailRequest) GetTo() string {
+	if x != nil {
+		return x.To
+	}
+	return ""
+}
+
+func (x *SendTestEmailRequest) GetData() map[string]string {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type SendTestEmailResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SendTestEmailResponse) Reset() {
+	*x = SendTestEmailResponse{}
+	mi := &file_notification_service_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendTestEmailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendTestEmailResponse) ProtoMessage() {}
+
+func (x *SendTestEmailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_notification_service_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendTestEmailResponse.ProtoReflect.Descriptor instead.
+func (*SendTestEmailResponse) Descriptor() ([]byte, []int) {
+	return file_notification_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *SendTestEmailResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_notification_service_proto protoreflect.FileDescriptor
 
 const file_notification_service_proto_rawDesc = "" +
@@ -212,7 +784,57 @@ const file_notification_service_proto_rawDesc = "" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"4\n" +
 	"\x1cUnregisterDeviceTokenRequest\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\"\x1f\n" +
-	"\x1dUnregisterDeviceTokenResponse2\xca\x03\n" +
+	"\x1dUnregisterDeviceTokenResponse\"\xe0\x02\n" +
+	"\rEmailTemplate\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
+	"\ftemplate_key\x18\x02 \x01(\tR\vtemplateKey\x12\x16\n" +
+	"\x06locale\x18\x03 \x01(\tR\x06locale\x12\x18\n" +
+	"\asubject\x18\x04 \x01(\tR\asubject\x12\x1b\n" +
+	"\thtml_body\x18\x05 \x01(\tR\bhtmlBody\x12\x1b\n" +
+	"\ttext_body\x18\x06 \x01(\tR\btextBody\x12\x1c\n" +
+	"\tvariables\x18\a \x03(\tR\tvariables\x12\x1b\n" +
+	"\tis_active\x18\b \x01(\bR\bisActive\x12\x18\n" +
+	"\aversion\x18\t \x01(\x05R\aversion\x12\x1d\n" +
+	"\n" +
+	"updated_by\x18\n" +
+	" \x01(\tR\tupdatedBy\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\v \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\f \x01(\tR\tupdatedAt\"\x1b\n" +
+	"\x19ListEmailTemplatesRequest\"W\n" +
+	"\x1aListEmailTemplatesResponse\x129\n" +
+	"\ttemplates\x18\x01 \x03(\v2\x1b.notification.EmailTemplateR\ttemplates\"T\n" +
+	"\x17GetEmailTemplateRequest\x12!\n" +
+	"\ftemplate_key\x18\x01 \x01(\tR\vtemplateKey\x12\x16\n" +
+	"\x06locale\x18\x02 \x01(\tR\x06locale\"\xab\x01\n" +
+	"\x1aUpdateEmailTemplateRequest\x12!\n" +
+	"\ftemplate_key\x18\x01 \x01(\tR\vtemplateKey\x12\x16\n" +
+	"\x06locale\x18\x02 \x01(\tR\x06locale\x12\x18\n" +
+	"\asubject\x18\x03 \x01(\tR\asubject\x12\x1b\n" +
+	"\thtml_body\x18\x04 \x01(\tR\bhtmlBody\x12\x1b\n" +
+	"\ttext_body\x18\x05 \x01(\tR\btextBody\"\xda\x01\n" +
+	"\x1bPreviewEmailTemplateRequest\x12!\n" +
+	"\ftemplate_key\x18\x01 \x01(\tR\vtemplateKey\x12\x16\n" +
+	"\x06locale\x18\x02 \x01(\tR\x06locale\x12G\n" +
+	"\x04data\x18\x03 \x03(\v23.notification.PreviewEmailTemplateRequest.DataEntryR\x04data\x1a7\n" +
+	"\tDataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"r\n" +
+	"\x1cPreviewEmailTemplateResponse\x12\x18\n" +
+	"\asubject\x18\x01 \x01(\tR\asubject\x12\x1b\n" +
+	"\thtml_body\x18\x02 \x01(\tR\bhtmlBody\x12\x1b\n" +
+	"\ttext_body\x18\x03 \x01(\tR\btextBody\"\xdc\x01\n" +
+	"\x14SendTestEmailRequest\x12!\n" +
+	"\ftemplate_key\x18\x01 \x01(\tR\vtemplateKey\x12\x16\n" +
+	"\x06locale\x18\x02 \x01(\tR\x06locale\x12\x0e\n" +
+	"\x02to\x18\x03 \x01(\tR\x02to\x12@\n" +
+	"\x04data\x18\x04 \x03(\v2,.notification.SendTestEmailRequest.DataEntryR\x04data\x1a7\n" +
+	"\tDataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"1\n" +
+	"\x15SendTestEmailResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2\xa2\r\n" +
 	"\x13NotificationService\x12\xd1\x01\n" +
 	"\x13RegisterDeviceToken\x12(.notification.RegisterDeviceTokenRequest\x1a).notification.RegisterDeviceTokenResponse\"e\x92A>\n" +
 	"\rnotifications\x12\x1bRegister a device FCM tokenb\x10\n" +
@@ -223,7 +845,32 @@ const file_notification_service_proto_rawDesc = "" +
 	"\rnotifications\x12\x1dUnregister a device FCM tokenb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02#*!/v1/notifications/devices/{token}B\x97\x01\x92Aj\x12\x1f\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02#*!/v1/notifications/devices/{token}\x12\xe6\x01\n" +
+	"\x12ListEmailTemplates\x12'.notification.ListEmailTemplatesRequest\x1a(.notification.ListEmailTemplatesResponse\"}\x92AK\n" +
+	"\x15admin-email-templates\x12 [Admin] List all email templatesb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02)\x12'/v1/notifications/admin/email-templates\x12\xe3\x01\n" +
+	"\x10GetEmailTemplate\x12%.notification.GetEmailTemplateRequest\x1a\x1b.notification.EmailTemplate\"\x8a\x01\x92AI\n" +
+	"\x15admin-email-templates\x12\x1e[Admin] Get one email templateb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x028\x126/v1/notifications/admin/email-templates/{template_key}\x12\xee\x01\n" +
+	"\x13UpdateEmailTemplate\x12(.notification.UpdateEmailTemplateRequest\x1a\x1b.notification.EmailTemplate\"\x8f\x01\x92AK\n" +
+	"\x15admin-email-templates\x12 [Admin] Update an email templateb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02;:\x01*\x1a6/v1/notifications/admin/email-templates/{template_key}\x12\x91\x02\n" +
+	"\x14PreviewEmailTemplate\x12).notification.PreviewEmailTemplateRequest\x1a*.notification.PreviewEmailTemplateResponse\"\xa1\x01\x92AU\n" +
+	"\x15admin-email-templates\x12*[Admin] Render a template with sample datab\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02C:\x01*\">/v1/notifications/admin/email-templates/{template_key}:preview\x12\x81\x02\n" +
+	"\rSendTestEmail\x12\".notification.SendTestEmailRequest\x1a#.notification.SendTestEmailResponse\"\xa6\x01\x92A]\n" +
+	"\x15admin-email-templates\x122[Admin] Send a rendered template to a test addressb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02@:\x01*\";/v1/notifications/admin/email-templates/{template_key}:testB\x97\x01\x92Aj\x12\x1f\n" +
 	"\x18Notification Service API2\x031.02\x10application/json:\x10application/jsonZ#\n" +
 	"!\n" +
 	"\n" +
@@ -241,23 +888,47 @@ func file_notification_service_proto_rawDescGZIP() []byte {
 	return file_notification_service_proto_rawDescData
 }
 
-var file_notification_service_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_notification_service_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_notification_service_proto_goTypes = []any{
 	(*RegisterDeviceTokenRequest)(nil),    // 0: notification.RegisterDeviceTokenRequest
 	(*RegisterDeviceTokenResponse)(nil),   // 1: notification.RegisterDeviceTokenResponse
 	(*UnregisterDeviceTokenRequest)(nil),  // 2: notification.UnregisterDeviceTokenRequest
 	(*UnregisterDeviceTokenResponse)(nil), // 3: notification.UnregisterDeviceTokenResponse
+	(*EmailTemplate)(nil),                 // 4: notification.EmailTemplate
+	(*ListEmailTemplatesRequest)(nil),     // 5: notification.ListEmailTemplatesRequest
+	(*ListEmailTemplatesResponse)(nil),    // 6: notification.ListEmailTemplatesResponse
+	(*GetEmailTemplateRequest)(nil),       // 7: notification.GetEmailTemplateRequest
+	(*UpdateEmailTemplateRequest)(nil),    // 8: notification.UpdateEmailTemplateRequest
+	(*PreviewEmailTemplateRequest)(nil),   // 9: notification.PreviewEmailTemplateRequest
+	(*PreviewEmailTemplateResponse)(nil),  // 10: notification.PreviewEmailTemplateResponse
+	(*SendTestEmailRequest)(nil),          // 11: notification.SendTestEmailRequest
+	(*SendTestEmailResponse)(nil),         // 12: notification.SendTestEmailResponse
+	nil,                                   // 13: notification.PreviewEmailTemplateRequest.DataEntry
+	nil,                                   // 14: notification.SendTestEmailRequest.DataEntry
 }
 var file_notification_service_proto_depIdxs = []int32{
-	0, // 0: notification.NotificationService.RegisterDeviceToken:input_type -> notification.RegisterDeviceTokenRequest
-	2, // 1: notification.NotificationService.UnregisterDeviceToken:input_type -> notification.UnregisterDeviceTokenRequest
-	1, // 2: notification.NotificationService.RegisterDeviceToken:output_type -> notification.RegisterDeviceTokenResponse
-	3, // 3: notification.NotificationService.UnregisterDeviceToken:output_type -> notification.UnregisterDeviceTokenResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4,  // 0: notification.ListEmailTemplatesResponse.templates:type_name -> notification.EmailTemplate
+	13, // 1: notification.PreviewEmailTemplateRequest.data:type_name -> notification.PreviewEmailTemplateRequest.DataEntry
+	14, // 2: notification.SendTestEmailRequest.data:type_name -> notification.SendTestEmailRequest.DataEntry
+	0,  // 3: notification.NotificationService.RegisterDeviceToken:input_type -> notification.RegisterDeviceTokenRequest
+	2,  // 4: notification.NotificationService.UnregisterDeviceToken:input_type -> notification.UnregisterDeviceTokenRequest
+	5,  // 5: notification.NotificationService.ListEmailTemplates:input_type -> notification.ListEmailTemplatesRequest
+	7,  // 6: notification.NotificationService.GetEmailTemplate:input_type -> notification.GetEmailTemplateRequest
+	8,  // 7: notification.NotificationService.UpdateEmailTemplate:input_type -> notification.UpdateEmailTemplateRequest
+	9,  // 8: notification.NotificationService.PreviewEmailTemplate:input_type -> notification.PreviewEmailTemplateRequest
+	11, // 9: notification.NotificationService.SendTestEmail:input_type -> notification.SendTestEmailRequest
+	1,  // 10: notification.NotificationService.RegisterDeviceToken:output_type -> notification.RegisterDeviceTokenResponse
+	3,  // 11: notification.NotificationService.UnregisterDeviceToken:output_type -> notification.UnregisterDeviceTokenResponse
+	6,  // 12: notification.NotificationService.ListEmailTemplates:output_type -> notification.ListEmailTemplatesResponse
+	4,  // 13: notification.NotificationService.GetEmailTemplate:output_type -> notification.EmailTemplate
+	4,  // 14: notification.NotificationService.UpdateEmailTemplate:output_type -> notification.EmailTemplate
+	10, // 15: notification.NotificationService.PreviewEmailTemplate:output_type -> notification.PreviewEmailTemplateResponse
+	12, // 16: notification.NotificationService.SendTestEmail:output_type -> notification.SendTestEmailResponse
+	10, // [10:17] is the sub-list for method output_type
+	3,  // [3:10] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_notification_service_proto_init() }
@@ -271,7 +942,7 @@ func file_notification_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_notification_service_proto_rawDesc), len(file_notification_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

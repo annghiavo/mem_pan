@@ -39,11 +39,23 @@ type PasswordResetRequestedEvent struct {
 	ExpiresAt time.Time `json:"expires_at"`
 }
 
+// ReportSubmittedEvent is fired when a user reports another user account.
+// admin-service consumes this and persists it to admin_db.reports.
+type ReportSubmittedEvent struct {
+	ReporterID     string    `json:"reporter_id"`
+	TargetType     string    `json:"target_type"`     // always "user" when published by auth-service
+	TargetID       string    `json:"target_id"`
+	ReasonCategory string    `json:"reason_category"` // inappropriate_content | copyright_violation | spam | harassment | misinformation | other
+	Description    string    `json:"description"`
+	SubmittedAt    time.Time `json:"submitted_at"`
+}
+
 type EventPublisher interface {
 	PublishUserRegistered(ctx context.Context, event UserRegisteredEvent) error
 	PublishUserUpdated(ctx context.Context, event UserUpdatedEvent) error
 	PublishEmailVerificationRequested(ctx context.Context, event EmailVerificationRequestedEvent) error
 	PublishPasswordResetRequested(ctx context.Context, event PasswordResetRequestedEvent) error
+	PublishReportSubmitted(ctx context.Context, event ReportSubmittedEvent) error
 }
 
 type noopPublisher struct{}
@@ -73,5 +85,11 @@ func (p *noopPublisher) PublishEmailVerificationRequested(_ context.Context, eve
 func (p *noopPublisher) PublishPasswordResetRequested(_ context.Context, event PasswordResetRequestedEvent) error {
 	b, _ := json.Marshal(event)
 	log.Printf("[event] password_reset_requested: %s", b)
+	return nil
+}
+
+func (p *noopPublisher) PublishReportSubmitted(_ context.Context, event ReportSubmittedEvent) error {
+	b, _ := json.Marshal(event)
+	log.Printf("[event] report_submitted: %s", b)
 	return nil
 }

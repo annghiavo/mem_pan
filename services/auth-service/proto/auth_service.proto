@@ -19,6 +19,7 @@ import "rpc_verify_token.proto";
 import "rpc_upload_avatar.proto";
 import "rpc_get_user_by_id.proto";
 import "rpc_set_user_role.proto";
+import "rpc_report_user.proto";
 
 option go_package = "mem_pan/services/auth-service/pb";
 
@@ -219,6 +220,15 @@ service AuthService {
                 key: "500";
                 value: { description: "Upload or database error."; }
             };
+        };
+    }
+
+    // Reports — publish a report.submitted event consumed by admin-service.
+    rpc ReportUser (ReportUserRequest) returns (ReportUserResponse) {
+        option (google.api.http) = { post: "/v1/users/{user_id}/reports"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Report another user for moderation"; tags: "reports";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }
 

@@ -83,7 +83,7 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	gapiServer := gapi.NewServer(authSvc, userSvc, tokenMaker, cld)
+	gapiServer := gapi.NewServer(authSvc, userSvc, tokenMaker, cld, pub)
 	go runGRPCServer(cfg, gapiServer)
 	go runHTTPGateway(cfg, gapiServer)
 

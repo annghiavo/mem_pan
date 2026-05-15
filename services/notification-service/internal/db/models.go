@@ -29,3 +29,29 @@ type NotificationLog struct {
 	ErrorMessage     *string    `json:"error_message"`
 	CreatedAt        time.Time  `json:"created_at"`
 }
+
+type EmailTemplate struct {
+	ID           uuid.UUID  `json:"id"`
+	TemplateKey  string     `json:"template_key"`
+	Locale       string     `json:"locale"`
+	Subject      string     `json:"subject"`
+	HtmlBody     string     `json:"html_body"`
+	TextBody     string     `json:"text_body"`
+	Variables    []byte     `json:"variables"`
+	IsActive     bool       `json:"is_active"`
+	Version      int32      `json:"version"`
+	UpdatedBy    *uuid.UUID `json:"updated_by"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
+}
+
+type EmailTemplateVersion struct {
+	ID         uuid.UUID  `json:"id"`
+	TemplateID uuid.UUID  `json:"template_id"`
+	Version    int32      `json:"version"`
+	Subject    string     `json:"subject"`
+	HtmlBody   string     `json:"html_body"`
+	TextBody   string     `json:"text_body"`
+	UpdatedBy  *uuid.UUID `json:"updated_by"`
+	CreatedAt  time.Time  `json:"created_at"`
+}

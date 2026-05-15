@@ -80,3 +80,7 @@ func (p *httpPublisher) PublishEmailVerificationRequested(ctx context.Context, e
 func (p *httpPublisher) PublishPasswordResetRequested(ctx context.Context, event PasswordResetRequestedEvent) error {
 	return p.publish(ctx, "password.reset_requested", event)
 }
+
+func (p *httpPublisher) PublishReportSubmitted(ctx context.Context, event ReportSubmittedEvent) error {
+	return p.publish(ctx, "report.submitted", event)
+}

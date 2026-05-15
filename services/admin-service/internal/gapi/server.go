@@ -8,20 +8,31 @@ import (
 
 	"mem_pan/services/admin-service/internal/authclient"
 	"mem_pan/services/admin-service/internal/domain"
+	"mem_pan/services/admin-service/internal/notifyclient"
+	"mem_pan/services/admin-service/internal/repository"
 	"mem_pan/services/admin-service/internal/service"
 	pb "mem_pan/services/admin-service/pb/proto"
 )
 
 type Server struct {
 	pb.UnimplementedAdminServiceServer
-	reportSvc  service.ReportService
-	authClient authclient.Client
+	reportSvc    service.ReportService
+	reportRepo   repository.ReportRepository
+	authClient   authclient.Client
+	notifyClient notifyclient.Client
 }
 
-func NewServer(reportSvc service.ReportService, authClient authclient.Client) *Server {
+func NewServer(
+	reportSvc service.ReportService,
+	reportRepo repository.ReportRepository,
+	authClient authclient.Client,
+	notifyClient notifyclient.Client,
+) *Server {
 	return &Server{
-		reportSvc:  reportSvc,
-		authClient: authClient,
+		reportSvc:    reportSvc,
+		reportRepo:   reportRepo,
+		authClient:   authClient,
+		notifyClient: notifyClient,
 	}
 }
 

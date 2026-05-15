@@ -83,6 +83,17 @@ type CardDeletedEvent struct {
 	UserID string `json:"user_id"`
 }
 
+// ReportSubmittedEvent is fired when a user files a moderation report.
+// admin-service consumes this and persists it to admin_db.reports.
+type ReportSubmittedEvent struct {
+	ReporterID     string    `json:"reporter_id"`
+	TargetType     string    `json:"target_type"`     // deck | user | note
+	TargetID       string    `json:"target_id"`
+	ReasonCategory string    `json:"reason_category"` // inappropriate_content | copyright_violation | spam | harassment | misinformation | other
+	Description    string    `json:"description"`
+	SubmittedAt    time.Time `json:"submitted_at"`
+}
+
 type EventPublisher interface {
 	PublishDeckCreated(ctx context.Context, event DeckCreatedEvent) error
 	PublishDeckUpdated(ctx context.Context, event DeckUpdatedEvent) error
@@ -93,6 +104,7 @@ type EventPublisher interface {
 	PublishCardCreated(ctx context.Context, event CardCreatedEvent) error
 	PublishCardUpdated(ctx context.Context, event CardUpdatedEvent) error
 	PublishCardDeleted(ctx context.Context, event CardDeletedEvent) error
+	PublishReportSubmitted(ctx context.Context, event ReportSubmittedEvent) error
 }
 
 // noopPublisher logs events without sending them anywhere.
@@ -132,6 +144,9 @@ func (p *noopPublisher) PublishCardUpdated(_ context.Context, e CardUpdatedEvent
 }
 func (p *noopPublisher) PublishCardDeleted(_ context.Context, e CardDeletedEvent) error {
 	return p.logEvent("card.deleted", e)
+}
+func (p *noopPublisher) PublishReportSubmitted(_ context.Context, e ReportSubmittedEvent) error {
+	return p.logEvent("report.submitted", e)
 }
 
 type envelope struct {
@@ -215,4 +230,7 @@ func (p *httpPublisher) PublishCardUpdated(ctx context.Context, e CardUpdatedEve
 }
 func (p *httpPublisher) PublishCardDeleted(ctx context.Context, e CardDeletedEvent) error {
 	return p.publish(ctx, "card.deleted", e)
+}
+func (p *httpPublisher) PublishReportSubmitted(ctx context.Context, e ReportSubmittedEvent) error {
+	return p.publish(ctx, "report.submitted", e)
 }

@@ -10,6 +10,7 @@ import (
 
 	"mem_pan/services/auth-service/internal/db"
 	"mem_pan/services/auth-service/internal/domain"
+	"mem_pan/services/auth-service/internal/publisher"
 	"mem_pan/services/auth-service/internal/service"
 	"mem_pan/services/auth-service/internal/token"
 	"mem_pan/services/auth-service/pb"
@@ -21,14 +22,16 @@ type Server struct {
 	userSvc    service.UserService
 	tokenMaker token.Maker
 	cld        *cloudinary.Cloudinary
+	pub        publisher.EventPublisher
 }
 
-func NewServer(authSvc service.AuthService, userSvc service.UserService, tokenMaker token.Maker, cld *cloudinary.Cloudinary) *Server {
+func NewServer(authSvc service.AuthService, userSvc service.UserService, tokenMaker token.Maker, cld *cloudinary.Cloudinary, pub publisher.EventPublisher) *Server {
 	return &Server{
 		authSvc:    authSvc,
 		userSvc:    userSvc,
 		tokenMaker: tokenMaker,
 		cld:        cld,
+		pub:        pub,
 	}
 }
 

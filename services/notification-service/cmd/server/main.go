@@ -56,6 +56,9 @@ func main() {
 	}
 	defer authClient.Close()
 
+	repo := repository.New(database)
+	templateCache := mailer.NewCachedStore(mailer.NewRepoStore(repo))
+
 	// Mailer — use noop if SMTP is not configured.
 	var m mailer.Mailer
 	if cfg.SMTPHost != "" {
@@ -65,7 +68,7 @@ func main() {
 			Username: cfg.SMTPUsername,
 			Password: cfg.SMTPPassword,
 			From:     cfg.EmailFrom,
-		})
+		}, templateCache)
 	} else {
 		log.Println("SMTP_HOST not set — email notifications disabled")
 		m = mailer.NewNoop()
@@ -83,8 +86,7 @@ func main() {
 		fcmSender = fcm.NewNoop()
 	}
 
-	repo := repository.New(database)
-	svc := service.New(repo, m, fcmSender, service.Config{AppBaseURL: cfg.AppBaseURL})
+	svc := service.New(repo, m, fcmSender, templateCache, service.Config{AppBaseURL: cfg.AppBaseURL})
 
 	handler := subscriber.NewHandler(svc)
 	pushHandler := subscriber.NewPushHandler(handler, cfg.PubSubPushSecret)

@@ -51,6 +51,62 @@ service NotificationService {
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }
+
+    // ----- Admin: email templates -----
+
+    rpc ListEmailTemplates(ListEmailTemplatesRequest) returns (ListEmailTemplatesResponse) {
+        option (google.api.http) = { get: "/v1/notifications/admin/email-templates" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] List all email templates";
+            tags: "admin-email-templates";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc GetEmailTemplate(GetEmailTemplateRequest) returns (EmailTemplate) {
+        option (google.api.http) = { get: "/v1/notifications/admin/email-templates/{template_key}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] Get one email template";
+            tags: "admin-email-templates";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc UpdateEmailTemplate(UpdateEmailTemplateRequest) returns (EmailTemplate) {
+        option (google.api.http) = {
+            put: "/v1/notifications/admin/email-templates/{template_key}"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] Update an email template";
+            tags: "admin-email-templates";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc PreviewEmailTemplate(PreviewEmailTemplateRequest) returns (PreviewEmailTemplateResponse) {
+        option (google.api.http) = {
+            post: "/v1/notifications/admin/email-templates/{template_key}:preview"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] Render a template with sample data";
+            tags: "admin-email-templates";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc SendTestEmail(SendTestEmailRequest) returns (SendTestEmailResponse) {
+        option (google.api.http) = {
+            post: "/v1/notifications/admin/email-templates/{template_key}:test"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] Send a rendered template to a test address";
+            tags: "admin-email-templates";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
 }
 
 message RegisterDeviceTokenRequest {
@@ -67,3 +123,59 @@ message UnregisterDeviceTokenRequest {
 }
 
 message UnregisterDeviceTokenResponse {}
+
+message EmailTemplate {
+    string id            = 1;
+    string template_key  = 2;
+    string locale        = 3;
+    string subject       = 4;
+    string html_body     = 5;
+    string text_body     = 6;
+    repeated string variables = 7;
+    bool   is_active     = 8;
+    int32  version       = 9;
+    string updated_by    = 10;
+    string created_at    = 11;
+    string updated_at    = 12;
+}
+
+message ListEmailTemplatesRequest {}
+message ListEmailTemplatesResponse {
+    repeated EmailTemplate templates = 1;
+}
+
+message GetEmailTemplateRequest {
+    string template_key = 1;
+    string locale       = 2;
+}
+
+message UpdateEmailTemplateRequest {
+    string template_key = 1;
+    string locale       = 2;
+    string subject      = 3;
+    string html_body    = 4;
+    string text_body    = 5;
+}
+
+message PreviewEmailTemplateRequest {
+    string template_key      = 1;
+    string locale            = 2;
+    map<string,string> data  = 3;
+}
+
+message PreviewEmailTemplateResponse {
+    string subject   = 1;
+    string html_body = 2;
+    string text_body = 3;
+}
+
+message SendTestEmailRequest {
+    string template_key      = 1;
+    string locale            = 2;
+    string to                = 3;
+    map<string,string> data  = 4;
+}
+
+message SendTestEmailResponse {
+    string message = 1;
+}

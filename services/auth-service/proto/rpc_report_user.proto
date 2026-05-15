@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message ReportUserRequest {
+    string user_id         = 1; // ID of the user being reported
+    string reason_category = 2; // inappropriate_content | copyright_violation | spam | harassment | misinformation | other
+    string description     = 3;
+}
+
+message ReportUserResponse {
+    string message = 1;
+}

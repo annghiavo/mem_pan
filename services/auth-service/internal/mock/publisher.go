@@ -77,3 +77,15 @@ func (mr *MockEventPublisherMockRecorder) PublishPasswordResetRequested(ctx, eve
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishPasswordResetRequested", reflect.TypeOf((*MockEventPublisher)(nil).PublishPasswordResetRequested), ctx, event)
 }
+
+func (m *MockEventPublisher) PublishReportSubmitted(ctx context.Context, event publisher.ReportSubmittedEvent) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PublishReportSubmitted", ctx, event)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (mr *MockEventPublisherMockRecorder) PublishReportSubmitted(ctx, event any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PublishReportSubmitted", reflect.TypeOf((*MockEventPublisher)(nil).PublishReportSubmitted), ctx, event)
+}

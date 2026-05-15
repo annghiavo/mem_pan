@@ -22,8 +22,10 @@ import (
 	"mem_pan/services/admin-service/doc"
 	"mem_pan/services/admin-service/internal/authclient"
 	"mem_pan/services/admin-service/internal/gapi"
+	"mem_pan/services/admin-service/internal/notifyclient"
 	"mem_pan/services/admin-service/internal/repository"
 	"mem_pan/services/admin-service/internal/service"
+	"mem_pan/services/admin-service/internal/subscriber"
 	pb "mem_pan/services/admin-service/pb/proto"
 )
 
@@ -53,16 +55,25 @@ func main() {
 	}
 	defer authClient.Close()
 
+	notifyClient, err := notifyclient.NewGRPCClient(cfg.NotificationServiceAddress)
+	if err != nil {
+		log.Fatal("notification client:", err)
+	}
+	defer notifyClient.Close()
+
 	reportRepo := repository.NewReportRepository(database)
 	reportSvc := service.NewReportService(reportRepo)
 
-	server := gapi.NewServer(reportSvc, authClient)
+	server := gapi.NewServer(reportSvc, reportRepo, authClient, notifyClient)
+
+	subHandler := subscriber.NewHandler(reportRepo)
+	pushHandler := subscriber.NewPushHandler(subHandler, cfg.PubSubPushSecret)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go runGRPCServer(cfg, server)
-	go runHTTPGateway(cfg)
+	go runHTTPGateway(cfg, pushHandler)
 
 	<-quit
 	log.Println("admin-service shutting down")
@@ -84,7 +95,7 @@ func runGRPCServer(cfg config.Config, server *gapi.Server) {
 	}
 }
 
-func runHTTPGateway(cfg config.Config) {
+func runHTTPGateway(cfg config.Config, pushHandler *subscriber.PushHandler) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -102,6 +113,7 @@ func runHTTPGateway(cfg config.Config) {
 
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFiles))))
+	httpMux.Handle("/internal/pubsub", pushHandler)
 	httpMux.Handle("/", grpcMux)
 
 	httpServer := &http.Server{
@@ -114,6 +126,7 @@ func runHTTPGateway(cfg config.Config) {
 
 	log.Printf("HTTP gateway listening on %s", cfg.HTTPServerAddress)
 	log.Printf("Swagger UI available at http://%s/swagger/", cfg.HTTPServerAddress)
+	log.Printf("Pub/Sub push endpoint: POST %s/internal/pubsub", cfg.HTTPServerAddress)
 	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("HTTP gateway failed: %v", err)
 	}

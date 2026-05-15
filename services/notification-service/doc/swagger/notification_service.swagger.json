@@ -16,6 +16,206 @@
     "application/json"
   ],
   "paths": {
+    "/v1/notifications/admin/email-templates": {
+      "get": {
+        "summary": "[Admin] List all email templates",
+        "operationId": "NotificationService_ListEmailTemplates",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/notificationListEmailTemplatesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "admin-email-templates"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/notifications/admin/email-templates/{templateKey}": {
+      "get": {
+        "summary": "[Admin] Get one email template",
+        "operationId": "NotificationService_GetEmailTemplate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/notificationEmailTemplate"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "templateKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "admin-email-templates"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "[Admin] Update an email template",
+        "operationId": "NotificationService_UpdateEmailTemplate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/notificationEmailTemplate"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "templateKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NotificationServiceUpdateEmailTemplateBody"
+            }
+          }
+        ],
+        "tags": [
+          "admin-email-templates"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/notifications/admin/email-templates/{templateKey}:preview": {
+      "post": {
+        "summary": "[Admin] Render a template with sample data",
+        "operationId": "NotificationService_PreviewEmailTemplate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/notificationPreviewEmailTemplateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "templateKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NotificationServicePreviewEmailTemplateBody"
+            }
+          }
+        ],
+        "tags": [
+          "admin-email-templates"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/notifications/admin/email-templates/{templateKey}:test": {
+      "post": {
+        "summary": "[Admin] Send a rendered template to a test address",
+        "operationId": "NotificationService_SendTestEmail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/notificationSendTestEmailResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "templateKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NotificationServiceSendTestEmailBody"
+            }
+          }
+        ],
+        "tags": [
+          "admin-email-templates"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/notifications/devices": {
       "post": {
         "summary": "Register a device FCM token",
@@ -92,6 +292,125 @@
     }
   },
   "definitions": {
+    "NotificationServicePreviewEmailTemplateBody": {
+      "type": "object",
+      "properties": {
+        "locale": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "NotificationServiceSendTestEmailBody": {
+      "type": "object",
+      "properties": {
+        "locale": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "NotificationServiceUpdateEmailTemplateBody": {
+      "type": "object",
+      "properties": {
+        "locale": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "htmlBody": {
+          "type": "string"
+        },
+        "textBody": {
+          "type": "string"
+        }
+      }
+    },
+    "notificationEmailTemplate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "templateKey": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "htmlBody": {
+          "type": "string"
+        },
+        "textBody": {
+          "type": "string"
+        },
+        "variables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isActive": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "updatedBy": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "notificationListEmailTemplatesResponse": {
+      "type": "object",
+      "properties": {
+        "templates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/notificationEmailTemplate"
+          }
+        }
+      }
+    },
+    "notificationPreviewEmailTemplateResponse": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "type": "string"
+        },
+        "htmlBody": {
+          "type": "string"
+        },
+        "textBody": {
+          "type": "string"
+        }
+      }
+    },
     "notificationRegisterDeviceTokenRequest": {
       "type": "object",
       "properties": {
@@ -104,6 +423,14 @@
       }
     },
     "notificationRegisterDeviceTokenResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "notificationSendTestEmailResponse": {
       "type": "object",
       "properties": {
         "message": {

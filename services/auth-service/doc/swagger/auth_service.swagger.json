@@ -443,9 +443,66 @@
           }
         ]
       }
+    },
+    "/v1/users/{userId}/reports": {
+      "post": {
+        "summary": "Report another user for moderation",
+        "operationId": "AuthService_ReportUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbReportUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "description": "ID of the user being reported",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AuthServiceReportUserBody"
+            }
+          }
+        ],
+        "tags": [
+          "reports"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
     }
   },
   "definitions": {
+    "AuthServiceReportUserBody": {
+      "type": "object",
+      "properties": {
+        "reasonCategory": {
+          "type": "string",
+          "title": "inappropriate_content | copyright_violation | spam | harassment | misinformation | other"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
     "pbChangePasswordRequest": {
       "type": "object",
       "properties": {
@@ -581,6 +638,14 @@
       "properties": {
         "user": {
           "$ref": "#/definitions/pbUser"
+        }
+      }
+    },
+    "pbReportUserResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
         }
       }
     },

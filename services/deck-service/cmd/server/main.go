@@ -82,7 +82,7 @@ func main() {
 		log.Println("CLOUDINARY_URL not set — image upload disabled")
 	}
 
-	server := gapi.NewServer(folderSvc, deckSvc, cardSvc, authClient, imageUploader)
+	server := gapi.NewServer(folderSvc, deckSvc, cardSvc, authClient, imageUploader, pub)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

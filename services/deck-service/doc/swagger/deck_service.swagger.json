@@ -525,6 +525,50 @@
         ]
       }
     },
+    "/v1/decks/{deckId}/reports": {
+      "post": {
+        "summary": "Report a deck for moderation",
+        "operationId": "DeckService_ReportDeck",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbReportDeckResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeckServiceReportDeckBody"
+            }
+          }
+        ],
+        "tags": [
+          "reports"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/decks/{deckId}/settings": {
       "patch": {
         "summary": "Update deck settings",
@@ -917,29 +961,13 @@
     },
     "/v1/import/parse": {
       "post": {
-        "summary": "Parse CSV/TSV/PDF file and preview cards",
-        "description": "Upload a file directly via multipart/form-data. The parsed card pairs are returned for review before committing with BulkCreateCards.",
+        "summary": "Parse CSV/PDF file and preview cards",
         "operationId": "DeckService_ParseImportFile",
-        "consumes": [
-          "multipart/form-data"
-        ],
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbParseImportFileResponse"
-            }
-          },
-          "400": {
-            "description": "Invalid request (missing file, unsupported type, parse error).",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          },
-          "401": {
-            "description": "Missing or invalid authorization token.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
             }
           },
           "default": {
@@ -951,19 +979,12 @@
         },
         "parameters": [
           {
-            "name": "file",
-            "in": "formData",
+            "name": "body",
+            "in": "body",
             "required": true,
-            "type": "file",
-            "description": "The CSV, TSV, or PDF file to parse."
-          },
-          {
-            "name": "file_type",
-            "in": "formData",
-            "required": true,
-            "type": "string",
-            "enum": ["csv", "tsv", "pdf"],
-            "description": "Format of the uploaded file."
+            "schema": {
+              "$ref": "#/definitions/pbParseImportFileRequest"
+            }
           }
         ],
         "tags": [
@@ -1016,6 +1037,18 @@
           "type": "string"
         },
         "langBack": {
+          "type": "string"
+        }
+      }
+    },
+    "DeckServiceReportDeckBody": {
+      "type": "object",
+      "properties": {
+        "reasonCategory": {
+          "type": "string",
+          "title": "inappropriate_content | copyright_violation | spam | harassment | misinformation | other"
+        },
+        "description": {
           "type": "string"
         }
       }
@@ -1455,6 +1488,19 @@
         }
       }
     },
+    "pbParseImportFileRequest": {
+      "type": "object",
+      "properties": {
+        "fileContent": {
+          "type": "string",
+          "format": "byte"
+        },
+        "fileType": {
+          "type": "string",
+          "title": "\"csv\", \"tsv\", or \"pdf\""
+        }
+      }
+    },
     "pbParseImportFileResponse": {
       "type": "object",
       "properties": {
@@ -1487,6 +1533,14 @@
       "properties": {
         "success": {
           "type": "boolean"
+        }
+      }
+    },
+    "pbReportDeckResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
         }
       }
     },

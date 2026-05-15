@@ -225,4 +225,23 @@ service DeckService {
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }
+
+    // Reports — publish a report.submitted event consumed by admin-service.
+    rpc ReportDeck (ReportDeckRequest) returns (ReportDeckResponse) {
+        option (google.api.http) = { post: "/v1/decks/{deck_id}/reports"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Report a deck for moderation"; tags: "reports";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+}
+
+message ReportDeckRequest {
+    string deck_id         = 1;
+    string reason_category = 2; // inappropriate_content | copyright_violation | spam | harassment | misinformation | other
+    string description     = 3;
+}
+
+message ReportDeckResponse {
+    string message = 1;
 }

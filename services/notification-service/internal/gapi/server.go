@@ -24,9 +24,12 @@ func NewServer(svc service.NotificationService, authClient authclient.Client) *S
 
 func toGRPCError(err error) error {
 	switch {
-	case errors.Is(err, domain.ErrTokenNotFound):
+	case errors.Is(err, domain.ErrTokenNotFound),
+		errors.Is(err, domain.ErrTemplateNotFound):
 		return status.Error(codes.NotFound, err.Error())
 	case errors.Is(err, domain.ErrForbidden):
+		return status.Error(codes.PermissionDenied, err.Error())
+	case errors.Is(err, domain.ErrAdminRequired):
 		return status.Error(codes.PermissionDenied, err.Error())
 	default:
 		return status.Error(codes.Internal, "internal server error")

@@ -3,10 +3,12 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 
 	"mem_pan/services/notification-service/internal/db"
+	"mem_pan/services/notification-service/internal/domain"
 )
 
 type NotificationRepository interface {
@@ -14,6 +16,13 @@ type NotificationRepository interface {
 	DeleteFCMToken(ctx context.Context, userID uuid.UUID, token string) error
 	ListFCMTokensByUser(ctx context.Context, userID uuid.UUID) ([]db.FcmToken, error)
 	LogNotification(ctx context.Context, arg db.LogNotificationParams) error
+
+	// Email templates
+	GetActiveEmailTemplate(ctx context.Context, key, locale string) (db.EmailTemplate, error)
+	GetEmailTemplate(ctx context.Context, key, locale string) (db.EmailTemplate, error)
+	ListEmailTemplates(ctx context.Context) ([]db.EmailTemplate, error)
+	UpdateEmailTemplate(ctx context.Context, arg db.UpdateEmailTemplateParams) (db.EmailTemplate, error)
+	InsertEmailTemplateVersion(ctx context.Context, arg db.InsertEmailTemplateVersionParams) error
 }
 
 type postgresRepo struct {
@@ -22,6 +31,38 @@ type postgresRepo struct {
 
 func New(database *sql.DB) NotificationRepository {
 	return &postgresRepo{q: db.New(database)}
+}
+
+func (r *postgresRepo) GetActiveEmailTemplate(ctx context.Context, key, locale string) (db.EmailTemplate, error) {
+	t, err := r.q.GetActiveEmailTemplate(ctx, db.GetActiveEmailTemplateParams{TemplateKey: key, Locale: locale})
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.EmailTemplate{}, domain.ErrTemplateNotFound
+	}
+	return t, err
+}
+
+func (r *postgresRepo) GetEmailTemplate(ctx context.Context, key, locale string) (db.EmailTemplate, error) {
+	t, err := r.q.GetEmailTemplate(ctx, db.GetEmailTemplateParams{TemplateKey: key, Locale: locale})
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.EmailTemplate{}, domain.ErrTemplateNotFound
+	}
+	return t, err
+}
+
+func (r *postgresRepo) ListEmailTemplates(ctx context.Context) ([]db.EmailTemplate, error) {
+	return r.q.ListEmailTemplates(ctx)
+}
+
+func (r *postgresRepo) UpdateEmailTemplate(ctx context.Context, arg db.UpdateEmailTemplateParams) (db.EmailTemplate, error) {
+	t, err := r.q.UpdateEmailTemplate(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.EmailTemplate{}, domain.ErrTemplateNotFound
+	}
+	return t, err
+}
+
+func (r *postgresRepo) InsertEmailTemplateVersion(ctx context.Context, arg db.InsertEmailTemplateVersionParams) error {
+	return r.q.InsertEmailTemplateVersion(ctx, arg)
 }
 
 func (r *postgresRepo) UpsertFCMToken(ctx context.Context, userID uuid.UUID, token, deviceName string) (db.FcmToken, error) {

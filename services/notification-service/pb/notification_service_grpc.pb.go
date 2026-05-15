@@ -21,6 +21,11 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	NotificationService_RegisterDeviceToken_FullMethodName   = "/notification.NotificationService/RegisterDeviceToken"
 	NotificationService_UnregisterDeviceToken_FullMethodName = "/notification.NotificationService/UnregisterDeviceToken"
+	NotificationService_ListEmailTemplates_FullMethodName    = "/notification.NotificationService/ListEmailTemplates"
+	NotificationService_GetEmailTemplate_FullMethodName      = "/notification.NotificationService/GetEmailTemplate"
+	NotificationService_UpdateEmailTemplate_FullMethodName   = "/notification.NotificationService/UpdateEmailTemplate"
+	NotificationService_PreviewEmailTemplate_FullMethodName  = "/notification.NotificationService/PreviewEmailTemplate"
+	NotificationService_SendTestEmail_FullMethodName         = "/notification.NotificationService/SendTestEmail"
 )
 
 // NotificationServiceClient is the client API for NotificationService service.
@@ -31,6 +36,11 @@ type NotificationServiceClient interface {
 	RegisterDeviceToken(ctx context.Context, in *RegisterDeviceTokenRequest, opts ...grpc.CallOption) (*RegisterDeviceTokenResponse, error)
 	// Unregister a device FCM token.
 	UnregisterDeviceToken(ctx context.Context, in *UnregisterDeviceTokenRequest, opts ...grpc.CallOption) (*UnregisterDeviceTokenResponse, error)
+	ListEmailTemplates(ctx context.Context, in *ListEmailTemplatesRequest, opts ...grpc.CallOption) (*ListEmailTemplatesResponse, error)
+	GetEmailTemplate(ctx context.Context, in *GetEmailTemplateRequest, opts ...grpc.CallOption) (*EmailTemplate, error)
+	UpdateEmailTemplate(ctx context.Context, in *UpdateEmailTemplateRequest, opts ...grpc.CallOption) (*EmailTemplate, error)
+	PreviewEmailTemplate(ctx context.Context, in *PreviewEmailTemplateRequest, opts ...grpc.CallOption) (*PreviewEmailTemplateResponse, error)
+	SendTestEmail(ctx context.Context, in *SendTestEmailRequest, opts ...grpc.CallOption) (*SendTestEmailResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -61,6 +71,56 @@ func (c *notificationServiceClient) UnregisterDeviceToken(ctx context.Context, i
 	return out, nil
 }
 
+func (c *notificationServiceClient) ListEmailTemplates(ctx context.Context, in *ListEmailTemplatesRequest, opts ...grpc.CallOption) (*ListEmailTemplatesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEmailTemplatesResponse)
+	err := c.cc.Invoke(ctx, NotificationService_ListEmailTemplates_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) GetEmailTemplate(ctx context.Context, in *GetEmailTemplateRequest, opts ...grpc.CallOption) (*EmailTemplate, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmailTemplate)
+	err := c.cc.Invoke(ctx, NotificationService_GetEmailTemplate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) UpdateEmailTemplate(ctx context.Context, in *UpdateEmailTemplateRequest, opts ...grpc.CallOption) (*EmailTemplate, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmailTemplate)
+	err := c.cc.Invoke(ctx, NotificationService_UpdateEmailTemplate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) PreviewEmailTemplate(ctx context.Context, in *PreviewEmailTemplateRequest, opts ...grpc.CallOption) (*PreviewEmailTemplateResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreviewEmailTemplateResponse)
+	err := c.cc.Invoke(ctx, NotificationService_PreviewEmailTemplate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) SendTestEmail(ctx context.Context, in *SendTestEmailRequest, opts ...grpc.CallOption) (*SendTestEmailResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendTestEmailResponse)
+	err := c.cc.Invoke(ctx, NotificationService_SendTestEmail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility.
@@ -69,6 +129,11 @@ type NotificationServiceServer interface {
 	RegisterDeviceToken(context.Context, *RegisterDeviceTokenRequest) (*RegisterDeviceTokenResponse, error)
 	// Unregister a device FCM token.
 	UnregisterDeviceToken(context.Context, *UnregisterDeviceTokenRequest) (*UnregisterDeviceTokenResponse, error)
+	ListEmailTemplates(context.Context, *ListEmailTemplatesRequest) (*ListEmailTemplatesResponse, error)
+	GetEmailTemplate(context.Context, *GetEmailTemplateRequest) (*EmailTemplate, error)
+	UpdateEmailTemplate(context.Context, *UpdateEmailTemplateRequest) (*EmailTemplate, error)
+	PreviewEmailTemplate(context.Context, *PreviewEmailTemplateRequest) (*PreviewEmailTemplateResponse, error)
+	SendTestEmail(context.Context, *SendTestEmailRequest) (*SendTestEmailResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -84,6 +149,21 @@ func (UnimplementedNotificationServiceServer) RegisterDeviceToken(context.Contex
 }
 func (UnimplementedNotificationServiceServer) UnregisterDeviceToken(context.Context, *UnregisterDeviceTokenRequest) (*UnregisterDeviceTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnregisterDeviceToken not implemented")
+}
+func (UnimplementedNotificationServiceServer) ListEmailTemplates(context.Context, *ListEmailTemplatesRequest) (*ListEmailTemplatesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListEmailTemplates not implemented")
+}
+func (UnimplementedNotificationServiceServer) GetEmailTemplate(context.Context, *GetEmailTemplateRequest) (*EmailTemplate, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEmailTemplate not implemented")
+}
+func (UnimplementedNotificationServiceServer) UpdateEmailTemplate(context.Context, *UpdateEmailTemplateRequest) (*EmailTemplate, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateEmailTemplate not implemented")
+}
+func (UnimplementedNotificationServiceServer) PreviewEmailTemplate(context.Context, *PreviewEmailTemplateRequest) (*PreviewEmailTemplateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PreviewEmailTemplate not implemented")
+}
+func (UnimplementedNotificationServiceServer) SendTestEmail(context.Context, *SendTestEmailRequest) (*SendTestEmailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendTestEmail not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 func (UnimplementedNotificationServiceServer) testEmbeddedByValue()                             {}
@@ -142,6 +222,96 @@ func _NotificationService_UnregisterDeviceToken_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_ListEmailTemplates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEmailTemplatesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).ListEmailTemplates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_ListEmailTemplates_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).ListEmailTemplates(ctx, req.(*ListEmailTemplatesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_GetEmailTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEmailTemplateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).GetEmailTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_GetEmailTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).GetEmailTemplate(ctx, req.(*GetEmailTemplateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_UpdateEmailTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateEmailTemplateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).UpdateEmailTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_UpdateEmailTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).UpdateEmailTemplate(ctx, req.(*UpdateEmailTemplateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_PreviewEmailTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreviewEmailTemplateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).PreviewEmailTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_PreviewEmailTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).PreviewEmailTemplate(ctx, req.(*PreviewEmailTemplateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_SendTestEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendTestEmailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SendTestEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_SendTestEmail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SendTestEmail(ctx, req.(*SendTestEmailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -156,6 +326,26 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UnregisterDeviceToken",
 			Handler:    _NotificationService_UnregisterDeviceToken_Handler,
+		},
+		{
+			MethodName: "ListEmailTemplates",
+			Handler:    _NotificationService_ListEmailTemplates_Handler,
+		},
+		{
+			MethodName: "GetEmailTemplate",
+			Handler:    _NotificationService_GetEmailTemplate_Handler,
+		},
+		{
+			MethodName: "UpdateEmailTemplate",
+			Handler:    _NotificationService_UpdateEmailTemplate_Handler,
+		},
+		{
+			MethodName: "PreviewEmailTemplate",
+			Handler:    _NotificationService_PreviewEmailTemplate_Handler,
+		},
+		{
+			MethodName: "SendTestEmail",
+			Handler:    _NotificationService_SendTestEmail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
