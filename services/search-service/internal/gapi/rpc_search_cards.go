@@ -29,13 +29,13 @@ func (s *Server) SearchCards(ctx context.Context, req *pb.SearchCardsRequest) (*
 		return nil, status.Error(codes.Internal, "search failed")
 	}
 
-	hits := make([]*pb.CardHit, 0, len(result.Hits))
+	cards := make([]*pb.Card, 0, len(result.Hits))
 	for _, h := range result.Hits {
 		var doc es.CardDoc
 		if err := json.Unmarshal(h.Source, &doc); err != nil {
 			continue
 		}
-		hits = append(hits, &pb.CardHit{
+		cards = append(cards, &pb.Card{
 			CardId:       doc.CardID,
 			UserId:       doc.UserID,
 			DeckId:       doc.DeckID,
@@ -46,5 +46,5 @@ func (s *Server) SearchCards(ctx context.Context, req *pb.SearchCardsRequest) (*
 			Score:        h.Score,
 		})
 	}
-	return &pb.SearchCardsResponse{Hits: hits, Total: result.Total}, nil
+	return &pb.SearchCardsResponse{Cards: cards, Total: result.Total}, nil
 }

@@ -48,10 +48,25 @@ service DeckService {
         };
     }
 
+    rpc ListPublicFolders (ListPublicFoldersRequest) returns (ListPublicFoldersResponse) {
+        option (google.api.http) = { get: "/v1/folders/public" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Browse public folders"; tags: "folders";
+        };
+    }
+
     rpc GetFolder (GetFolderRequest) returns (GetFolderResponse) {
         option (google.api.http) = { get: "/v1/folders/{folder_id}" };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
             summary: "Get folder with decks"; tags: "folders";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc UpdateFolderVisibility (UpdateFolderVisibilityRequest) returns (UpdateFolderVisibilityResponse) {
+        option (google.api.http) = { patch: "/v1/folders/{folder_id}/visibility"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Toggle folder visibility"; tags: "folders";
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }

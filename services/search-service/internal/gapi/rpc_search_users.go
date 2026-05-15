@@ -23,13 +23,13 @@ func (s *Server) SearchUsers(ctx context.Context, req *pb.SearchUsersRequest) (*
 		return nil, status.Error(codes.Internal, "search failed")
 	}
 
-	hits := make([]*pb.UserHit, 0, len(result.Hits))
+	users := make([]*pb.User, 0, len(result.Hits))
 	for _, h := range result.Hits {
 		var doc es.UserDoc
 		if err := json.Unmarshal(h.Source, &doc); err != nil {
 			continue
 		}
-		hits = append(hits, &pb.UserHit{
+		users = append(users, &pb.User{
 			UserId:    doc.UserID,
 			Username:  doc.Username,
 			FullName:  doc.FullName,
@@ -38,5 +38,5 @@ func (s *Server) SearchUsers(ctx context.Context, req *pb.SearchUsersRequest) (*
 			Score:     h.Score,
 		})
 	}
-	return &pb.SearchUsersResponse{Hits: hits, Total: result.Total}, nil
+	return &pb.SearchUsersResponse{Users: users, Total: result.Total}, nil
 }

@@ -19,31 +19,33 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DeckService_ListFolders_FullMethodName          = "/pb.DeckService/ListFolders"
-	DeckService_CreateFolder_FullMethodName         = "/pb.DeckService/CreateFolder"
-	DeckService_GetFolder_FullMethodName            = "/pb.DeckService/GetFolder"
-	DeckService_UpdateFolder_FullMethodName         = "/pb.DeckService/UpdateFolder"
-	DeckService_DeleteFolder_FullMethodName         = "/pb.DeckService/DeleteFolder"
-	DeckService_AddDeckToFolder_FullMethodName      = "/pb.DeckService/AddDeckToFolder"
-	DeckService_RemoveDeckFromFolder_FullMethodName = "/pb.DeckService/RemoveDeckFromFolder"
-	DeckService_ListDecks_FullMethodName            = "/pb.DeckService/ListDecks"
-	DeckService_CreateDeck_FullMethodName           = "/pb.DeckService/CreateDeck"
-	DeckService_ListPublicDecks_FullMethodName      = "/pb.DeckService/ListPublicDecks"
-	DeckService_GetDeck_FullMethodName              = "/pb.DeckService/GetDeck"
-	DeckService_UpdateDeck_FullMethodName           = "/pb.DeckService/UpdateDeck"
-	DeckService_DeleteDeck_FullMethodName           = "/pb.DeckService/DeleteDeck"
-	DeckService_UpdateDeckSettings_FullMethodName   = "/pb.DeckService/UpdateDeckSettings"
-	DeckService_UpdateDeckVisibility_FullMethodName = "/pb.DeckService/UpdateDeckVisibility"
-	DeckService_CloneDeck_FullMethodName            = "/pb.DeckService/CloneDeck"
-	DeckService_GetDeckStats_FullMethodName         = "/pb.DeckService/GetDeckStats"
-	DeckService_ListDeckCards_FullMethodName        = "/pb.DeckService/ListDeckCards"
-	DeckService_CreateCard_FullMethodName           = "/pb.DeckService/CreateCard"
-	DeckService_BulkCreateCards_FullMethodName      = "/pb.DeckService/BulkCreateCards"
-	DeckService_ParseImportFile_FullMethodName      = "/pb.DeckService/ParseImportFile"
-	DeckService_GetCard_FullMethodName              = "/pb.DeckService/GetCard"
-	DeckService_UpdateCard_FullMethodName           = "/pb.DeckService/UpdateCard"
-	DeckService_DeleteCard_FullMethodName           = "/pb.DeckService/DeleteCard"
-	DeckService_ReportDeck_FullMethodName           = "/pb.DeckService/ReportDeck"
+	DeckService_ListFolders_FullMethodName            = "/pb.DeckService/ListFolders"
+	DeckService_CreateFolder_FullMethodName           = "/pb.DeckService/CreateFolder"
+	DeckService_ListPublicFolders_FullMethodName      = "/pb.DeckService/ListPublicFolders"
+	DeckService_GetFolder_FullMethodName              = "/pb.DeckService/GetFolder"
+	DeckService_UpdateFolderVisibility_FullMethodName = "/pb.DeckService/UpdateFolderVisibility"
+	DeckService_UpdateFolder_FullMethodName           = "/pb.DeckService/UpdateFolder"
+	DeckService_DeleteFolder_FullMethodName           = "/pb.DeckService/DeleteFolder"
+	DeckService_AddDeckToFolder_FullMethodName        = "/pb.DeckService/AddDeckToFolder"
+	DeckService_RemoveDeckFromFolder_FullMethodName   = "/pb.DeckService/RemoveDeckFromFolder"
+	DeckService_ListDecks_FullMethodName              = "/pb.DeckService/ListDecks"
+	DeckService_CreateDeck_FullMethodName             = "/pb.DeckService/CreateDeck"
+	DeckService_ListPublicDecks_FullMethodName        = "/pb.DeckService/ListPublicDecks"
+	DeckService_GetDeck_FullMethodName                = "/pb.DeckService/GetDeck"
+	DeckService_UpdateDeck_FullMethodName             = "/pb.DeckService/UpdateDeck"
+	DeckService_DeleteDeck_FullMethodName             = "/pb.DeckService/DeleteDeck"
+	DeckService_UpdateDeckSettings_FullMethodName     = "/pb.DeckService/UpdateDeckSettings"
+	DeckService_UpdateDeckVisibility_FullMethodName   = "/pb.DeckService/UpdateDeckVisibility"
+	DeckService_CloneDeck_FullMethodName              = "/pb.DeckService/CloneDeck"
+	DeckService_GetDeckStats_FullMethodName           = "/pb.DeckService/GetDeckStats"
+	DeckService_ListDeckCards_FullMethodName          = "/pb.DeckService/ListDeckCards"
+	DeckService_CreateCard_FullMethodName             = "/pb.DeckService/CreateCard"
+	DeckService_BulkCreateCards_FullMethodName        = "/pb.DeckService/BulkCreateCards"
+	DeckService_ParseImportFile_FullMethodName        = "/pb.DeckService/ParseImportFile"
+	DeckService_GetCard_FullMethodName                = "/pb.DeckService/GetCard"
+	DeckService_UpdateCard_FullMethodName             = "/pb.DeckService/UpdateCard"
+	DeckService_DeleteCard_FullMethodName             = "/pb.DeckService/DeleteCard"
+	DeckService_ReportDeck_FullMethodName             = "/pb.DeckService/ReportDeck"
 )
 
 // DeckServiceClient is the client API for DeckService service.
@@ -53,7 +55,9 @@ type DeckServiceClient interface {
 	// Folders
 	ListFolders(ctx context.Context, in *ListFoldersRequest, opts ...grpc.CallOption) (*ListFoldersResponse, error)
 	CreateFolder(ctx context.Context, in *CreateFolderRequest, opts ...grpc.CallOption) (*CreateFolderResponse, error)
+	ListPublicFolders(ctx context.Context, in *ListPublicFoldersRequest, opts ...grpc.CallOption) (*ListPublicFoldersResponse, error)
 	GetFolder(ctx context.Context, in *GetFolderRequest, opts ...grpc.CallOption) (*GetFolderResponse, error)
+	UpdateFolderVisibility(ctx context.Context, in *UpdateFolderVisibilityRequest, opts ...grpc.CallOption) (*UpdateFolderVisibilityResponse, error)
 	UpdateFolder(ctx context.Context, in *UpdateFolderRequest, opts ...grpc.CallOption) (*UpdateFolderResponse, error)
 	DeleteFolder(ctx context.Context, in *DeleteFolderRequest, opts ...grpc.CallOption) (*DeleteFolderResponse, error)
 	AddDeckToFolder(ctx context.Context, in *AddDeckToFolderRequest, opts ...grpc.CallOption) (*AddDeckToFolderResponse, error)
@@ -110,10 +114,30 @@ func (c *deckServiceClient) CreateFolder(ctx context.Context, in *CreateFolderRe
 	return out, nil
 }
 
+func (c *deckServiceClient) ListPublicFolders(ctx context.Context, in *ListPublicFoldersRequest, opts ...grpc.CallOption) (*ListPublicFoldersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPublicFoldersResponse)
+	err := c.cc.Invoke(ctx, DeckService_ListPublicFolders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *deckServiceClient) GetFolder(ctx context.Context, in *GetFolderRequest, opts ...grpc.CallOption) (*GetFolderResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetFolderResponse)
 	err := c.cc.Invoke(ctx, DeckService_GetFolder_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deckServiceClient) UpdateFolderVisibility(ctx context.Context, in *UpdateFolderVisibilityRequest, opts ...grpc.CallOption) (*UpdateFolderVisibilityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateFolderVisibilityResponse)
+	err := c.cc.Invoke(ctx, DeckService_UpdateFolderVisibility_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +371,9 @@ type DeckServiceServer interface {
 	// Folders
 	ListFolders(context.Context, *ListFoldersRequest) (*ListFoldersResponse, error)
 	CreateFolder(context.Context, *CreateFolderRequest) (*CreateFolderResponse, error)
+	ListPublicFolders(context.Context, *ListPublicFoldersRequest) (*ListPublicFoldersResponse, error)
 	GetFolder(context.Context, *GetFolderRequest) (*GetFolderResponse, error)
+	UpdateFolderVisibility(context.Context, *UpdateFolderVisibilityRequest) (*UpdateFolderVisibilityResponse, error)
 	UpdateFolder(context.Context, *UpdateFolderRequest) (*UpdateFolderResponse, error)
 	DeleteFolder(context.Context, *DeleteFolderRequest) (*DeleteFolderResponse, error)
 	AddDeckToFolder(context.Context, *AddDeckToFolderRequest) (*AddDeckToFolderResponse, error)
@@ -390,8 +416,14 @@ func (UnimplementedDeckServiceServer) ListFolders(context.Context, *ListFoldersR
 func (UnimplementedDeckServiceServer) CreateFolder(context.Context, *CreateFolderRequest) (*CreateFolderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFolder not implemented")
 }
+func (UnimplementedDeckServiceServer) ListPublicFolders(context.Context, *ListPublicFoldersRequest) (*ListPublicFoldersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPublicFolders not implemented")
+}
 func (UnimplementedDeckServiceServer) GetFolder(context.Context, *GetFolderRequest) (*GetFolderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFolder not implemented")
+}
+func (UnimplementedDeckServiceServer) UpdateFolderVisibility(context.Context, *UpdateFolderVisibilityRequest) (*UpdateFolderVisibilityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateFolderVisibility not implemented")
 }
 func (UnimplementedDeckServiceServer) UpdateFolder(context.Context, *UpdateFolderRequest) (*UpdateFolderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateFolder not implemented")
@@ -516,6 +548,24 @@ func _DeckService_CreateFolder_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeckService_ListPublicFolders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPublicFoldersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).ListPublicFolders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_ListPublicFolders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).ListPublicFolders(ctx, req.(*ListPublicFoldersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DeckService_GetFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetFolderRequest)
 	if err := dec(in); err != nil {
@@ -530,6 +580,24 @@ func _DeckService_GetFolder_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DeckServiceServer).GetFolder(ctx, req.(*GetFolderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeckService_UpdateFolderVisibility_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateFolderVisibilityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).UpdateFolderVisibility(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_UpdateFolderVisibility_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).UpdateFolderVisibility(ctx, req.(*UpdateFolderVisibilityRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -946,8 +1014,16 @@ var DeckService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DeckService_CreateFolder_Handler,
 		},
 		{
+			MethodName: "ListPublicFolders",
+			Handler:    _DeckService_ListPublicFolders_Handler,
+		},
+		{
 			MethodName: "GetFolder",
 			Handler:    _DeckService_GetFolder_Handler,
+		},
+		{
+			MethodName: "UpdateFolderVisibility",
+			Handler:    _DeckService_UpdateFolderVisibility_Handler,
 		},
 		{
 			MethodName: "UpdateFolder",

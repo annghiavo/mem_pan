@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"go.uber.org/mock/gomock"
@@ -13,6 +12,8 @@ import (
 	"mem_pan/services/auth-service/internal/domain"
 	"mem_pan/services/auth-service/internal/mock"
 )
+
+// ------- GetProfile -------
 
 func TestGetProfile_Success(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -54,11 +55,14 @@ func TestGetProfile_NotFound(t *testing.T) {
 	}
 }
 
+// ------- UpdateProfile -------
+
 func TestUpdateProfile_Success(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	userRepo := mock.NewMockUserRepository(ctrl)
+	pub := mock.NewMockEventPublisher(ctrl)
 	ctx := context.Background()
 	userID := uuid.New()
 	fullName := "Updated Name"
@@ -71,8 +75,9 @@ func TestUpdateProfile_Success(t *testing.T) {
 		FullName:  domain.NullStr(&fullName),
 		AvatarUrl: domain.NullStr(nil),
 	}).Return(user, nil)
+	pub.EXPECT().PublishUserUpdated(ctx, gomock.Any()).Return(nil)
 
-	svc := NewUserService(userRepo)
+	svc := NewUserService(userRepo, pub)
 	result, err := svc.UpdateProfile(ctx, userID, UpdateProfileParams{FullName: &fullName})
 
 	if err != nil {
@@ -101,6 +106,8 @@ func TestUpdateProfile_UserNotFound(t *testing.T) {
 	}
 }
 
+// ------- ChangePassword -------
+
 func TestChangePassword_Success(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -109,8 +116,6 @@ func TestChangePassword_Success(t *testing.T) {
 	ctx := context.Background()
 	userID := uuid.New()
 	user := makeUser(userID)
-	// hash for "password" generated with bcrypt default cost
-	user.PasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
 
 	userRepo.EXPECT().GetUserByID(ctx, userID).Return(user, nil)
 	userRepo.EXPECT().UpdatePassword(ctx, gomock.Any()).Return(nil)
@@ -135,7 +140,6 @@ func TestChangePassword_WrongOldPassword(t *testing.T) {
 	ctx := context.Background()
 	userID := uuid.New()
 	user := makeUser(userID)
-	user.PasswordHash = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
 
 	userRepo.EXPECT().GetUserByID(ctx, userID).Return(user, nil)
 
@@ -173,5 +177,47 @@ func TestChangePassword_UserNotFound(t *testing.T) {
 	}
 }
 
-// ensure makeUser is usable in this test file
-var _ = time.Now
+// ------- SetUserRole -------
+
+func TestSetUserRole_Success(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	userRepo := mock.NewMockUserRepository(ctrl)
+	ctx := context.Background()
+	userID := uuid.New()
+	user := makeUser(userID)
+	user.Role = "admin"
+
+	userRepo.EXPECT().UpdateUserRole(ctx, db.UpdateUserRoleParams{
+		Email: "test@example.com",
+		Role:  "admin",
+	}).Return(user, nil)
+
+	svc := NewUserService(userRepo)
+	result, err := svc.SetUserRole(ctx, "test@example.com", "admin")
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result.Role != "admin" {
+		t.Errorf("expected role admin, got %s", result.Role)
+	}
+}
+
+func TestSetUserRole_UserNotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	userRepo := mock.NewMockUserRepository(ctrl)
+	ctx := context.Background()
+
+	userRepo.EXPECT().UpdateUserRole(ctx, gomock.Any()).Return(db.User{}, domain.ErrUserNotFound)
+
+	svc := NewUserService(userRepo)
+	_, err := svc.SetUserRole(ctx, "unknown@example.com", "admin")
+
+	if !errors.Is(err, domain.ErrUserNotFound) {
+		t.Errorf("expected ErrUserNotFound, got %v", err)
+	}
+}

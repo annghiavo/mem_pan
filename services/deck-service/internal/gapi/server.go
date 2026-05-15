@@ -73,6 +73,7 @@ func dbFolderToPb(f db.Folder) *pb.Folder {
 		FolderId:  f.FolderID.String(),
 		UserId:    f.UserID.String(),
 		Name:      f.Name,
+		IsPublic:  f.IsPublic,
 		CreatedAt: timestamppb.New(f.CreatedAt),
 		UpdatedAt: timestamppb.New(f.UpdatedAt),
 	}

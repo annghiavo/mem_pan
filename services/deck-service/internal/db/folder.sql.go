@@ -12,26 +12,44 @@ import (
 	"github.com/google/uuid"
 )
 
+const countPublicFolders = `-- name: CountPublicFolders :one
+SELECT COUNT(*) FROM folders WHERE is_public = TRUE
+`
+
+func (q *Queries) CountPublicFolders(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countPublicFolders)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createFolder = `-- name: CreateFolder :one
-INSERT INTO folders (user_id, name, description)
-VALUES ($1, $2, $3)
-RETURNING folder_id, user_id, name, description, created_at, updated_at
+INSERT INTO folders (user_id, name, description, is_public)
+VALUES ($1, $2, $3, $4)
+RETURNING folder_id, user_id, name, description, is_public, created_at, updated_at
 `
 
 type CreateFolderParams struct {
 	UserID      uuid.UUID      `json:"user_id"`
 	Name        string         `json:"name"`
 	Description sql.NullString `json:"description"`
+	IsPublic    bool           `json:"is_public"`
 }
 
 func (q *Queries) CreateFolder(ctx context.Context, arg CreateFolderParams) (Folder, error) {
-	row := q.db.QueryRowContext(ctx, createFolder, arg.UserID, arg.Name, arg.Description)
+	row := q.db.QueryRowContext(ctx, createFolder,
+		arg.UserID,
+		arg.Name,
+		arg.Description,
+		arg.IsPublic,
+	)
 	var i Folder
 	err := row.Scan(
 		&i.FolderID,
 		&i.UserID,
 		&i.Name,
 		&i.Description,
+		&i.IsPublic,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -53,7 +71,7 @@ func (q *Queries) DeleteFolder(ctx context.Context, arg DeleteFolderParams) erro
 }
 
 const getFolderByID = `-- name: GetFolderByID :one
-SELECT folder_id, user_id, name, description, created_at, updated_at FROM folders WHERE folder_id = $1 LIMIT 1
+SELECT folder_id, user_id, name, description, is_public, created_at, updated_at FROM folders WHERE folder_id = $1 LIMIT 1
 `
 
 func (q *Queries) GetFolderByID(ctx context.Context, folderID uuid.UUID) (Folder, error) {
@@ -64,6 +82,7 @@ func (q *Queries) GetFolderByID(ctx context.Context, folderID uuid.UUID) (Folder
 		&i.UserID,
 		&i.Name,
 		&i.Description,
+		&i.IsPublic,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -71,7 +90,7 @@ func (q *Queries) GetFolderByID(ctx context.Context, folderID uuid.UUID) (Folder
 }
 
 const listFoldersByUser = `-- name: ListFoldersByUser :many
-SELECT folder_id, user_id, name, description, created_at, updated_at FROM folders WHERE user_id = $1 ORDER BY created_at DESC
+SELECT folder_id, user_id, name, description, is_public, created_at, updated_at FROM folders WHERE user_id = $1 ORDER BY created_at DESC
 `
 
 func (q *Queries) ListFoldersByUser(ctx context.Context, userID uuid.UUID) ([]Folder, error) {
@@ -88,6 +107,50 @@ func (q *Queries) ListFoldersByUser(ctx context.Context, userID uuid.UUID) ([]Fo
 			&i.UserID,
 			&i.Name,
 			&i.Description,
+			&i.IsPublic,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPublicFolders = `-- name: ListPublicFolders :many
+SELECT folder_id, user_id, name, description, is_public, created_at, updated_at FROM folders
+WHERE is_public = TRUE
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListPublicFoldersParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListPublicFolders(ctx context.Context, arg ListPublicFoldersParams) ([]Folder, error) {
+	rows, err := q.db.QueryContext(ctx, listPublicFolders, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Folder{}
+	for rows.Next() {
+		var i Folder
+		if err := rows.Scan(
+			&i.FolderID,
+			&i.UserID,
+			&i.Name,
+			&i.Description,
+			&i.IsPublic,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -110,7 +173,7 @@ SET name        = COALESCE($1, name),
     description = COALESCE($2, description),
     updated_at  = now()
 WHERE folder_id = $3 AND user_id = $4
-RETURNING folder_id, user_id, name, description, created_at, updated_at
+RETURNING folder_id, user_id, name, description, is_public, created_at, updated_at
 `
 
 type UpdateFolderParams struct {
@@ -133,6 +196,40 @@ func (q *Queries) UpdateFolder(ctx context.Context, arg UpdateFolderParams) (Fol
 		&i.UserID,
 		&i.Name,
 		&i.Description,
+		&i.IsPublic,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateFolderVisibility = `-- name: UpdateFolderVisibility :one
+UPDATE folders
+SET is_public  = $1,
+    updated_at = now()
+WHERE folder_id = $2 AND user_id = $3
+RETURNING folder_id, user_id, name, description, is_public, created_at, updated_at
+`
+
+type UpdateFolderVisibilityParams struct {
+	IsPublic bool      `json:"is_public"`
+	FolderID uuid.UUID `json:"folder_id"`
+	UserID   uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) UpdateFolderVisibility(ctx context.Context, arg UpdateFolderVisibilityParams) (Folder, error) {
+	row := q.db.QueryRowContext(ctx, updateFolderVisibility,
+		arg.IsPublic,
+		arg.FolderID,
+		arg.UserID,
+	)
+	var i Folder
+	err := row.Scan(
+		&i.FolderID,
+		&i.UserID,
+		&i.Name,
+		&i.Description,
+		&i.IsPublic,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

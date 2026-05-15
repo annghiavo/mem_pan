@@ -409,7 +409,7 @@ func TestCloneDeck_Success(t *testing.T) {
 	clonedDeck := makeDeck(uuid.New(), newOwnerID)
 
 	deckRepo.EXPECT().GetDeckByID(ctx, srcDeckID).Return(srcDeck, nil)
-	deckRepo.EXPECT().CloneDeck(ctx, gomock.Any()).Return(clonedDeck, nil)
+	deckRepo.EXPECT().CloneDeck(ctx, srcDeck, newOwnerID, "Copy of "+srcDeck.Name).Return(clonedDeck, []db.ListCardsByDeckRow{}, nil)
 
 	svc := NewDeckService(deckRepo, cardRepo)
 	result, err := svc.CloneDeck(ctx, srcDeckID, newOwnerID)

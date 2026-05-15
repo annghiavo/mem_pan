@@ -28,8 +28,9 @@ type Folder struct {
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	IsPublic      bool                   `protobuf:"varint,5,opt,name=is_public,json=isPublic,proto3" json:"is_public,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -90,6 +91,13 @@ func (x *Folder) GetDescription() string {
 		return x.Description
 	}
 	return ""
+}
+
+func (x *Folder) GetIsPublic() bool {
+	if x != nil {
+		return x.IsPublic
+	}
+	return false
 }
 
 func (x *Folder) GetCreatedAt() *timestamppb.Timestamp {
@@ -546,16 +554,17 @@ var File_models_proto protoreflect.FileDescriptor
 
 const file_models_proto_rawDesc = "" +
 	"\n" +
-	"\fmodels.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"\xea\x01\n" +
+	"\fmodels.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"\x87\x02\n" +
 	"\x06Folder\x12\x1b\n" +
 	"\tfolder_id\x18\x01 \x01(\tR\bfolderId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x129\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1b\n" +
+	"\tis_public\x18\x05 \x01(\bR\bisPublic\x129\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"U\n" +
+	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"U\n" +
 	"\x0fFolderWithDecks\x12\"\n" +
 	"\x06folder\x18\x01 \x01(\v2\n" +
 	".pb.FolderR\x06folder\x12\x1e\n" +

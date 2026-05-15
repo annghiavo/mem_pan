@@ -105,6 +105,7 @@ type CreateFolderRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	IsPublic      bool                   `protobuf:"varint,3,opt,name=is_public,json=isPublic,proto3" json:"is_public,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -153,6 +154,213 @@ func (x *CreateFolderRequest) GetDescription() string {
 	return ""
 }
 
+func (x *CreateFolderRequest) GetIsPublic() bool {
+	if x != nil {
+		return x.IsPublic
+	}
+	return false
+}
+
+type ListPublicFoldersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPublicFoldersRequest) Reset() {
+	*x = ListPublicFoldersRequest{}
+	mi := &file_rpc_folder_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPublicFoldersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPublicFoldersRequest) ProtoMessage() {}
+
+func (x *ListPublicFoldersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_folder_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPublicFoldersRequest.ProtoReflect.Descriptor instead.
+func (*ListPublicFoldersRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_folder_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ListPublicFoldersRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListPublicFoldersRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ListPublicFoldersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Folders       []*Folder              `protobuf:"bytes,1,rep,name=folders,proto3" json:"folders,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPublicFoldersResponse) Reset() {
+	*x = ListPublicFoldersResponse{}
+	mi := &file_rpc_folder_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPublicFoldersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPublicFoldersResponse) ProtoMessage() {}
+
+func (x *ListPublicFoldersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_folder_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPublicFoldersResponse.ProtoReflect.Descriptor instead.
+func (*ListPublicFoldersResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_folder_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListPublicFoldersResponse) GetFolders() []*Folder {
+	if x != nil {
+		return x.Folders
+	}
+	return nil
+}
+
+func (x *ListPublicFoldersResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+type UpdateFolderVisibilityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FolderId      string                 `protobuf:"bytes,1,opt,name=folder_id,json=folderId,proto3" json:"folder_id,omitempty"`
+	IsPublic      bool                   `protobuf:"varint,2,opt,name=is_public,json=isPublic,proto3" json:"is_public,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateFolderVisibilityRequest) Reset() {
+	*x = UpdateFolderVisibilityRequest{}
+	mi := &file_rpc_folder_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateFolderVisibilityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateFolderVisibilityRequest) ProtoMessage() {}
+
+func (x *UpdateFolderVisibilityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_folder_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateFolderVisibilityRequest.ProtoReflect.Descriptor instead.
+func (*UpdateFolderVisibilityRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_folder_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateFolderVisibilityRequest) GetFolderId() string {
+	if x != nil {
+		return x.FolderId
+	}
+	return ""
+}
+
+func (x *UpdateFolderVisibilityRequest) GetIsPublic() bool {
+	if x != nil {
+		return x.IsPublic
+	}
+	return false
+}
+
+type UpdateFolderVisibilityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Folder        *Folder                `protobuf:"bytes,1,opt,name=folder,proto3" json:"folder,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateFolderVisibilityResponse) Reset() {
+	*x = UpdateFolderVisibilityResponse{}
+	mi := &file_rpc_folder_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateFolderVisibilityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateFolderVisibilityResponse) ProtoMessage() {}
+
+func (x *UpdateFolderVisibilityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_folder_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateFolderVisibilityResponse.ProtoReflect.Descriptor instead.
+func (*UpdateFolderVisibilityResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_folder_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *UpdateFolderVisibilityResponse) GetFolder() *Folder {
+	if x != nil {
+		return x.Folder
+	}
+	return nil
+}
+
 type CreateFolderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Folder        *Folder                `protobuf:"bytes,1,opt,name=folder,proto3" json:"folder,omitempty"`
@@ -162,7 +370,7 @@ type CreateFolderResponse struct {
 
 func (x *CreateFolderResponse) Reset() {
 	*x = CreateFolderResponse{}
-	mi := &file_rpc_folder_proto_msgTypes[3]
+	mi := &file_rpc_folder_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -174,7 +382,7 @@ func (x *CreateFolderResponse) String() string {
 func (*CreateFolderResponse) ProtoMessage() {}
 
 func (x *CreateFolderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[3]
+	mi := &file_rpc_folder_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -187,7 +395,7 @@ func (x *CreateFolderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFolderResponse.ProtoReflect.Descriptor instead.
 func (*CreateFolderResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{3}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CreateFolderResponse) GetFolder() *Folder {
@@ -206,7 +414,7 @@ type GetFolderRequest struct {
 
 func (x *GetFolderRequest) Reset() {
 	*x = GetFolderRequest{}
-	mi := &file_rpc_folder_proto_msgTypes[4]
+	mi := &file_rpc_folder_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -218,7 +426,7 @@ func (x *GetFolderRequest) String() string {
 func (*GetFolderRequest) ProtoMessage() {}
 
 func (x *GetFolderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[4]
+	mi := &file_rpc_folder_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -231,7 +439,7 @@ func (x *GetFolderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFolderRequest.ProtoReflect.Descriptor instead.
 func (*GetFolderRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{4}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetFolderRequest) GetFolderId() string {
@@ -250,7 +458,7 @@ type GetFolderResponse struct {
 
 func (x *GetFolderResponse) Reset() {
 	*x = GetFolderResponse{}
-	mi := &file_rpc_folder_proto_msgTypes[5]
+	mi := &file_rpc_folder_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -262,7 +470,7 @@ func (x *GetFolderResponse) String() string {
 func (*GetFolderResponse) ProtoMessage() {}
 
 func (x *GetFolderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[5]
+	mi := &file_rpc_folder_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -275,7 +483,7 @@ func (x *GetFolderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFolderResponse.ProtoReflect.Descriptor instead.
 func (*GetFolderResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{5}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetFolderResponse) GetData() *FolderWithDecks {
@@ -296,7 +504,7 @@ type UpdateFolderRequest struct {
 
 func (x *UpdateFolderRequest) Reset() {
 	*x = UpdateFolderRequest{}
-	mi := &file_rpc_folder_proto_msgTypes[6]
+	mi := &file_rpc_folder_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -308,7 +516,7 @@ func (x *UpdateFolderRequest) String() string {
 func (*UpdateFolderRequest) ProtoMessage() {}
 
 func (x *UpdateFolderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[6]
+	mi := &file_rpc_folder_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -321,7 +529,7 @@ func (x *UpdateFolderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateFolderRequest.ProtoReflect.Descriptor instead.
 func (*UpdateFolderRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{6}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *UpdateFolderRequest) GetFolderId() string {
@@ -354,7 +562,7 @@ type UpdateFolderResponse struct {
 
 func (x *UpdateFolderResponse) Reset() {
 	*x = UpdateFolderResponse{}
-	mi := &file_rpc_folder_proto_msgTypes[7]
+	mi := &file_rpc_folder_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -366,7 +574,7 @@ func (x *UpdateFolderResponse) String() string {
 func (*UpdateFolderResponse) ProtoMessage() {}
 
 func (x *UpdateFolderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[7]
+	mi := &file_rpc_folder_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -379,7 +587,7 @@ func (x *UpdateFolderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateFolderResponse.ProtoReflect.Descriptor instead.
 func (*UpdateFolderResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{7}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *UpdateFolderResponse) GetFolder() *Folder {
@@ -398,7 +606,7 @@ type DeleteFolderRequest struct {
 
 func (x *DeleteFolderRequest) Reset() {
 	*x = DeleteFolderRequest{}
-	mi := &file_rpc_folder_proto_msgTypes[8]
+	mi := &file_rpc_folder_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -410,7 +618,7 @@ func (x *DeleteFolderRequest) String() string {
 func (*DeleteFolderRequest) ProtoMessage() {}
 
 func (x *DeleteFolderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[8]
+	mi := &file_rpc_folder_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -423,7 +631,7 @@ func (x *DeleteFolderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteFolderRequest.ProtoReflect.Descriptor instead.
 func (*DeleteFolderRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{8}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *DeleteFolderRequest) GetFolderId() string {
@@ -442,7 +650,7 @@ type DeleteFolderResponse struct {
 
 func (x *DeleteFolderResponse) Reset() {
 	*x = DeleteFolderResponse{}
-	mi := &file_rpc_folder_proto_msgTypes[9]
+	mi := &file_rpc_folder_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -454,7 +662,7 @@ func (x *DeleteFolderResponse) String() string {
 func (*DeleteFolderResponse) ProtoMessage() {}
 
 func (x *DeleteFolderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[9]
+	mi := &file_rpc_folder_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -467,7 +675,7 @@ func (x *DeleteFolderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteFolderResponse.ProtoReflect.Descriptor instead.
 func (*DeleteFolderResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{9}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *DeleteFolderResponse) GetSuccess() bool {
@@ -487,7 +695,7 @@ type AddDeckToFolderRequest struct {
 
 func (x *AddDeckToFolderRequest) Reset() {
 	*x = AddDeckToFolderRequest{}
-	mi := &file_rpc_folder_proto_msgTypes[10]
+	mi := &file_rpc_folder_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -499,7 +707,7 @@ func (x *AddDeckToFolderRequest) String() string {
 func (*AddDeckToFolderRequest) ProtoMessage() {}
 
 func (x *AddDeckToFolderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[10]
+	mi := &file_rpc_folder_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -512,7 +720,7 @@ func (x *AddDeckToFolderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddDeckToFolderRequest.ProtoReflect.Descriptor instead.
 func (*AddDeckToFolderRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{10}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *AddDeckToFolderRequest) GetFolderId() string {
@@ -538,7 +746,7 @@ type AddDeckToFolderResponse struct {
 
 func (x *AddDeckToFolderResponse) Reset() {
 	*x = AddDeckToFolderResponse{}
-	mi := &file_rpc_folder_proto_msgTypes[11]
+	mi := &file_rpc_folder_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -550,7 +758,7 @@ func (x *AddDeckToFolderResponse) String() string {
 func (*AddDeckToFolderResponse) ProtoMessage() {}
 
 func (x *AddDeckToFolderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[11]
+	mi := &file_rpc_folder_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -563,7 +771,7 @@ func (x *AddDeckToFolderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddDeckToFolderResponse.ProtoReflect.Descriptor instead.
 func (*AddDeckToFolderResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{11}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *AddDeckToFolderResponse) GetSuccess() bool {
@@ -583,7 +791,7 @@ type RemoveDeckFromFolderRequest struct {
 
 func (x *RemoveDeckFromFolderRequest) Reset() {
 	*x = RemoveDeckFromFolderRequest{}
-	mi := &file_rpc_folder_proto_msgTypes[12]
+	mi := &file_rpc_folder_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -595,7 +803,7 @@ func (x *RemoveDeckFromFolderRequest) String() string {
 func (*RemoveDeckFromFolderRequest) ProtoMessage() {}
 
 func (x *RemoveDeckFromFolderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[12]
+	mi := &file_rpc_folder_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -608,7 +816,7 @@ func (x *RemoveDeckFromFolderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveDeckFromFolderRequest.ProtoReflect.Descriptor instead.
 func (*RemoveDeckFromFolderRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{12}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *RemoveDeckFromFolderRequest) GetFolderId() string {
@@ -634,7 +842,7 @@ type RemoveDeckFromFolderResponse struct {
 
 func (x *RemoveDeckFromFolderResponse) Reset() {
 	*x = RemoveDeckFromFolderResponse{}
-	mi := &file_rpc_folder_proto_msgTypes[13]
+	mi := &file_rpc_folder_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -646,7 +854,7 @@ func (x *RemoveDeckFromFolderResponse) String() string {
 func (*RemoveDeckFromFolderResponse) ProtoMessage() {}
 
 func (x *RemoveDeckFromFolderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_folder_proto_msgTypes[13]
+	mi := &file_rpc_folder_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -659,7 +867,7 @@ func (x *RemoveDeckFromFolderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveDeckFromFolderResponse.ProtoReflect.Descriptor instead.
 func (*RemoveDeckFromFolderResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_folder_proto_rawDescGZIP(), []int{13}
+	return file_rpc_folder_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *RemoveDeckFromFolderResponse) GetSuccess() bool {
@@ -677,10 +885,24 @@ const file_rpc_folder_proto_rawDesc = "" +
 	"\x12ListFoldersRequest\";\n" +
 	"\x13ListFoldersResponse\x12$\n" +
 	"\afolders\x18\x01 \x03(\v2\n" +
-	".pb.FolderR\afolders\"K\n" +
+	".pb.FolderR\afolders\"h\n" +
 	"\x13CreateFolderRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\":\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1b\n" +
+	"\tis_public\x18\x03 \x01(\bR\bisPublic\"K\n" +
+	"\x18ListPublicFoldersRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"W\n" +
+	"\x19ListPublicFoldersResponse\x12$\n" +
+	"\afolders\x18\x01 \x03(\v2\n" +
+	".pb.FolderR\afolders\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\"Y\n" +
+	"\x1dUpdateFolderVisibilityRequest\x12\x1b\n" +
+	"\tfolder_id\x18\x01 \x01(\tR\bfolderId\x12\x1b\n" +
+	"\tis_public\x18\x02 \x01(\bR\bisPublic\"D\n" +
+	"\x1eUpdateFolderVisibilityResponse\x12\"\n" +
+	"\x06folder\x18\x01 \x01(\v2\n" +
+	".pb.FolderR\x06folder\":\n" +
 	"\x14CreateFolderResponse\x12\"\n" +
 	"\x06folder\x18\x01 \x01(\v2\n" +
 	".pb.FolderR\x06folder\"/\n" +
@@ -722,35 +944,41 @@ func file_rpc_folder_proto_rawDescGZIP() []byte {
 	return file_rpc_folder_proto_rawDescData
 }
 
-var file_rpc_folder_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_rpc_folder_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_rpc_folder_proto_goTypes = []any{
-	(*ListFoldersRequest)(nil),           // 0: pb.ListFoldersRequest
-	(*ListFoldersResponse)(nil),          // 1: pb.ListFoldersResponse
-	(*CreateFolderRequest)(nil),          // 2: pb.CreateFolderRequest
-	(*CreateFolderResponse)(nil),         // 3: pb.CreateFolderResponse
-	(*GetFolderRequest)(nil),             // 4: pb.GetFolderRequest
-	(*GetFolderResponse)(nil),            // 5: pb.GetFolderResponse
-	(*UpdateFolderRequest)(nil),          // 6: pb.UpdateFolderRequest
-	(*UpdateFolderResponse)(nil),         // 7: pb.UpdateFolderResponse
-	(*DeleteFolderRequest)(nil),          // 8: pb.DeleteFolderRequest
-	(*DeleteFolderResponse)(nil),         // 9: pb.DeleteFolderResponse
-	(*AddDeckToFolderRequest)(nil),       // 10: pb.AddDeckToFolderRequest
-	(*AddDeckToFolderResponse)(nil),      // 11: pb.AddDeckToFolderResponse
-	(*RemoveDeckFromFolderRequest)(nil),  // 12: pb.RemoveDeckFromFolderRequest
-	(*RemoveDeckFromFolderResponse)(nil), // 13: pb.RemoveDeckFromFolderResponse
-	(*Folder)(nil),                       // 14: pb.Folder
-	(*FolderWithDecks)(nil),              // 15: pb.FolderWithDecks
+	(*ListFoldersRequest)(nil),             // 0: pb.ListFoldersRequest
+	(*ListFoldersResponse)(nil),            // 1: pb.ListFoldersResponse
+	(*CreateFolderRequest)(nil),            // 2: pb.CreateFolderRequest
+	(*ListPublicFoldersRequest)(nil),       // 3: pb.ListPublicFoldersRequest
+	(*ListPublicFoldersResponse)(nil),      // 4: pb.ListPublicFoldersResponse
+	(*UpdateFolderVisibilityRequest)(nil),  // 5: pb.UpdateFolderVisibilityRequest
+	(*UpdateFolderVisibilityResponse)(nil), // 6: pb.UpdateFolderVisibilityResponse
+	(*CreateFolderResponse)(nil),           // 7: pb.CreateFolderResponse
+	(*GetFolderRequest)(nil),               // 8: pb.GetFolderRequest
+	(*GetFolderResponse)(nil),              // 9: pb.GetFolderResponse
+	(*UpdateFolderRequest)(nil),            // 10: pb.UpdateFolderRequest
+	(*UpdateFolderResponse)(nil),           // 11: pb.UpdateFolderResponse
+	(*DeleteFolderRequest)(nil),            // 12: pb.DeleteFolderRequest
+	(*DeleteFolderResponse)(nil),           // 13: pb.DeleteFolderResponse
+	(*AddDeckToFolderRequest)(nil),         // 14: pb.AddDeckToFolderRequest
+	(*AddDeckToFolderResponse)(nil),        // 15: pb.AddDeckToFolderResponse
+	(*RemoveDeckFromFolderRequest)(nil),    // 16: pb.RemoveDeckFromFolderRequest
+	(*RemoveDeckFromFolderResponse)(nil),   // 17: pb.RemoveDeckFromFolderResponse
+	(*Folder)(nil),                         // 18: pb.Folder
+	(*FolderWithDecks)(nil),                // 19: pb.FolderWithDecks
 }
 var file_rpc_folder_proto_depIdxs = []int32{
-	14, // 0: pb.ListFoldersResponse.folders:type_name -> pb.Folder
-	14, // 1: pb.CreateFolderResponse.folder:type_name -> pb.Folder
-	15, // 2: pb.GetFolderResponse.data:type_name -> pb.FolderWithDecks
-	14, // 3: pb.UpdateFolderResponse.folder:type_name -> pb.Folder
-	4,  // [4:4] is the sub-list for method output_type
-	4,  // [4:4] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	18, // 0: pb.ListFoldersResponse.folders:type_name -> pb.Folder
+	18, // 1: pb.ListPublicFoldersResponse.folders:type_name -> pb.Folder
+	18, // 2: pb.UpdateFolderVisibilityResponse.folder:type_name -> pb.Folder
+	18, // 3: pb.CreateFolderResponse.folder:type_name -> pb.Folder
+	19, // 4: pb.GetFolderResponse.data:type_name -> pb.FolderWithDecks
+	18, // 5: pb.UpdateFolderResponse.folder:type_name -> pb.Folder
+	6,  // [6:6] is the sub-list for method output_type
+	6,  // [6:6] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_rpc_folder_proto_init() }
@@ -765,7 +993,7 @@ func file_rpc_folder_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_rpc_folder_proto_rawDesc), len(file_rpc_folder_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -16,6 +16,7 @@ type CreateFolderParams struct {
 	UserID      uuid.UUID
 	Name        string
 	Description *string
+	IsPublic    bool
 }
 
 type UpdateFolderParams struct {
@@ -25,6 +26,16 @@ type UpdateFolderParams struct {
 	Description *string
 }
 
+type ListPublicFoldersParams struct {
+	Limit  int32
+	Offset int32
+}
+
+type FoldersPage struct {
+	Folders []db.Folder
+	Total   int64
+}
+
 type FolderWithDecks struct {
 	Folder db.Folder
 	Decks  []db.Deck
@@ -32,9 +43,11 @@ type FolderWithDecks struct {
 
 type FolderService interface {
 	CreateFolder(ctx context.Context, p CreateFolderParams) (db.Folder, error)
-	GetFolder(ctx context.Context, folderID, userID uuid.UUID) (FolderWithDecks, error)
+	GetFolder(ctx context.Context, folderID, userID uuid.UUID, publicOK bool) (FolderWithDecks, error)
 	ListFolders(ctx context.Context, userID uuid.UUID) ([]db.Folder, error)
+	ListPublicFolders(ctx context.Context, p ListPublicFoldersParams) (FoldersPage, error)
 	UpdateFolder(ctx context.Context, p UpdateFolderParams) (db.Folder, error)
+	UpdateFolderVisibility(ctx context.Context, folderID, userID uuid.UUID, isPublic bool) (db.Folder, error)
 	DeleteFolder(ctx context.Context, folderID, userID uuid.UUID) error
 	AddDeckToFolder(ctx context.Context, folderID, deckID, userID uuid.UUID) error
 	RemoveDeckFromFolder(ctx context.Context, folderID, deckID, userID uuid.UUID) error
@@ -70,6 +83,7 @@ func (s *folderService) CreateFolder(ctx context.Context, p CreateFolderParams) 
 		UserID:      p.UserID,
 		Name:        p.Name,
 		Description: nullStr(p.Description),
+		IsPublic:    p.IsPublic,
 	})
 	if err != nil {
 		return db.Folder{}, err
@@ -79,6 +93,7 @@ func (s *folderService) CreateFolder(ctx context.Context, p CreateFolderParams) 
 		UserID:      folder.UserID.String(),
 		Name:        folder.Name,
 		Description: nullStrVal(folder.Description),
+		IsPublic:    folder.IsPublic,
 		CreatedAt:   folder.CreatedAt,
 	}); pubErr != nil {
 		log.Printf("[publisher] folder.created: %v", pubErr)
@@ -86,23 +101,53 @@ func (s *folderService) CreateFolder(ctx context.Context, p CreateFolderParams) 
 	return folder, nil
 }
 
-func (s *folderService) GetFolder(ctx context.Context, folderID, userID uuid.UUID) (FolderWithDecks, error) {
+func (s *folderService) GetFolder(ctx context.Context, folderID, userID uuid.UUID, publicOK bool) (FolderWithDecks, error) {
 	folder, err := s.folderRepo.GetFolderByID(ctx, folderID)
 	if err != nil {
 		return FolderWithDecks{}, err
 	}
-	if folder.UserID != userID {
-		return FolderWithDecks{}, domain.ErrForbidden
+	isOwner := folder.UserID == userID
+	if !isOwner {
+		if !publicOK || !folder.IsPublic {
+			return FolderWithDecks{}, domain.ErrForbidden
+		}
 	}
 	decks, err := s.folderDeckRepo.ListDecksByFolder(ctx, folderID)
 	if err != nil {
 		return FolderWithDecks{}, err
+	}
+	if !isOwner {
+		visible := decks[:0]
+		for _, d := range decks {
+			if d.IsPublic && d.Status == string(db.ContentStatusActive) {
+				visible = append(visible, d)
+			}
+		}
+		decks = visible
 	}
 	return FolderWithDecks{Folder: folder, Decks: decks}, nil
 }
 
 func (s *folderService) ListFolders(ctx context.Context, userID uuid.UUID) ([]db.Folder, error) {
 	return s.folderRepo.ListFoldersByUser(ctx, userID)
+}
+
+func (s *folderService) ListPublicFolders(ctx context.Context, p ListPublicFoldersParams) (FoldersPage, error) {
+	if p.Limit <= 0 {
+		p.Limit = 20
+	}
+	folders, err := s.folderRepo.ListPublicFolders(ctx, db.ListPublicFoldersParams{
+		Limit:  p.Limit,
+		Offset: p.Offset,
+	})
+	if err != nil {
+		return FoldersPage{}, err
+	}
+	total, err := s.folderRepo.CountPublicFolders(ctx)
+	if err != nil {
+		return FoldersPage{}, err
+	}
+	return FoldersPage{Folders: folders, Total: total}, nil
 }
 
 func (s *folderService) UpdateFolder(ctx context.Context, p UpdateFolderParams) (db.Folder, error) {
@@ -127,9 +172,39 @@ func (s *folderService) UpdateFolder(ctx context.Context, p UpdateFolderParams) 
 		UserID:      updated.UserID.String(),
 		Name:        updated.Name,
 		Description: nullStrVal(updated.Description),
+		IsPublic:    updated.IsPublic,
 		UpdatedAt:   updated.UpdatedAt,
 	}); pubErr != nil {
 		log.Printf("[publisher] folder.updated: %v", pubErr)
+	}
+	return updated, nil
+}
+
+func (s *folderService) UpdateFolderVisibility(ctx context.Context, folderID, userID uuid.UUID, isPublic bool) (db.Folder, error) {
+	folder, err := s.folderRepo.GetFolderByID(ctx, folderID)
+	if err != nil {
+		return db.Folder{}, err
+	}
+	if folder.UserID != userID {
+		return db.Folder{}, domain.ErrForbidden
+	}
+	updated, err := s.folderRepo.UpdateFolderVisibility(ctx, db.UpdateFolderVisibilityParams{
+		FolderID: folderID,
+		UserID:   userID,
+		IsPublic: isPublic,
+	})
+	if err != nil {
+		return db.Folder{}, err
+	}
+	if pubErr := s.pub.PublishFolderUpdated(ctx, publisher.FolderUpdatedEvent{
+		FolderID:    updated.FolderID.String(),
+		UserID:      updated.UserID.String(),
+		Name:        updated.Name,
+		Description: nullStrVal(updated.Description),
+		IsPublic:    updated.IsPublic,
+		UpdatedAt:   updated.UpdatedAt,
+	}); pubErr != nil {
+		log.Printf("[publisher] folder.updated (visibility): %v", pubErr)
 	}
 	return updated, nil
 }
@@ -192,4 +267,3 @@ func (s *folderService) RemoveDeckFromFolder(ctx context.Context, folderID, deck
 		DeckID:   deckID,
 	})
 }
-

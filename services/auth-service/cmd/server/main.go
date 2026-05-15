@@ -130,7 +130,7 @@ func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server) {
 
 	srv := &http.Server{
 		Addr:         cfg.HTTPServerAddress,
-		Handler:      httpMux,
+		Handler:      withCORS(httpMux),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,

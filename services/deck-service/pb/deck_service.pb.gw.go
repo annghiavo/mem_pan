@@ -83,6 +83,41 @@ func local_request_DeckService_CreateFolder_0(ctx context.Context, marshaler run
 	return msg, metadata, err
 }
 
+var filter_DeckService_ListPublicFolders_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
+func request_DeckService_ListPublicFolders_0(ctx context.Context, marshaler runtime.Marshaler, client DeckServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq ListPublicFoldersRequest
+		metadata runtime.ServerMetadata
+	)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DeckService_ListPublicFolders_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.ListPublicFolders(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_DeckService_ListPublicFolders_0(ctx context.Context, marshaler runtime.Marshaler, server DeckServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq ListPublicFoldersRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DeckService_ListPublicFolders_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.ListPublicFolders(ctx, &protoReq)
+	return msg, metadata, err
+}
+
 func request_DeckService_GetFolder_0(ctx context.Context, marshaler runtime.Marshaler, client DeckServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq GetFolderRequest
@@ -119,6 +154,51 @@ func local_request_DeckService_GetFolder_0(ctx context.Context, marshaler runtim
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "folder_id", err)
 	}
 	msg, err := server.GetFolder(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_DeckService_UpdateFolderVisibility_0(ctx context.Context, marshaler runtime.Marshaler, client DeckServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq UpdateFolderVisibilityRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["folder_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "folder_id")
+	}
+	protoReq.FolderId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "folder_id", err)
+	}
+	msg, err := client.UpdateFolderVisibility(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_DeckService_UpdateFolderVisibility_0(ctx context.Context, marshaler runtime.Marshaler, server DeckServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq UpdateFolderVisibilityRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["folder_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "folder_id")
+	}
+	protoReq.FolderId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "folder_id", err)
+	}
+	msg, err := server.UpdateFolderVisibility(ctx, &protoReq)
 	return msg, metadata, err
 }
 
@@ -1086,6 +1166,26 @@ func RegisterDeckServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		}
 		forward_DeckService_CreateFolder_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_DeckService_ListPublicFolders_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.DeckService/ListPublicFolders", runtime.WithHTTPPathPattern("/v1/folders/public"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_DeckService_ListPublicFolders_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_DeckService_ListPublicFolders_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	mux.Handle(http.MethodGet, pattern_DeckService_GetFolder_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -1105,6 +1205,26 @@ func RegisterDeckServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 			return
 		}
 		forward_DeckService_GetFolder_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPatch, pattern_DeckService_UpdateFolderVisibility_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/pb.DeckService/UpdateFolderVisibility", runtime.WithHTTPPathPattern("/v1/folders/{folder_id}/visibility"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_DeckService_UpdateFolderVisibility_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_DeckService_UpdateFolderVisibility_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodPatch, pattern_DeckService_UpdateFolder_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -1620,6 +1740,23 @@ func RegisterDeckServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		}
 		forward_DeckService_CreateFolder_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_DeckService_ListPublicFolders_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/pb.DeckService/ListPublicFolders", runtime.WithHTTPPathPattern("/v1/folders/public"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_DeckService_ListPublicFolders_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_DeckService_ListPublicFolders_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	mux.Handle(http.MethodGet, pattern_DeckService_GetFolder_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -1636,6 +1773,23 @@ func RegisterDeckServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 			return
 		}
 		forward_DeckService_GetFolder_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPatch, pattern_DeckService_UpdateFolderVisibility_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/pb.DeckService/UpdateFolderVisibility", runtime.WithHTTPPathPattern("/v1/folders/{folder_id}/visibility"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_DeckService_UpdateFolderVisibility_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_DeckService_UpdateFolderVisibility_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodPatch, pattern_DeckService_UpdateFolder_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -2015,57 +2169,61 @@ func RegisterDeckServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 }
 
 var (
-	pattern_DeckService_ListFolders_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "folders"}, ""))
-	pattern_DeckService_CreateFolder_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "folders"}, ""))
-	pattern_DeckService_GetFolder_0            = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "folders", "folder_id"}, ""))
-	pattern_DeckService_UpdateFolder_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "folders", "folder_id"}, ""))
-	pattern_DeckService_DeleteFolder_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "folders", "folder_id"}, ""))
-	pattern_DeckService_AddDeckToFolder_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "folders", "folder_id", "decks", "deck_id"}, ""))
-	pattern_DeckService_RemoveDeckFromFolder_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "folders", "folder_id", "decks", "deck_id"}, ""))
-	pattern_DeckService_ListDecks_0            = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "decks"}, ""))
-	pattern_DeckService_CreateDeck_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "decks"}, ""))
-	pattern_DeckService_ListPublicDecks_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "decks", "public"}, ""))
-	pattern_DeckService_GetDeck_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "decks", "deck_id"}, ""))
-	pattern_DeckService_UpdateDeck_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "decks", "deck_id"}, ""))
-	pattern_DeckService_DeleteDeck_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "decks", "deck_id"}, ""))
-	pattern_DeckService_UpdateDeckSettings_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "settings"}, ""))
-	pattern_DeckService_UpdateDeckVisibility_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "visibility"}, ""))
-	pattern_DeckService_CloneDeck_0            = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "clone"}, ""))
-	pattern_DeckService_GetDeckStats_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "stats"}, ""))
-	pattern_DeckService_ListDeckCards_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "cards"}, ""))
-	pattern_DeckService_CreateCard_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "cards"}, ""))
-	pattern_DeckService_BulkCreateCards_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "decks", "deck_id", "cards", "bulk"}, ""))
-	pattern_DeckService_ParseImportFile_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "import", "parse"}, ""))
-	pattern_DeckService_GetCard_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "cards", "card_id"}, ""))
-	pattern_DeckService_UpdateCard_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "cards", "card_id"}, ""))
-	pattern_DeckService_DeleteCard_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "cards", "card_id"}, ""))
-	pattern_DeckService_ReportDeck_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "reports"}, ""))
+	pattern_DeckService_ListFolders_0            = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "folders"}, ""))
+	pattern_DeckService_CreateFolder_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "folders"}, ""))
+	pattern_DeckService_ListPublicFolders_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "folders", "public"}, ""))
+	pattern_DeckService_GetFolder_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "folders", "folder_id"}, ""))
+	pattern_DeckService_UpdateFolderVisibility_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "folders", "folder_id", "visibility"}, ""))
+	pattern_DeckService_UpdateFolder_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "folders", "folder_id"}, ""))
+	pattern_DeckService_DeleteFolder_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "folders", "folder_id"}, ""))
+	pattern_DeckService_AddDeckToFolder_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "folders", "folder_id", "decks", "deck_id"}, ""))
+	pattern_DeckService_RemoveDeckFromFolder_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "folders", "folder_id", "decks", "deck_id"}, ""))
+	pattern_DeckService_ListDecks_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "decks"}, ""))
+	pattern_DeckService_CreateDeck_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "decks"}, ""))
+	pattern_DeckService_ListPublicDecks_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "decks", "public"}, ""))
+	pattern_DeckService_GetDeck_0                = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "decks", "deck_id"}, ""))
+	pattern_DeckService_UpdateDeck_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "decks", "deck_id"}, ""))
+	pattern_DeckService_DeleteDeck_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "decks", "deck_id"}, ""))
+	pattern_DeckService_UpdateDeckSettings_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "settings"}, ""))
+	pattern_DeckService_UpdateDeckVisibility_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "visibility"}, ""))
+	pattern_DeckService_CloneDeck_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "clone"}, ""))
+	pattern_DeckService_GetDeckStats_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "stats"}, ""))
+	pattern_DeckService_ListDeckCards_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "cards"}, ""))
+	pattern_DeckService_CreateCard_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "cards"}, ""))
+	pattern_DeckService_BulkCreateCards_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 2, 4}, []string{"v1", "decks", "deck_id", "cards", "bulk"}, ""))
+	pattern_DeckService_ParseImportFile_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "import", "parse"}, ""))
+	pattern_DeckService_GetCard_0                = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "cards", "card_id"}, ""))
+	pattern_DeckService_UpdateCard_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "cards", "card_id"}, ""))
+	pattern_DeckService_DeleteCard_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "cards", "card_id"}, ""))
+	pattern_DeckService_ReportDeck_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "decks", "deck_id", "reports"}, ""))
 )
 
 var (
-	forward_DeckService_ListFolders_0          = runtime.ForwardResponseMessage
-	forward_DeckService_CreateFolder_0         = runtime.ForwardResponseMessage
-	forward_DeckService_GetFolder_0            = runtime.ForwardResponseMessage
-	forward_DeckService_UpdateFolder_0         = runtime.ForwardResponseMessage
-	forward_DeckService_DeleteFolder_0         = runtime.ForwardResponseMessage
-	forward_DeckService_AddDeckToFolder_0      = runtime.ForwardResponseMessage
-	forward_DeckService_RemoveDeckFromFolder_0 = runtime.ForwardResponseMessage
-	forward_DeckService_ListDecks_0            = runtime.ForwardResponseMessage
-	forward_DeckService_CreateDeck_0           = runtime.ForwardResponseMessage
-	forward_DeckService_ListPublicDecks_0      = runtime.ForwardResponseMessage
-	forward_DeckService_GetDeck_0              = runtime.ForwardResponseMessage
-	forward_DeckService_UpdateDeck_0           = runtime.ForwardResponseMessage
-	forward_DeckService_DeleteDeck_0           = runtime.ForwardResponseMessage
-	forward_DeckService_UpdateDeckSettings_0   = runtime.ForwardResponseMessage
-	forward_DeckService_UpdateDeckVisibility_0 = runtime.ForwardResponseMessage
-	forward_DeckService_CloneDeck_0            = runtime.ForwardResponseMessage
-	forward_DeckService_GetDeckStats_0         = runtime.ForwardResponseMessage
-	forward_DeckService_ListDeckCards_0        = runtime.ForwardResponseMessage
-	forward_DeckService_CreateCard_0           = runtime.ForwardResponseMessage
-	forward_DeckService_BulkCreateCards_0      = runtime.ForwardResponseMessage
-	forward_DeckService_ParseImportFile_0      = runtime.ForwardResponseMessage
-	forward_DeckService_GetCard_0              = runtime.ForwardResponseMessage
-	forward_DeckService_UpdateCard_0           = runtime.ForwardResponseMessage
-	forward_DeckService_DeleteCard_0           = runtime.ForwardResponseMessage
-	forward_DeckService_ReportDeck_0           = runtime.ForwardResponseMessage
+	forward_DeckService_ListFolders_0            = runtime.ForwardResponseMessage
+	forward_DeckService_CreateFolder_0           = runtime.ForwardResponseMessage
+	forward_DeckService_ListPublicFolders_0      = runtime.ForwardResponseMessage
+	forward_DeckService_GetFolder_0              = runtime.ForwardResponseMessage
+	forward_DeckService_UpdateFolderVisibility_0 = runtime.ForwardResponseMessage
+	forward_DeckService_UpdateFolder_0           = runtime.ForwardResponseMessage
+	forward_DeckService_DeleteFolder_0           = runtime.ForwardResponseMessage
+	forward_DeckService_AddDeckToFolder_0        = runtime.ForwardResponseMessage
+	forward_DeckService_RemoveDeckFromFolder_0   = runtime.ForwardResponseMessage
+	forward_DeckService_ListDecks_0              = runtime.ForwardResponseMessage
+	forward_DeckService_CreateDeck_0             = runtime.ForwardResponseMessage
+	forward_DeckService_ListPublicDecks_0        = runtime.ForwardResponseMessage
+	forward_DeckService_GetDeck_0                = runtime.ForwardResponseMessage
+	forward_DeckService_UpdateDeck_0             = runtime.ForwardResponseMessage
+	forward_DeckService_DeleteDeck_0             = runtime.ForwardResponseMessage
+	forward_DeckService_UpdateDeckSettings_0     = runtime.ForwardResponseMessage
+	forward_DeckService_UpdateDeckVisibility_0   = runtime.ForwardResponseMessage
+	forward_DeckService_CloneDeck_0              = runtime.ForwardResponseMessage
+	forward_DeckService_GetDeckStats_0           = runtime.ForwardResponseMessage
+	forward_DeckService_ListDeckCards_0          = runtime.ForwardResponseMessage
+	forward_DeckService_CreateCard_0             = runtime.ForwardResponseMessage
+	forward_DeckService_BulkCreateCards_0        = runtime.ForwardResponseMessage
+	forward_DeckService_ParseImportFile_0        = runtime.ForwardResponseMessage
+	forward_DeckService_GetCard_0                = runtime.ForwardResponseMessage
+	forward_DeckService_UpdateCard_0             = runtime.ForwardResponseMessage
+	forward_DeckService_DeleteCard_0             = runtime.ForwardResponseMessage
+	forward_DeckService_ReportDeck_0             = runtime.ForwardResponseMessage
 )

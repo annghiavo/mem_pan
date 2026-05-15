@@ -11,8 +11,9 @@ message Folder {
     string user_id     = 2;
     string name        = 3;
     string description = 4;
-    google.protobuf.Timestamp created_at = 5;
-    google.protobuf.Timestamp updated_at = 6;
+    bool   is_public   = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
 }
 
 message FolderWithDecks {

@@ -14,13 +14,31 @@ import (
 )
 
 func (s *Server) SearchFolders(ctx context.Context, req *pb.SearchFoldersRequest) (*pb.SearchFoldersResponse, error) {
-	payload, err := s.authorizeUser(ctx)
-	if err != nil {
-		return nil, err
+	scope := service.FolderScopePublic
+	switch req.GetScope() {
+	case pb.FolderSearchScope_FOLDER_SCOPE_MINE:
+		scope = service.FolderScopeMine
+	case pb.FolderSearchScope_FOLDER_SCOPE_ALL:
+		scope = service.FolderScopeAll
 	}
+
+	callerID := ""
+	if scope == service.FolderScopeMine || scope == service.FolderScopeAll {
+		payload, err := s.authorizeUser(ctx)
+		if err != nil {
+			return nil, err
+		}
+		callerID = payload.UserID.String()
+	} else {
+		if payload, _ := s.optionalUser(ctx); payload != nil {
+			callerID = payload.UserID.String()
+		}
+	}
+
 	result, err := s.svc.SearchFolders(ctx, service.FolderSearchParams{
 		Query:    req.GetQuery(),
-		UserID:   payload.UserID.String(),
+		Scope:    scope,
+		CallerID: callerID,
 		Page:     req.GetPage(),
 		PageSize: req.GetPageSize(),
 	})
@@ -28,21 +46,22 @@ func (s *Server) SearchFolders(ctx context.Context, req *pb.SearchFoldersRequest
 		return nil, status.Error(codes.Internal, "search failed")
 	}
 
-	hits := make([]*pb.FolderHit, 0, len(result.Hits))
+	folders := make([]*pb.Folder, 0, len(result.Hits))
 	for _, h := range result.Hits {
 		var doc es.FolderDoc
 		if err := json.Unmarshal(h.Source, &doc); err != nil {
 			continue
 		}
-		hits = append(hits, &pb.FolderHit{
+		folders = append(folders, &pb.Folder{
 			FolderId:    doc.FolderID,
 			UserId:      doc.UserID,
 			Name:        doc.Name,
 			Description: doc.Description,
+			IsPublic:    doc.IsPublic,
 			CreatedAt:   timestamppb.New(doc.CreatedAt),
 			UpdatedAt:   timestamppb.New(doc.UpdatedAt),
 			Score:       h.Score,
 		})
 	}
-	return &pb.SearchFoldersResponse{Hits: hits, Total: result.Total}, nil
+	return &pb.SearchFoldersResponse{Folders: folders, Total: result.Total}, nil
 }

@@ -15,6 +15,26 @@ message ListFoldersResponse {
 message CreateFolderRequest {
     string name        = 1;
     string description = 2;
+    bool   is_public   = 3;
+}
+
+message ListPublicFoldersRequest {
+    int32 page      = 1;
+    int32 page_size = 2;
+}
+
+message ListPublicFoldersResponse {
+    repeated Folder folders = 1;
+    int64           total   = 2;
+}
+
+message UpdateFolderVisibilityRequest {
+    string folder_id = 1;
+    bool   is_public = 2;
+}
+
+message UpdateFolderVisibilityResponse {
+    Folder folder = 1;
 }
 
 message CreateFolderResponse {

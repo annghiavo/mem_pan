@@ -46,23 +46,25 @@ func (s *Server) SearchDecks(ctx context.Context, req *pb.SearchDecksRequest) (*
 		return nil, status.Error(codes.Internal, "search failed")
 	}
 
-	hits := make([]*pb.DeckHit, 0, len(result.Hits))
+	decks := make([]*pb.Deck, 0, len(result.Hits))
 	for _, h := range result.Hits {
 		var doc es.DeckDoc
 		if err := json.Unmarshal(h.Source, &doc); err != nil {
 			continue
 		}
-		hits = append(hits, &pb.DeckHit{
+		decks = append(decks, &pb.Deck{
 			DeckId:      doc.DeckID,
 			UserId:      doc.UserID,
 			Name:        doc.Name,
 			Description: doc.Description,
 			IsPublic:    doc.IsPublic,
+			Status:      doc.Status,
 			CardCount:   doc.CardCount,
+			ClonedFrom:  doc.ClonedFrom,
 			CreatedAt:   timestamppb.New(doc.CreatedAt),
 			UpdatedAt:   timestamppb.New(doc.UpdatedAt),
 			Score:       h.Score,
 		})
 	}
-	return &pb.SearchDecksResponse{Hits: hits, Total: result.Total}, nil
+	return &pb.SearchDecksResponse{Decks: decks, Total: result.Total}, nil
 }

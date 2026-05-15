@@ -133,7 +133,7 @@
     },
     "/v1/search/folders": {
       "get": {
-        "summary": "Search folders owned by the caller.",
+        "summary": "Search folders (public by default; pass scope=mine for caller's own).",
         "operationId": "SearchService_SearchFolders",
         "responses": {
           "200": {
@@ -157,6 +157,19 @@
             "type": "string"
           },
           {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "FOLDER_SCOPE_UNSPECIFIED",
+              "FOLDER_SCOPE_PUBLIC",
+              "FOLDER_SCOPE_MINE",
+              "FOLDER_SCOPE_ALL"
+            ],
+            "default": "FOLDER_SCOPE_UNSPECIFIED"
+          },
+          {
             "name": "page",
             "in": "query",
             "required": false,
@@ -173,11 +186,6 @@
         ],
         "tags": [
           "search"
-        ],
-        "security": [
-          {
-            "BearerAuth": []
-          }
         ]
       }
     },
@@ -256,7 +264,7 @@
         }
       }
     },
-    "searchCardHit": {
+    "searchCard": {
       "type": "object",
       "properties": {
         "cardId": {
@@ -287,7 +295,7 @@
         }
       }
     },
-    "searchDeckHit": {
+    "searchDeck": {
       "type": "object",
       "properties": {
         "deckId": {
@@ -305,9 +313,15 @@
         "isPublic": {
           "type": "boolean"
         },
+        "status": {
+          "type": "string"
+        },
         "cardCount": {
           "type": "integer",
           "format": "int32"
+        },
+        "clonedFrom": {
+          "type": "string"
         },
         "createdAt": {
           "type": "string",
@@ -333,7 +347,7 @@
       ],
       "default": "DECK_SCOPE_UNSPECIFIED"
     },
-    "searchFolderHit": {
+    "searchFolder": {
       "type": "object",
       "properties": {
         "folderId": {
@@ -347,6 +361,9 @@
         },
         "description": {
           "type": "string"
+        },
+        "isPublic": {
+          "type": "boolean"
         },
         "createdAt": {
           "type": "string",
@@ -362,14 +379,24 @@
         }
       }
     },
+    "searchFolderSearchScope": {
+      "type": "string",
+      "enum": [
+        "FOLDER_SCOPE_UNSPECIFIED",
+        "FOLDER_SCOPE_PUBLIC",
+        "FOLDER_SCOPE_MINE",
+        "FOLDER_SCOPE_ALL"
+      ],
+      "default": "FOLDER_SCOPE_UNSPECIFIED"
+    },
     "searchSearchCardsResponse": {
       "type": "object",
       "properties": {
-        "hits": {
+        "cards": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/searchCardHit"
+            "$ref": "#/definitions/searchCard"
           }
         },
         "total": {
@@ -381,11 +408,11 @@
     "searchSearchDecksResponse": {
       "type": "object",
       "properties": {
-        "hits": {
+        "decks": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/searchDeckHit"
+            "$ref": "#/definitions/searchDeck"
           }
         },
         "total": {
@@ -397,11 +424,11 @@
     "searchSearchFoldersResponse": {
       "type": "object",
       "properties": {
-        "hits": {
+        "folders": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/searchFolderHit"
+            "$ref": "#/definitions/searchFolder"
           }
         },
         "total": {
@@ -413,11 +440,11 @@
     "searchSearchUsersResponse": {
       "type": "object",
       "properties": {
-        "hits": {
+        "users": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/searchUserHit"
+            "$ref": "#/definitions/searchUser"
           }
         },
         "total": {
@@ -426,7 +453,7 @@
         }
       }
     },
-    "searchUserHit": {
+    "searchUser": {
       "type": "object",
       "properties": {
         "userId": {

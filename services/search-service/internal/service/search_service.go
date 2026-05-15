@@ -44,9 +44,18 @@ type DeckSearchParams struct {
 	PageSize int32
 }
 
+type FolderScope int
+
+const (
+	FolderScopePublic FolderScope = iota
+	FolderScopeMine
+	FolderScopeAll
+)
+
 type FolderSearchParams struct {
 	Query    string
-	UserID   string // required
+	Scope    FolderScope
+	CallerID string // empty when caller is unauthenticated
 	Page     int32
 	PageSize int32
 }
@@ -148,7 +157,32 @@ func (s *service) SearchDecks(ctx context.Context, p DeckSearchParams) (*es.Sear
 func (s *service) SearchFolders(ctx context.Context, p FolderSearchParams) (*es.SearchResult, error) {
 	from, size := es.PageOffset(p.Page, p.PageSize)
 	must := []map[string]any{es.MultiMatchOrMatchAll(p.Query, []string{"name^3", "description"})}
-	filters := []map[string]any{{"term": map[string]any{"user_id": p.UserID}}}
+
+	var filters []map[string]any
+	switch p.Scope {
+	case FolderScopeMine:
+		if p.CallerID == "" {
+			return &es.SearchResult{Hits: []es.Hit{}}, nil
+		}
+		filters = append(filters, map[string]any{"term": map[string]any{"user_id": p.CallerID}})
+	case FolderScopeAll:
+		if p.CallerID != "" {
+			filters = append(filters, map[string]any{
+				"bool": map[string]any{
+					"should": []map[string]any{
+						{"term": map[string]any{"is_public": true}},
+						{"term": map[string]any{"user_id": p.CallerID}},
+					},
+					"minimum_should_match": 1,
+				},
+			})
+		} else {
+			filters = append(filters, map[string]any{"term": map[string]any{"is_public": true}})
+		}
+	default: // FolderScopePublic
+		filters = append(filters, map[string]any{"term": map[string]any{"is_public": true}})
+	}
+
 	body := map[string]any{
 		"from":  from,
 		"size":  size,

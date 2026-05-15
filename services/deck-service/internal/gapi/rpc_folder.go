@@ -42,6 +42,7 @@ func (s *Server) CreateFolder(ctx context.Context, req *pb.CreateFolderRequest) 
 		UserID:      payload.UserID,
 		Name:        req.Name,
 		Description: nullStrFromProto(req.Description),
+		IsPublic:    req.IsPublic,
 	})
 	if err != nil {
 		return nil, toGRPCError(err)
@@ -60,7 +61,7 @@ func (s *Server) GetFolder(ctx context.Context, req *pb.GetFolderRequest) (*pb.G
 		return nil, status.Error(codes.InvalidArgument, "invalid folder_id")
 	}
 
-	result, err := s.folderSvc.GetFolder(ctx, folderID, payload.UserID)
+	result, err := s.folderSvc.GetFolder(ctx, folderID, payload.UserID, true)
 	if err != nil {
 		return nil, toGRPCError(err)
 	}
@@ -136,6 +137,49 @@ func (s *Server) AddDeckToFolder(ctx context.Context, req *pb.AddDeckToFolderReq
 		return nil, toGRPCError(err)
 	}
 	return &pb.AddDeckToFolderResponse{Success: true}, nil
+}
+
+func (s *Server) ListPublicFolders(ctx context.Context, req *pb.ListPublicFoldersRequest) (*pb.ListPublicFoldersResponse, error) {
+	pageSize := req.PageSize
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	offset := (req.Page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+
+	page, err := s.folderSvc.ListPublicFolders(ctx, service.ListPublicFoldersParams{
+		Limit:  pageSize,
+		Offset: offset,
+	})
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+
+	folders := make([]*pb.Folder, len(page.Folders))
+	for i, f := range page.Folders {
+		folders[i] = dbFolderToPb(f)
+	}
+	return &pb.ListPublicFoldersResponse{Folders: folders, Total: page.Total}, nil
+}
+
+func (s *Server) UpdateFolderVisibility(ctx context.Context, req *pb.UpdateFolderVisibilityRequest) (*pb.UpdateFolderVisibilityResponse, error) {
+	payload, err := s.authorizeUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	folderID, err := uuid.Parse(req.FolderId)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid folder_id")
+	}
+
+	folder, err := s.folderSvc.UpdateFolderVisibility(ctx, folderID, payload.UserID, req.IsPublic)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &pb.UpdateFolderVisibilityResponse{Folder: dbFolderToPb(folder)}, nil
 }
 
 func (s *Server) RemoveDeckFromFolder(ctx context.Context, req *pb.RemoveDeckFromFolderRequest) (*pb.RemoveDeckFromFolderResponse, error) {

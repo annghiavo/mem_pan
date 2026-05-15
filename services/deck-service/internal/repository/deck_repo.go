@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 
@@ -25,15 +26,16 @@ type DeckRepository interface {
 	SoftDeleteDeck(ctx context.Context, arg db.SoftDeleteDeckParams) error
 	IncrementCardCount(ctx context.Context, deckID uuid.UUID) error
 	DecrementCardCount(ctx context.Context, deckID uuid.UUID) error
-	CloneDeck(ctx context.Context, arg db.CloneDeckParams) (db.Deck, error)
+	CloneDeck(ctx context.Context, src db.Deck, newOwnerID uuid.UUID, newName string) (db.Deck, []db.ListCardsByDeckRow, error)
 }
 
 type deckRepository struct {
-	q *db.Queries
+	db *sql.DB
+	q  *db.Queries
 }
 
 func NewDeckRepository(database *sql.DB) DeckRepository {
-	return &deckRepository{q: db.New(database)}
+	return &deckRepository{db: database, q: db.New(database)}
 }
 
 func (r *deckRepository) CreateDeck(ctx context.Context, arg db.CreateDeckParams) (db.Deck, error) {
@@ -100,8 +102,88 @@ func (r *deckRepository) DecrementCardCount(ctx context.Context, deckID uuid.UUI
 	return r.q.DecrementCardCount(ctx, deckID)
 }
 
-func (r *deckRepository) CloneDeck(ctx context.Context, arg db.CloneDeckParams) (db.Deck, error) {
-	return r.q.CloneDeck(ctx, arg)
+// CloneDeck duplicates a source deck under a new owner: creates a new deck row
+// (is_public=FALSE, cloned_from=src.DeckID), copies every note+card with the
+// same position, and sets card_count. Runs inside a single transaction so a
+// partial clone is impossible.
+//
+// Returns the new deck and the freshly cloned cards (with note content) so the
+// caller can emit deck.created + card.created events for search indexing.
+func (r *deckRepository) CloneDeck(ctx context.Context, src db.Deck, newOwnerID uuid.UUID, newName string) (db.Deck, []db.ListCardsByDeckRow, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return db.Deck{}, nil, fmt.Errorf("begin tx: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	q := r.q.WithTx(tx)
+
+	newDeck, err := q.CloneDeck(ctx, db.CloneDeckParams{
+		UserID:      newOwnerID,
+		Name:        newName,
+		Description: src.Description,
+		ClonedFrom:  uuid.NullUUID{UUID: src.DeckID, Valid: true},
+	})
+	if err != nil {
+		return db.Deck{}, nil, fmt.Errorf("insert cloned deck: %w", err)
+	}
+
+	sourceCards, err := q.ListCardsByDeck(ctx, src.DeckID)
+	if err != nil {
+		return db.Deck{}, nil, fmt.Errorf("list source cards: %w", err)
+	}
+
+	clonedCards := make([]db.ListCardsByDeckRow, 0, len(sourceCards))
+	for _, c := range sourceCards {
+		newNote, err := q.CreateNote(ctx, db.CreateNoteParams{
+			UserID:       newOwnerID,
+			ContentFront: c.ContentFront,
+			ContentBack:  c.ContentBack,
+			ImageUrl:     c.ImageUrl,
+			LangFront:    c.LangFront,
+			LangBack:     c.LangBack,
+		})
+		if err != nil {
+			return db.Deck{}, nil, fmt.Errorf("clone note: %w", err)
+		}
+		newCard, err := q.CreateCard(ctx, db.CreateCardParams{
+			UserID:   newOwnerID,
+			DeckID:   newDeck.DeckID,
+			NoteID:   newNote.NoteID,
+			Position: c.Position,
+		})
+		if err != nil {
+			return db.Deck{}, nil, fmt.Errorf("clone card: %w", err)
+		}
+		clonedCards = append(clonedCards, db.ListCardsByDeckRow{
+			CardID:       newCard.CardID,
+			UserID:       newCard.UserID,
+			DeckID:       newCard.DeckID,
+			NoteID:       newCard.NoteID,
+			Position:     newCard.Position,
+			CreatedAt:    newCard.CreatedAt,
+			ContentFront: newNote.ContentFront,
+			ContentBack:  newNote.ContentBack,
+			ImageUrl:     newNote.ImageUrl,
+			LangFront:    newNote.LangFront,
+			LangBack:     newNote.LangBack,
+		})
+	}
+
+	if cnt := int32(len(clonedCards)); cnt > 0 {
+		if _, err := tx.ExecContext(ctx,
+			`UPDATE decks SET card_count = $1, updated_at = now() WHERE deck_id = $2`,
+			cnt, newDeck.DeckID,
+		); err != nil {
+			return db.Deck{}, nil, fmt.Errorf("update card_count: %w", err)
+		}
+		newDeck.CardCount = cnt
+	}
+
+	if err := tx.Commit(); err != nil {
+		return db.Deck{}, nil, fmt.Errorf("commit clone: %w", err)
+	}
+	return newDeck, clonedCards, nil
 }
 
 // DefaultSettings returns the default deck settings as JSON.

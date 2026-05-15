@@ -111,7 +111,7 @@ func runHTTPServer(cfg config.Config, grpcServer *gapi.Server, pushHandler *subs
 
 	httpServer := &http.Server{
 		Addr:         cfg.HTTPServerAddress,
-		Handler:      mux,
+		Handler:      withCORS(mux),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,

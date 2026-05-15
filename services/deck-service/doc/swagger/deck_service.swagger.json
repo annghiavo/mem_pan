@@ -757,6 +757,45 @@
         ]
       }
     },
+    "/v1/folders/public": {
+      "get": {
+        "summary": "Browse public folders",
+        "operationId": "DeckService_ListPublicFolders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbListPublicFoldersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "folders"
+        ]
+      }
+    },
     "/v1/folders/{folderId}": {
       "get": {
         "summary": "Get folder with decks",
@@ -959,6 +998,50 @@
         ]
       }
     },
+    "/v1/folders/{folderId}/visibility": {
+      "patch": {
+        "summary": "Toggle folder visibility",
+        "operationId": "DeckService_UpdateFolderVisibility",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUpdateFolderVisibilityResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeckServiceUpdateFolderVisibilityBody"
+            }
+          }
+        ],
+        "tags": [
+          "folders"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/import/parse": {
       "post": {
         "summary": "Parse CSV/PDF file and preview cards",
@@ -1111,6 +1194,14 @@
         }
       }
     },
+    "DeckServiceUpdateFolderVisibilityBody": {
+      "type": "object",
+      "properties": {
+        "isPublic": {
+          "type": "boolean"
+        }
+      }
+    },
     "pbAddDeckToFolderResponse": {
       "type": "object",
       "properties": {
@@ -1241,6 +1332,9 @@
         },
         "description": {
           "type": "string"
+        },
+        "isPublic": {
+          "type": "boolean"
         }
       }
     },
@@ -1369,6 +1463,9 @@
         "description": {
           "type": "string"
         },
+        "isPublic": {
+          "type": "boolean"
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -1488,6 +1585,22 @@
         }
       }
     },
+    "pbListPublicFoldersResponse": {
+      "type": "object",
+      "properties": {
+        "folders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/pbFolder"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "pbParseImportFileRequest": {
       "type": "object",
       "properties": {
@@ -1577,6 +1690,14 @@
       }
     },
     "pbUpdateFolderResponse": {
+      "type": "object",
+      "properties": {
+        "folder": {
+          "$ref": "#/definitions/pbFolder"
+        }
+      }
+    },
+    "pbUpdateFolderVisibilityResponse": {
       "type": "object",
       "properties": {
         "folder": {

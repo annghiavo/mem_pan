@@ -94,7 +94,7 @@ func TestGetFolder_Success(t *testing.T) {
 	folderDeckRepo.EXPECT().ListDecksByFolder(ctx, folderID).Return([]db.Deck{}, nil)
 
 	svc := NewFolderService(folderRepo, folderDeckRepo, deckRepo)
-	result, err := svc.GetFolder(ctx, folderID, userID)
+	result, err := svc.GetFolder(ctx, folderID, userID, false)
 
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
@@ -121,7 +121,7 @@ func TestGetFolder_Forbidden(t *testing.T) {
 	folderRepo.EXPECT().GetFolderByID(ctx, folderID).Return(folder, nil)
 
 	svc := NewFolderService(folderRepo, folderDeckRepo, deckRepo)
-	_, err := svc.GetFolder(ctx, folderID, otherID)
+	_, err := svc.GetFolder(ctx, folderID, otherID, false)
 
 	if !errors.Is(err, domain.ErrForbidden) {
 		t.Errorf("expected ErrForbidden, got %v", err)

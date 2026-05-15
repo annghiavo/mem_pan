@@ -276,12 +276,35 @@ func (s *deckService) CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uu
 		return db.Deck{}, domain.ErrForbidden
 	}
 	clonedName := "Copy of " + src.Name
-	return s.deckRepo.CloneDeck(ctx, db.CloneDeckParams{
-		UserID:      newOwnerID,
-		Name:        clonedName,
-		Description: src.Description,
-		ClonedFrom:  uuid.NullUUID{UUID: sourceDeckID, Valid: true},
-	})
+	newDeck, newCards, err := s.deckRepo.CloneDeck(ctx, src, newOwnerID, clonedName)
+	if err != nil {
+		return db.Deck{}, err
+	}
+	if pubErr := s.pub.PublishDeckCreated(ctx, publisher.DeckCreatedEvent{
+		DeckID:      newDeck.DeckID.String(),
+		UserID:      newDeck.UserID.String(),
+		DeckName:    newDeck.Name,
+		Description: nullStrVal(newDeck.Description),
+		IsPublic:    newDeck.IsPublic,
+		CardCount:   newDeck.CardCount,
+		CreatedAt:   newDeck.CreatedAt,
+	}); pubErr != nil {
+		log.Printf("[publisher] deck.created (clone): %v", pubErr)
+	}
+	for _, c := range newCards {
+		if pubErr := s.pub.PublishCardCreated(ctx, publisher.CardCreatedEvent{
+			CardID:       c.CardID.String(),
+			DeckID:       c.DeckID.String(),
+			UserID:       c.UserID.String(),
+			NoteID:       c.NoteID.String(),
+			ContentFront: c.ContentFront,
+			ContentBack:  c.ContentBack,
+			CreatedAt:    c.CreatedAt,
+		}); pubErr != nil {
+			log.Printf("[publisher] card.created (clone): %v", pubErr)
+		}
+	}
+	return newDeck, nil
 }
 
 func (s *deckService) GetStats(ctx context.Context, deckID, userID uuid.UUID) (DeckStats, error) {

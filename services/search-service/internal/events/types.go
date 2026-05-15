@@ -76,6 +76,7 @@ type FolderCreated struct {
 	UserID      string    `json:"user_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
+	IsPublic    bool      `json:"is_public"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 
@@ -84,6 +85,7 @@ type FolderUpdated struct {
 	UserID      string    `json:"user_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
+	IsPublic    bool      `json:"is_public"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 

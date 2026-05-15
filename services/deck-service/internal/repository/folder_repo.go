@@ -16,7 +16,10 @@ type FolderRepository interface {
 	CreateFolder(ctx context.Context, arg db.CreateFolderParams) (db.Folder, error)
 	GetFolderByID(ctx context.Context, id uuid.UUID) (db.Folder, error)
 	ListFoldersByUser(ctx context.Context, userID uuid.UUID) ([]db.Folder, error)
+	ListPublicFolders(ctx context.Context, arg db.ListPublicFoldersParams) ([]db.Folder, error)
+	CountPublicFolders(ctx context.Context) (int64, error)
 	UpdateFolder(ctx context.Context, arg db.UpdateFolderParams) (db.Folder, error)
+	UpdateFolderVisibility(ctx context.Context, arg db.UpdateFolderVisibilityParams) (db.Folder, error)
 	DeleteFolder(ctx context.Context, arg db.DeleteFolderParams) error
 }
 
@@ -52,8 +55,24 @@ func (r *folderRepository) ListFoldersByUser(ctx context.Context, userID uuid.UU
 	return r.q.ListFoldersByUser(ctx, userID)
 }
 
+func (r *folderRepository) ListPublicFolders(ctx context.Context, arg db.ListPublicFoldersParams) ([]db.Folder, error) {
+	return r.q.ListPublicFolders(ctx, arg)
+}
+
+func (r *folderRepository) CountPublicFolders(ctx context.Context) (int64, error) {
+	return r.q.CountPublicFolders(ctx)
+}
+
 func (r *folderRepository) UpdateFolder(ctx context.Context, arg db.UpdateFolderParams) (db.Folder, error) {
 	f, err := r.q.UpdateFolder(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.Folder{}, domain.ErrFolderNotFound
+	}
+	return f, err
+}
+
+func (r *folderRepository) UpdateFolderVisibility(ctx context.Context, arg db.UpdateFolderVisibilityParams) (db.Folder, error) {
+	f, err := r.q.UpdateFolderVisibility(ctx, arg)
 	if errors.Is(err, sql.ErrNoRows) {
 		return db.Folder{}, domain.ErrFolderNotFound
 	}

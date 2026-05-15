@@ -184,15 +184,16 @@ func (mr *MockDeckRepositoryMockRecorder) DecrementCardCount(ctx, deckID any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DecrementCardCount", reflect.TypeOf((*MockDeckRepository)(nil).DecrementCardCount), ctx, deckID)
 }
 
-func (m *MockDeckRepository) CloneDeck(ctx context.Context, arg db.CloneDeckParams) (db.Deck, error) {
+func (m *MockDeckRepository) CloneDeck(ctx context.Context, src db.Deck, newOwnerID uuid.UUID, newName string) (db.Deck, []db.ListCardsByDeckRow, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CloneDeck", ctx, arg)
+	ret := m.ctrl.Call(m, "CloneDeck", ctx, src, newOwnerID, newName)
 	ret0, _ := ret[0].(db.Deck)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].([]db.ListCardsByDeckRow)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
-func (mr *MockDeckRepositoryMockRecorder) CloneDeck(ctx, arg any) *gomock.Call {
+func (mr *MockDeckRepositoryMockRecorder) CloneDeck(ctx, src, newOwnerID, newName any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CloneDeck", reflect.TypeOf((*MockDeckRepository)(nil).CloneDeck), ctx, arg)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CloneDeck", reflect.TypeOf((*MockDeckRepository)(nil).CloneDeck), ctx, src, newOwnerID, newName)
 }

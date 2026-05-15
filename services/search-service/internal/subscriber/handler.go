@@ -153,6 +153,7 @@ func (h *Handler) folderCreated(ctx context.Context, data []byte) error {
 		UserID:      e.UserID,
 		Name:        e.Name,
 		Description: e.Description,
+		IsPublic:    e.IsPublic,
 		CreatedAt:   e.CreatedAt,
 		UpdatedAt:   e.CreatedAt,
 	})
@@ -166,6 +167,7 @@ func (h *Handler) folderUpdated(ctx context.Context, data []byte) error {
 	partial := map[string]any{
 		"name":        e.Name,
 		"description": e.Description,
+		"is_public":   e.IsPublic,
 		"user_id":     e.UserID,
 		"updated_at":  e.UpdatedAt,
 	}

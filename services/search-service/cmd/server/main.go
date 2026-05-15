@@ -108,7 +108,7 @@ func runHTTPServer(cfg config.Config, pushHandler *subscriber.PushHandler) {
 
 	httpServer := &http.Server{
 		Addr:         cfg.HTTPServerAddress,
-		Handler:      mux,
+		Handler:      withCORS(mux),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
