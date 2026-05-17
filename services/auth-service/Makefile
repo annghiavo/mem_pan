@@ -49,7 +49,7 @@ check-db-url:
 	@test -n "$(DB_URL)" || (echo "DB_URL, DIRECT_URL, or DATABASE_URL is required" && exit 1)
 
 run:
-	go run cmd/server/main.go
+	go run ./cmd/server/
 
 evans:
 	evans --host localhost --port 9090 -r repl

@@ -156,3 +156,34 @@ func (c *Client) updateDoc(ctx context.Context, index, id string, partial map[st
 	}
 	return nil
 }
+
+// BumpDeckCardCount atomically adjusts the deck's card_count by delta using
+// a painless script. Used so card.created / card.deleted events keep search
+// results' card count in sync without racing on read-modify-write.
+func (c *Client) BumpDeckCardCount(ctx context.Context, deckID string, delta int) error {
+	body, err := json.Marshal(map[string]any{
+		"script": map[string]any{
+			"source": "ctx._source.card_count = (ctx._source.card_count == null ? 0 : ctx._source.card_count) + params.delta; if (ctx._source.card_count < 0) { ctx._source.card_count = 0 }",
+			"lang":   "painless",
+			"params": map[string]any{"delta": delta},
+		},
+	})
+	if err != nil {
+		return err
+	}
+	res, err := c.ES.Update(
+		c.Indices.Deck, deckID,
+		strings.NewReader(string(body)),
+		c.ES.Update.WithContext(ctx),
+	)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	// 404 means the deck document was not yet indexed (e.g. event race) —
+	// safe to ignore, the deck.created/updated event will set the count.
+	if res.IsError() && res.StatusCode != 404 {
+		return fmt.Errorf("bump card_count %s: %s", deckID, res.String())
+	}
+	return nil
+}

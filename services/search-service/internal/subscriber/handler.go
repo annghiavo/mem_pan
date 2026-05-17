@@ -187,7 +187,7 @@ func (h *Handler) cardCreated(ctx context.Context, data []byte) error {
 	if err := json.Unmarshal(data, &e); err != nil {
 		return err
 	}
-	return h.svc.IndexCard(ctx, es.CardDoc{
+	if err := h.svc.IndexCard(ctx, es.CardDoc{
 		CardID:       e.CardID,
 		UserID:       e.UserID,
 		DeckID:       e.DeckID,
@@ -195,7 +195,14 @@ func (h *Handler) cardCreated(ctx context.Context, data []byte) error {
 		ContentFront: e.ContentFront,
 		ContentBack:  e.ContentBack,
 		CreatedAt:    e.CreatedAt,
-	})
+	}); err != nil {
+		return err
+	}
+	// Keep the deck's card_count in sync so search results show the right total.
+	if err := h.svc.BumpDeckCardCount(ctx, e.DeckID, 1); err != nil {
+		log.Printf("[search] bump card_count +1 deck=%s: %v", e.DeckID, err)
+	}
+	return nil
 }
 
 func (h *Handler) cardUpdated(ctx context.Context, data []byte) error {
@@ -218,5 +225,11 @@ func (h *Handler) cardDeleted(ctx context.Context, data []byte) error {
 	if err := json.Unmarshal(data, &e); err != nil {
 		return err
 	}
-	return h.svc.DeleteCard(ctx, e.CardID)
+	if err := h.svc.DeleteCard(ctx, e.CardID); err != nil {
+		return err
+	}
+	if err := h.svc.BumpDeckCardCount(ctx, e.DeckID, -1); err != nil {
+		log.Printf("[search] bump card_count -1 deck=%s: %v", e.DeckID, err)
+	}
+	return nil
 }

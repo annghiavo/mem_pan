@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.3
+    image: traefik:v2.11
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
@@ -201,7 +201,7 @@ services:
       - AUTH_SERVICE_ADDRESS=auth-service:9090
       - PUBSUB_PUSH_SECRET=dev-secret
     volumes:
-      - ../services/notification-service/mempan-cac51-firebase-adminsdk-fbsvc-b4257c1459.json:/mempan-cac51-firebase-adminsdk-fbsvc-b4257c1459.json:ro
+      - ../services/notification-service/mempan-cac51-firebase-adminsdk-fbsvc-fc301037a8.json:/fcm-credentials.json:ro
     depends_on:
       - auth-service
       - pubsub-emulator

@@ -128,6 +128,13 @@ func (h *Handler) handleCardReviewed(ctx context.Context, data []byte) error {
 		return err
 	}
 
+	// Ensure user_stats row exists for legacy users (registered before stats-service
+	// was deployed, or where user.registered event was lost). Without this, the
+	// UPDATEs below silently do nothing and streak/counters stay at 0.
+	if _, err := h.repo.CreateUserStats(ctx, userID, "", ""); err != nil {
+		log.Printf("[stats] ensure user_stats %s: %v", userID, err)
+	}
+
 	isCorrect := e.Rating >= 3
 
 	// 1. Increment overall review counters

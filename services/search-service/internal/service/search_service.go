@@ -17,6 +17,7 @@ type SearchService interface {
 	IndexCard(ctx context.Context, d es.CardDoc) error
 	UpdateCard(ctx context.Context, id string, partial map[string]any) error
 	DeleteCard(ctx context.Context, id string) error
+	BumpDeckCardCount(ctx context.Context, deckID string, delta int) error
 	IndexUser(ctx context.Context, d es.UserDoc) error
 	UpdateUser(ctx context.Context, id string, partial map[string]any) error
 	DeleteUser(ctx context.Context, id string) error
@@ -105,6 +106,9 @@ func (s *service) UpdateCard(ctx context.Context, id string, p map[string]any) e
 	return s.client.UpdateCardPartial(ctx, id, p)
 }
 func (s *service) DeleteCard(ctx context.Context, id string) error { return s.client.DeleteCard(ctx, id) }
+func (s *service) BumpDeckCardCount(ctx context.Context, deckID string, delta int) error {
+	return s.client.BumpDeckCardCount(ctx, deckID, delta)
+}
 
 func (s *service) IndexUser(ctx context.Context, d es.UserDoc) error { return s.client.IndexUser(ctx, d) }
 func (s *service) UpdateUser(ctx context.Context, id string, p map[string]any) error {
