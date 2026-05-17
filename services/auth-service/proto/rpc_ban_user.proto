@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message BanUserRequest {
+    string user_id = 1;
+    bool   ban     = 2;
+    string reason  = 3;
+}
+
+message BanUserResponse {
+    string user_id   = 1;
+    string username  = 2;
+    string email     = 3;
+    bool   is_banned = 4;
+}

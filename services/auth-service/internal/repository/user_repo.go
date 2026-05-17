@@ -24,6 +24,8 @@ type UserRepository interface {
 	MarkEmailVerified(ctx context.Context, id uuid.UUID) error
 	BanUser(ctx context.Context, arg db.BanUserParams) error
 	UnbanUser(ctx context.Context, id uuid.UUID) error
+	ListUsers(ctx context.Context, arg db.ListUsersParams) ([]db.User, error)
+	CountUsers(ctx context.Context, filterBanned bool) (int64, error)
 }
 
 type userRepository struct {
@@ -107,4 +109,12 @@ func (r *userRepository) BanUser(ctx context.Context, arg db.BanUserParams) erro
 
 func (r *userRepository) UnbanUser(ctx context.Context, id uuid.UUID) error {
 	return r.q.UnbanUser(ctx, id)
+}
+
+func (r *userRepository) ListUsers(ctx context.Context, arg db.ListUsersParams) ([]db.User, error) {
+	return r.q.ListUsers(ctx, arg)
+}
+
+func (r *userRepository) CountUsers(ctx context.Context, filterBanned bool) (int64, error) {
+	return r.q.CountUsers(ctx, filterBanned)
 }

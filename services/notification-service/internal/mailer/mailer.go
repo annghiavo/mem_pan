@@ -20,6 +20,7 @@ const (
 	KeyEmailVerification  = "email_verification"
 	KeyPasswordReset      = "password_reset"
 	KeyStudyReminder      = "study_reminder"
+	KeyReportResolved     = "report_resolved"
 	DefaultLocale         = "en"
 	defaultCacheTTL       = 60 * time.Second
 )
@@ -50,6 +51,7 @@ type Mailer interface {
 	SendWelcome(ctx context.Context, to, username string) error
 	SendEmailVerification(ctx context.Context, to, username, verifyURL string) error
 	SendPasswordReset(ctx context.Context, to, username, resetURL string) error
+	SendReportResolved(ctx context.Context, to, username, outcome string) error
 }
 
 type Config struct {
@@ -119,6 +121,10 @@ func (m *smtpMailer) SendPasswordReset(ctx context.Context, to, username, resetU
 	return m.Send(ctx, to, KeyPasswordReset, map[string]string{"Username": username, "URL": resetURL})
 }
 
+func (m *smtpMailer) SendReportResolved(ctx context.Context, to, username, outcome string) error {
+	return m.Send(ctx, to, KeyReportResolved, map[string]string{"Username": username, "Outcome": outcome})
+}
+
 // noopMailer silently discards all emails (used when SMTP is not configured).
 type noopMailer struct{}
 
@@ -129,6 +135,7 @@ func (n *noopMailer) SendRaw(context.Context, string, string, string, string) er
 func (n *noopMailer) SendWelcome(context.Context, string, string) error                { return nil }
 func (n *noopMailer) SendEmailVerification(context.Context, string, string, string) error { return nil }
 func (n *noopMailer) SendPasswordReset(context.Context, string, string, string) error  { return nil }
+func (n *noopMailer) SendReportResolved(context.Context, string, string, string) error { return nil }
 
 // Render executes a Template against data and returns the rendered triple.
 // HTML body uses html/template (auto-escaping); subject and text body use text/template.
@@ -254,6 +261,11 @@ var defaultTemplates = map[string]Template{
 		Subject: "Your MemPan study session is waiting",
 		HTML:    "<!DOCTYPE html><html><body>\n<h2>Time to study, {{.Username}}!</h2>\n<p>You have {{.DueCount}} card(s) due for review today. Keep your streak alive.</p>\n<p><a href=\"{{.URL}}\">Open MemPan</a></p>\n</body></html>",
 		Text:    "Time to study, {{.Username}}!\n\nYou have {{.DueCount}} card(s) due for review today. Keep your streak alive.\n{{.URL}}\n",
+	},
+	KeyReportResolved: {
+		Subject: "Update on your MemPan report",
+		HTML:    "<!DOCTYPE html><html><body>\n<h2>Hi {{.Username}},</h2>\n<p>Thanks for helping keep MemPan safe. We've finished reviewing the report you submitted.</p>\n<p><strong>Outcome:</strong> {{.Outcome}}</p>\n<p>We appreciate you flagging this. Please continue to report anything that doesn't belong.</p>\n</body></html>",
+		Text:    "Hi {{.Username}},\n\nThanks for helping keep MemPan safe. We've finished reviewing the report you submitted.\n\nOutcome: {{.Outcome}}\n\nWe appreciate you flagging this. Please continue to report anything that doesn't belong.\n",
 	},
 }
 

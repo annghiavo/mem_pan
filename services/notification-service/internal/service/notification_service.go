@@ -30,6 +30,7 @@ type NotificationService interface {
 	SendVerificationEmail(ctx context.Context, userID, email, username, token string) error
 	SendPasswordResetEmail(ctx context.Context, userID, email, username, token string) error
 	SendDeckCloneReadyPush(ctx context.Context, userID, deckID, deckName string, cardCount int32) error
+	SendReportResolvedEmail(ctx context.Context, userID, email, username, outcome string) error
 
 	// Email template administration.
 	ListEmailTemplates(ctx context.Context) ([]db.EmailTemplate, error)
@@ -96,6 +97,12 @@ func (s *service) SendPasswordResetEmail(ctx context.Context, userID, email, use
 	url := fmt.Sprintf("%s/reset-password?token=%s", s.cfg.AppBaseURL, token)
 	err := s.mailer.SendPasswordReset(ctx, email, username, url)
 	s.log(ctx, userID, "password_reset", "email", email, err)
+	return err
+}
+
+func (s *service) SendReportResolvedEmail(ctx context.Context, userID, email, username, outcome string) error {
+	err := s.mailer.SendReportResolved(ctx, email, username, outcome)
+	s.log(ctx, userID, "report_resolved", "email", email, err)
 	return err
 }
 

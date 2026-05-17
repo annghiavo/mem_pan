@@ -62,10 +62,18 @@ service AdminService {
     }
 
     // Decks
+    rpc ListDecks (ListDecksRequest) returns (ListDecksResponse) {
+        option (google.api.http) = { get: "/v1/admin/decks" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] List all decks (filter by status)"; tags: "admin";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
     rpc UpdateDeckStatus (UpdateDeckStatusRequest) returns (UpdateDeckStatusResponse) {
         option (google.api.http) = { patch: "/v1/admin/decks/{deck_id}/status"; body: "*" };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            summary: "[Admin] Hide or delete the offending deck"; tags: "admin";
+            summary: "[Admin] Hide or delete the offending deck (cascades to cards)"; tags: "admin";
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }
@@ -124,42 +132,42 @@ service AdminService {
 
 // Message definitions
 message Report {
-    string report_id = 1;
-    string reporter_id = 2;
-    string target_type = 3;
-    string target_id = 4;
+    string report_id       = 1;
+    string reporter_id     = 2;
+    string target_type     = 3;   // user | deck
+    string target_id       = 4;
     string reason_category = 5;
-    string description = 6;
-    string status = 7;
-    string assigned_to = 8;
-    string admin_note = 9;
-    string resolution = 10;
-    string resolved_by = 11;
-    string resolved_at = 12;
-    string created_at = 13;
-    string updated_at = 14;
+    string description     = 6;
+    string status          = 7;   // pending | resolved | dismissed
+    string admin_note      = 8;
+    string resolution      = 9;   // banned | deck_hidden | deck_deleted | "" (when dismissed)
+    string resolved_by     = 10;
+    string resolved_at     = 11;
+    string created_at      = 12;
+    string updated_at      = 13;
 }
 
 message ListReportsRequest {
-    int32 page_size = 1;
-    string page_token = 2;
-    string status_filter = 3;
+    int32  page_size     = 1;
+    string page_token    = 2;
+    string status_filter = 3;   // "", pending, resolved, dismissed
 }
 
 message ListReportsResponse {
-    repeated Report reports = 1;
-    string next_page_token = 2;
+    repeated Report reports         = 1;
+    string          next_page_token = 2;
 }
 
 message ProcessReportRequest {
-    string report_id = 1;
-    string action = 2; // "resolve", "dismiss"
-    string resolution = 3;
-    string admin_note = 4;
+    string report_id  = 1;
+    string action     = 2;  // ban_user | hide_deck | delete_deck | dismiss
+    string admin_note = 3;
 }
 
 message ProcessReportResponse {
-    Report report = 1;
+    Report report            = 1;
+    int32  affected_reports  = 2;  // total reports bulk-resolved for the same target
+    int32  notified_reporters = 3; // unique reporters notified
 }
 
 message User {
@@ -201,6 +209,31 @@ message UpdateDeckStatusResponse {
     string deck_id = 1;
     string status = 2;
 }
+
+message AdminDeck {
+    string deck_id    = 1;
+    string user_id    = 2;
+    string name       = 3;
+    string description = 4;
+    bool   is_public  = 5;
+    string status     = 6;
+    int32  card_count = 7;
+    string created_at = 8;
+    string updated_at = 9;
+}
+
+message ListDecksRequest {
+    int32  page_size     = 1;
+    string page_token    = 2;
+    string status_filter = 3; // "", "active", "hidden", "deleted"
+}
+
+message ListDecksResponse {
+    repeated AdminDeck decks         = 1;
+    string             next_page_token = 2;
+    int64              total          = 3;
+}
+
 
 message PromoteModeratorRequest {
     string email = 1;

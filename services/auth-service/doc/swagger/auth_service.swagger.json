@@ -533,14 +533,6 @@
         }
       }
     },
-    "pbGetUserByIDResponse": {
-      "type": "object",
-      "properties": {
-        "user": {
-          "$ref": "#/definitions/pbUser"
-        }
-      }
-    },
     "pbGetUserResponse": {
       "type": "object",
       "properties": {
@@ -684,23 +676,6 @@
         }
       }
     },
-    "pbSetUserRoleResponse": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "username": {
-          "type": "string"
-        },
-        "role": {
-          "type": "string"
-        }
-      }
-    },
     "pbUpdateUserRequest": {
       "type": "object",
       "properties": {
@@ -787,27 +762,6 @@
       "properties": {
         "message": {
           "type": "string"
-        }
-      }
-    },
-    "pbVerifyTokenResponse": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string"
-        },
-        "username": {
-          "type": "string"
-        },
-        "role": {
-          "type": "string"
-        },
-        "tokenId": {
-          "type": "string"
-        },
-        "expiredAt": {
-          "type": "string",
-          "format": "date-time"
         }
       }
     },

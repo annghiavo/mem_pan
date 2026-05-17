@@ -88,7 +88,7 @@ func main() {
 
 	svc := service.New(repo, m, fcmSender, templateCache, service.Config{AppBaseURL: cfg.AppBaseURL})
 
-	handler := subscriber.NewHandler(svc)
+	handler := subscriber.NewHandler(svc, authClient)
 	pushHandler := subscriber.NewPushHandler(handler, cfg.PubSubPushSecret)
 
 	grpcServer := gapi.NewServer(svc, authClient)

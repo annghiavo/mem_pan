@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -69,6 +70,8 @@ type DeckService interface {
 	UpdateVisibility(ctx context.Context, deckID, userID uuid.UUID, isPublic bool) (db.Deck, error)
 	CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uuid.UUID) (db.Deck, error)
 	GetStats(ctx context.Context, deckID, userID uuid.UUID) (DeckStats, error)
+	AdminUpdateDeckStatus(ctx context.Context, deckID uuid.UUID, status string) (db.Deck, error)
+	AdminListDecks(ctx context.Context, limit, offset int32, statusFilter string) (DecksPage, error)
 }
 
 type deckService struct {
@@ -305,6 +308,48 @@ func (s *deckService) CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uu
 		}
 	}
 	return newDeck, nil
+}
+
+func (s *deckService) AdminUpdateDeckStatus(ctx context.Context, deckID uuid.UUID, statusStr string) (db.Deck, error) {
+	deck, err := s.deckRepo.AdminUpdateDeckStatus(ctx, db.AdminUpdateDeckStatusParams{
+		DeckID: deckID,
+		Status: statusStr,
+	})
+	if err != nil {
+		return db.Deck{}, err
+	}
+	if pubErr := s.pub.PublishDeckUpdated(ctx, publisher.DeckUpdatedEvent{
+		DeckID:      deck.DeckID.String(),
+		UserID:      deck.UserID.String(),
+		DeckName:    deck.Name,
+		Description: nullStrVal(deck.Description),
+		IsPublic:    deck.IsPublic,
+		CardCount:   deck.CardCount,
+		UpdatedAt:   deck.UpdatedAt,
+	}); pubErr != nil {
+		log.Printf("[publisher] deck.updated (admin status): %v", pubErr)
+	}
+	return deck, nil
+}
+
+func (s *deckService) AdminListDecks(ctx context.Context, limit, offset int32, statusFilter string) (DecksPage, error) {
+	var filter sql.NullString
+	if statusFilter != "" {
+		filter = sql.NullString{String: statusFilter, Valid: true}
+	}
+	decks, err := s.deckRepo.AdminListDecks(ctx, db.AdminListDecksParams{
+		Limit:        limit,
+		Offset:       offset,
+		StatusFilter: filter,
+	})
+	if err != nil {
+		return DecksPage{}, err
+	}
+	total, err := s.deckRepo.AdminCountDecks(ctx, filter)
+	if err != nil {
+		return DecksPage{}, err
+	}
+	return DecksPage{Decks: decks, Total: total}, nil
 }
 
 func (s *deckService) GetStats(ctx context.Context, deckID, userID uuid.UUID) (DeckStats, error) {

@@ -52,6 +52,23 @@ SET status     = 'deleted',
     updated_at = now()
 WHERE deck_id = $1 AND user_id = $2;
 
+-- name: AdminUpdateDeckStatus :one
+UPDATE decks
+SET status     = $2,
+    updated_at = now()
+WHERE deck_id = $1
+RETURNING *;
+
+-- name: AdminListDecks :many
+SELECT * FROM decks
+WHERE status::text = COALESCE(sqlc.narg('status_filter')::text, status::text)
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
+
+-- name: AdminCountDecks :one
+SELECT COUNT(*) FROM decks
+WHERE status::text = COALESCE(sqlc.narg('status_filter')::text, status::text);
+
 -- name: IncrementCardCount :exec
 UPDATE decks SET card_count = card_count + 1, updated_at = now() WHERE deck_id = $1;
 

@@ -20,6 +20,8 @@ import "rpc_upload_avatar.proto";
 import "rpc_get_user_by_id.proto";
 import "rpc_set_user_role.proto";
 import "rpc_report_user.proto";
+import "rpc_list_users.proto";
+import "rpc_ban_user.proto";
 
 option go_package = "mem_pan/services/auth-service/pb";
 
@@ -236,4 +238,6 @@ service AuthService {
     rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenResponse) {}
     rpc GetUserByID (GetUserByIDRequest) returns (GetUserByIDResponse) {}
     rpc SetUserRole (SetUserRoleRequest) returns (SetUserRoleResponse) {}
+    rpc ListUsers (ListUsersRequest) returns (ListUsersResponse) {}
+    rpc BanUser (BanUserRequest) returns (BanUserResponse) {}
 }

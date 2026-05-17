@@ -51,6 +51,13 @@ func (s *Server) ListReports(ctx context.Context, req *pb.ListReportsRequest) (*
 	return &pb.ListReportsResponse{Reports: pbReports}, nil
 }
 
+var allowedReportActions = map[string]service.ProcessAction{
+	"ban_user":    service.ActionBanUser,
+	"hide_deck":   service.ActionHideDeck,
+	"delete_deck": service.ActionDeleteDeck,
+	"dismiss":     service.ActionDismiss,
+}
+
 func (s *Server) ProcessReport(ctx context.Context, req *pb.ProcessReportRequest) (*pb.ProcessReportResponse, error) {
 	payload, err := s.authorizeUser(ctx)
 	if err != nil {
@@ -65,56 +72,40 @@ func (s *Server) ProcessReport(ctx context.Context, req *pb.ProcessReportRequest
 		return nil, status.Error(codes.InvalidArgument, "invalid report_id")
 	}
 
-	reportStatus, err := actionToStatus(req.GetAction())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	action, ok := allowedReportActions[req.GetAction()]
+	if !ok {
+		return nil, status.Error(codes.InvalidArgument, "action must be ban_user, hide_deck, delete_deck, or dismiss")
 	}
 
-	var adminNote, resolution *string
+	var adminNote *string
 	if v := req.GetAdminNote(); v != "" {
 		adminNote = &v
 	}
-	if v := req.GetResolution(); v != "" {
-		resolution = &v
-	}
 
-	report, err := s.reportSvc.ProcessReport(ctx, service.ProcessReportParams{
-		ReportID:   reportID,
-		AdminID:    payload.UserID,
-		Status:     reportStatus,
-		AdminNote:  adminNote,
-		Resolution: resolution,
+	result, err := s.reportSvc.ProcessReport(ctx, service.ProcessReportParams{
+		ReportID:  reportID,
+		AdminID:   payload.UserID,
+		Action:    action,
+		AdminNote: adminNote,
 	})
 	if err != nil {
 		return nil, toGRPCError(err)
 	}
 
-	return &pb.ProcessReportResponse{Report: dbReportToPb(report)}, nil
-}
-
-func actionToStatus(action string) (db.ReportStatus, error) {
-	switch action {
-	case "resolve":
-		return db.ReportStatusResolved, nil
-	case "dismiss":
-		return db.ReportStatusDismissed, nil
-	case "review":
-		return db.ReportStatusReviewing, nil
-	default:
-		return "", status.Errorf(codes.InvalidArgument, "invalid action %q: must be resolve, dismiss, or review", action)
-	}
+	return &pb.ProcessReportResponse{
+		Report:            dbReportToPb(result.Report),
+		AffectedReports:   result.AffectedReports,
+		NotifiedReporters: result.NotifiedReporters,
+	}, nil
 }
 
 func dbReportToPb(r db.Report) *pb.Report {
-	var assignedTo, resolvedBy, resolvedAt string
-	if r.AssignedTo.Valid {
-		assignedTo = r.AssignedTo.UUID.String()
-	}
+	var resolvedBy, resolvedAt string
 	if r.ResolvedBy.Valid {
 		resolvedBy = r.ResolvedBy.UUID.String()
 	}
 	if r.ResolvedAt.Valid {
-		resolvedAt = r.ResolvedAt.Time.String()
+		resolvedAt = r.ResolvedAt.Time.Format("2006-01-02T15:04:05Z07:00")
 	}
 	return &pb.Report{
 		ReportId:       r.ReportID.String(),
@@ -124,12 +115,11 @@ func dbReportToPb(r db.Report) *pb.Report {
 		ReasonCategory: string(r.ReasonCategory),
 		Description:    r.Description.String,
 		Status:         string(r.Status),
-		AssignedTo:     assignedTo,
 		AdminNote:      r.AdminNote.String,
 		Resolution:     r.Resolution.String,
 		ResolvedBy:     resolvedBy,
 		ResolvedAt:     resolvedAt,
-		CreatedAt:      r.CreatedAt.String(),
-		UpdatedAt:      r.UpdatedAt.String(),
+		CreatedAt:      r.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt:      r.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }

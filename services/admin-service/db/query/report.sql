@@ -24,17 +24,27 @@ LIMIT $1 OFFSET $2;
 SELECT COUNT(*) FROM reports
 WHERE status = COALESCE(sqlc.narg('status_filter'), status);
 
--- name: UpdateReportStatus :one
+-- name: GetReportTarget :one
+SELECT target_type, target_id FROM reports
+WHERE report_id = $1 LIMIT 1;
+
+-- name: BulkResolveReportsByTarget :many
+-- Updates every pending report for the same (target_type, target_id) so that
+-- one admin decision covers every duplicate report. Returns all affected rows.
 UPDATE reports
 SET
-    status = $2,
-    resolution = COALESCE(sqlc.narg('resolution'), resolution),
-    admin_note = COALESCE(sqlc.narg('admin_note'), admin_note),
-    resolved_by = COALESCE(sqlc.narg('resolved_by'), resolved_by),
-    resolved_at = CASE WHEN $2::report_status IN ('resolved', 'dismissed') THEN CURRENT_TIMESTAMP ELSE resolved_at END,
-    updated_at = CURRENT_TIMESTAMP
-WHERE report_id = $1
+    status      = $3,
+    resolution  = COALESCE(sqlc.narg('resolution'), resolution),
+    admin_note  = COALESCE(sqlc.narg('admin_note'), admin_note),
+    resolved_by = sqlc.arg('resolved_by'),
+    resolved_at = CURRENT_TIMESTAMP,
+    updated_at  = CURRENT_TIMESTAMP
+WHERE target_type = $1 AND target_id = $2 AND status = 'pending'
 RETURNING *;
+
+-- name: ListReporterIDsByTarget :many
+SELECT DISTINCT reporter_id FROM reports
+WHERE target_type = $1 AND target_id = $2;
 
 -- name: CreateModerationLog :one
 INSERT INTO moderation_logs (

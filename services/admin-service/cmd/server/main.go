@@ -21,8 +21,10 @@ import (
 	"mem_pan/services/admin-service/config"
 	"mem_pan/services/admin-service/doc"
 	"mem_pan/services/admin-service/internal/authclient"
+	"mem_pan/services/admin-service/internal/deckclient"
 	"mem_pan/services/admin-service/internal/gapi"
 	"mem_pan/services/admin-service/internal/notifyclient"
+	"mem_pan/services/admin-service/internal/publisher"
 	"mem_pan/services/admin-service/internal/repository"
 	"mem_pan/services/admin-service/internal/service"
 	"mem_pan/services/admin-service/internal/subscriber"
@@ -61,10 +63,23 @@ func main() {
 	}
 	defer notifyClient.Close()
 
-	reportRepo := repository.NewReportRepository(database)
-	reportSvc := service.NewReportService(reportRepo)
+	deckClient, err := deckclient.NewGRPCClient(cfg.DeckServiceAddress)
+	if err != nil {
+		log.Fatal("deck client:", err)
+	}
+	defer deckClient.Close()
 
-	server := gapi.NewServer(reportSvc, reportRepo, authClient, notifyClient)
+	var pub publisher.EventPublisher
+	if cfg.PubSubProjectID != "" {
+		pub = publisher.NewPubSubPublisher(cfg.PubSubProjectID, cfg.PubSubTopic)
+	} else {
+		pub = publisher.NewNoopPublisher()
+	}
+
+	reportRepo := repository.NewReportRepository(database)
+	reportSvc := service.NewReportService(reportRepo, authClient, deckClient, pub)
+
+	server := gapi.NewServer(reportSvc, reportRepo, authClient, notifyClient, deckClient)
 
 	subHandler := subscriber.NewHandler(reportRepo)
 	pushHandler := subscriber.NewPushHandler(subHandler, cfg.PubSubPushSecret)

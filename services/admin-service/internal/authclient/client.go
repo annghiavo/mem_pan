@@ -29,10 +29,33 @@ type PromotedUser struct {
 	Username string
 }
 
+type AdminUser struct {
+	UserID    uuid.UUID
+	Username  string
+	Email     string
+	Role      string
+	IsBanned  bool
+	CreatedAt string
+}
+
+type ListUsersResult struct {
+	Users []AdminUser
+	Total int64
+}
+
+type BanResult struct {
+	UserID   uuid.UUID
+	Username string
+	Email    string
+	IsBanned bool
+}
+
 type Client interface {
 	VerifyToken(ctx context.Context, accessToken string) (*Payload, error)
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*UserProfile, error)
 	SetUserRole(ctx context.Context, email, role string) (*PromotedUser, error)
+	ListUsers(ctx context.Context, pageSize, offset int32, filterBanned bool) (*ListUsersResult, error)
+	BanUser(ctx context.Context, userID uuid.UUID, ban bool, reason string) (*BanResult, error)
 	Close() error
 }
 
@@ -100,6 +123,54 @@ func (c *grpcClient) SetUserRole(ctx context.Context, email, role string) (*Prom
 		UserID:   userID,
 		Email:    resp.Email,
 		Username: resp.Username,
+	}, nil
+}
+
+func (c *grpcClient) ListUsers(ctx context.Context, pageSize, offset int32, filterBanned bool) (*ListUsersResult, error) {
+	resp, err := c.authSvc.ListUsers(ctx, &authpb.ListUsersRequest{
+		PageSize:     pageSize,
+		Offset:       offset,
+		FilterBanned: filterBanned,
+	})
+	if err != nil {
+		return nil, err
+	}
+	users := make([]AdminUser, 0, len(resp.Users))
+	for _, u := range resp.Users {
+		id, parseErr := uuid.Parse(u.UserId)
+		if parseErr != nil {
+			return nil, status.Error(codes.Internal, "invalid user_id in list response")
+		}
+		users = append(users, AdminUser{
+			UserID:    id,
+			Username:  u.Username,
+			Email:     u.Email,
+			Role:      u.Role,
+			IsBanned:  u.IsBanned,
+			CreatedAt: u.CreatedAt,
+		})
+	}
+	return &ListUsersResult{Users: users, Total: resp.Total}, nil
+}
+
+func (c *grpcClient) BanUser(ctx context.Context, userID uuid.UUID, ban bool, reason string) (*BanResult, error) {
+	resp, err := c.authSvc.BanUser(ctx, &authpb.BanUserRequest{
+		UserId: userID.String(),
+		Ban:    ban,
+		Reason: reason,
+	})
+	if err != nil {
+		return nil, err
+	}
+	id, parseErr := uuid.Parse(resp.UserId)
+	if parseErr != nil {
+		return nil, status.Error(codes.Internal, "invalid user_id in ban response")
+	}
+	return &BanResult{
+		UserID:   id,
+		Username: resp.Username,
+		Email:    resp.Email,
+		IsBanned: resp.IsBanned,
 	}, nil
 }
 

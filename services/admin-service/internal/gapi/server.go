@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"mem_pan/services/admin-service/internal/authclient"
+	"mem_pan/services/admin-service/internal/deckclient"
 	"mem_pan/services/admin-service/internal/domain"
 	"mem_pan/services/admin-service/internal/notifyclient"
 	"mem_pan/services/admin-service/internal/repository"
@@ -20,6 +21,7 @@ type Server struct {
 	reportRepo   repository.ReportRepository
 	authClient   authclient.Client
 	notifyClient notifyclient.Client
+	deckClient   deckclient.Client
 }
 
 func NewServer(
@@ -27,12 +29,14 @@ func NewServer(
 	reportRepo repository.ReportRepository,
 	authClient authclient.Client,
 	notifyClient notifyclient.Client,
+	deckClient deckclient.Client,
 ) *Server {
 	return &Server{
 		reportSvc:    reportSvc,
 		reportRepo:   reportRepo,
 		authClient:   authClient,
 		notifyClient: notifyClient,
+		deckClient:   deckClient,
 	}
 }
 

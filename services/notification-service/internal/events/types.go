@@ -11,6 +11,9 @@ const (
 
 	// Published by worker-service
 	TypeDeckCloneCompleted = "deck.clone_completed"
+
+	// Published by admin-service after an admin resolves/dismisses a report.
+	TypeReportResolved = "report.resolved"
 )
 
 type Envelope struct {
@@ -50,4 +53,15 @@ type DeckCloneCompleted struct {
 	DeckName  string    `json:"deck_name"`
 	CardCount int32     `json:"card_count"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+// ReportResolved is published by admin-service after an admin acts on a report.
+// notification-service emails every distinct reporter.
+type ReportResolved struct {
+	TargetType  string    `json:"target_type"`  // user | deck
+	TargetID    string    `json:"target_id"`
+	Action      string    `json:"action"`       // ban_user | hide_deck | delete_deck | dismiss
+	Resolution  string    `json:"resolution"`   // banned | deck_hidden | deck_deleted | ""
+	ReporterIDs []string  `json:"reporter_ids"`
+	ResolvedAt  time.Time `json:"resolved_at"`
 }

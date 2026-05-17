@@ -24,11 +24,25 @@ type ChangePasswordParams struct {
 	NewPassword string
 }
 
+type ListUsersParams struct {
+	Limit        int32
+	Offset       int32
+	FilterBanned bool
+}
+
+type ListUsersResult struct {
+	Users []db.User
+	Total int64
+}
+
 type UserService interface {
 	GetProfile(ctx context.Context, userID uuid.UUID) (db.User, error)
 	UpdateProfile(ctx context.Context, userID uuid.UUID, params UpdateProfileParams) (db.User, error)
 	ChangePassword(ctx context.Context, params ChangePasswordParams) error
 	SetUserRole(ctx context.Context, email, role string) (db.User, error)
+	ListUsers(ctx context.Context, params ListUsersParams) (ListUsersResult, error)
+	BanUser(ctx context.Context, userID uuid.UUID, reason string) (db.User, error)
+	UnbanUser(ctx context.Context, userID uuid.UUID) (db.User, error)
 }
 
 type userService struct {
@@ -73,6 +87,39 @@ func (s *userService) SetUserRole(ctx context.Context, email, role string) (db.U
 		Email: email,
 		Role:  role,
 	})
+}
+
+func (s *userService) ListUsers(ctx context.Context, params ListUsersParams) (ListUsersResult, error) {
+	users, err := s.userRepo.ListUsers(ctx, db.ListUsersParams{
+		Limit:        params.Limit,
+		Offset:       params.Offset,
+		FilterBanned: params.FilterBanned,
+	})
+	if err != nil {
+		return ListUsersResult{}, err
+	}
+	total, err := s.userRepo.CountUsers(ctx, params.FilterBanned)
+	if err != nil {
+		return ListUsersResult{}, err
+	}
+	return ListUsersResult{Users: users, Total: total}, nil
+}
+
+func (s *userService) BanUser(ctx context.Context, userID uuid.UUID, reason string) (db.User, error) {
+	if err := s.userRepo.BanUser(ctx, db.BanUserParams{
+		UserID:       userID,
+		BannedReason: domain.NullStr(&reason),
+	}); err != nil {
+		return db.User{}, err
+	}
+	return s.userRepo.GetUserByID(ctx, userID)
+}
+
+func (s *userService) UnbanUser(ctx context.Context, userID uuid.UUID) (db.User, error) {
+	if err := s.userRepo.UnbanUser(ctx, userID); err != nil {
+		return db.User{}, err
+	}
+	return s.userRepo.GetUserByID(ctx, userID)
 }
 
 func (s *userService) ChangePassword(ctx context.Context, params ChangePasswordParams) error {

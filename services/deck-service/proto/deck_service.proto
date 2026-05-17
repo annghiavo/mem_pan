@@ -8,6 +8,7 @@ import "rpc_folder.proto";
 import "rpc_deck.proto";
 import "rpc_card.proto";
 import "rpc_import.proto";
+import "rpc_admin_deck.proto";
 
 option go_package = "mem_pan/services/deck-service/pb";
 
@@ -240,6 +241,10 @@ service DeckService {
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }
+
+    // Admin RPC — internal service-to-service, not exposed via HTTP gateway.
+    rpc AdminUpdateDeckStatus (AdminUpdateDeckStatusRequest) returns (AdminUpdateDeckStatusResponse) {}
+    rpc AdminListDecks (AdminListDecksRequest) returns (AdminListDecksResponse) {}
 
     // Reports — publish a report.submitted event consumed by admin-service.
     rpc ReportDeck (ReportDeckRequest) returns (ReportDeckResponse) {

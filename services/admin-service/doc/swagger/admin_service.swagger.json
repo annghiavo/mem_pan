@@ -16,9 +16,59 @@
     "application/json"
   ],
   "paths": {
+    "/v1/admin/decks": {
+      "get": {
+        "summary": "[Admin] List all decks (filter by status)",
+        "operationId": "AdminService_ListDecks",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/adminListDecksResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "statusFilter",
+            "description": "\"\", \"active\", \"hidden\", \"deleted\"",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/admin/decks/{deckId}/status": {
       "patch": {
-        "summary": "[Admin] Hide or delete the offending deck",
+        "summary": "[Admin] Hide or delete the offending deck (cascades to cards)",
         "operationId": "AdminService_UpdateDeckStatus",
         "responses": {
           "200": {
@@ -294,6 +344,7 @@
           },
           {
             "name": "statusFilter",
+            "description": "\"\", pending, resolved, dismissed",
             "in": "query",
             "required": false,
             "type": "string"
@@ -517,10 +568,7 @@
       "properties": {
         "action": {
           "type": "string",
-          "title": "\"resolve\", \"dismiss\""
-        },
-        "resolution": {
-          "type": "string"
+          "title": "ban_user | hide_deck | delete_deck | dismiss"
         },
         "adminNote": {
           "type": "string"
@@ -569,6 +617,39 @@
           "type": "string"
         },
         "textBody": {
+          "type": "string"
+        }
+      }
+    },
+    "adminAdminDeck": {
+      "type": "object",
+      "properties": {
+        "deckId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "isPublic": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        },
+        "cardCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
           "type": "string"
         }
       }
@@ -623,6 +704,25 @@
         },
         "updatedAt": {
           "type": "string"
+        }
+      }
+    },
+    "adminListDecksResponse": {
+      "type": "object",
+      "properties": {
+        "decks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/adminAdminDeck"
+          }
+        },
+        "nextPageToken": {
+          "type": "string"
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -687,6 +787,16 @@
       "properties": {
         "report": {
           "$ref": "#/definitions/adminReport"
+        },
+        "affectedReports": {
+          "type": "integer",
+          "format": "int32",
+          "title": "total reports bulk-resolved for the same target"
+        },
+        "notifiedReporters": {
+          "type": "integer",
+          "format": "int32",
+          "title": "unique reporters notified"
         }
       }
     },
@@ -722,7 +832,8 @@
           "type": "string"
         },
         "targetType": {
-          "type": "string"
+          "type": "string",
+          "title": "user | deck"
         },
         "targetId": {
           "type": "string"
@@ -734,16 +845,15 @@
           "type": "string"
         },
         "status": {
-          "type": "string"
-        },
-        "assignedTo": {
-          "type": "string"
+          "type": "string",
+          "title": "pending | resolved | dismissed"
         },
         "adminNote": {
           "type": "string"
         },
         "resolution": {
-          "type": "string"
+          "type": "string",
+          "title": "banned | deck_hidden | deck_deleted | \"\" (when dismissed)"
         },
         "resolvedBy": {
           "type": "string"

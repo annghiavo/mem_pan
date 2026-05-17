@@ -38,6 +38,13 @@ SET email_verified = TRUE,
     updated_at     = now()
 WHERE user_id = $1;
 
+-- name: UpdateUserRole :one
+UPDATE users
+SET role       = $2,
+    updated_at = now()
+WHERE email = $1
+RETURNING *;
+
 -- name: BanUser :exec
 UPDATE users
 SET is_banned     = TRUE,
@@ -53,3 +60,13 @@ SET is_banned     = FALSE,
     banned_reason = NULL,
     updated_at    = now()
 WHERE user_id = $1;
+
+-- name: ListUsers :many
+SELECT * FROM users
+WHERE (NOT sqlc.arg('filter_banned')::boolean OR is_banned = TRUE)
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
+
+-- name: CountUsers :one
+SELECT COUNT(*) FROM users
+WHERE (NOT sqlc.arg('filter_banned')::boolean OR is_banned = TRUE);

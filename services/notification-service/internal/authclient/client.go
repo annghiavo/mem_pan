@@ -18,8 +18,15 @@ type Payload struct {
 	Role     string
 }
 
+type User struct {
+	UserID   uuid.UUID
+	Username string
+	Email    string
+}
+
 type Client interface {
 	VerifyToken(ctx context.Context, accessToken string) (*Payload, error)
+	GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error)
 	Close() error
 }
 
@@ -51,6 +58,21 @@ func (c *grpcClient) VerifyToken(ctx context.Context, accessToken string) (*Payl
 	}
 
 	return &Payload{UserID: userID, Username: resp.Username, Role: resp.Role}, nil
+}
+
+func (c *grpcClient) GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error) {
+	resp, err := c.authSvc.GetUserByID(ctx, &authpb.GetUserByIDRequest{UserId: userID.String()})
+	if err != nil {
+		return nil, err
+	}
+	if resp.User == nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+	return &User{
+		UserID:   userID,
+		Username: resp.User.Username,
+		Email:    resp.User.Email,
+	}, nil
 }
 
 func (c *grpcClient) Close() error {

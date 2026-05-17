@@ -5,6 +5,7 @@ package mock
 
 import (
 	context "context"
+	sql "database/sql"
 	reflect "reflect"
 
 	uuid "github.com/google/uuid"
@@ -158,6 +159,45 @@ func (m *MockDeckRepository) SoftDeleteDeck(ctx context.Context, arg db.SoftDele
 func (mr *MockDeckRepositoryMockRecorder) SoftDeleteDeck(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SoftDeleteDeck", reflect.TypeOf((*MockDeckRepository)(nil).SoftDeleteDeck), ctx, arg)
+}
+
+func (m *MockDeckRepository) AdminUpdateDeckStatus(ctx context.Context, arg db.AdminUpdateDeckStatusParams) (db.Deck, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AdminUpdateDeckStatus", ctx, arg)
+	ret0, _ := ret[0].(db.Deck)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) AdminUpdateDeckStatus(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminUpdateDeckStatus", reflect.TypeOf((*MockDeckRepository)(nil).AdminUpdateDeckStatus), ctx, arg)
+}
+
+func (m *MockDeckRepository) AdminListDecks(ctx context.Context, arg db.AdminListDecksParams) ([]db.Deck, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AdminListDecks", ctx, arg)
+	ret0, _ := ret[0].([]db.Deck)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) AdminListDecks(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminListDecks", reflect.TypeOf((*MockDeckRepository)(nil).AdminListDecks), ctx, arg)
+}
+
+func (m *MockDeckRepository) AdminCountDecks(ctx context.Context, statusFilter sql.NullString) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AdminCountDecks", ctx, statusFilter)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) AdminCountDecks(ctx, statusFilter any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminCountDecks", reflect.TypeOf((*MockDeckRepository)(nil).AdminCountDecks), ctx, statusFilter)
 }
 
 func (m *MockDeckRepository) IncrementCardCount(ctx context.Context, deckID uuid.UUID) error {

@@ -24,6 +24,9 @@ type DeckRepository interface {
 	UpdateDeckSettings(ctx context.Context, arg db.UpdateDeckSettingsParams) (db.Deck, error)
 	UpdateDeckVisibility(ctx context.Context, arg db.UpdateDeckVisibilityParams) (db.Deck, error)
 	SoftDeleteDeck(ctx context.Context, arg db.SoftDeleteDeckParams) error
+	AdminUpdateDeckStatus(ctx context.Context, arg db.AdminUpdateDeckStatusParams) (db.Deck, error)
+	AdminListDecks(ctx context.Context, arg db.AdminListDecksParams) ([]db.Deck, error)
+	AdminCountDecks(ctx context.Context, statusFilter sql.NullString) (int64, error)
 	IncrementCardCount(ctx context.Context, deckID uuid.UUID) error
 	DecrementCardCount(ctx context.Context, deckID uuid.UUID) error
 	CloneDeck(ctx context.Context, src db.Deck, newOwnerID uuid.UUID, newName string) (db.Deck, []db.ListCardsByDeckRow, error)
@@ -92,6 +95,22 @@ func (r *deckRepository) UpdateDeckVisibility(ctx context.Context, arg db.Update
 
 func (r *deckRepository) SoftDeleteDeck(ctx context.Context, arg db.SoftDeleteDeckParams) error {
 	return r.q.SoftDeleteDeck(ctx, arg)
+}
+
+func (r *deckRepository) AdminUpdateDeckStatus(ctx context.Context, arg db.AdminUpdateDeckStatusParams) (db.Deck, error) {
+	d, err := r.q.AdminUpdateDeckStatus(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.Deck{}, domain.ErrDeckNotFound
+	}
+	return d, err
+}
+
+func (r *deckRepository) AdminListDecks(ctx context.Context, arg db.AdminListDecksParams) ([]db.Deck, error) {
+	return r.q.AdminListDecks(ctx, arg)
+}
+
+func (r *deckRepository) AdminCountDecks(ctx context.Context, statusFilter sql.NullString) (int64, error) {
+	return r.q.AdminCountDecks(ctx, statusFilter)
 }
 
 func (r *deckRepository) IncrementCardCount(ctx context.Context, deckID uuid.UUID) error {

@@ -131,8 +131,12 @@ services:
       - ../services/admin-service/app.env
     environment:
       - AUTH_SERVICE_ADDRESS=auth-service:9090
+      - NOTIFICATION_SERVICE_ADDRESS=notification-service:9095
+      - DECK_SERVICE_ADDRESS=deck-service:9091
     depends_on:
       - auth-service
+      - notification-service
+      - deck-service
     expose:
       - "8083"
       - "9093"

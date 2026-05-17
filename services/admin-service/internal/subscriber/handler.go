@@ -35,7 +35,6 @@ func (h *Handler) Dispatch(ctx context.Context, eventType string, data []byte) e
 var allowedTargetTypes = map[string]db.ReportTargetType{
 	"deck": db.ReportTargetType("deck"),
 	"user": db.ReportTargetType("user"),
-	"note": db.ReportTargetType("note"),
 }
 
 var allowedCategories = map[string]db.ReportCategory{
