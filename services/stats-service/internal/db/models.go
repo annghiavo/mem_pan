@@ -44,16 +44,27 @@ type DeckStat struct {
 }
 
 type UserStat struct {
-	UserID           uuid.UUID      `json:"user_id"`
-	TotalCards       int32          `json:"total_cards"`
-	TotalReviews     int32          `json:"total_reviews"`
-	TotalStudyTimeMs int64          `json:"total_study_time_ms"`
-	CurrentStreak    int32          `json:"current_streak"`
-	LongestStreak    int32          `json:"longest_streak"`
-	LastStudiedDate  sql.NullTime   `json:"last_studied_date"`
-	TotalCorrect     int32          `json:"total_correct"`
-	TotalIncorrect   int32          `json:"total_incorrect"`
-	Username         sql.NullString `json:"username"`
-	AvatarUrl        sql.NullString `json:"avatar_url"`
-	UpdatedAt        time.Time      `json:"updated_at"`
+	UserID             uuid.UUID      `json:"user_id"`
+	TotalCards         int32          `json:"total_cards"`
+	TotalReviews       int32          `json:"total_reviews"`
+	TotalStudyTimeMs   int64          `json:"total_study_time_ms"`
+	CurrentStreak      int32          `json:"current_streak"`
+	LongestStreak      int32          `json:"longest_streak"`
+	LastStudiedDate    sql.NullTime   `json:"last_studied_date"`
+	TotalCorrect       int32          `json:"total_correct"`
+	TotalIncorrect     int32          `json:"total_incorrect"`
+	Username           sql.NullString `json:"username"`
+	AvatarUrl          sql.NullString `json:"avatar_url"`
+	UpdatedAt          time.Time      `json:"updated_at"`
+	OptimalHourWeekday sql.NullInt16  `json:"optimal_hour_weekday"`
+	OptimalHourWeekend sql.NullInt16  `json:"optimal_hour_weekend"`
+	ReminderLocalTime  time.Time      `json:"reminder_local_time"`
+}
+
+type UserActivityBucket struct {
+	UserID      uuid.UUID `json:"user_id"`
+	HourOfDay   int16     `json:"hour_of_day"`
+	DayType     int16     `json:"day_type"`
+	ReviewCount int32     `json:"review_count"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }

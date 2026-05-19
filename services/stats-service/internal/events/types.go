@@ -47,7 +47,12 @@ type CardCreated struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// Published by study-service on card.reviewed
+// Published by study-service on card.reviewed.
+// `Timezone` is the user's IANA timezone (e.g. "Asia/Ho_Chi_Minh") at the
+// moment of the review. It's used for two timezone-sensitive aggregations:
+//   - streak computation (day boundary follows the user's local midnight)
+//   - activity histogram bucket (hour_of_day is local)
+// May be empty for legacy events; the handler falls back to UTC.
 type CardReviewed struct {
 	UserID         string    `json:"user_id"`
 	CardID         string    `json:"card_id"`
@@ -59,4 +64,5 @@ type CardReviewed struct {
 	StabilityAfter float64   `json:"stability_after"`
 	IsNewCard      bool      `json:"is_new_card"`
 	ReviewTime     time.Time `json:"review_time"`
+	Timezone       string    `json:"timezone,omitempty"`
 }

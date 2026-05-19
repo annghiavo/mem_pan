@@ -14,6 +14,16 @@ const (
 
 	// Published by admin-service after an admin resolves/dismisses a report.
 	TypeReportResolved = "report.resolved"
+
+	// Published by Cloud Scheduler → Pub/Sub topic `cron-study-reminder`
+	// every 15 minutes. The handler iterates eligible users and sends an
+	// FCM push "you have N cards to review".
+	TypeCronStudyReminder = "cron.study_reminder"
+
+	// Published by Cloud Scheduler → Pub/Sub topic `cron-streak-warning`
+	// every 15 minutes. The handler sends a push to users whose streak is
+	// at risk (haven't studied today and local time is at their warning hour).
+	TypeCronStreakWarning = "cron.streak_warning"
 )
 
 type Envelope struct {
@@ -64,4 +74,11 @@ type ReportResolved struct {
 	Resolution  string    `json:"resolution"`   // banned | deck_hidden | deck_deleted | ""
 	ReporterIDs []string  `json:"reporter_ids"`
 	ResolvedAt  time.Time `json:"resolved_at"`
+}
+
+// CronTick is the payload Cloud Scheduler attaches to the two reminder topics.
+// `now` is the UTC instant the scheduler fired (so handler logic is
+// reproducible across retries). If absent, the handler uses time.Now().
+type CronTick struct {
+	Now time.Time `json:"now,omitempty"`
 }

@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -88,4 +89,26 @@ func (q *Queries) LogNotification(ctx context.Context, arg LogNotificationParams
 		arg.UserID, arg.NotificationType, arg.Channel, arg.Recipient, arg.Status, arg.ErrorMessage,
 	)
 	return err
+}
+
+const countRecentNotifications = `-- name: CountRecentNotifications :one
+SELECT COUNT(*)::bigint
+FROM notification_log
+WHERE user_id           = $1
+  AND notification_type = $2
+  AND status            = 'sent'
+  AND created_at        >= $3
+`
+
+type CountRecentNotificationsParams struct {
+	UserID           *uuid.UUID `json:"user_id"`
+	NotificationType string     `json:"notification_type"`
+	CreatedAt        time.Time  `json:"created_at"`
+}
+
+func (q *Queries) CountRecentNotifications(ctx context.Context, arg CountRecentNotificationsParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countRecentNotifications, arg.UserID, arg.NotificationType, arg.CreatedAt)
+	var n int64
+	err := row.Scan(&n)
+	return n, err
 }

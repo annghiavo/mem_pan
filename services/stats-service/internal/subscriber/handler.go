@@ -154,9 +154,21 @@ func (h *Handler) handleCardReviewed(ctx context.Context, data []byte) error {
 		return err
 	}
 
-	// 2. Update streak based on review time
-	if err := h.updateStreak(ctx, userID, e.ReviewTime); err != nil {
+	// 2. Update streak based on review time, in the user's local timezone.
+	// Day boundary follows the user's local midnight, not UTC.
+	loc := loadTZ(e.Timezone)
+	if err := h.updateStreak(ctx, userID, e.ReviewTime, loc); err != nil {
 		log.Printf("[stats] updateStreak %s: %v", userID, err)
+	}
+
+	// 2a. Bump the activity histogram for optimal-hour prediction.
+	localReview := e.ReviewTime.In(loc)
+	dayType := int16(0)
+	if wd := localReview.Weekday(); wd == time.Saturday || wd == time.Sunday {
+		dayType = 1
+	}
+	if err := h.repo.BumpActivityBucket(ctx, userID, int16(localReview.Hour()), dayType, 1); err != nil {
+		log.Printf("[stats] bumpActivityBucket %s: %v", userID, err)
 	}
 
 	// 3. Upsert daily stats
@@ -200,16 +212,29 @@ func (h *Handler) handleCardReviewed(ctx context.Context, data []byte) error {
 	return nil
 }
 
-func (h *Handler) updateStreak(ctx context.Context, userID uuid.UUID, reviewTime time.Time) error {
+func (h *Handler) updateStreak(ctx context.Context, userID uuid.UUID, reviewTime time.Time, loc *time.Location) error {
 	row, err := h.repo.GetUserStats(ctx, userID)
 	if err != nil {
 		return err
 	}
 
-	today := reviewTime.UTC().Truncate(24 * time.Hour)
+	// "today" is midnight-in-tz, stored as a DATE — wall-clock local day.
+	localReview := reviewTime.In(loc)
+	today := time.Date(localReview.Year(), localReview.Month(), localReview.Day(), 0, 0, 0, 0, loc)
 	newStreak := computeStreak(row.LastStudiedDate, today, row.CurrentStreak)
 
 	return h.repo.UpdateStreak(ctx, userID, newStreak, today)
+}
+
+func loadTZ(tz string) *time.Location {
+	if tz == "" {
+		return time.UTC
+	}
+	loc, err := time.LoadLocation(tz)
+	if err != nil {
+		return time.UTC
+	}
+	return loc
 }
 
 func computeStreak(last sql.NullTime, today time.Time, current int32) int32 {

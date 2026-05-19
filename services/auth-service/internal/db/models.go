@@ -124,6 +124,7 @@ type User struct {
 	LastLoginAt   sql.NullTime   `json:"last_login_at"`
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
+	Timezone      string         `json:"timezone"`
 }
 
 type VerificationToken struct {

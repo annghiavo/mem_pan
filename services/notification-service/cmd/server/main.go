@@ -25,7 +25,10 @@ import (
 	"mem_pan/services/notification-service/internal/gapi"
 	"mem_pan/services/notification-service/internal/mailer"
 	"mem_pan/services/notification-service/internal/repository"
+	"mem_pan/services/notification-service/internal/scheduler"
 	"mem_pan/services/notification-service/internal/service"
+	"mem_pan/services/notification-service/internal/statsclient"
+	"mem_pan/services/notification-service/internal/studyclient"
 	"mem_pan/services/notification-service/internal/subscriber"
 	pb "mem_pan/services/notification-service/pb"
 )
@@ -88,7 +91,27 @@ func main() {
 
 	svc := service.New(repo, m, fcmSender, templateCache, service.Config{AppBaseURL: cfg.AppBaseURL})
 
-	handler := subscriber.NewHandler(svc, authClient)
+	// Optional internal clients for reminder cron handlers. If either address
+	// is missing the scheduler stays nil and the two cron events log + skip.
+	var sched *scheduler.Scheduler
+	if cfg.StatsServiceAddress != "" && cfg.StudyServiceAddress != "" {
+		statsCli, err := statsclient.NewGRPCClient(cfg.StatsServiceAddress)
+		if err != nil {
+			log.Fatal("stats client:", err)
+		}
+		defer statsCli.Close()
+		studyCli, err := studyclient.NewGRPCClient(cfg.StudyServiceAddress)
+		if err != nil {
+			log.Fatal("study client:", err)
+		}
+		defer studyCli.Close()
+		sched = scheduler.New(repo, fcmSender, authClient, statsCli, studyCli)
+		log.Println("reminder scheduler wired (stats + study clients ready)")
+	} else {
+		log.Println("STATS_SERVICE_ADDRESS or STUDY_SERVICE_ADDRESS not set — reminder crons disabled")
+	}
+
+	handler := subscriber.NewHandler(svc, authClient, sched)
 	pushHandler := subscriber.NewPushHandler(handler, cfg.PubSubPushSecret)
 
 	grpcServer := gapi.NewServer(svc, authClient)

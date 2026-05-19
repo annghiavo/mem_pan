@@ -46,7 +46,7 @@ func (q *Queries) CountUsers(ctx context.Context, filterBanned bool) (int64, err
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, email, password_hash, full_name, role)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at
+RETURNING user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at, timezone
 `
 
 type CreateUserParams struct {
@@ -81,12 +81,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Timezone,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at FROM users WHERE email = $1 LIMIT 1
+SELECT user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at, timezone FROM users WHERE email = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -107,12 +108,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Timezone,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at FROM users WHERE user_id = $1 LIMIT 1
+SELECT user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at, timezone FROM users WHERE user_id = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, userID uuid.UUID) (User, error) {
@@ -133,12 +135,13 @@ func (q *Queries) GetUserByID(ctx context.Context, userID uuid.UUID) (User, erro
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Timezone,
 	)
 	return i, err
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at FROM users WHERE username = $1 LIMIT 1
+SELECT user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at, timezone FROM users WHERE username = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
@@ -159,12 +162,13 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Timezone,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at FROM users
+SELECT user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at, timezone FROM users
 WHERE (NOT $3::boolean OR is_banned = TRUE)
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2
@@ -200,6 +204,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.LastLoginAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Timezone,
 		); err != nil {
 			return nil, err
 		}
@@ -273,19 +278,21 @@ const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET full_name  = COALESCE($1, full_name),
     avatar_url = COALESCE($2, avatar_url),
+    timezone   = COALESCE($3, timezone),
     updated_at = now()
-WHERE user_id = $3
-RETURNING user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at
+WHERE user_id = $4
+RETURNING user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at, timezone
 `
 
 type UpdateUserParams struct {
 	FullName  sql.NullString `json:"full_name"`
 	AvatarUrl sql.NullString `json:"avatar_url"`
+	Timezone  sql.NullString `json:"timezone"`
 	UserID    uuid.UUID      `json:"user_id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateUser, arg.FullName, arg.AvatarUrl, arg.UserID)
+	row := q.db.QueryRowContext(ctx, updateUser, arg.FullName, arg.AvatarUrl, arg.Timezone, arg.UserID)
 	var i User
 	err := row.Scan(
 		&i.UserID,
@@ -302,6 +309,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Timezone,
 	)
 	return i, err
 }
@@ -311,7 +319,7 @@ UPDATE users
 SET role       = $2,
     updated_at = now()
 WHERE email = $1
-RETURNING user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at
+RETURNING user_id, username, email, password_hash, full_name, avatar_url, role, is_banned, banned_at, banned_reason, email_verified, last_login_at, created_at, updated_at, timezone
 `
 
 type UpdateUserRoleParams struct {
@@ -337,6 +345,41 @@ func (q *Queries) UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) 
 		&i.LastLoginAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Timezone,
 	)
 	return i, err
+}
+
+const listUsersForReminders = `-- name: ListUsersForReminders :many
+SELECT user_id, username, email, timezone
+FROM users
+WHERE NOT is_banned
+ORDER BY user_id
+`
+
+type ListUsersForRemindersRow struct {
+	UserID   uuid.UUID `json:"user_id"`
+	Username string    `json:"username"`
+	Email    string    `json:"email"`
+	Timezone string    `json:"timezone"`
+}
+
+func (q *Queries) ListUsersForReminders(ctx context.Context) ([]ListUsersForRemindersRow, error) {
+	rows, err := q.db.QueryContext(ctx, listUsersForReminders)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListUsersForRemindersRow{}
+	for rows.Next() {
+		var i ListUsersForRemindersRow
+		if err := rows.Scan(&i.UserID, &i.Username, &i.Email, &i.Timezone); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

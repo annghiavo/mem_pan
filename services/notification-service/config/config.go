@@ -12,6 +12,11 @@ type Config struct {
 	HTTPServerAddress  string
 	AuthServiceAddress string
 
+	// Optional. Enable the reminder cron handlers
+	// (cron.study_reminder and cron.streak_warning).
+	StatsServiceAddress string
+	StudyServiceAddress string
+
 	PubSubPushSecret string
 
 	// Email (SMTP)
@@ -35,7 +40,9 @@ func Load() (Config, error) {
 		GRPCServerAddress: getEnv("GRPC_SERVER_ADDRESS", ":9095"),
 		HTTPServerAddress: getEnv("HTTP_SERVER_ADDRESS", ":8085"),
 
-		AuthServiceAddress: getEnv("AUTH_SERVICE_ADDRESS", "localhost:9090"),
+		AuthServiceAddress:  getEnv("AUTH_SERVICE_ADDRESS", "localhost:9090"),
+		StatsServiceAddress: getEnv("STATS_SERVICE_ADDRESS", ""),
+		StudyServiceAddress: getEnv("STUDY_SERVICE_ADDRESS", ""),
 
 		PubSubPushSecret: getEnv("PUBSUB_PUSH_SECRET", ""),
 

@@ -85,6 +85,7 @@ func (s *Server) ReviewCard(ctx context.Context, req *pb.ReviewCardRequest) (*pb
 		CardID:     cardID,
 		Rating:     req.Rating,
 		DurationMS: req.DurationMs,
+		Timezone:   req.Timezone,
 	})
 	if err != nil {
 		return nil, toGRPCError(err)

@@ -22,9 +22,11 @@ const (
 )
 
 type UpdateUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	FullName      *string                `protobuf:"bytes,1,opt,name=full_name,json=fullName,proto3,oneof" json:"full_name,omitempty"`
-	AvatarUrl     *string                `protobuf:"bytes,2,opt,name=avatar_url,json=avatarUrl,proto3,oneof" json:"avatar_url,omitempty"`
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	FullName  *string                `protobuf:"bytes,1,opt,name=full_name,json=fullName,proto3,oneof" json:"full_name,omitempty"`
+	AvatarUrl *string                `protobuf:"bytes,2,opt,name=avatar_url,json=avatarUrl,proto3,oneof" json:"avatar_url,omitempty"`
+	// IANA timezone name, e.g. "Asia/Ho_Chi_Minh". Required for reminder scheduling.
+	Timezone      *string `protobuf:"bytes,3,opt,name=timezone,proto3,oneof" json:"timezone,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -69,6 +71,13 @@ func (x *UpdateUserRequest) GetFullName() string {
 func (x *UpdateUserRequest) GetAvatarUrl() string {
 	if x != nil && x.AvatarUrl != nil {
 		return *x.AvatarUrl
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetTimezone() string {
+	if x != nil && x.Timezone != nil {
+		return *x.Timezone
 	}
 	return ""
 }
@@ -122,14 +131,16 @@ var File_rpc_update_user_proto protoreflect.FileDescriptor
 const file_rpc_update_user_proto_rawDesc = "" +
 	"\n" +
 	"\x15rpc_update_user.proto\x12\x02pb\x1a\n" +
-	"user.proto\"v\n" +
+	"user.proto\"\xa4\x01\n" +
 	"\x11UpdateUserRequest\x12 \n" +
 	"\tfull_name\x18\x01 \x01(\tH\x00R\bfullName\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"avatar_url\x18\x02 \x01(\tH\x01R\tavatarUrl\x88\x01\x01B\f\n" +
+	"avatar_url\x18\x02 \x01(\tH\x01R\tavatarUrl\x88\x01\x01\x12\x1f\n" +
+	"\btimezone\x18\x03 \x01(\tH\x02R\btimezone\x88\x01\x01B\f\n" +
 	"\n" +
 	"_full_nameB\r\n" +
-	"\v_avatar_url\"2\n" +
+	"\v_avatar_urlB\v\n" +
+	"\t_timezone\"2\n" +
 	"\x12UpdateUserResponse\x12\x1c\n" +
 	"\x04user\x18\x01 \x01(\v2\b.pb.UserR\x04userB\"Z mem_pan/services/auth-service/pbb\x06proto3"
 

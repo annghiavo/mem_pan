@@ -16,7 +16,7 @@ const createUserStats = `-- name: CreateUserStats :one
 INSERT INTO user_stats (user_id, username, avatar_url)
 VALUES ($1, $2, $3)
 ON CONFLICT (user_id) DO NOTHING
-RETURNING user_id, total_cards, total_reviews, total_study_time_ms, current_streak, longest_streak, last_studied_date, total_correct, total_incorrect, username, avatar_url, updated_at
+RETURNING user_id, total_cards, total_reviews, total_study_time_ms, current_streak, longest_streak, last_studied_date, total_correct, total_incorrect, username, avatar_url, updated_at, optimal_hour_weekday, optimal_hour_weekend, reminder_local_time
 `
 
 type CreateUserStatsParams struct {
@@ -41,12 +41,15 @@ func (q *Queries) CreateUserStats(ctx context.Context, arg CreateUserStatsParams
 		&i.Username,
 		&i.AvatarUrl,
 		&i.UpdatedAt,
+		&i.OptimalHourWeekday,
+		&i.OptimalHourWeekend,
+		&i.ReminderLocalTime,
 	)
 	return i, err
 }
 
 const getUserStats = `-- name: GetUserStats :one
-SELECT user_id, total_cards, total_reviews, total_study_time_ms, current_streak, longest_streak, last_studied_date, total_correct, total_incorrect, username, avatar_url, updated_at FROM user_stats WHERE user_id = $1
+SELECT user_id, total_cards, total_reviews, total_study_time_ms, current_streak, longest_streak, last_studied_date, total_correct, total_incorrect, username, avatar_url, updated_at, optimal_hour_weekday, optimal_hour_weekend, reminder_local_time FROM user_stats WHERE user_id = $1
 `
 
 func (q *Queries) GetUserStats(ctx context.Context, userID uuid.UUID) (UserStat, error) {
@@ -65,6 +68,9 @@ func (q *Queries) GetUserStats(ctx context.Context, userID uuid.UUID) (UserStat,
 		&i.Username,
 		&i.AvatarUrl,
 		&i.UpdatedAt,
+		&i.OptimalHourWeekday,
+		&i.OptimalHourWeekend,
+		&i.ReminderLocalTime,
 	)
 	return i, err
 }

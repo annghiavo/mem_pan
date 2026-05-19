@@ -22,6 +22,7 @@ type User struct {
 	UserID   uuid.UUID
 	Username string
 	Email    string
+	Timezone string
 }
 
 type Client interface {
@@ -72,6 +73,7 @@ func (c *grpcClient) GetUserByID(ctx context.Context, userID uuid.UUID) (*User, 
 		UserID:   userID,
 		Username: resp.User.Username,
 		Email:    resp.User.Email,
+		Timezone: resp.User.Timezone,
 	}, nil
 }
 

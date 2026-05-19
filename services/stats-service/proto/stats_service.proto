@@ -66,6 +66,32 @@ service StatsService {
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }
+
+    // Internal-only — called by notification-service from cron handlers.
+    // Returns reminder state for every user (current_streak, last_studied_date,
+    // optimal_hour_*, reminder_local_time). Server-to-server only — auth via
+    // INTERNAL_SHARED_SECRET header.
+    rpc ListReminderState(ListReminderStateRequest) returns (ListReminderStateResponse);
+}
+
+// ── Reminder state (internal) ──────────────────────────────────────────────────
+
+message UserReminderState {
+    string user_id              = 1;
+    int32  current_streak       = 2;
+    string last_studied_date    = 3;  // YYYY-MM-DD or "" if never
+    int32  optimal_hour_weekday = 4;  // 0-23, -1 if unset
+    int32  optimal_hour_weekend = 5;  // 0-23, -1 if unset
+    string reminder_local_time  = 6;  // HH:MM (24h), default "21:00"
+}
+
+message ListReminderStateRequest {
+    // If true, return only users with current_streak >= 1 (streak-warning cron).
+    bool only_active_streak = 1;
+}
+
+message ListReminderStateResponse {
+    repeated UserReminderState users = 1;
 }
 
 // ── Messages ─────────────────────────────────────────────────────────────────

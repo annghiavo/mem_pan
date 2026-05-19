@@ -381,3 +381,23 @@ func (q *Queries) UpsertUserCard(ctx context.Context, arg UpsertUserCardParams) 
 	)
 	return i, err
 }
+
+const countDueByEndOfDay = `-- name: CountDueByEndOfDay :one
+SELECT COUNT(*)::int AS due
+FROM user_cards
+WHERE user_id = $1
+  AND state != 'new'
+  AND next_review_date <= $2
+`
+
+type CountDueByEndOfDayParams struct {
+	UserID         uuid.UUID `json:"user_id"`
+	NextReviewDate time.Time `json:"next_review_date"`
+}
+
+func (q *Queries) CountDueByEndOfDay(ctx context.Context, arg CountDueByEndOfDayParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, countDueByEndOfDay, arg.UserID, arg.NextReviewDate)
+	var due int32
+	err := row.Scan(&due)
+	return due, err
+}

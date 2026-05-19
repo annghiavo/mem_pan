@@ -457,6 +457,10 @@
         "durationMs": {
           "type": "integer",
           "format": "int32"
+        },
+        "timezone": {
+          "type": "string",
+          "description": "IANA timezone of the device at review time. Optional but recommended —\nused for streak boundary and activity-histogram bucketing."
         }
       }
     },

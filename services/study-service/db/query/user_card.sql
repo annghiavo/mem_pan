@@ -54,3 +54,16 @@ LIMIT $3;
 SELECT * FROM user_cards
 WHERE user_id = $1 AND deck_id = $2
 ORDER BY state, created_at;
+
+-- name: CountDueByEndOfDay :one
+-- Counts cards whose next_review_date is on or before the end of "today" in
+-- the user's local timezone. Used by the reminder cron to populate the
+-- "you have N cards to review" push.
+--
+-- $2 is the absolute UTC timestamp corresponding to end-of-day in the user's
+-- timezone (computed by the caller using time.LoadLocation).
+SELECT COUNT(*)::int AS due
+FROM user_cards
+WHERE user_id = $1
+  AND state != 'new'
+  AND next_review_date <= $2;

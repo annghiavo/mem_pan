@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -16,6 +17,10 @@ type NotificationRepository interface {
 	DeleteFCMToken(ctx context.Context, userID uuid.UUID, token string) error
 	ListFCMTokensByUser(ctx context.Context, userID uuid.UUID) ([]db.FcmToken, error)
 	LogNotification(ctx context.Context, arg db.LogNotificationParams) error
+	// Used by reminder cron handlers to avoid double-sending. Returns the
+	// number of rows in notification_log for (user, type) created at or after
+	// `since`.
+	CountRecentNotifications(ctx context.Context, userID uuid.UUID, notifType string, since time.Time) (int64, error)
 
 	// Email templates
 	GetActiveEmailTemplate(ctx context.Context, key, locale string) (db.EmailTemplate, error)
@@ -83,4 +88,13 @@ func (r *postgresRepo) ListFCMTokensByUser(ctx context.Context, userID uuid.UUID
 
 func (r *postgresRepo) LogNotification(ctx context.Context, arg db.LogNotificationParams) error {
 	return r.q.LogNotification(ctx, arg)
+}
+
+func (r *postgresRepo) CountRecentNotifications(ctx context.Context, userID uuid.UUID, notifType string, since time.Time) (int64, error) {
+	uid := userID
+	return r.q.CountRecentNotifications(ctx, db.CountRecentNotificationsParams{
+		UserID:           &uid,
+		NotificationType: notifType,
+		CreatedAt:        since,
+	})
 }

@@ -29,6 +29,9 @@ message ReviewCardRequest {
     string card_id     = 2;
     int32  rating      = 3;
     int32  duration_ms = 4;
+    // IANA timezone of the device at review time. Optional but recommended —
+    // used for streak boundary and activity-histogram bucketing.
+    string timezone    = 5;
 }
 
 message ReviewCardResponse {

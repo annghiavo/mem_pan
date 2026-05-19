@@ -16,9 +16,18 @@ SELECT * FROM users WHERE username = $1 LIMIT 1;
 UPDATE users
 SET full_name  = COALESCE(sqlc.narg('full_name'), full_name),
     avatar_url = COALESCE(sqlc.narg('avatar_url'), avatar_url),
+    timezone   = COALESCE(sqlc.narg('timezone'), timezone),
     updated_at = now()
 WHERE user_id = sqlc.arg('user_id')
 RETURNING *;
+
+-- name: ListUsersForReminders :many
+-- Returns the minimal columns needed by the reminder cron jobs.
+-- Filters out banned users.
+SELECT user_id, username, email, timezone
+FROM users
+WHERE NOT is_banned
+ORDER BY user_id;
 
 -- name: UpdatePassword :exec
 UPDATE users

@@ -15,4 +15,5 @@ message User {
     string role          = 6;
     bool   email_verified = 7;
     google.protobuf.Timestamp created_at = 8;
+    string timezone      = 9;
 }

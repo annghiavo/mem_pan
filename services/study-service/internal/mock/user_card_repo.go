@@ -6,6 +6,7 @@ package mock
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	uuid "github.com/google/uuid"
 	gomock "go.uber.org/mock/gomock"
@@ -133,4 +134,17 @@ func (m *MockUserCardRepository) ListUserCardsByDeck(ctx context.Context, arg db
 func (mr *MockUserCardRepositoryMockRecorder) ListUserCardsByDeck(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUserCardsByDeck", reflect.TypeOf((*MockUserCardRepository)(nil).ListUserCardsByDeck), ctx, arg)
+}
+
+func (m *MockUserCardRepository) CountDueByEndOfDay(ctx context.Context, userID uuid.UUID, endOfDayUTC time.Time) (int32, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountDueByEndOfDay", ctx, userID, endOfDayUTC)
+	ret0, _ := ret[0].(int32)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockUserCardRepositoryMockRecorder) CountDueByEndOfDay(ctx, userID, endOfDayUTC any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountDueByEndOfDay", reflect.TypeOf((*MockUserCardRepository)(nil).CountDueByEndOfDay), ctx, userID, endOfDayUTC)
 }

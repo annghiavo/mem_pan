@@ -23,6 +23,10 @@ type CardReviewedEvent struct {
 	StabilityAfter float64   `json:"stability_after"`
 	IsNewCard      bool      `json:"is_new_card"`
 	ReviewTime     time.Time `json:"review_time"`
+	// User's IANA timezone at review time; stats-service uses it to compute
+	// the local day for streaks and the local hour bucket for the activity
+	// histogram. Empty falls back to UTC on the consumer side.
+	Timezone       string    `json:"timezone,omitempty"`
 }
 
 type EventPublisher interface {

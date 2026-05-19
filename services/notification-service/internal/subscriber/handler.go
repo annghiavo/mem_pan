@@ -4,21 +4,24 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 
 	"mem_pan/services/notification-service/internal/authclient"
 	"mem_pan/services/notification-service/internal/events"
+	"mem_pan/services/notification-service/internal/scheduler"
 	"mem_pan/services/notification-service/internal/service"
 )
 
 type Handler struct {
 	svc        service.NotificationService
 	authClient authclient.Client
+	sched      *scheduler.Scheduler // nil when statsclient / studyclient are not configured
 }
 
-func NewHandler(svc service.NotificationService, authClient authclient.Client) *Handler {
-	return &Handler{svc: svc, authClient: authClient}
+func NewHandler(svc service.NotificationService, authClient authclient.Client, sched *scheduler.Scheduler) *Handler {
+	return &Handler{svc: svc, authClient: authClient, sched: sched}
 }
 
 func (h *Handler) Dispatch(ctx context.Context, eventType string, data []byte) error {
@@ -33,10 +36,40 @@ func (h *Handler) Dispatch(ctx context.Context, eventType string, data []byte) e
 		return h.handleDeckCloneCompleted(ctx, data)
 	case events.TypeReportResolved:
 		return h.handleReportResolved(ctx, data)
+	case events.TypeCronStudyReminder:
+		return h.handleCronStudyReminder(ctx, data)
+	case events.TypeCronStreakWarning:
+		return h.handleCronStreakWarning(ctx, data)
 	default:
 		log.Printf("[notification] unknown event type %q — skipping", eventType)
 		return nil
 	}
+}
+
+func (h *Handler) handleCronStudyReminder(ctx context.Context, data []byte) error {
+	if h.sched == nil {
+		log.Printf("[cron] study_reminder fired but scheduler not configured — skipping")
+		return nil
+	}
+	now := decodeTickTime(data)
+	return h.sched.HandleStudyReminderTick(ctx, now)
+}
+
+func (h *Handler) handleCronStreakWarning(ctx context.Context, data []byte) error {
+	if h.sched == nil {
+		log.Printf("[cron] streak_warning fired but scheduler not configured — skipping")
+		return nil
+	}
+	now := decodeTickTime(data)
+	return h.sched.HandleStreakWarningTick(ctx, now)
+}
+
+func decodeTickTime(data []byte) time.Time {
+	var t events.CronTick
+	if err := json.Unmarshal(data, &t); err != nil || t.Now.IsZero() {
+		return time.Now().UTC()
+	}
+	return t.Now.UTC()
 }
 
 func (h *Handler) handleUserRegistered(ctx context.Context, data []byte) error {

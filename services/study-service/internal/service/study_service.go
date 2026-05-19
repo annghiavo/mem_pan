@@ -38,6 +38,10 @@ type ReviewCardParams struct {
 	CardID     uuid.UUID
 	Rating     int32
 	DurationMS int32
+	// Timezone is the user's IANA timezone forwarded onto the card.reviewed
+	// event so stats-service can compute the streak day and activity bucket
+	// in the user's local time. Empty falls back to UTC.
+	Timezone string
 }
 
 type SessionResult struct {
@@ -71,6 +75,10 @@ type StudyService interface {
 	ReviewCard(ctx context.Context, p ReviewCardParams) (db.UserCard, error)
 	FinishSession(ctx context.Context, sessionID, userID uuid.UUID) (*SessionResult, error)
 	GetDueCards(ctx context.Context, userID uuid.UUID, deckID *uuid.UUID) ([]db.UserCard, error)
+	// CountDueByEndOfDay returns the number of non-new cards whose
+	// next_review_date is on or before the end of "today" in the given IANA
+	// timezone. Used by notification-service reminder crons.
+	CountDueByEndOfDay(ctx context.Context, userID uuid.UUID, timezone string) (int32, error)
 	GetRecentSessionCards(ctx context.Context, userID uuid.UUID) (*SessionResult, error)
 	GetRecentDecks(ctx context.Context, userID uuid.UUID) ([]RecentDeck, error)
 	GetDeckProgress(ctx context.Context, userID, deckID uuid.UUID) (*DeckProgress, error)
@@ -334,6 +342,7 @@ func (s *studyService) ReviewCard(ctx context.Context, p ReviewCardParams) (db.U
 		StabilityAfter: updatedUC.Stability,
 		IsNewCard:      uc.State == string(db.CardStateNew),
 		ReviewTime:     now,
+		Timezone:       p.Timezone,
 	}); pubErr != nil {
 		log.Printf("[publisher] card.reviewed: %v", pubErr)
 	}
@@ -377,6 +386,17 @@ func (s *studyService) GetDueCards(ctx context.Context, userID uuid.UUID, deckID
 		UserID: userID,
 		Limit:  1000,
 	})
+}
+
+func (s *studyService) CountDueByEndOfDay(ctx context.Context, userID uuid.UUID, timezone string) (int32, error) {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil || timezone == "" {
+		loc = time.UTC
+	}
+	now := time.Now().In(loc)
+	// End-of-day in user's tz = next day's 00:00 - 1ns.
+	endLocal := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, int(time.Second-time.Nanosecond), loc)
+	return s.userCardRepo.CountDueByEndOfDay(ctx, userID, endLocal.UTC())
 }
 
 func (s *studyService) GetRecentSessionCards(ctx context.Context, userID uuid.UUID) (*SessionResult, error) {

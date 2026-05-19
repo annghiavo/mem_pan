@@ -16,3 +16,12 @@ SELECT * FROM fcm_tokens WHERE user_id = $1 ORDER BY updated_at DESC;
 -- name: LogNotification :exec
 INSERT INTO notification_log (user_id, notification_type, channel, recipient, status, error_message)
 VALUES ($1, $2, $3, $4, $5, $6);
+
+-- name: CountRecentNotifications :one
+-- Used by reminder cron handlers to dedupe within a local day.
+SELECT COUNT(*)::bigint
+FROM notification_log
+WHERE user_id           = $1
+  AND notification_type = $2
+  AND status            = 'sent'
+  AND created_at        >= $3;

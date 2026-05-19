@@ -203,11 +203,15 @@ services:
       - ../services/notification-service/app.env
     environment:
       - AUTH_SERVICE_ADDRESS=auth-service:9090
+      - STATS_SERVICE_ADDRESS=stats-service:9094
+      - STUDY_SERVICE_ADDRESS=study-service:9092
       - PUBSUB_PUSH_SECRET=dev-secret
     volumes:
       - ../services/notification-service/mempan-cac51-firebase-adminsdk-fbsvc-fc301037a8.json:/fcm-credentials.json:ro
     depends_on:
       - auth-service
+      - stats-service
+      - study-service
       - pubsub-emulator
     expose:
       - "8085"

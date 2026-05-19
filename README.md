@@ -10,5 +10,8 @@ CSV/TSV — two-column rows, auto-detected separator, blank rows skipped, BOM-sa
   with CSV imports.
 
   check docker disk usage:
+
   docker system df
   docker system prune -a -f
+  
+  open -a OrbStack

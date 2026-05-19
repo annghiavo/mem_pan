@@ -116,4 +116,18 @@ service StudyService {
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }
+
+    // Internal-only. Returns the number of cards whose next_review_date <= the
+    // end of today in the given IANA timezone, for a single user. Used by
+    // notification-service reminder crons.
+    rpc CountDueForUser (CountDueForUserRequest) returns (CountDueForUserResponse);
+}
+
+message CountDueForUserRequest {
+    string user_id  = 1;
+    string timezone = 2;  // IANA name, e.g. "Asia/Ho_Chi_Minh"
+}
+
+message CountDueForUserResponse {
+    int32 due_today = 1;
 }

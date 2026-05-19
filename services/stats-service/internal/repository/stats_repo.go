@@ -36,6 +36,23 @@ type StatsRepository interface {
 	// deck_progress_snapshots
 	UpsertDeckProgressSnapshot(ctx context.Context, arg db.UpsertDeckProgressSnapshotParams) error
 	ListDeckProgressSnapshots(ctx context.Context, deckID uuid.UUID, from, to time.Time) ([]db.DeckProgressSnapshot, error)
+
+	// Reminder cron support
+	BumpActivityBucket(ctx context.Context, userID uuid.UUID, hour int16, dayType int16, count int32) error
+	ListActivityBuckets(ctx context.Context, userID uuid.UUID) ([]db.UserActivityBucket, error)
+	SetOptimalHours(ctx context.Context, userID uuid.UUID, weekday, weekend *int16) error
+	ListReminderState(ctx context.Context, onlyActiveStreak bool) ([]ReminderState, error)
+}
+
+// ReminderState mirrors the service-level shape so the repository can return
+// the union of two queries without leaking sqlc types upward.
+type ReminderState struct {
+	UserID             uuid.UUID
+	CurrentStreak      int32
+	LastStudiedDate    *time.Time
+	OptimalHourWeekday *int16
+	OptimalHourWeekend *int16
+	ReminderLocalTime  string
 }
 
 type statsRepository struct {
@@ -143,4 +160,94 @@ func (r *statsRepository) ListDeckProgressSnapshots(ctx context.Context, deckID 
 		SnapshotDate:  from,
 		SnapshotDate_2: to,
 	})
+}
+
+// ── Reminder cron ───────────────────────────────────────────────────────────
+
+func (r *statsRepository) BumpActivityBucket(ctx context.Context, userID uuid.UUID, hour int16, dayType int16, count int32) error {
+	return r.q.BumpActivityBucket(ctx, db.BumpActivityBucketParams{
+		UserID:      userID,
+		HourOfDay:   hour,
+		DayType:     dayType,
+		ReviewCount: count,
+	})
+}
+
+func (r *statsRepository) ListActivityBuckets(ctx context.Context, userID uuid.UUID) ([]db.UserActivityBucket, error) {
+	return r.q.GetActivityBuckets(ctx, userID)
+}
+
+func (r *statsRepository) SetOptimalHours(ctx context.Context, userID uuid.UUID, weekday, weekend *int16) error {
+	var wd, we sql.NullInt16
+	if weekday != nil {
+		wd = sql.NullInt16{Int16: *weekday, Valid: true}
+	}
+	if weekend != nil {
+		we = sql.NullInt16{Int16: *weekend, Valid: true}
+	}
+	return r.q.SetOptimalHours(ctx, db.SetOptimalHoursParams{
+		UserID:               userID,
+		OptimalHourWeekday:   wd,
+		OptimalHourWeekend:   we,
+	})
+}
+
+// ListReminderState calls one of the two sqlc-generated queries depending on
+// the filter flag and converts to the repository-level struct. The two queries
+// return identical column shapes.
+func (r *statsRepository) ListReminderState(ctx context.Context, onlyActiveStreak bool) ([]ReminderState, error) {
+	if onlyActiveStreak {
+		rows, err := r.q.ListUsersWithActiveStreak(ctx)
+		if err != nil {
+			return nil, err
+		}
+		out := make([]ReminderState, 0, len(rows))
+		for _, row := range rows {
+			out = append(out, reminderRowToState(
+				row.UserID, row.CurrentStreak, row.LastStudiedDate,
+				row.OptimalHourWeekday, row.OptimalHourWeekend, row.ReminderLocalTime,
+			))
+		}
+		return out, nil
+	}
+	rows, err := r.q.ListUsersForStudyReminder(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]ReminderState, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, reminderRowToState(
+			row.UserID, row.CurrentStreak, row.LastStudiedDate,
+			row.OptimalHourWeekday, row.OptimalHourWeekend, row.ReminderLocalTime,
+		))
+	}
+	return out, nil
+}
+
+func reminderRowToState(
+	userID uuid.UUID,
+	streak int32,
+	lastDate sql.NullTime,
+	hourWD, hourWE sql.NullInt16,
+	reminderTime time.Time,
+) ReminderState {
+	st := ReminderState{
+		UserID:        userID,
+		CurrentStreak: streak,
+		// Postgres TIME maps to time.Time with year=0001 — format hour/min.
+		ReminderLocalTime: reminderTime.Format("15:04:05"),
+	}
+	if lastDate.Valid {
+		t := lastDate.Time
+		st.LastStudiedDate = &t
+	}
+	if hourWD.Valid {
+		h := hourWD.Int16
+		st.OptimalHourWeekday = &h
+	}
+	if hourWE.Valid {
+		h := hourWE.Int16
+		st.OptimalHourWeekend = &h
+	}
+	return st
 }

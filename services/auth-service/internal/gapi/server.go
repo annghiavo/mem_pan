@@ -50,6 +50,7 @@ func dbUserToPb(u db.User) *pb.User {
 	if u.AvatarUrl.Valid {
 		r.AvatarUrl = u.AvatarUrl.String
 	}
+	r.Timezone = u.Timezone
 	return r
 }
 

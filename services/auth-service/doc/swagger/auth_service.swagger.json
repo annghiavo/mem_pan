@@ -684,6 +684,10 @@
         },
         "avatarUrl": {
           "type": "string"
+        },
+        "timezone": {
+          "type": "string",
+          "description": "IANA timezone name, e.g. \"Asia/Ho_Chi_Minh\". Required for reminder scheduling."
         }
       }
     },
@@ -746,6 +750,9 @@
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "timezone": {
+          "type": "string"
         }
       }
     },

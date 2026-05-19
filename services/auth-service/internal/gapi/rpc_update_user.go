@@ -20,6 +20,9 @@ func (s *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb
 	if req.AvatarUrl != nil {
 		params.AvatarURL = req.AvatarUrl
 	}
+	if req.Timezone != nil {
+		params.Timezone = req.Timezone
+	}
 
 	user, err := s.userSvc.UpdateProfile(ctx, payload.UserID, params)
 	if err != nil {

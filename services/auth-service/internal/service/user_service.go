@@ -16,6 +16,7 @@ import (
 type UpdateProfileParams struct {
 	FullName  *string
 	AvatarURL *string
+	Timezone  *string
 }
 
 type ChangePasswordParams struct {
@@ -67,6 +68,7 @@ func (s *userService) UpdateProfile(ctx context.Context, userID uuid.UUID, param
 		UserID:    userID,
 		FullName:  domain.NullStr(params.FullName),
 		AvatarUrl: domain.NullStr(params.AvatarURL),
+		Timezone:  domain.NullStr(params.Timezone),
 	})
 	if err != nil {
 		return db.User{}, err

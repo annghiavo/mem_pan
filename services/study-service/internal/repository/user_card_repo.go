@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -20,6 +21,7 @@ type UserCardRepository interface {
 	ListDueUserCardsByDeck(ctx context.Context, arg db.ListDueUserCardsByDeckParams) ([]db.UserCard, error)
 	ListNewUserCardsByDeck(ctx context.Context, arg db.ListNewUserCardsByDeckParams) ([]db.UserCard, error)
 	ListUserCardsByDeck(ctx context.Context, arg db.ListUserCardsByDeckParams) ([]db.UserCard, error)
+	CountDueByEndOfDay(ctx context.Context, userID uuid.UUID, endOfDayUTC time.Time) (int32, error)
 }
 
 type userCardRepository struct {
@@ -64,4 +66,11 @@ func (r *userCardRepository) ListNewUserCardsByDeck(ctx context.Context, arg db.
 
 func (r *userCardRepository) ListUserCardsByDeck(ctx context.Context, arg db.ListUserCardsByDeckParams) ([]db.UserCard, error) {
 	return r.q.ListUserCardsByDeck(ctx, arg)
+}
+
+func (r *userCardRepository) CountDueByEndOfDay(ctx context.Context, userID uuid.UUID, endOfDayUTC time.Time) (int32, error) {
+	return r.q.CountDueByEndOfDay(ctx, db.CountDueByEndOfDayParams{
+		UserID:         userID,
+		NextReviewDate: endOfDayUTC,
+	})
 }
