@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"mem_pan/services/deck-service/internal/db"
 	"mem_pan/services/deck-service/internal/domain"
@@ -30,8 +30,8 @@ func NewFolderDeckRepository(database *sql.DB) FolderDeckRepository {
 func (r *folderDeckRepository) AddDeckToFolder(ctx context.Context, arg db.AddDeckToFolderParams) (db.FolderDeck, error) {
 	fd, err := r.q.AddDeckToFolder(ctx, arg)
 	if err != nil {
-		var pqErr *pq.Error
-		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return db.FolderDeck{}, domain.ErrDeckAlreadyInFolder
 		}
 		return db.FolderDeck{}, err

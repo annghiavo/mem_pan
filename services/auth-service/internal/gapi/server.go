@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"errors"
+	"log"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"google.golang.org/grpc/codes"
@@ -71,6 +72,7 @@ func toGRPCError(err error) error {
 		errors.Is(err, domain.ErrTokenRevoked):
 		return status.Error(codes.InvalidArgument, err.Error())
 	default:
+		log.Printf("unhandled error: %v", err)
 		return status.Error(codes.Internal, "internal server error")
 	}
 }

@@ -15,3 +15,5 @@ CSV/TSV — two-column rows, auto-detected separator, blank rows skipped, BOM-sa
   docker system prune -a -f
   
   open -a OrbStack
+
+  ./scripts/reset-data.sh

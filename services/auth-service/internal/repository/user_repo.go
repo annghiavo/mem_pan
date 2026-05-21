@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"mem_pan/services/auth-service/internal/db"
 	"mem_pan/services/auth-service/internal/domain"
@@ -39,9 +39,9 @@ func NewUserRepository(database *sql.DB) UserRepository {
 func (r *userRepository) CreateUser(ctx context.Context, arg db.CreateUserParams) (db.User, error) {
 	u, err := r.q.CreateUser(ctx, arg)
 	if err != nil {
-		var pqErr *pq.Error
-		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
-			if pqErr.Constraint == "users_email_key" {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			if pgErr.ConstraintName == "users_email_key" {
 				return db.User{}, domain.ErrEmailAlreadyExists
 			}
 			return db.User{}, domain.ErrUsernameAlreadyExists

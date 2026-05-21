@@ -1,4 +1,4 @@
-CREATE TABLE deck_study_settings (
+CREATE TABLE IF NOT EXISTS deck_study_settings (
     user_id                         UUID NOT NULL,
     deck_id                         UUID NOT NULL,
 

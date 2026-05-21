@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"io/fs"
 	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -13,11 +13,14 @@ import (
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/stdlib"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 
+	"mem_pan/pkg/logger"
+	"mem_pan/pkg/middleware"
 	"mem_pan/services/notification-service/config"
 	"mem_pan/services/notification-service/doc"
 	"mem_pan/services/notification-service/internal/authclient"
@@ -34,15 +37,20 @@ import (
 )
 
 func main() {
+	slogger := logger.New("notification-service")
+	slog.SetDefault(slogger)
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	database, err := sql.Open("postgres", cfg.DBUrl)
+	pgxCfg, err := pgx.ParseConfig(cfg.DBUrl)
 	if err != nil {
-		log.Fatal("open db:", err)
+		log.Fatal("parse db url:", err)
 	}
+	pgxCfg.DefaultQueryExecMode = pgx.QueryExecModeExec
+	database := stdlib.OpenDB(*pgxCfg)
 	defer database.Close()
 
 	database.SetMaxOpenConns(25)
@@ -119,15 +127,15 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	go runGRPCServer(cfg, grpcServer)
-	go runHTTPServer(cfg, grpcServer, pushHandler)
+	go runGRPCServer(cfg, grpcServer, slogger)
+	go runHTTPServer(cfg, grpcServer, pushHandler, slogger)
 
 	<-quit
 	log.Println("notification-service shutting down")
 }
 
-func runGRPCServer(cfg config.Config, server *gapi.Server) {
-	s := grpc.NewServer()
+func runGRPCServer(cfg config.Config, server *gapi.Server, logger *slog.Logger) {
+	s := grpc.NewServer(grpc.UnaryInterceptor(middleware.UnaryServerLogger(logger)))
 	pb.RegisterNotificationServiceServer(s, server)
 	reflection.Register(s)
 
@@ -142,7 +150,7 @@ func runGRPCServer(cfg config.Config, server *gapi.Server) {
 	}
 }
 
-func runHTTPServer(cfg config.Config, grpcServer *gapi.Server, pushHandler *subscriber.PushHandler) {
+func runHTTPServer(cfg config.Config, grpcServer *gapi.Server, pushHandler *subscriber.PushHandler, logger *slog.Logger) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -164,7 +172,7 @@ func runHTTPServer(cfg config.Config, grpcServer *gapi.Server, pushHandler *subs
 
 	httpServer := &http.Server{
 		Addr:         cfg.HTTPServerAddress,
-		Handler:      withCORS(mux),
+		Handler:      middleware.HTTPLogger(logger)(withCORS(mux)),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,

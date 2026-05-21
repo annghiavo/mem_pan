@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"io/fs"
 	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -14,12 +14,15 @@ import (
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 
+	"mem_pan/pkg/logger"
+	"mem_pan/pkg/middleware"
 	"mem_pan/services/auth-service/config"
 	"mem_pan/services/auth-service/doc"
 	"mem_pan/services/auth-service/internal/gapi"
@@ -33,15 +36,20 @@ import (
 func main() {
 	_ = godotenv.Load("app.env")
 
+	slogger := logger.New("auth-service")
+	slog.SetDefault(slogger)
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db, err := sql.Open("postgres", cfg.DBUrl)
+	pgxCfg, err := pgx.ParseConfig(cfg.DBUrl)
 	if err != nil {
-		log.Fatal("open db:", err)
+		log.Fatal("parse db url:", err)
 	}
+	pgxCfg.DefaultQueryExecMode = pgx.QueryExecModeExec
+	db := stdlib.OpenDB(*pgxCfg)
 	defer db.Close()
 
 	db.SetMaxOpenConns(25)
@@ -84,15 +92,15 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	gapiServer := gapi.NewServer(authSvc, userSvc, tokenMaker, cld, pub)
-	go runGRPCServer(cfg, gapiServer)
-	go runHTTPGateway(cfg, gapiServer)
+	go runGRPCServer(cfg, gapiServer, slogger)
+	go runHTTPGateway(cfg, gapiServer, slogger)
 
 	<-quit
 	log.Println("auth-service shutting down")
 }
 
-func runGRPCServer(cfg config.Config, server *gapi.Server) {
-	grpcServer := grpc.NewServer()
+func runGRPCServer(cfg config.Config, server *gapi.Server, logger *slog.Logger) {
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(middleware.UnaryServerLogger(logger)))
 	pb.RegisterAuthServiceServer(grpcServer, server)
 	reflection.Register(grpcServer)
 
@@ -107,7 +115,7 @@ func runGRPCServer(cfg config.Config, server *gapi.Server) {
 	}
 }
 
-func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server) {
+func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server, logger *slog.Logger) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -130,7 +138,7 @@ func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server) {
 
 	srv := &http.Server{
 		Addr:         cfg.HTTPServerAddress,
-		Handler:      withCORS(httpMux),
+		Handler:      middleware.HTTPLogger(logger)(withCORS(httpMux)),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,

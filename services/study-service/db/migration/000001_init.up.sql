@@ -24,7 +24,7 @@ CREATE TABLE user_cards (
     created_at          TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE (user_id, card_id)
+    UNIQUE (user_id, card_id, deck_id)
 );
 
 CREATE INDEX idx_user_cards_user_id  ON user_cards(user_id);

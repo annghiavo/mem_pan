@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"io/fs"
 	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -13,13 +13,14 @@ import (
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/stdlib"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
 
+	"mem_pan/pkg/logger"
+	"mem_pan/pkg/middleware"
 	"mem_pan/services/study-service/config"
 	"mem_pan/services/study-service/doc"
 	"mem_pan/services/study-service/internal/authclient"
@@ -32,15 +33,20 @@ import (
 )
 
 func main() {
+	slogger := logger.New("study-service")
+	slog.SetDefault(slogger)
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	database, err := sql.Open("postgres", cfg.DBUrl)
+	pgxCfg, err := pgx.ParseConfig(cfg.DBUrl)
 	if err != nil {
-		log.Fatal("open db:", err)
+		log.Fatal("parse db url:", err)
 	}
+	pgxCfg.DefaultQueryExecMode = pgx.QueryExecModeExec
+	database := stdlib.OpenDB(*pgxCfg)
 	defer database.Close()
 
 	database.SetMaxOpenConns(25)
@@ -91,17 +97,17 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	go runGRPCServer(cfg, studySvc, settingsSvc, authClient)
-	go runHTTPGateway(cfg)
+	go runGRPCServer(cfg, studySvc, settingsSvc, authClient, slogger)
+	go runHTTPGateway(cfg, slogger)
 
 	<-quit
 	log.Println("study-service shutting down")
 }
 
-func runGRPCServer(cfg config.Config, studySvc service.StudyService, settingsSvc service.SettingsService, authClient authclient.Client) {
+func runGRPCServer(cfg config.Config, studySvc service.StudyService, settingsSvc service.SettingsService, authClient authclient.Client, logger *slog.Logger) {
 	server := gapi.NewServer(studySvc, settingsSvc, authClient)
 
-	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(errorLoggingInterceptor))
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(middleware.UnaryServerLogger(logger)))
 	pb.RegisterStudyServiceServer(grpcServer, server)
 	reflection.Register(grpcServer)
 
@@ -116,7 +122,7 @@ func runGRPCServer(cfg config.Config, studySvc service.StudyService, settingsSvc
 	}
 }
 
-func runHTTPGateway(cfg config.Config) {
+func runHTTPGateway(cfg config.Config, logger *slog.Logger) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -138,7 +144,7 @@ func runHTTPGateway(cfg config.Config) {
 
 	srv := &http.Server{
 		Addr:         cfg.HTTPServerAddress,
-		Handler:      withCORS(httpMux),
+		Handler:      middleware.HTTPLogger(logger)(withCORS(httpMux)),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
@@ -151,12 +157,3 @@ func runHTTPGateway(cfg config.Config) {
 	}
 }
 
-func errorLoggingInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-	resp, err := handler(ctx, req)
-	if err != nil {
-		if s, ok := status.FromError(err); ok && s.Code() == codes.Internal {
-			log.Printf("method=%s status=internal", info.FullMethod)
-		}
-	}
-	return resp, err
-}
