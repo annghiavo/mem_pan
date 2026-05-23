@@ -1,0 +1,3 @@
+-- No-op: the backfill is idempotent and there's no meaningful way to undo
+-- promoting zombie 'ongoing' sessions to 'completed' without losing
+-- information about which sessions were healed.

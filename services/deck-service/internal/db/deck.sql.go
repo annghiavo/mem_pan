@@ -396,7 +396,7 @@ func (q *Queries) UpdateDeck(ctx context.Context, arg UpdateDeckParams) (Deck, e
 
 const updateDeckSettings = `-- name: UpdateDeckSettings :one
 UPDATE decks
-SET settings   = $2,
+SET settings   = $2::jsonb,
     updated_at = now()
 WHERE deck_id = $1
 RETURNING deck_id, user_id, name, description, is_public, status, settings, card_count, cloned_from, created_at, updated_at

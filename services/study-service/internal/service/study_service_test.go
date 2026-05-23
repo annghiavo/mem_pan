@@ -424,6 +424,9 @@ func TestFinishSession_Success(t *testing.T) {
 }
 
 func TestFinishSession_AlreadyFinished(t *testing.T) {
+	// /finish is idempotent — calling it on a session that auto-completed
+	// (when the last review hit total_cards) must return the existing session
+	// rather than erroring, so the client's explicit follow-up call is safe.
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -441,12 +444,16 @@ func TestFinishSession_AlreadyFinished(t *testing.T) {
 	session := makeSession(sessionID, userID, deckID, db.SessionStatusCompleted)
 
 	sessRepo.EXPECT().GetStudySession(ctx, sessionID).Return(session, nil)
+	scRepo.EXPECT().ListSessionCards(ctx, sessionID).Return([]db.SessionCard{}, nil)
 
 	svc := newTestStudyService(ctrl, ucRepo, sessRepo, scRepo, revRepo, weightsRepo, deckClient)
-	_, err := svc.FinishSession(ctx, sessionID, userID)
+	result, err := svc.FinishSession(ctx, sessionID, userID)
 
-	if !errors.Is(err, domain.ErrSessionFinished) {
-		t.Errorf("expected ErrSessionFinished, got %v", err)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if result == nil || result.Session.SessionID != sessionID {
+		t.Errorf("expected existing session returned, got %+v", result)
 	}
 }
 

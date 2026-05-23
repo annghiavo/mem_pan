@@ -58,7 +58,7 @@ type UserStat struct {
 	UpdatedAt          time.Time      `json:"updated_at"`
 	OptimalHourWeekday sql.NullInt16  `json:"optimal_hour_weekday"`
 	OptimalHourWeekend sql.NullInt16  `json:"optimal_hour_weekend"`
-	ReminderLocalTime  time.Time      `json:"reminder_local_time"`
+	ReminderLocalTime  string         `json:"reminder_local_time"`
 }
 
 type UserActivityBucket struct {

@@ -229,13 +229,12 @@ func reminderRowToState(
 	streak int32,
 	lastDate sql.NullTime,
 	hourWD, hourWE sql.NullInt16,
-	reminderTime time.Time,
+	reminderTime string,
 ) ReminderState {
 	st := ReminderState{
-		UserID:        userID,
-		CurrentStreak: streak,
-		// Postgres TIME maps to time.Time with year=0001 — format hour/min.
-		ReminderLocalTime: reminderTime.Format("15:04:05"),
+		UserID:            userID,
+		CurrentStreak:     streak,
+		ReminderLocalTime: reminderTime,
 	}
 	if lastDate.Valid {
 		t := lastDate.Time

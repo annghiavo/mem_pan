@@ -13,6 +13,7 @@ import (
 	"mem_pan/services/study-service/pb"
 )
 
+
 func (s *Server) GetDeckSettings(ctx context.Context, req *pb.GetStudyDeckSettingsRequest) (*pb.GetStudyDeckSettingsResponse, error) {
 	payload, err := s.authorizeUser(ctx)
 	if err != nil {
@@ -26,9 +27,6 @@ func (s *Server) GetDeckSettings(ctx context.Context, req *pb.GetStudyDeckSettin
 
 	settings, err := s.settingsSvc.GetDeckSettings(ctx, payload.UserID, deckID)
 	if err != nil {
-		if errors.Is(err, domain.ErrSettingsNotFound) {
-			return nil, status.Error(codes.NotFound, err.Error())
-		}
 		return nil, toGRPCError(err)
 	}
 	return &pb.GetStudyDeckSettingsResponse{Settings: dbSettingsToPb(settings)}, nil

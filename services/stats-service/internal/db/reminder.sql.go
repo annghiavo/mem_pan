@@ -8,7 +8,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -106,7 +105,7 @@ type ListUsersWithActiveStreakRow struct {
 	LastStudiedDate    sql.NullTime  `json:"last_studied_date"`
 	OptimalHourWeekday sql.NullInt16 `json:"optimal_hour_weekday"`
 	OptimalHourWeekend sql.NullInt16 `json:"optimal_hour_weekend"`
-	ReminderLocalTime  time.Time     `json:"reminder_local_time"`
+	ReminderLocalTime  string        `json:"reminder_local_time"`
 }
 
 func (q *Queries) ListUsersWithActiveStreak(ctx context.Context) ([]ListUsersWithActiveStreakRow, error) {
@@ -154,7 +153,7 @@ type ListUsersForStudyReminderRow struct {
 	LastStudiedDate    sql.NullTime  `json:"last_studied_date"`
 	OptimalHourWeekday sql.NullInt16 `json:"optimal_hour_weekday"`
 	OptimalHourWeekend sql.NullInt16 `json:"optimal_hour_weekend"`
-	ReminderLocalTime  time.Time     `json:"reminder_local_time"`
+	ReminderLocalTime  string        `json:"reminder_local_time"`
 }
 
 func (q *Queries) ListUsersForStudyReminder(ctx context.Context) ([]ListUsersForStudyReminderRow, error) {

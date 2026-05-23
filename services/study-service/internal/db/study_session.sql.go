@@ -176,7 +176,15 @@ const incrementCompletedCards = `-- name: IncrementCompletedCards :one
 UPDATE study_sessions SET
     completed_cards      = completed_cards + 1,
     last_completed_index = last_completed_index + 1,
-    last_accessed_at     = NOW()
+    last_accessed_at     = NOW(),
+    status               = CASE WHEN completed_cards + 1 >= total_cards
+                                THEN 'completed'::session_status
+                                ELSE status
+                           END,
+    finished_at          = CASE WHEN completed_cards + 1 >= total_cards
+                                THEN NOW()
+                                ELSE finished_at
+                           END
 WHERE session_id = $1
 RETURNING session_id, user_id, deck_id, status, total_cards, completed_cards, last_completed_index, started_at, finished_at, last_accessed_at
 `

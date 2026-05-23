@@ -49,7 +49,7 @@ func TestGetDeckSettings_Success(t *testing.T) {
 	}
 }
 
-func TestGetDeckSettings_NotFound(t *testing.T) {
+func TestGetDeckSettings_NotFound_ReturnsDefaults(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -61,10 +61,42 @@ func TestGetDeckSettings_NotFound(t *testing.T) {
 	settingsRepo.EXPECT().GetDeckSettings(ctx, userID, deckID).Return(db.DeckStudySetting{}, domain.ErrSettingsNotFound)
 
 	svc := NewSettingsService(settingsRepo)
+	got, err := svc.GetDeckSettings(ctx, userID, deckID)
+
+	if err != nil {
+		t.Fatalf("expected no error (defaults should be returned), got %v", err)
+	}
+	if got.UserID != userID || got.DeckID != deckID {
+		t.Errorf("expected defaults scoped to caller, got %+v", got)
+	}
+	if got.StrictnessLevel != grading.StrictnessFlexible {
+		t.Errorf("expected default StrictnessLevel=%q, got %q", grading.StrictnessFlexible, got.StrictnessLevel)
+	}
+	if !got.AnswerWithTerm || !got.AnswerWithDefinition {
+		t.Errorf("expected default AnswerWithTerm/Definition=true, got %+v", got)
+	}
+	if !got.QuestionTypeMultipleChoice || !got.QuestionTypeWritten {
+		t.Errorf("expected default QuestionTypeMultipleChoice/Written=true, got %+v", got)
+	}
+}
+
+func TestGetDeckSettings_RepoError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	settingsRepo := mock.NewMockDeckSettingsRepository(ctrl)
+	ctx := context.Background()
+	userID := uuid.New()
+	deckID := uuid.New()
+	boom := errors.New("db down")
+
+	settingsRepo.EXPECT().GetDeckSettings(ctx, userID, deckID).Return(db.DeckStudySetting{}, boom)
+
+	svc := NewSettingsService(settingsRepo)
 	_, err := svc.GetDeckSettings(ctx, userID, deckID)
 
-	if !errors.Is(err, domain.ErrSettingsNotFound) {
-		t.Errorf("expected ErrSettingsNotFound, got %v", err)
+	if !errors.Is(err, boom) {
+		t.Errorf("expected underlying repo error to surface, got %v", err)
 	}
 }
 

@@ -28,10 +28,22 @@ WHERE session_id = $1
 RETURNING *;
 
 -- name: IncrementCompletedCards :one
+-- Bumps the per-review counters and atomically flips the session to
+-- 'completed' on the final card so it can't get stuck in 'ongoing' state.
+-- A stuck ongoing-but-fully-graded session would cause the next StartSession
+-- to resume it and every /review call to 409 with ErrCardAlreadyReviewed.
 UPDATE study_sessions SET
     completed_cards      = completed_cards + 1,
     last_completed_index = last_completed_index + 1,
-    last_accessed_at     = NOW()
+    last_accessed_at     = NOW(),
+    status               = CASE WHEN completed_cards + 1 >= total_cards
+                                THEN 'completed'::session_status
+                                ELSE status
+                           END,
+    finished_at          = CASE WHEN completed_cards + 1 >= total_cards
+                                THEN NOW()
+                                ELSE finished_at
+                           END
 WHERE session_id = $1
 RETURNING *;
 

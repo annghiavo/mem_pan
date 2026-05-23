@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"errors"
+	"log/slog"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,6 +35,7 @@ func toGRPCError(err error) error {
 	case errors.Is(err, domain.ErrForbidden):
 		return status.Error(codes.PermissionDenied, err.Error())
 	default:
+		slog.Error("stats internal error", "err", err.Error())
 		return status.Error(codes.Internal, "internal server error")
 	}
 }

@@ -34,7 +34,7 @@ RETURNING *;
 
 -- name: UpdateDeckSettings :one
 UPDATE decks
-SET settings   = $2,
+SET settings   = $2::jsonb,
     updated_at = now()
 WHERE deck_id = $1
 RETURNING *;

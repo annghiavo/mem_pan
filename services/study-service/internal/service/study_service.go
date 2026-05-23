@@ -119,19 +119,28 @@ func NewStudyService(
 }
 
 func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (*SessionResult, error) {
-	// Resume existing ongoing session.
+	// Resume existing ongoing session — but only if it still has un-reviewed
+	// cards. A session whose status was never flipped to 'completed' (e.g. the
+	// client crashed before calling FinishSession) would otherwise be resumed
+	// forever and every /review call would 409 with ErrCardAlreadyReviewed.
 	existing, err := s.sessionRepo.GetOngoingSessionByDeck(ctx, db.GetOngoingSessionByDeckParams{
 		UserID: p.UserID,
 		DeckID: p.DeckID,
 	})
 	if err == nil {
-		cards, err := s.sessionCardRepo.ListSessionCards(ctx, existing.SessionID)
-		if err != nil {
-			return nil, err
+		if existing.TotalCards > 0 && existing.CompletedCards >= existing.TotalCards {
+			if _, finErr := s.sessionRepo.FinishStudySession(ctx, existing.SessionID); finErr != nil {
+				return nil, finErr
+			}
+			// Fall through to create a brand-new session below.
+		} else {
+			cards, err := s.sessionCardRepo.ListSessionCards(ctx, existing.SessionID)
+			if err != nil {
+				return nil, err
+			}
+			return &SessionResult{Session: existing, Cards: cards}, nil
 		}
-		return &SessionResult{Session: existing, Cards: cards}, nil
-	}
-	if !errors.Is(err, domain.ErrSessionNotFound) {
+	} else if !errors.Is(err, domain.ErrSessionNotFound) {
 		return nil, err
 	}
 
@@ -326,6 +335,9 @@ func (s *studyService) ReviewCard(ctx context.Context, p ReviewCardParams) (db.U
 		return db.UserCard{}, err
 	}
 
+	// IncrementCompletedCards atomically flips status to 'completed' on the
+	// final card (see study_session.sql) so the session can't get stuck in
+	// 'ongoing' state with every card already graded.
 	_, err = s.sessionRepo.IncrementCompletedCards(ctx, p.SessionID)
 	if err != nil {
 		return db.UserCard{}, err
@@ -358,8 +370,16 @@ func (s *studyService) FinishSession(ctx context.Context, sessionID, userID uuid
 	if session.UserID != userID {
 		return nil, domain.ErrForbidden
 	}
+	// /finish is idempotent: if the session already auto-completed when the
+	// last card's review hit total_cards (see IncrementCompletedCards), the
+	// client's follow-up explicit /finish call returns the existing session
+	// instead of erroring.
 	if session.Status != string(db.SessionStatusOngoing) {
-		return nil, domain.ErrSessionFinished
+		cards, err := s.sessionCardRepo.ListSessionCards(ctx, sessionID)
+		if err != nil {
+			return nil, err
+		}
+		return &SessionResult{Session: session, Cards: cards}, nil
 	}
 
 	finished, err := s.sessionRepo.FinishStudySession(ctx, sessionID)

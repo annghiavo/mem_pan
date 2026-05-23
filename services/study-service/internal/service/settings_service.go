@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 
@@ -10,6 +11,26 @@ import (
 	"mem_pan/services/study-service/internal/grading"
 	"mem_pan/services/study-service/internal/repository"
 )
+
+// defaultDeckStudySettings mirrors the column-level DEFAULTs in
+// db/migration/000003_deck_study_settings.up.sql. Returned by GetDeckSettings
+// when no row exists yet so the client can render the settings UI on a
+// freshly-opened deck instead of hitting a 404.
+func defaultDeckStudySettings(userID, deckID uuid.UUID) db.DeckStudySetting {
+	return db.DeckStudySetting{
+		UserID:                       userID,
+		DeckID:                       deckID,
+		ShuffleTerms:                 false,
+		TextToSpeech:                 false,
+		AnswerWithTerm:               true,
+		AnswerWithDefinition:         true,
+		QuestionTypeFlashcards:       false,
+		QuestionTypeMultipleChoice:   true,
+		QuestionTypeWritten:          true,
+		StrictnessLevel:              grading.StrictnessFlexible,
+		RequireRetypingCorrectAnswer: false,
+	}
+}
 
 type UpsertSettingsParams struct {
 	UserID                       uuid.UUID
@@ -52,7 +73,11 @@ func NewSettingsService(settingsRepo repository.DeckSettingsRepository) Settings
 }
 
 func (s *settingsService) GetDeckSettings(ctx context.Context, userID, deckID uuid.UUID) (db.DeckStudySetting, error) {
-	return s.settingsRepo.GetDeckSettings(ctx, userID, deckID)
+	settings, err := s.settingsRepo.GetDeckSettings(ctx, userID, deckID)
+	if errors.Is(err, domain.ErrSettingsNotFound) {
+		return defaultDeckStudySettings(userID, deckID), nil
+	}
+	return settings, err
 }
 
 func (s *settingsService) UpsertDeckSettings(ctx context.Context, p UpsertSettingsParams) (db.DeckStudySetting, error) {
@@ -76,9 +101,10 @@ func (s *settingsService) UpsertDeckSettings(ctx context.Context, p UpsertSettin
 
 func (s *settingsService) CheckAnswer(ctx context.Context, p CheckAnswerParams) (CheckAnswerResult, error) {
 	settings, err := s.settingsRepo.GetDeckSettings(ctx, p.UserID, p.DeckID)
-	if err != nil {
-		// Fall back to flexible if no settings exist.
-		settings = db.DeckStudySetting{StrictnessLevel: grading.StrictnessFlexible}
+	if errors.Is(err, domain.ErrSettingsNotFound) {
+		settings = defaultDeckStudySettings(p.UserID, p.DeckID)
+	} else if err != nil {
+		return CheckAnswerResult{}, err
 	}
 
 	ok := grading.CheckAnswer(p.UserAnswer, p.CorrectAnswer, settings.StrictnessLevel)

@@ -218,9 +218,15 @@ func (h *Handler) updateStreak(ctx context.Context, userID uuid.UUID, reviewTime
 		return err
 	}
 
-	// "today" is midnight-in-tz, stored as a DATE — wall-clock local day.
+	// "today" represents the user's local calendar date, but constructed as UTC
+	// midnight on that date. The pgx driver (QueryExecModeExec) sends time.Time
+	// as TIMESTAMPTZ; Postgres then casts to DATE in the session tz (UTC), which
+	// would shift the date backwards by the tz offset if we used a non-UTC zone
+	// here. Building UTC midnight from the local Y/M/D keeps storage and reads
+	// symmetric (Postgres DATE always decodes as UTC midnight in pgx too).
 	localReview := reviewTime.In(loc)
-	today := time.Date(localReview.Year(), localReview.Month(), localReview.Day(), 0, 0, 0, 0, loc)
+	y, m, d := localReview.Date()
+	today := time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
 	newStreak := computeStreak(row.LastStudiedDate, today, row.CurrentStreak)
 
 	return h.repo.UpdateStreak(ctx, userID, newStreak, today)
@@ -241,11 +247,16 @@ func computeStreak(last sql.NullTime, today time.Time, current int32) int32 {
 	if !last.Valid {
 		return 1
 	}
-	lastDay := last.Time.UTC().Truncate(24 * time.Hour)
-	if lastDay.Equal(today) {
+	// last comes from a Postgres DATE (decoded as UTC midnight), today is local
+	// midnight in the user's tz. Compare by Y/M/D, not instant — otherwise a
+	// non-UTC user's streak resets to 1 on every review.
+	ly, lm, ld := last.Time.UTC().Date()
+	ty, tm, td := today.Date()
+	if ly == ty && lm == tm && ld == td {
 		return current
 	}
-	if lastDay.Equal(today.AddDate(0, 0, -1)) {
+	yy, ym, yd := today.AddDate(0, 0, -1).Date()
+	if ly == yy && lm == ym && ld == yd {
 		return current + 1
 	}
 	return 1
