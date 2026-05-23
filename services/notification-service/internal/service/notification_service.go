@@ -11,6 +11,7 @@ import (
 	"mem_pan/services/notification-service/internal/fcm"
 	"mem_pan/services/notification-service/internal/mailer"
 	"mem_pan/services/notification-service/internal/repository"
+	"mem_pan/services/notification-service/internal/scheduler"
 )
 
 // templateDataFromMap converts the gRPC string-map payload into the shape
@@ -25,6 +26,7 @@ func templateDataFromMap(data map[string]string) map[string]string {
 type NotificationService interface {
 	RegisterDeviceToken(ctx context.Context, userID uuid.UUID, token, deviceName string) error
 	UnregisterDeviceToken(ctx context.Context, userID uuid.UUID, token string) error
+	SendTestNotification(ctx context.Context, userID uuid.UUID, p TestNotificationParams) (TestNotificationResult, error)
 
 	SendWelcomeEmail(ctx context.Context, userID, email, username string) error
 	SendVerificationEmail(ctx context.Context, userID, email, username, token string) error
@@ -55,6 +57,19 @@ type RenderedEmail struct {
 	TextBody string
 }
 
+type TestNotificationParams struct {
+	Type     string // "study_reminder" (default) or "streak_warning"
+	Token    string // optional; if set, push goes only to this token
+	DueCount int32
+	Streak   int32
+}
+
+type TestNotificationResult struct {
+	DeviceCount int32
+	Title       string
+	Body        string
+}
+
 type Config struct {
 	AppBaseURL string // e.g. "https://mempan.app"
 }
@@ -78,6 +93,67 @@ func (s *service) RegisterDeviceToken(ctx context.Context, userID uuid.UUID, tok
 
 func (s *service) UnregisterDeviceToken(ctx context.Context, userID uuid.UUID, token string) error {
 	return s.repo.DeleteFCMToken(ctx, userID, token)
+}
+
+// SendTestNotification fires a push that mirrors the production payload from
+// the reminder cron (same title/body builder, same data fields). It exists so
+// the Android client (or a curl/grpcurl tool) can verify FCM end-to-end
+// without waiting for the cron tick window, due cards, or dedup state.
+func (s *service) SendTestNotification(ctx context.Context, userID uuid.UUID, p TestNotificationParams) (TestNotificationResult, error) {
+	notifType := p.Type
+	if notifType == "" {
+		notifType = "study_reminder"
+	}
+
+	var title, body string
+	switch notifType {
+	case "study_reminder":
+		title = "Time to study"
+		body = scheduler.StudyReminderBody(p.DueCount, p.Streak)
+	case "streak_warning":
+		title = "Don't lose your streak"
+		body = scheduler.StreakWarningBody(p.DueCount, p.Streak)
+	default:
+		return TestNotificationResult{}, fmt.Errorf("unsupported notification_type %q (expected study_reminder or streak_warning)", notifType)
+	}
+
+	var tokens []string
+	if p.Token != "" {
+		tokens = []string{p.Token}
+	} else {
+		rows, err := s.repo.ListFCMTokensByUser(ctx, userID)
+		if err != nil {
+			return TestNotificationResult{}, fmt.Errorf("list fcm tokens: %w", err)
+		}
+		tokens = make([]string, len(rows))
+		for i, t := range rows {
+			tokens[i] = t.Token
+		}
+	}
+
+	data := map[string]string{
+		"type":      notifType,
+		"due_count": fmt.Sprintf("%d", p.DueCount),
+		"streak":    fmt.Sprintf("%d", p.Streak),
+		"test":      "true",
+	}
+
+	result := TestNotificationResult{
+		DeviceCount: int32(len(tokens)),
+		Title:       title,
+		Body:        body,
+	}
+
+	if len(tokens) == 0 {
+		return result, nil
+	}
+
+	err := s.fcm.Send(ctx, tokens, title, body, data)
+	s.log(ctx, userID.String(), "test_"+notifType, "fcm", userID.String(), err)
+	if err != nil {
+		return result, err
+	}
+	return result, nil
 }
 
 func (s *service) SendWelcomeEmail(ctx context.Context, userID, email, username string) error {

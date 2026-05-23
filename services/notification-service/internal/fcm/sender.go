@@ -3,11 +3,21 @@ package fcm
 import (
 	"context"
 	"fmt"
+	"log"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
 	"google.golang.org/api/option"
 )
+
+// tokenPrefix returns a short, non-sensitive prefix of an FCM token for log
+// correlation without leaking the whole secret.
+func tokenPrefix(t string) string {
+	if len(t) <= 12 {
+		return t
+	}
+	return t[:12] + "…"
+}
 
 // Sender sends Firebase Cloud Messaging push notifications.
 type Sender interface {
@@ -65,14 +75,20 @@ func (s *firebaseSender) Send(ctx context.Context, tokens []string, title, body 
 		return fmt.Errorf("fcm: multicast send: %w", err)
 	}
 
+	// Per-token failures (expired token, invalid registration, sender
+	// mismatch, etc.) don't fail the multicast — FCM returns 200 with a
+	// per-entry success flag. We log each failure so a misconfigured token
+	// doesn't masquerade as a successful send.
 	if resp.FailureCount > 0 {
 		for i, r := range resp.Responses {
 			if !r.Success {
-				// Log per-token failure but don't fail the whole call.
-				_ = r.Error
-				_ = tokens[i]
+				log.Printf("[fcm] token %s failed: %v",
+					tokenPrefix(tokens[i]), r.Error)
 			}
 		}
+	}
+	if resp.FailureCount > 0 && resp.SuccessCount == 0 {
+		return fmt.Errorf("fcm: all %d token(s) failed", resp.FailureCount)
 	}
 	return nil
 }

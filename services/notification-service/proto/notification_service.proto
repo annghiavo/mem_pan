@@ -52,6 +52,21 @@ service NotificationService {
         };
     }
 
+    // Send a test push to the caller's registered devices (or to an explicit
+    // token). Bypasses the scheduler's time-window / due-count / dedup gating
+    // so it can be triggered on demand from the Android app or a dev tool.
+    rpc SendTestNotification(SendTestNotificationRequest) returns (SendTestNotificationResponse) {
+        option (google.api.http) = {
+            post: "/v1/notifications/devices:test"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Send a test push to the caller's devices";
+            tags: "notifications";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
     // ----- Admin: email templates -----
 
     rpc ListEmailTemplates(ListEmailTemplatesRequest) returns (ListEmailTemplatesResponse) {
@@ -123,6 +138,28 @@ message UnregisterDeviceTokenRequest {
 }
 
 message UnregisterDeviceTokenResponse {}
+
+message SendTestNotificationRequest {
+    // "study_reminder" (default) or "streak_warning". Controls title + body
+    // copy and the `type` field in the data payload — matches what the cron
+    // produces in production.
+    string notification_type = 1;
+
+    // Optional. If empty, the push is sent to ALL FCM tokens registered for
+    // the caller. If set, sent only to this token (useful before the device is
+    // registered, or for ad-hoc QA on someone else's handset).
+    string token = 2;
+
+    // Fake values used to render the body. Defaults: due_count=5, streak=0.
+    int32  due_count = 3;
+    int32  streak    = 4;
+}
+
+message SendTestNotificationResponse {
+    int32  device_count = 1; // how many tokens we attempted to send to
+    string title        = 2; // echo of the rendered title
+    string body         = 3; // echo of the rendered body
+}
 
 message EmailTemplate {
     string id            = 1;

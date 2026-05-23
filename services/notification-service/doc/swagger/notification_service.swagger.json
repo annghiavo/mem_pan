@@ -289,6 +289,44 @@
           }
         ]
       }
+    },
+    "/v1/notifications/devices:test": {
+      "post": {
+        "summary": "Send a test push to the caller's devices",
+        "operationId": "NotificationService_SendTestNotification",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/notificationSendTestNotificationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/notificationSendTestNotificationRequest"
+            }
+          }
+        ],
+        "tags": [
+          "notifications"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -435,6 +473,46 @@
       "properties": {
         "message": {
           "type": "string"
+        }
+      }
+    },
+    "notificationSendTestNotificationRequest": {
+      "type": "object",
+      "properties": {
+        "notificationType": {
+          "type": "string",
+          "description": "\"study_reminder\" (default) or \"streak_warning\". Controls title + body\ncopy and the `type` field in the data payload — matches what the cron\nproduces in production."
+        },
+        "token": {
+          "type": "string",
+          "description": "Optional. If empty, the push is sent to ALL FCM tokens registered for\nthe caller. If set, sent only to this token (useful before the device is\nregistered, or for ad-hoc QA on someone else's handset)."
+        },
+        "dueCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Fake values used to render the body. Defaults: due_count=5, streak=0."
+        },
+        "streak": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "notificationSendTestNotificationResponse": {
+      "type": "object",
+      "properties": {
+        "deviceCount": {
+          "type": "integer",
+          "format": "int32",
+          "title": "how many tokens we attempted to send to"
+        },
+        "title": {
+          "type": "string",
+          "title": "echo of the rendered title"
+        },
+        "body": {
+          "type": "string",
+          "title": "echo of the rendered body"
         }
       }
     },

@@ -159,7 +159,7 @@ func (s *Scheduler) runStudyReminderForUser(ctx context.Context, st statsclient.
 	}
 
 	title := "Time to study"
-	body := studyReminderBody(due, st.CurrentStreak)
+	body := StudyReminderBody(due, st.CurrentStreak)
 	data := map[string]string{
 		"type":      "study_reminder",
 		"due_count": fmt.Sprintf("%d", due),
@@ -209,7 +209,7 @@ func (s *Scheduler) runStreakWarningForUser(ctx context.Context, st statsclient.
 	}
 
 	title := "Don't lose your streak"
-	body := streakWarningBody(due, st.CurrentStreak)
+	body := StreakWarningBody(due, st.CurrentStreak)
 	data := map[string]string{
 		"type":      "streak_warning",
 		"due_count": fmt.Sprintf("%d", due),
@@ -263,10 +263,10 @@ func parseHM(s string) (int, int) {
 	return h, m
 }
 
-// studyReminderBody renders the push body.
+// StudyReminderBody renders the push body.
 // The notification always shows the due-card count. Streak text is appended
 // only when streak >= 3 (mirroring the streak_warning copy).
-func studyReminderBody(due, streak int32) string {
+func StudyReminderBody(due, streak int32) string {
 	if streak >= 3 {
 		return fmt.Sprintf("You have %d card%s to review — keep your %d-day streak alive!",
 			due, plural(due), streak)
@@ -274,13 +274,13 @@ func studyReminderBody(due, streak int32) string {
 	return fmt.Sprintf("You have %d card%s to review today.", due, plural(due))
 }
 
-// streakWarningBody mirrors the user's spec:
+// StreakWarningBody mirrors the user's spec:
 //
 //   streak >= 3 → "X cards to review — about to lose your N-day streak!"
 //   streak <  3 → "X cards to review — about to lose your streak!"
 //
 // If `due` is 0 (count call failed), the count phrase is omitted.
-func streakWarningBody(due, streak int32) string {
+func StreakWarningBody(due, streak int32) string {
 	prefix := ""
 	if due > 0 {
 		prefix = fmt.Sprintf("%d card%s to review — ", due, plural(due))
