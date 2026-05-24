@@ -45,6 +45,14 @@ CSV/TSV — two-column rows, auto-detected separator, blank rows skipped, BOM-sa
 API Gateway (single client URL):
   https://mempan-gateway-3hd0u0cm.uc.gateway.dev
 
+moderation-fsrs-service (Python, GCS-mounted ML models):
+  https://moderation-fsrs-service-272885252422.asia-southeast1.run.app
+
+GCS bucket (ML models, 1.5GB):
+  gs://mempan-cac51-models/
+  └── flashcard_image_moderator/  (343MB — ViT-base)
+  └── flashcard_text_moderator/   (1.1GB — XLM-RoBERTa)
+
 Direct service URLs (cho debug):
   auth          → https://auth-service-wzed7v5hbq-as.a.run.app
   deck          → https://deck-service-wzed7v5hbq-as.a.run.app
@@ -73,6 +81,51 @@ Mỗi job:
 5. Smoke test swagger endpoint.
 
 Toàn bộ pipeline ~3-5 phút cho 7 service chạy song song (so với ~25 phút nếu tuần tự).
+
+## ML models (Cloud Storage FUSE mount)
+
+`moderation-fsrs-service` (Python) cần 2 model `.safetensors` (~1.5GB) — quá lớn để đẩy lên Docker image. Models sống trong GCS bucket `mempan-cac51-models` và được mount vào container qua Cloud Storage FUSE volume:
+
+```bash
+gcloud run deploy moderation-fsrs-service \
+  --execution-environment=gen2 \
+  --add-volume=name=models,type=cloud-storage,bucket=mempan-cac51-models \
+  --add-volume-mount=volume=models,mount-path=/models \
+  --set-env-vars="TEXT_MODEL_DIR=/models/flashcard_text_moderator,IMAGE_MODEL_DIR=/models/flashcard_image_moderator,..." \
+  --memory=4Gi --cpu=2
+```
+
+Cold start ~40s vì service phải lazy-read 1.5GB từ GCS. Sau khi load xong, inference <100ms.
+
+Update models:
+```bash
+gcloud storage cp -r ml_model/results/flashcard_text_moderator gs://mempan-cac51-models/
+# Restart Cloud Run service để pick up
+gcloud run services update moderation-fsrs-service --region=asia-southeast1 --clear-base-image
+```
+
+## FCM (Firebase Cloud Messaging) — Application Default Credentials
+
+`notification-service` **không cần** file JSON service account key. Cloud Run runtime SA `mempan-runtime@` đã có role `roles/firebasecloudmessaging.admin`, Firebase Admin SDK tự xài metadata server token. Cấu hình:
+
+```yaml
+# Cloud Run env vars
+FCM_PROJECT_ID: mempan-cac51
+# (KHÔNG set FCM_CREDENTIALS_FILE — code sẽ fallback sang ADC)
+```
+
+Test:
+```bash
+curl -X POST $GATE/v1/notifications/devices:test \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"notification_type":"study_reminder","token":"REAL_FCM_TOKEN","due_count":5}'
+```
+
+> Lưu ý: SMTP password trong secret `smtp-password` hiện không xác thực được với Gmail. Tạo lại Gmail App Password tại myaccount.google.com → Security → 2-Step → App passwords, rồi:
+> ```bash
+> echo -n "NEW_APP_PASSWORD" | gcloud secrets versions add smtp-password --data-file=-
+> gcloud run services update notification-service --region=asia-southeast1 --quiet  # pick up new version
+> ```
 
 ## Phase 0 — Prerequisites
 

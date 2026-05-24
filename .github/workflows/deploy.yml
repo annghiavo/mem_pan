@@ -184,48 +184,53 @@ jobs:
       - name: Resolve service runtime config
         id: runtime
         run: |
-          declare -A SECRETS ENV_VARS
+          # NOTE: do NOT use `declare -A` for SECRETS — bash 4+ on the GHA
+          # runner treats associative arrays differently and the indexed
+          # SECRETS=( "..." "..." ) syntax below silently drops elements.
+          # Plain strings join cleanly with `,`.
 
-          # Common env across all services
           BASE_ENV="HTTP_SERVER_ADDRESS=:8080,GRPC_SERVER_ADDRESS=:9090,PUBSUB_PROJECT_ID=${{ env.PROJECT_ID }}"
+          SECRET_STR=""
+          ENV_VARS=""
 
           case "${{ matrix.service }}" in
             auth-service)
-              SECRETS=( "DATABASE_URL=auth-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "CLOUDINARY_URL=auth-cloudinary-url:latest" )
+              SECRET_STR="DATABASE_URL=auth-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,CLOUDINARY_URL=auth-cloudinary-url:latest"
               ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=user-events,ACCESS_TOKEN_DURATION=15m,REFRESH_TOKEN_DURATION=168h,VERIFICATION_TOKEN_DURATION=24h,RESET_TOKEN_DURATION=1h"
               ;;
             deck-service)
-              SECRETS=( "DATABASE_URL=deck-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "CLOUDINARY_URL=deck-cloudinary-url:latest" )
+              SECRET_STR="DATABASE_URL=deck-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,CLOUDINARY_URL=deck-cloudinary-url:latest"
               ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=deck-events,AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443"
               ;;
             study-service)
-              SECRETS=( "DATABASE_URL=study-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" )
+              SECRET_STR="DATABASE_URL=study-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest"
               ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=study-events,AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443,DECK_SERVICE_ADDRESS=deck-service-wzed7v5hbq-as.a.run.app:443"
               ;;
             stats-service)
-              SECRETS=( "DATABASE_URL=stats-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "PUBSUB_PUSH_SECRET=pubsub-push-token:latest" )
+              SECRET_STR="DATABASE_URL=stats-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,PUBSUB_PUSH_SECRET=pubsub-push-token:latest"
               ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443"
               ;;
             admin-service)
-              SECRETS=( "DATABASE_URL=admin-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "PUBSUB_PUSH_SECRET=pubsub-push-token:latest" )
+              SECRET_STR="DATABASE_URL=admin-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,PUBSUB_PUSH_SECRET=pubsub-push-token:latest"
               ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443,DECK_SERVICE_ADDRESS=deck-service-wzed7v5hbq-as.a.run.app:443"
               ;;
             notification-service)
-              SECRETS=( "DATABASE_URL=notif-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "SMTP_PASSWORD=smtp-password:latest" "PUBSUB_PUSH_SECRET=pubsub-push-token:latest" )
+              SECRET_STR="DATABASE_URL=notif-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,SMTP_PASSWORD=smtp-password:latest,PUBSUB_PUSH_SECRET=pubsub-push-token:latest"
               ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443,STATS_SERVICE_ADDRESS=stats-service-wzed7v5hbq-as.a.run.app:443,STUDY_SERVICE_ADDRESS=study-service-wzed7v5hbq-as.a.run.app:443,SMTP_HOST=smtp.gmail.com,SMTP_PORT=587,SMTP_USERNAME=noreply.mempan@gmail.com,FCM_PROJECT_ID=${{ env.PROJECT_ID }}"
               ;;
             search-service)
-              SECRETS=( "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "ELASTICSEARCH_URL=es-url:latest" "ELASTICSEARCH_API_KEY=es-api-key:latest" "PUBSUB_PUSH_SECRET=pubsub-push-token:latest" )
+              SECRET_STR="PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,ELASTICSEARCH_URL=es-url:latest,ELASTICSEARCH_API_KEY=es-api-key:latest,PUBSUB_PUSH_SECRET=pubsub-push-token:latest"
               ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443,ES_DECK_INDEX=mempan-decks,ES_FOLDER_INDEX=mempan-folders,ES_CARD_INDEX=mempan-cards,ES_USER_INDEX=mempan-users"
               ;;
           esac
 
-          # Join secrets array with commas for the gcloud --set-secrets flag.
-          SECRET_STR=$(IFS=, ; echo "${SECRETS[*]}")
           {
             echo "secrets=$SECRET_STR"
             echo "env_vars=$ENV_VARS"
           } >> "$GITHUB_OUTPUT"
+          # Visible in the GHA job log so misconfigs surface quickly.
+          echo "secrets count: $(echo "$SECRET_STR" | tr ',' '\n' | wc -l)"
+          echo "env count:     $(echo "$ENV_VARS" | tr ',' '\n' | wc -l)"
 
       - name: Deploy to Cloud Run
         run: |
