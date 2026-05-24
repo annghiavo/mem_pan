@@ -18,6 +18,8 @@ type FolderRepository interface {
 	ListFoldersByUser(ctx context.Context, userID uuid.UUID) ([]db.Folder, error)
 	ListPublicFolders(ctx context.Context, arg db.ListPublicFoldersParams) ([]db.Folder, error)
 	CountPublicFolders(ctx context.Context) (int64, error)
+	ListPublicFoldersByUser(ctx context.Context, arg db.ListPublicFoldersByUserParams) ([]db.Folder, error)
+	CountPublicFoldersByUser(ctx context.Context, userID uuid.UUID) (int64, error)
 	UpdateFolder(ctx context.Context, arg db.UpdateFolderParams) (db.Folder, error)
 	UpdateFolderVisibility(ctx context.Context, arg db.UpdateFolderVisibilityParams) (db.Folder, error)
 	DeleteFolder(ctx context.Context, arg db.DeleteFolderParams) error
@@ -61,6 +63,14 @@ func (r *folderRepository) ListPublicFolders(ctx context.Context, arg db.ListPub
 
 func (r *folderRepository) CountPublicFolders(ctx context.Context) (int64, error) {
 	return r.q.CountPublicFolders(ctx)
+}
+
+func (r *folderRepository) ListPublicFoldersByUser(ctx context.Context, arg db.ListPublicFoldersByUserParams) ([]db.Folder, error) {
+	return r.q.ListPublicFoldersByUser(ctx, arg)
+}
+
+func (r *folderRepository) CountPublicFoldersByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
+	return r.q.CountPublicFoldersByUser(ctx, userID)
 }
 
 func (r *folderRepository) UpdateFolder(ctx context.Context, arg db.UpdateFolderParams) (db.Folder, error) {

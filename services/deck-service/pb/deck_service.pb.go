@@ -148,14 +148,14 @@ const file_deck_service_proto_rawDesc = "" +
 	"\afolders\x12\rCreate folderb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x10:\x01*\"\v/v1/folders\x12\x8f\x01\n" +
-	"\x11ListPublicFolders\x12\x1c.pb.ListPublicFoldersRequest\x1a\x1d.pb.ListPublicFoldersResponse\"=\x92A \n" +
-	"\afolders\x12\x15Browse public folders\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/folders/public\x12\x8e\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x10:\x01*\"\v/v1/folders\x12\x8e\x01\n" +
 	"\tGetFolder\x12\x14.pb.GetFolderRequest\x1a\x15.pb.GetFolderResponse\"T\x92A2\n" +
 	"\afolders\x12\x15Get folder with decksb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x19\x12\x17/v1/folders/{folder_id}\x12\xc6\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x19\x12\x17/v1/folders/{folder_id}\x12\x8f\x01\n" +
+	"\x11ListPublicFolders\x12\x1c.pb.ListPublicFoldersRequest\x1a\x1d.pb.ListPublicFoldersResponse\"=\x92A \n" +
+	"\afolders\x12\x15Browse public folders\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/folders/public\x12\xc6\x01\n" +
 	"\x16UpdateFolderVisibility\x12!.pb.UpdateFolderVisibilityRequest\x1a\".pb.UpdateFolderVisibilityResponse\"e\x92A5\n" +
 	"\afolders\x12\x18Toggle folder visibilityb\x10\n" +
 	"\x0e\n" +
@@ -191,14 +191,14 @@ const file_deck_service_proto_rawDesc = "" +
 	"\x05decks\x12\vCreate deckb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/decks\x12\x83\x01\n" +
-	"\x0fListPublicDecks\x12\x1a.pb.ListPublicDecksRequest\x1a\x1b.pb.ListPublicDecksResponse\"7\x92A\x1c\n" +
-	"\x05decks\x12\x13Search public decks\x82\xd3\xe4\x93\x02\x12\x12\x10/v1/decks/public\x12|\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/decks\x12|\n" +
 	"\aGetDeck\x12\x12.pb.GetDeckRequest\x1a\x13.pb.GetDeckResponse\"H\x92A*\n" +
 	"\x05decks\x12\x0fGet deck detailb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x15\x12\x13/v1/decks/{deck_id}\x12\x89\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x15\x12\x13/v1/decks/{deck_id}\x12\x83\x01\n" +
+	"\x0fListPublicDecks\x12\x1a.pb.ListPublicDecksRequest\x1a\x1b.pb.ListPublicDecksResponse\"7\x92A\x1c\n" +
+	"\x05decks\x12\x13Search public decks\x82\xd3\xe4\x93\x02\x12\x12\x10/v1/decks/public\x12\x89\x01\n" +
 	"\n" +
 	"UpdateDeck\x12\x15.pb.UpdateDeckRequest\x1a\x16.pb.UpdateDeckResponse\"L\x92A+\n" +
 	"\x05decks\x12\x10Update deck infob\x10\n" +
@@ -300,8 +300,8 @@ var file_deck_service_proto_goTypes = []any{
 	(*ReportDeckResponse)(nil),             // 1: pb.ReportDeckResponse
 	(*ListFoldersRequest)(nil),             // 2: pb.ListFoldersRequest
 	(*CreateFolderRequest)(nil),            // 3: pb.CreateFolderRequest
-	(*ListPublicFoldersRequest)(nil),       // 4: pb.ListPublicFoldersRequest
-	(*GetFolderRequest)(nil),               // 5: pb.GetFolderRequest
+	(*GetFolderRequest)(nil),               // 4: pb.GetFolderRequest
+	(*ListPublicFoldersRequest)(nil),       // 5: pb.ListPublicFoldersRequest
 	(*UpdateFolderVisibilityRequest)(nil),  // 6: pb.UpdateFolderVisibilityRequest
 	(*UpdateFolderRequest)(nil),            // 7: pb.UpdateFolderRequest
 	(*DeleteFolderRequest)(nil),            // 8: pb.DeleteFolderRequest
@@ -309,8 +309,8 @@ var file_deck_service_proto_goTypes = []any{
 	(*RemoveDeckFromFolderRequest)(nil),    // 10: pb.RemoveDeckFromFolderRequest
 	(*ListDecksRequest)(nil),               // 11: pb.ListDecksRequest
 	(*CreateDeckRequest)(nil),              // 12: pb.CreateDeckRequest
-	(*ListPublicDecksRequest)(nil),         // 13: pb.ListPublicDecksRequest
-	(*GetDeckRequest)(nil),                 // 14: pb.GetDeckRequest
+	(*GetDeckRequest)(nil),                 // 13: pb.GetDeckRequest
+	(*ListPublicDecksRequest)(nil),         // 14: pb.ListPublicDecksRequest
 	(*UpdateDeckRequest)(nil),              // 15: pb.UpdateDeckRequest
 	(*DeleteDeckRequest)(nil),              // 16: pb.DeleteDeckRequest
 	(*UpdateDeckSettingsRequest)(nil),      // 17: pb.UpdateDeckSettingsRequest
@@ -328,8 +328,8 @@ var file_deck_service_proto_goTypes = []any{
 	(*AdminListDecksRequest)(nil),          // 29: pb.AdminListDecksRequest
 	(*ListFoldersResponse)(nil),            // 30: pb.ListFoldersResponse
 	(*CreateFolderResponse)(nil),           // 31: pb.CreateFolderResponse
-	(*ListPublicFoldersResponse)(nil),      // 32: pb.ListPublicFoldersResponse
-	(*GetFolderResponse)(nil),              // 33: pb.GetFolderResponse
+	(*GetFolderResponse)(nil),              // 32: pb.GetFolderResponse
+	(*ListPublicFoldersResponse)(nil),      // 33: pb.ListPublicFoldersResponse
 	(*UpdateFolderVisibilityResponse)(nil), // 34: pb.UpdateFolderVisibilityResponse
 	(*UpdateFolderResponse)(nil),           // 35: pb.UpdateFolderResponse
 	(*DeleteFolderResponse)(nil),           // 36: pb.DeleteFolderResponse
@@ -337,8 +337,8 @@ var file_deck_service_proto_goTypes = []any{
 	(*RemoveDeckFromFolderResponse)(nil),   // 38: pb.RemoveDeckFromFolderResponse
 	(*ListDecksResponse)(nil),              // 39: pb.ListDecksResponse
 	(*CreateDeckResponse)(nil),             // 40: pb.CreateDeckResponse
-	(*ListPublicDecksResponse)(nil),        // 41: pb.ListPublicDecksResponse
-	(*GetDeckResponse)(nil),                // 42: pb.GetDeckResponse
+	(*GetDeckResponse)(nil),                // 41: pb.GetDeckResponse
+	(*ListPublicDecksResponse)(nil),        // 42: pb.ListPublicDecksResponse
 	(*UpdateDeckResponse)(nil),             // 43: pb.UpdateDeckResponse
 	(*DeleteDeckResponse)(nil),             // 44: pb.DeleteDeckResponse
 	(*UpdateDeckSettingsResponse)(nil),     // 45: pb.UpdateDeckSettingsResponse
@@ -358,8 +358,8 @@ var file_deck_service_proto_goTypes = []any{
 var file_deck_service_proto_depIdxs = []int32{
 	2,  // 0: pb.DeckService.ListFolders:input_type -> pb.ListFoldersRequest
 	3,  // 1: pb.DeckService.CreateFolder:input_type -> pb.CreateFolderRequest
-	4,  // 2: pb.DeckService.ListPublicFolders:input_type -> pb.ListPublicFoldersRequest
-	5,  // 3: pb.DeckService.GetFolder:input_type -> pb.GetFolderRequest
+	4,  // 2: pb.DeckService.GetFolder:input_type -> pb.GetFolderRequest
+	5,  // 3: pb.DeckService.ListPublicFolders:input_type -> pb.ListPublicFoldersRequest
 	6,  // 4: pb.DeckService.UpdateFolderVisibility:input_type -> pb.UpdateFolderVisibilityRequest
 	7,  // 5: pb.DeckService.UpdateFolder:input_type -> pb.UpdateFolderRequest
 	8,  // 6: pb.DeckService.DeleteFolder:input_type -> pb.DeleteFolderRequest
@@ -367,8 +367,8 @@ var file_deck_service_proto_depIdxs = []int32{
 	10, // 8: pb.DeckService.RemoveDeckFromFolder:input_type -> pb.RemoveDeckFromFolderRequest
 	11, // 9: pb.DeckService.ListDecks:input_type -> pb.ListDecksRequest
 	12, // 10: pb.DeckService.CreateDeck:input_type -> pb.CreateDeckRequest
-	13, // 11: pb.DeckService.ListPublicDecks:input_type -> pb.ListPublicDecksRequest
-	14, // 12: pb.DeckService.GetDeck:input_type -> pb.GetDeckRequest
+	13, // 11: pb.DeckService.GetDeck:input_type -> pb.GetDeckRequest
+	14, // 12: pb.DeckService.ListPublicDecks:input_type -> pb.ListPublicDecksRequest
 	15, // 13: pb.DeckService.UpdateDeck:input_type -> pb.UpdateDeckRequest
 	16, // 14: pb.DeckService.DeleteDeck:input_type -> pb.DeleteDeckRequest
 	17, // 15: pb.DeckService.UpdateDeckSettings:input_type -> pb.UpdateDeckSettingsRequest
@@ -387,8 +387,8 @@ var file_deck_service_proto_depIdxs = []int32{
 	0,  // 28: pb.DeckService.ReportDeck:input_type -> pb.ReportDeckRequest
 	30, // 29: pb.DeckService.ListFolders:output_type -> pb.ListFoldersResponse
 	31, // 30: pb.DeckService.CreateFolder:output_type -> pb.CreateFolderResponse
-	32, // 31: pb.DeckService.ListPublicFolders:output_type -> pb.ListPublicFoldersResponse
-	33, // 32: pb.DeckService.GetFolder:output_type -> pb.GetFolderResponse
+	32, // 31: pb.DeckService.GetFolder:output_type -> pb.GetFolderResponse
+	33, // 32: pb.DeckService.ListPublicFolders:output_type -> pb.ListPublicFoldersResponse
 	34, // 33: pb.DeckService.UpdateFolderVisibility:output_type -> pb.UpdateFolderVisibilityResponse
 	35, // 34: pb.DeckService.UpdateFolder:output_type -> pb.UpdateFolderResponse
 	36, // 35: pb.DeckService.DeleteFolder:output_type -> pb.DeleteFolderResponse
@@ -396,8 +396,8 @@ var file_deck_service_proto_depIdxs = []int32{
 	38, // 37: pb.DeckService.RemoveDeckFromFolder:output_type -> pb.RemoveDeckFromFolderResponse
 	39, // 38: pb.DeckService.ListDecks:output_type -> pb.ListDecksResponse
 	40, // 39: pb.DeckService.CreateDeck:output_type -> pb.CreateDeckResponse
-	41, // 40: pb.DeckService.ListPublicDecks:output_type -> pb.ListPublicDecksResponse
-	42, // 41: pb.DeckService.GetDeck:output_type -> pb.GetDeckResponse
+	41, // 40: pb.DeckService.GetDeck:output_type -> pb.GetDeckResponse
+	42, // 41: pb.DeckService.ListPublicDecks:output_type -> pb.ListPublicDecksResponse
 	43, // 42: pb.DeckService.UpdateDeck:output_type -> pb.UpdateDeckResponse
 	44, // 43: pb.DeckService.DeleteDeck:output_type -> pb.DeleteDeckResponse
 	45, // 44: pb.DeckService.UpdateDeckSettings:output_type -> pb.UpdateDeckSettingsResponse

@@ -33,6 +33,8 @@ type NotificationService interface {
 	SendPasswordResetEmail(ctx context.Context, userID, email, username, token string) error
 	SendDeckCloneReadyPush(ctx context.Context, userID, deckID, deckName string, cardCount int32) error
 	SendReportResolvedEmail(ctx context.Context, userID, email, username, outcome string) error
+	SendDeckModerationEmail(ctx context.Context, userID, email, username, deckStatus string) error
+	SendModerationDeckDeletedPush(ctx context.Context, userID, deckID, reason string, violatedCardCount int) error
 
 	// Email template administration.
 	ListEmailTemplates(ctx context.Context) ([]db.EmailTemplate, error)
@@ -182,6 +184,12 @@ func (s *service) SendReportResolvedEmail(ctx context.Context, userID, email, us
 	return err
 }
 
+func (s *service) SendDeckModerationEmail(ctx context.Context, userID, email, username, deckStatus string) error {
+	err := s.mailer.SendDeckModeration(ctx, email, username, deckStatus)
+	s.log(ctx, userID, "deck_moderation", "email", email, err)
+	return err
+}
+
 func (s *service) SendDeckCloneReadyPush(ctx context.Context, userID, deckID, deckName string, cardCount int32) error {
 	uid, err := uuid.Parse(userID)
 	if err != nil {
@@ -210,6 +218,44 @@ func (s *service) SendDeckCloneReadyPush(ctx context.Context, userID, deckID, de
 
 	err = s.fcm.Send(ctx, rawTokens, title, body, data)
 	s.log(ctx, userID, "deck_clone_ready", "fcm", userID, err)
+	return err
+}
+
+func (s *service) SendModerationDeckDeletedPush(
+	ctx context.Context, userID, deckID, reason string, violatedCardCount int,
+) error {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("invalid user_id: %w", err)
+	}
+
+	tokens, err := s.repo.ListFCMTokensByUser(ctx, uid)
+	if err != nil {
+		return fmt.Errorf("list fcm tokens: %w", err)
+	}
+	if len(tokens) == 0 {
+		return nil
+	}
+
+	rawTokens := make([]string, len(tokens))
+	for i, t := range tokens {
+		rawTokens[i] = t.Token
+	}
+
+	title := "Deck Removed by Content Moderation"
+	body := fmt.Sprintf(
+		"Your deck was removed because %d card(s) violated our content policy (%s). "+
+			"You can appeal this decision from your account settings.",
+		violatedCardCount, reason,
+	)
+	data := map[string]string{
+		"type":    "moderation_deck_deleted",
+		"deck_id": deckID,
+		"reason":  reason,
+	}
+
+	err = s.fcm.Send(ctx, rawTokens, title, body, data)
+	s.log(ctx, userID, "moderation_deck_deleted", "fcm", userID, err)
 	return err
 }
 

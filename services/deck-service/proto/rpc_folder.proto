@@ -19,8 +19,9 @@ message CreateFolderRequest {
 }
 
 message ListPublicFoldersRequest {
-    int32 page      = 1;
-    int32 page_size = 2;
+    int32  page      = 1;
+    int32  page_size = 2;
+    string user_id   = 3;
 }
 
 message ListPublicFoldersResponse {

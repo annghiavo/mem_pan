@@ -17,3 +17,11 @@ message User {
     google.protobuf.Timestamp created_at = 8;
     string timezone      = 9;
 }
+
+message PublicUser {
+    string user_id    = 1;
+    string username   = 2;
+    string full_name  = 3;
+    string avatar_url = 4;
+    google.protobuf.Timestamp created_at = 5;
+}

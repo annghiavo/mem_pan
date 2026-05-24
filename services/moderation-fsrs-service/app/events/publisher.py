@@ -1,0 +1,65 @@
+"""Async Pub/Sub HTTP publisher. Matches the wire format of the GoLang
+`httpPublisher` in deck-service/internal/publisher/publisher.go.
+
+GoLang json.Marshal of a `[]byte` field uses base64. So the wrapper looks like:
+
+    envelope = {"event_type": <type>, "data": "<b64-of-inner-payload-json>"}
+    body     = {"messages": [{"data": "<b64-of-envelope-json>"}]}
+"""
+from __future__ import annotations
+
+import base64
+import json
+import logging
+import os
+from typing import Any
+
+import httpx
+
+log = logging.getLogger(__name__)
+
+
+class PubsubPublisher:
+    def __init__(
+        self,
+        project_id: str,
+        topic_id: str,
+        emulator_host: str | None = None,
+    ) -> None:
+        self.project_id = project_id
+        self.topic_id = topic_id
+        host = emulator_host or os.environ.get("PUBSUB_EMULATOR_HOST")
+        base = f"http://{host}" if host else "https://pubsub.googleapis.com"
+        self._endpoint = f"{base}/v1/projects/{project_id}/topics/{topic_id}:publish"
+        self._client: httpx.AsyncClient | None = None
+
+    def _ensure(self) -> httpx.AsyncClient:
+        if self._client is None:
+            self._client = httpx.AsyncClient(timeout=5.0)
+        return self._client
+
+    async def publish(self, event_type: str, payload: dict[str, Any]) -> None:
+        inner = json.dumps(payload, default=str, separators=(",", ":")).encode("utf-8")
+        envelope = json.dumps({
+            "event_type": event_type,
+            "data": base64.b64encode(inner).decode("ascii"),
+        }).encode("utf-8")
+        body = {
+            "messages": [
+                {"data": base64.b64encode(envelope).decode("ascii")},
+            ],
+        }
+        client = self._ensure()
+        resp = await client.post(self._endpoint, json=body)
+        if resp.status_code >= 300:
+            log.error(
+                "pubsub publish failed: status=%d type=%s body=%s",
+                resp.status_code, event_type, resp.text[:200],
+            )
+            resp.raise_for_status()
+        log.info("pubsub published type=%s topic=%s", event_type, self.topic_id)
+
+    async def close(self) -> None:
+        if self._client is not None:
+            await self._client.aclose()
+            self._client = None

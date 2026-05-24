@@ -18,6 +18,15 @@ LIMIT $1 OFFSET $2;
 -- name: CountPublicFolders :one
 SELECT COUNT(*) FROM folders WHERE is_public = TRUE;
 
+-- name: ListPublicFoldersByUser :many
+SELECT * FROM folders
+WHERE user_id = $1 AND is_public = TRUE
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3;
+
+-- name: CountPublicFoldersByUser :one
+SELECT COUNT(*) FROM folders WHERE user_id = $1 AND is_public = TRUE;
+
 -- name: UpdateFolder :one
 UPDATE folders
 SET name        = COALESCE(sqlc.narg('name'), name),

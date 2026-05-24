@@ -165,6 +165,7 @@ type ListPublicFoldersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -211,6 +212,13 @@ func (x *ListPublicFoldersRequest) GetPageSize() int32 {
 		return x.PageSize
 	}
 	return 0
+}
+
+func (x *ListPublicFoldersRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
 }
 
 type ListPublicFoldersResponse struct {
@@ -889,10 +897,11 @@ const file_rpc_folder_proto_rawDesc = "" +
 	"\x13CreateFolderRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1b\n" +
-	"\tis_public\x18\x03 \x01(\bR\bisPublic\"K\n" +
+	"\tis_public\x18\x03 \x01(\bR\bisPublic\"d\n" +
 	"\x18ListPublicFoldersRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"W\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"W\n" +
 	"\x19ListPublicFoldersResponse\x12$\n" +
 	"\afolders\x18\x01 \x03(\v2\n" +
 	".pb.FolderR\afolders\x12\x14\n" +

@@ -32,5 +32,18 @@ func (u *cloudinaryUploader) Upload(ctx context.Context, file multipart.File, fo
 	if err != nil {
 		return "", fmt.Errorf("cloudinary upload: %w", err)
 	}
-	return resp.SecureURL, nil
+	// Cloudinary SDK does not return a Go error for API-level failures
+	// (e.g. missing permissions). The error is buried in resp.Error.Message.
+	if resp.Error.Message != "" {
+		return "", fmt.Errorf("cloudinary API error: %s", resp.Error.Message)
+	}
+	url := resp.SecureURL
+	if url == "" {
+		url = resp.URL
+	}
+	if url == "" {
+		return "", fmt.Errorf("cloudinary returned empty URL (PublicID=%s)", resp.PublicID)
+	}
+	return url, nil
 }
+

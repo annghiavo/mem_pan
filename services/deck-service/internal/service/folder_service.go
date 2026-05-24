@@ -27,6 +27,7 @@ type UpdateFolderParams struct {
 }
 
 type ListPublicFoldersParams struct {
+	UserID uuid.UUID
 	Limit  int32
 	Offset int32
 }
@@ -135,6 +136,21 @@ func (s *folderService) ListFolders(ctx context.Context, userID uuid.UUID) ([]db
 func (s *folderService) ListPublicFolders(ctx context.Context, p ListPublicFoldersParams) (FoldersPage, error) {
 	if p.Limit <= 0 {
 		p.Limit = 20
+	}
+	if p.UserID != uuid.Nil {
+		folders, err := s.folderRepo.ListPublicFoldersByUser(ctx, db.ListPublicFoldersByUserParams{
+			UserID: p.UserID,
+			Limit:  p.Limit,
+			Offset: p.Offset,
+		})
+		if err != nil {
+			return FoldersPage{}, err
+		}
+		total, err := s.folderRepo.CountPublicFoldersByUser(ctx, p.UserID)
+		if err != nil {
+			return FoldersPage{}, err
+		}
+		return FoldersPage{Folders: folders, Total: total}, nil
 	}
 	folders, err := s.folderRepo.ListPublicFolders(ctx, db.ListPublicFoldersParams{
 		Limit:  p.Limit,

@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
-	"github.com/sqlc-dev/pqtype"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -87,7 +86,7 @@ func (s *Server) BanUser(ctx context.Context, req *pb.BanUserRequest) (*pb.BanUs
 		TargetType: "user",
 		TargetID:   userID,
 		Reason:     sql.NullString{String: req.GetReason(), Valid: req.GetReason() != ""},
-		Metadata:   pqtype.NullRawMessage{RawMessage: logMeta, Valid: true},
+		Metadata:   sql.NullString{String: string(logMeta), Valid: true},
 	})
 
 	return &pb.BanUserResponse{User: &pb.User{

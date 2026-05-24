@@ -129,6 +129,7 @@ func (s *cardService) CreateCard(ctx context.Context, p CreateCardParams) (db.Ge
 		NoteID:       card.NoteID.String(),
 		ContentFront: note.ContentFront,
 		ContentBack:  note.ContentBack,
+		ImageURL:     note.ImageUrl.String,
 		CreatedAt:    card.CreatedAt,
 	}); pubErr != nil {
 		log.Printf("[publisher] card.created: %v", pubErr)
@@ -200,6 +201,7 @@ func (s *cardService) BulkCreateCards(ctx context.Context, userID, deckID uuid.U
 			NoteID:       card.NoteID.String(),
 			ContentFront: note.ContentFront,
 			ContentBack:  note.ContentBack,
+			ImageURL:     note.ImageUrl.String,
 			CreatedAt:    card.CreatedAt,
 		}); pubErr != nil {
 			log.Printf("[publisher] card.created: %v", pubErr)
@@ -281,6 +283,7 @@ func (s *cardService) UpdateCard(ctx context.Context, p UpdateCardParams) (db.Ge
 		NoteID:       card.NoteID.String(),
 		ContentFront: updated.ContentFront,
 		ContentBack:  updated.ContentBack,
+		ImageURL:     updated.ImageUrl.String,
 	}); pubErr != nil {
 		log.Printf("[publisher] card.updated: %v", pubErr)
 	}

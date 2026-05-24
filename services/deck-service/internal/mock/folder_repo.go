@@ -121,6 +121,32 @@ func (mr *MockFolderRepositoryMockRecorder) CountPublicFolders(ctx any) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountPublicFolders", reflect.TypeOf((*MockFolderRepository)(nil).CountPublicFolders), ctx)
 }
 
+func (m *MockFolderRepository) ListPublicFoldersByUser(ctx context.Context, arg db.ListPublicFoldersByUserParams) ([]db.Folder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListPublicFoldersByUser", ctx, arg)
+	ret0, _ := ret[0].([]db.Folder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockFolderRepositoryMockRecorder) ListPublicFoldersByUser(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPublicFoldersByUser", reflect.TypeOf((*MockFolderRepository)(nil).ListPublicFoldersByUser), ctx, arg)
+}
+
+func (m *MockFolderRepository) CountPublicFoldersByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountPublicFoldersByUser", ctx, userID)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockFolderRepositoryMockRecorder) CountPublicFoldersByUser(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountPublicFoldersByUser", reflect.TypeOf((*MockFolderRepository)(nil).CountPublicFoldersByUser), ctx, userID)
+}
+
 func (m *MockFolderRepository) UpdateFolderVisibility(ctx context.Context, arg db.UpdateFolderVisibilityParams) (db.Folder, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateFolderVisibility", ctx, arg)

@@ -10,7 +10,6 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
-	"github.com/sqlc-dev/pqtype"
 )
 
 const bulkResolveReportsByTarget = `-- name: BulkResolveReportsByTarget :many
@@ -108,12 +107,12 @@ RETURNING log_id, admin_id, action, target_type, target_id, reason, metadata, cr
 `
 
 type CreateModerationLogParams struct {
-	AdminID    uuid.UUID             `json:"admin_id"`
-	Action     string                `json:"action"`
-	TargetType string                `json:"target_type"`
-	TargetID   uuid.UUID             `json:"target_id"`
-	Reason     sql.NullString        `json:"reason"`
-	Metadata   pqtype.NullRawMessage `json:"metadata"`
+	AdminID    uuid.UUID      `json:"admin_id"`
+	Action     string         `json:"action"`
+	TargetType string         `json:"target_type"`
+	TargetID   uuid.UUID      `json:"target_id"`
+	Reason     sql.NullString `json:"reason"`
+	Metadata   sql.NullString `json:"metadata"`
 }
 
 func (q *Queries) CreateModerationLog(ctx context.Context, arg CreateModerationLogParams) (ModerationLog, error) {

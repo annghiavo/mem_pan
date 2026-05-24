@@ -45,6 +45,7 @@ type ListDecksParams struct {
 }
 
 type ListPublicDecksParams struct {
+	UserID uuid.UUID
 	Limit  int32
 	Offset int32
 }
@@ -150,6 +151,21 @@ func (s *deckService) ListDecks(ctx context.Context, p ListDecksParams) (DecksPa
 func (s *deckService) ListPublicDecks(ctx context.Context, p ListPublicDecksParams) (DecksPage, error) {
 	if p.Limit <= 0 {
 		p.Limit = 20
+	}
+	if p.UserID != uuid.Nil {
+		decks, err := s.deckRepo.ListPublicDecksByUser(ctx, db.ListPublicDecksByUserParams{
+			UserID: p.UserID,
+			Limit:  p.Limit,
+			Offset: p.Offset,
+		})
+		if err != nil {
+			return DecksPage{}, err
+		}
+		total, err := s.deckRepo.CountPublicDecksByUser(ctx, p.UserID)
+		if err != nil {
+			return DecksPage{}, err
+		}
+		return DecksPage{Decks: decks, Total: total}, nil
 	}
 	decks, err := s.deckRepo.ListPublicDecks(ctx, db.ListPublicDecksParams{
 		Limit:  p.Limit,
@@ -302,6 +318,7 @@ func (s *deckService) CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uu
 			NoteID:       c.NoteID.String(),
 			ContentFront: c.ContentFront,
 			ContentBack:  c.ContentBack,
+			ImageURL:     c.ImageUrl.String,
 			CreatedAt:    c.CreatedAt,
 		}); pubErr != nil {
 			log.Printf("[publisher] card.created (clone): %v", pubErr)

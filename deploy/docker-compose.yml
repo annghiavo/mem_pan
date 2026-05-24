@@ -31,6 +31,8 @@ services:
       - stats-service
       - notification-service
       - search-service
+      - admin-service
+      - moderation-service
     environment:
       - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
       - PUBSUB_PROJECT_ID=local-dev
@@ -38,6 +40,8 @@ services:
       - STATS_SERVICE_HOST=stats-service:8084
       - NOTIFICATION_SERVICE_HOST=notification-service:8085
       - SEARCH_SERVICE_HOST=search-service:8086
+      - ADMIN_SERVICE_HOST=admin-service:8083
+      - MODERATION_SERVICE_HOST=moderation-service:8087
     volumes:
       - ./pubsub-setup:/scripts:ro
     entrypoint: sh /scripts/init.sh
@@ -133,10 +137,14 @@ services:
       - AUTH_SERVICE_ADDRESS=auth-service:9090
       - NOTIFICATION_SERVICE_ADDRESS=notification-service:9095
       - DECK_SERVICE_ADDRESS=deck-service:9091
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_TOPIC=report-events
     depends_on:
       - auth-service
       - notification-service
       - deck-service
+      - pubsub-emulator
     expose:
       - "8083"
       - "9093"
@@ -221,6 +229,42 @@ services:
       - "traefik.http.routers.notification.entrypoints=web"
       - "traefik.http.routers.notification.rule=PathPrefix(`/v1/notifications`)"
       - "traefik.http.services.notification.loadbalancer.server.port=8085"
+    networks:
+      - gateway
+    restart: unless-stopped
+
+  moderation-service:
+    build:
+      context: ../services/moderation-fsrs-service
+      dockerfile: Dockerfile
+    environment:
+      - GRPC_PORT=50051
+      - HTTP_PORT=8087
+      - TEXT_MODEL_DIR=/models/flashcard_text_moderator
+      - IMAGE_MODEL_DIR=/models/flashcard_image_moderator
+      - DECK_SERVICE_ADDR=deck-service:9091
+      - NOTIFICATION_SERVICE_ADDR=notification-service:9095
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_MODERATION_TOPIC=moderation-events
+      - PUBSUB_PUSH_SECRET=dev-secret
+    volumes:
+      # Mount the model weights from the host so the docker image stays small
+      # and re-trains don't require an image rebuild.
+      - ../ml_model/results/flashcard_text_moderator:/models/flashcard_text_moderator:ro
+      - ../ml_model/results/flashcard_image_moderator:/models/flashcard_image_moderator:ro
+    depends_on:
+      - deck-service
+      - notification-service
+      - pubsub-emulator
+    expose:
+      - "8087"   # HTTP (Pub/Sub push receiver + healthz + /metrics)
+      - "50051"  # gRPC (ModerateDeck + OptimizeWeights)
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.moderation.entrypoints=web"
+      - "traefik.http.routers.moderation.rule=PathPrefix(`/internal/moderation`)"
+      - "traefik.http.services.moderation.loadbalancer.server.port=8087"
     networks:
       - gateway
     restart: unless-stopped

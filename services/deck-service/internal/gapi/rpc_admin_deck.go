@@ -34,6 +34,7 @@ func (s *Server) AdminUpdateDeckStatus(ctx context.Context, req *pb.AdminUpdateD
 	return &pb.AdminUpdateDeckStatusResponse{
 		DeckId: deck.DeckID.String(),
 		Status: deck.Status,
+		UserId: deck.UserID.String(),
 	}, nil
 }
 

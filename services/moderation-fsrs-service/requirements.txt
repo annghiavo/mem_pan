@@ -1,0 +1,36 @@
+# ===== Torch CPU-only (Rule 3) =====
+# The Dockerfile pip-install uses `--index-url https://download.pytorch.org/whl/cpu`
+# so this resolves to the CPU wheel (~200MB vs ~2.5GB CUDA build).
+# Versions kept in step with what the PyTorch CPU index actively publishes —
+# old patch releases (e.g. 2.3.1+cpu) are rotated off the mirror.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.7.1+cpu
+
+# ===== Inference stack =====
+transformers==4.46.3
+tokenizers==0.20.3
+sentencepiece==0.2.0
+safetensors==0.4.5
+pillow==11.0.0
+httpx==0.27.2
+numpy==2.1.3
+
+# ===== gRPC =====
+grpcio==1.68.0
+grpcio-tools==1.68.0
+grpcio-health-checking==1.68.0
+protobuf==5.28.3
+
+# ===== HTTP (Pub/Sub push receiver + healthz/metrics) =====
+aiohttp==3.10.11
+
+# ===== FSRS optimizer =====
+fsrs-optimizer==5.5.0
+pandas==2.2.3
+
+# ===== Observability =====
+prometheus-client==0.21.0
+psutil==6.1.0
+
+# ===== Validation =====
+pydantic==2.9.2

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -118,6 +119,16 @@ func runGRPCServer(cfg config.Config, server *gapi.Server, logger *slog.Logger) 
 	}
 }
 
+func dispatchMultipart(multipartHandler http.HandlerFunc, fallback http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
+			multipartHandler(w, r)
+			return
+		}
+		fallback.ServeHTTP(w, r)
+	}
+}
+
 func runHTTPGateway(cfg config.Config, srv *gapi.Server, logger *slog.Logger) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -138,8 +149,12 @@ func runHTTPGateway(cfg config.Config, srv *gapi.Server, logger *slog.Logger) {
 	httpMux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFiles))))
 	httpMux.HandleFunc("POST /v1/import/parse", srv.ServeParseImportFile)
 	httpMux.HandleFunc("POST /v1/cards/upload-image", srv.ServeUploadCardImage)
-	httpMux.HandleFunc("POST /v1/decks/{deck_id}/cards", srv.ServeCreateCard)
-	httpMux.HandleFunc("PUT /v1/cards/{card_id}", srv.ServeUpdateCard)
+	// Card create/update accept either multipart (with an image file) or JSON
+	// (text-only / image_url). Dispatch by Content-Type so JSON requests fall
+	// through to the grpc-gateway instead of hitting the multipart handler,
+	// which would reject them with "invalid multipart form".
+	httpMux.HandleFunc("POST /v1/decks/{deck_id}/cards", dispatchMultipart(srv.ServeCreateCard, grpcMux))
+	httpMux.HandleFunc("PUT /v1/cards/{card_id}", dispatchMultipart(srv.ServeUpdateCard, grpcMux))
 	httpMux.Handle("/", grpcMux)
 
 	httpServer := &http.Server{

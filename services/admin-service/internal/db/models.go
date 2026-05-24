@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sqlc-dev/pqtype"
 )
 
 type ReportCategory string
@@ -148,14 +147,14 @@ func (ns NullReportTargetType) Value() (driver.Value, error) {
 }
 
 type ModerationLog struct {
-	LogID      uuid.UUID             `json:"log_id"`
-	AdminID    uuid.UUID             `json:"admin_id"`
-	Action     string                `json:"action"`
-	TargetType string                `json:"target_type"`
-	TargetID   uuid.UUID             `json:"target_id"`
-	Reason     sql.NullString        `json:"reason"`
-	Metadata   pqtype.NullRawMessage `json:"metadata"`
-	CreatedAt  time.Time             `json:"created_at"`
+	LogID      uuid.UUID      `json:"log_id"`
+	AdminID    uuid.UUID      `json:"admin_id"`
+	Action     string         `json:"action"`
+	TargetType string         `json:"target_type"`
+	TargetID   uuid.UUID      `json:"target_id"`
+	Reason     sql.NullString `json:"reason"`
+	Metadata   sql.NullString `json:"metadata"`
+	CreatedAt  time.Time      `json:"created_at"`
 }
 
 type Report struct {

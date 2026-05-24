@@ -444,6 +444,38 @@
         ]
       }
     },
+    "/v1/users/{userId}": {
+      "get": {
+        "summary": "Get public profile",
+        "description": "Get a user's public profile by ID (safe subset of fields)",
+        "operationId": "AuthService_GetPublicProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbGetPublicProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "users"
+        ]
+      }
+    },
     "/v1/users/{userId}/reports": {
       "post": {
         "summary": "Report another user for moderation",
@@ -533,6 +565,14 @@
         }
       }
     },
+    "pbGetPublicProfileResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/pbPublicUser"
+        }
+      }
+    },
     "pbGetUserResponse": {
       "type": "object",
       "properties": {
@@ -587,6 +627,27 @@
     },
     "pbLogoutResponse": {
       "type": "object"
+    },
+    "pbPublicUser": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "fullName": {
+          "type": "string"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
     },
     "pbRefreshTokenRequest": {
       "type": "object",

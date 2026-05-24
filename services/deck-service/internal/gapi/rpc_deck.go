@@ -73,7 +73,17 @@ func (s *Server) ListPublicDecks(ctx context.Context, req *pb.ListPublicDecksReq
 		offset = 0
 	}
 
+	var userID uuid.UUID
+	if req.UserId != "" {
+		parsed, err := uuid.Parse(req.UserId)
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "invalid user_id")
+		}
+		userID = parsed
+	}
+
 	page, err := s.deckSvc.ListPublicDecks(ctx, service.ListPublicDecksParams{
+		UserID: userID,
 		Limit:  pageSize,
 		Offset: offset,
 	})

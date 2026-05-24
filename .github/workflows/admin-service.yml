@@ -1,0 +1,94 @@
+name: admin-service
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/admin-service/**'
+      - 'go.work'
+      - 'go.work.sum'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'services/admin-service/**'
+      - 'go.work'
+      - 'go.work.sum'
+
+concurrency:
+  group: admin-service-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: admin-service
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: services/admin-service
+    env:
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache-dependency-path: services/admin-service/go.sum
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Resolve DB URL
+        run: |
+          DB_URL="${DIRECT_URL:-$DATABASE_URL}"
+          if [ -n "$DB_URL" ]; then
+            echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
+            echo "HAS_DB_URL=true" >> "$GITHUB_ENV"
+          else
+            echo "HAS_DB_URL=false" >> "$GITHUB_ENV"
+            echo "No database secret found. Migration step will be skipped."
+          fi
+
+      - name: Install golang-migrate
+        if: env.HAS_DB_URL == 'true'
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.19.1/migrate.linux-amd64.tar.gz | tar xvz
+          sudo mv migrate /usr/local/bin/migrate
+
+      - name: Run migrations
+        if: env.HAS_DB_URL == 'true'
+        run: make migrateup
+
+      - name: Unit tests (race + coverage)
+        run: |
+          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Integration tests (if any tagged)
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: 'true'
+        run: |
+          if grep -rqsE "^//go:build (integration|.*[ ,]integration)" --include='*_test.go' .; then
+            go test -v -race -tags=integration -timeout=10m \
+              -coverprofile=coverage-integration.out -covermode=atomic ./...
+            tail -n +2 coverage-integration.out >> coverage.out
+          else
+            echo "No integration-tagged tests; skipping."
+          fi
+
+      - name: Filter codegen + show summary
+        run: |
+          grep -vE '/(pb|internal/db|internal/mock)/' coverage.out > coverage.filtered.out \
+            || cp coverage.out coverage.filtered.out
+          mv coverage.filtered.out coverage.out
+          go tool cover -func=coverage.out | tail -1
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: services/admin-service/coverage.out
+          retention-days: 7

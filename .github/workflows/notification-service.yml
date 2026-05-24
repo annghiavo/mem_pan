@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: '1.26'
           cache-dependency-path: services/notification-service/go.sum
@@ -58,8 +58,27 @@ jobs:
         if: env.HAS_DB_URL == 'true'
         run: make migrateup
 
-      - name: Test
-        run: make test/cover
+      - name: Unit tests (race + coverage)
+        run: |
+          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Integration tests (testcontainers Postgres)
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: 'true'
+        run: |
+          go test -v -race -tags=integration -timeout=10m \
+            -coverprofile=coverage-integration.out -covermode=atomic \
+            ./internal/repository/...
+
+      - name: Merge coverage profiles
+        run: |
+          if [ -f coverage-integration.out ]; then
+            tail -n +2 coverage-integration.out >> coverage.out
+          fi
+          grep -vE '/(pb|internal/db|internal/mock)/' coverage.out > coverage.filtered.out \
+            || cp coverage.out coverage.filtered.out
+          mv coverage.filtered.out coverage.out
+          go tool cover -func=coverage.out | tail -1
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4

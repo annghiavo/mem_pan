@@ -62,9 +62,9 @@ func newTestStudyService(
 	return NewStudyService(ucRepo, sessRepo, scRepo, revRepo, weightsRepo, deckClient)
 }
 
-// ------- StartSession (resume existing) -------
+// ------- StartSession (abandons any ongoing session, then creates a new one) -------
 
-func TestStartSession_ResumeExisting(t *testing.T) {
+func TestStartSession_AbandonsOngoingAndCreatesNew(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -78,30 +78,49 @@ func TestStartSession_ResumeExisting(t *testing.T) {
 	ctx := context.Background()
 	userID := uuid.New()
 	deckID := uuid.New()
-	sessionID := uuid.New()
+	oldSessionID := uuid.New()
+	newSessionID := uuid.New()
 	cardID := uuid.New()
 	userCardID := uuid.New()
 
-	existingSession := makeSession(sessionID, userID, deckID, db.SessionStatusOngoing)
-	sessionCards := []db.SessionCard{makeSessionCard(sessionID, cardID, userCardID)}
+	oldSession := makeSession(oldSessionID, userID, deckID, db.SessionStatusOngoing)
+	deckCards := []deckclient.CardInfo{{CardID: cardID, DeckID: deckID}}
+	userCard := makeUserCard(userCardID, userID, cardID, deckID)
+	newSession := makeSession(newSessionID, userID, deckID, db.SessionStatusOngoing)
+	sc := makeSessionCard(newSessionID, cardID, userCardID)
 
 	sessRepo.EXPECT().GetOngoingSessionByDeck(ctx, db.GetOngoingSessionByDeckParams{
 		UserID: userID,
 		DeckID: deckID,
-	}).Return(existingSession, nil)
-	scRepo.EXPECT().ListSessionCards(ctx, sessionID).Return(sessionCards, nil)
+	}).Return(oldSession, nil)
+	sessRepo.EXPECT().AbandonStudySession(ctx, oldSessionID).Return(oldSession, nil)
+	deckClient.EXPECT().ListDeckCards(ctx, deckID, "token123").Return(deckCards, nil)
+	ucRepo.EXPECT().UpsertUserCard(ctx, db.UpsertUserCardParams{
+		UserID: userID,
+		CardID: cardID,
+		DeckID: deckID,
+	}).Return(userCard, nil)
+	ucRepo.EXPECT().ListDueUserCardsByDeck(ctx, gomock.Any()).Return([]db.UserCard{userCard}, nil)
+	ucRepo.EXPECT().ListNewUserCardsByDeck(ctx, gomock.Any()).Return([]db.UserCard{}, nil)
+	sessRepo.EXPECT().CreateStudySession(ctx, db.CreateStudySessionParams{
+		UserID:     userID,
+		DeckID:     deckID,
+		TotalCards: 1,
+	}).Return(newSession, nil)
+	scRepo.EXPECT().InsertSessionCard(ctx, gomock.Any()).Return(sc, nil)
 
 	svc := newTestStudyService(ctrl, ucRepo, sessRepo, scRepo, revRepo, weightsRepo, deckClient)
-	result, err := svc.StartSession(ctx, StartSessionParams{UserID: userID, DeckID: deckID})
+	result, err := svc.StartSession(ctx, StartSessionParams{
+		UserID:      userID,
+		DeckID:      deckID,
+		AccessToken: "token123",
+	})
 
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
-	if result.Session.SessionID != sessionID {
-		t.Errorf("expected sessionID %v, got %v", sessionID, result.Session.SessionID)
-	}
-	if len(result.Cards) != 1 {
-		t.Errorf("expected 1 card, got %d", len(result.Cards))
+	if result.Session.SessionID != newSessionID {
+		t.Errorf("expected new sessionID %v, got %v", newSessionID, result.Session.SessionID)
 	}
 }
 

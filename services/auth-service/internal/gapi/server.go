@@ -55,6 +55,21 @@ func dbUserToPb(u db.User) *pb.User {
 	return r
 }
 
+func dbUserToPublicPb(u db.User) *pb.PublicUser {
+	r := &pb.PublicUser{
+		UserId:    u.UserID.String(),
+		Username:  u.Username,
+		CreatedAt: timestamppb.New(u.CreatedAt),
+	}
+	if u.FullName.Valid {
+		r.FullName = u.FullName.String
+	}
+	if u.AvatarUrl.Valid {
+		r.AvatarUrl = u.AvatarUrl.String
+	}
+	return r
+}
+
 func toGRPCError(err error) error {
 	switch {
 	case errors.Is(err, domain.ErrUserNotFound):

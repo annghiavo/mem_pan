@@ -7,7 +7,6 @@ import (
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/sqlc-dev/pqtype"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -93,7 +92,7 @@ func (s *Server) UpdateEmailTemplate(ctx context.Context, req *pb.UpdateEmailTem
 			TargetType: "email_template",
 			TargetID:   templateID,
 			Reason:     sql.NullString{String: "admin edit", Valid: true},
-			Metadata:   pqtype.NullRawMessage{RawMessage: meta, Valid: true},
+			Metadata:   sql.NullString{String: string(meta), Valid: true},
 		}); logErr != nil {
 			log.Printf("[admin] failed to write moderation log for template update: %v", logErr)
 		}

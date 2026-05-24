@@ -57,5 +57,13 @@ services:
       - PUBSUB_PROJECT_ID=local-dev
       - PUBSUB_TOPIC=study-events
 
+  admin-service:
+    depends_on:
+      - pubsub-emulator
+    environment:
+      - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
+      - PUBSUB_PROJECT_ID=local-dev
+      - PUBSUB_TOPIC=report-events
+
 networks:
   gateway:

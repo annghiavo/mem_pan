@@ -21,6 +21,7 @@ const (
 	KeyPasswordReset      = "password_reset"
 	KeyStudyReminder      = "study_reminder"
 	KeyReportResolved     = "report_resolved"
+	KeyDeckModeration     = "deck_moderation"
 	DefaultLocale         = "en"
 	defaultCacheTTL       = 60 * time.Second
 )
@@ -52,6 +53,7 @@ type Mailer interface {
 	SendEmailVerification(ctx context.Context, to, username, verifyURL string) error
 	SendPasswordReset(ctx context.Context, to, username, resetURL string) error
 	SendReportResolved(ctx context.Context, to, username, outcome string) error
+	SendDeckModeration(ctx context.Context, to, username, deckStatus string) error
 }
 
 type Config struct {
@@ -125,6 +127,10 @@ func (m *smtpMailer) SendReportResolved(ctx context.Context, to, username, outco
 	return m.Send(ctx, to, KeyReportResolved, map[string]string{"Username": username, "Outcome": outcome})
 }
 
+func (m *smtpMailer) SendDeckModeration(ctx context.Context, to, username, deckStatus string) error {
+	return m.Send(ctx, to, KeyDeckModeration, map[string]string{"Username": username, "DeckStatus": deckStatus})
+}
+
 // noopMailer silently discards all emails (used when SMTP is not configured).
 type noopMailer struct{}
 
@@ -136,6 +142,7 @@ func (n *noopMailer) SendWelcome(context.Context, string, string) error         
 func (n *noopMailer) SendEmailVerification(context.Context, string, string, string) error { return nil }
 func (n *noopMailer) SendPasswordReset(context.Context, string, string, string) error  { return nil }
 func (n *noopMailer) SendReportResolved(context.Context, string, string, string) error { return nil }
+func (n *noopMailer) SendDeckModeration(context.Context, string, string, string) error { return nil }
 
 // Render executes a Template against data and returns the rendered triple.
 // HTML body uses html/template (auto-escaping); subject and text body use text/template.
@@ -266,6 +273,11 @@ var defaultTemplates = map[string]Template{
 		Subject: "Update on your MemPan report",
 		HTML:    "<!DOCTYPE html><html><body>\n<h2>Hi {{.Username}},</h2>\n<p>Thanks for helping keep MemPan safe. We've finished reviewing the report you submitted.</p>\n<p><strong>Outcome:</strong> {{.Outcome}}</p>\n<p>We appreciate you flagging this. Please continue to report anything that doesn't belong.</p>\n</body></html>",
 		Text:    "Hi {{.Username}},\n\nThanks for helping keep MemPan safe. We've finished reviewing the report you submitted.\n\nOutcome: {{.Outcome}}\n\nWe appreciate you flagging this. Please continue to report anything that doesn't belong.\n",
+	},
+	KeyDeckModeration: {
+		Subject: "Important update regarding your MemPan deck",
+		HTML:    "<!DOCTYPE html><html><body>\n<h2>Hi {{.Username}},</h2>\n<p>Your deck has been {{.DeckStatus}} due to a violation of our policies.</p>\n<p>If you believe this is a mistake, please contact support.</p>\n</body></html>",
+		Text:    "Hi {{.Username}},\n\nYour deck has been {{.DeckStatus}} due to a violation of our policies.\n\nIf you believe this is a mistake, please contact support.\n",
 	},
 }
 

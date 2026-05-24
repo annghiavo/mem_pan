@@ -20,6 +20,8 @@ type DeckRepository interface {
 	CountDecksByUser(ctx context.Context, userID uuid.UUID) (int64, error)
 	ListPublicDecks(ctx context.Context, arg db.ListPublicDecksParams) ([]db.Deck, error)
 	CountPublicDecks(ctx context.Context) (int64, error)
+	ListPublicDecksByUser(ctx context.Context, arg db.ListPublicDecksByUserParams) ([]db.Deck, error)
+	CountPublicDecksByUser(ctx context.Context, userID uuid.UUID) (int64, error)
 	UpdateDeck(ctx context.Context, arg db.UpdateDeckParams) (db.Deck, error)
 	UpdateDeckSettings(ctx context.Context, arg db.UpdateDeckSettingsParams) (db.Deck, error)
 	UpdateDeckVisibility(ctx context.Context, arg db.UpdateDeckVisibilityParams) (db.Deck, error)
@@ -67,6 +69,14 @@ func (r *deckRepository) ListPublicDecks(ctx context.Context, arg db.ListPublicD
 
 func (r *deckRepository) CountPublicDecks(ctx context.Context) (int64, error) {
 	return r.q.CountPublicDecks(ctx)
+}
+
+func (r *deckRepository) ListPublicDecksByUser(ctx context.Context, arg db.ListPublicDecksByUserParams) ([]db.Deck, error) {
+	return r.q.ListPublicDecksByUser(ctx, arg)
+}
+
+func (r *deckRepository) CountPublicDecksByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
+	return r.q.CountPublicDecksByUser(ctx, userID)
 }
 
 func (r *deckRepository) UpdateDeck(ctx context.Context, arg db.UpdateDeckParams) (db.Deck, error) {

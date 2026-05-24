@@ -67,6 +67,7 @@ type CardCreatedEvent struct {
 	NoteID       string    `json:"note_id"`
 	ContentFront string    `json:"content_front"`
 	ContentBack  string    `json:"content_back"`
+	ImageURL     string    `json:"image_url,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 }
 
@@ -77,6 +78,7 @@ type CardUpdatedEvent struct {
 	NoteID       string `json:"note_id"`
 	ContentFront string `json:"content_front"`
 	ContentBack  string `json:"content_back"`
+	ImageURL     string `json:"image_url,omitempty"`
 }
 
 type CardDeletedEvent struct {

@@ -24,6 +24,12 @@ const (
 	// every 15 minutes. The handler sends a push to users whose streak is
 	// at risk (haven't studied today and local time is at their warning hour).
 	TypeCronStreakWarning = "cron.streak_warning"
+
+	// Published by moderation-fsrs-service when a deck is auto-deleted due to
+	// detected toxic text or unsafe imagery. The deck row stays in deck_db with
+	// content_status='deleted' so the owner can appeal. Consumed by
+	// notification-service (FCM alert to the owner) and admin-service (audit log).
+	TypeModerationDeckDeleted = "moderation.deck_deleted"
 )
 
 type Envelope struct {
@@ -68,12 +74,13 @@ type DeckCloneCompleted struct {
 // ReportResolved is published by admin-service after an admin acts on a report.
 // notification-service emails every distinct reporter.
 type ReportResolved struct {
-	TargetType  string    `json:"target_type"`  // user | deck
-	TargetID    string    `json:"target_id"`
-	Action      string    `json:"action"`       // ban_user | hide_deck | delete_deck | dismiss
-	Resolution  string    `json:"resolution"`   // banned | deck_hidden | deck_deleted | ""
-	ReporterIDs []string  `json:"reporter_ids"`
-	ResolvedAt  time.Time `json:"resolved_at"`
+	TargetType    string    `json:"target_type"`  // user | deck
+	TargetID      string    `json:"target_id"`
+	TargetOwnerID string    `json:"target_owner_id"`
+	Action        string    `json:"action"`       // ban_user | hide_deck | delete_deck | dismiss
+	Resolution    string    `json:"resolution"`   // banned | deck_hidden | deck_deleted | ""
+	ReporterIDs   []string  `json:"reporter_ids"`
+	ResolvedAt    time.Time `json:"resolved_at"`
 }
 
 // CronTick is the payload Cloud Scheduler attaches to the two reminder topics.
@@ -81,4 +88,17 @@ type ReportResolved struct {
 // reproducible across retries). If absent, the handler uses time.Now().
 type CronTick struct {
 	Now time.Time `json:"now,omitempty"`
+}
+
+// ModerationDeckDeleted is published by moderation-fsrs-service when one of
+// its AI models flags a deck as violating the content policy. The deck row is
+// soft-deleted (content_status='deleted'); admin-service persists the event
+// for audit / appeal.
+type ModerationDeckDeleted struct {
+	DeckID           string    `json:"deck_id"`
+	UserID           string    `json:"user_id"`
+	Reason           string    `json:"reason"`            // "text_violation" | "image_violation" | "mixed"
+	ViolatedCardIDs  []string  `json:"violated_card_ids"`
+	DeletedAt        time.Time `json:"deleted_at"`
+	ModeratorVersion string    `json:"moderator_version"`
 }

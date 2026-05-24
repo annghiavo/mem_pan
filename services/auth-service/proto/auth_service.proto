@@ -18,6 +18,7 @@ import "rpc_change_password.proto";
 import "rpc_verify_token.proto";
 import "rpc_upload_avatar.proto";
 import "rpc_get_user_by_id.proto";
+import "rpc_get_public_profile.proto";
 import "rpc_set_user_role.proto";
 import "rpc_report_user.proto";
 import "rpc_list_users.proto";
@@ -138,6 +139,20 @@ service AuthService {
             description: "Reset the user password using the token from the reset email";
             summary: "Reset password";
             tags: "auth";
+        };
+    }
+
+    // NOTE: GetPublicProfile must be declared BEFORE GetUser. grpc-gateway's
+    // ServeMux.Handle prepends each registration, so the LAST-registered RPC is
+    // checked first. Declaring GetUser later puts it at the front of the GET
+    // handler list, so the literal "/v1/users/me" path matches GetUser instead
+    // of being captured as user_id="me" by GetPublicProfile (which would 400).
+    rpc GetPublicProfile (GetPublicProfileRequest) returns (GetPublicProfileResponse) {
+        option (google.api.http) = { get: "/v1/users/{user_id}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            description: "Get a user's public profile by ID (safe subset of fields)";
+            summary: "Get public profile";
+            tags: "users";
         };
     }
 

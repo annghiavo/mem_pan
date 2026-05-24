@@ -1,0 +1,70 @@
+name: search-service
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/search-service/**'
+      - 'go.work'
+      - 'go.work.sum'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'services/search-service/**'
+      - 'go.work'
+      - 'go.work.sum'
+
+concurrency:
+  group: search-service-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: search-service
+    # ES container startup is slow; budget extra time vs. the DB-backed jobs.
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: services/search-service
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache-dependency-path: services/search-service/go.sum
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Unit tests (race + coverage)
+        run: |
+          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Integration tests (testcontainers Elasticsearch)
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: 'true'
+        run: |
+          go test -v -race -tags=integration -timeout=15m \
+            -coverprofile=coverage-integration.out -covermode=atomic \
+            ./internal/service/...
+
+      - name: Merge coverage profiles
+        run: |
+          if [ -f coverage-integration.out ]; then
+            tail -n +2 coverage-integration.out >> coverage.out
+          fi
+          grep -vE '/(pb|internal/db|internal/mock)/' coverage.out > coverage.filtered.out \
+            || cp coverage.out coverage.filtered.out
+          mv coverage.filtered.out coverage.out
+          go tool cover -func=coverage.out | tail -1
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: services/search-service/coverage.out
+          retention-days: 7

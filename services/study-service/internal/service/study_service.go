@@ -119,26 +119,19 @@ func NewStudyService(
 }
 
 func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (*SessionResult, error) {
-	// Resume existing ongoing session — but only if it still has un-reviewed
-	// cards. A session whose status was never flipped to 'completed' (e.g. the
-	// client crashed before calling FinishSession) would otherwise be resumed
-	// forever and every /review call would 409 with ErrCardAlreadyReviewed.
+	// Always start a fresh session. If an old one is still 'ongoing' (the user
+	// abandoned it earlier or the client never finished it), close it and move
+	// on. Cards already reviewed in the old session have had their FSRS state
+	// updated; cards that were skipped are still due and will be picked up by
+	// the new session's due-card selection below. Resuming would just hand
+	// back stale already-reviewed session_card rows that 409 on /review.
 	existing, err := s.sessionRepo.GetOngoingSessionByDeck(ctx, db.GetOngoingSessionByDeckParams{
 		UserID: p.UserID,
 		DeckID: p.DeckID,
 	})
 	if err == nil {
-		if existing.TotalCards > 0 && existing.CompletedCards >= existing.TotalCards {
-			if _, finErr := s.sessionRepo.FinishStudySession(ctx, existing.SessionID); finErr != nil {
-				return nil, finErr
-			}
-			// Fall through to create a brand-new session below.
-		} else {
-			cards, err := s.sessionCardRepo.ListSessionCards(ctx, existing.SessionID)
-			if err != nil {
-				return nil, err
-			}
-			return &SessionResult{Session: existing, Cards: cards}, nil
+		if _, finErr := s.sessionRepo.AbandonStudySession(ctx, existing.SessionID); finErr != nil {
+			return nil, finErr
 		}
 	} else if !errors.Is(err, domain.ErrSessionNotFound) {
 		return nil, err

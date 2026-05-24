@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -144,14 +145,24 @@ func (s *Server) ServeUpdateCard(w http.ResponseWriter, r *http.Request) {
 
 // resolveImageURL uploads the "image" file to Cloudinary when present,
 // otherwise falls back to the "image_url" text field. Returns nil when neither is set.
+//
+// If the form contains an "image" part we always attempt to upload it: silently
+// treating a zero-byte upload as "no image" produced a confusing bug where the
+// frontend reported success but the card kept its old image URL.
 func (s *Server) resolveImageURL(ctx context.Context, r *http.Request) (*string, error) {
 	file, fh, err := r.FormFile("image")
-	if err == nil && fh.Size > 0 {
+	if err == nil {
 		defer file.Close()
+		if fh.Size == 0 {
+			return nil, fmt.Errorf("uploaded image is empty")
+		}
 		if s.uploader == nil {
 			return nil, fmt.Errorf("uploader not configured")
 		}
 		return s.uploadFile(ctx, file)
+	}
+	if !errors.Is(err, http.ErrMissingFile) {
+		return nil, err
 	}
 	return nullStrFromProto(r.FormValue("image_url")), nil
 }

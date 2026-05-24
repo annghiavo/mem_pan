@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+// Package + message names MUST match deck-service/proto/* so the protobuf
+// fully-qualified names (`pb.DeckService/AdminUpdateDeckStatus`,
+// `pb.AdminUpdateDeckStatusRequest`) line up on the wire.
+//
+// We only declare the subset of the deck-service surface that this Python
+// service actually calls. Generating the full deck-service.proto would pull in
+// dozens of unrelated RPCs.
+package pb;
+
+option go_package = "mem_pan/services/deck-service/pb";
+
+message AdminUpdateDeckStatusRequest {
+  string deck_id = 1;
+  string status  = 2;
+}
+
+message AdminUpdateDeckStatusResponse {
+  string deck_id = 1;
+  string status  = 2;
+  string user_id = 3;
+}
+
+service DeckService {
+  rpc AdminUpdateDeckStatus(AdminUpdateDeckStatusRequest) returns (AdminUpdateDeckStatusResponse);
+}

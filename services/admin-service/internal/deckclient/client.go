@@ -27,7 +27,7 @@ type ListDecksResult struct {
 }
 
 type Client interface {
-	UpdateDeckStatus(ctx context.Context, deckID, status string) (string, error)
+	UpdateDeckStatus(ctx context.Context, deckID, status string) (string, string, error)
 	ListDecks(ctx context.Context, pageSize, offset int32, statusFilter string) (*ListDecksResult, error)
 	Close() error
 }
@@ -45,15 +45,15 @@ func NewGRPCClient(addr string) (Client, error) {
 	return &grpcClient{conn: conn, deckSvc: deckpb.NewDeckServiceClient(conn)}, nil
 }
 
-func (c *grpcClient) UpdateDeckStatus(ctx context.Context, deckID, status string) (string, error) {
+func (c *grpcClient) UpdateDeckStatus(ctx context.Context, deckID, status string) (string, string, error) {
 	resp, err := c.deckSvc.AdminUpdateDeckStatus(ctx, &deckpb.AdminUpdateDeckStatusRequest{
 		DeckId: deckID,
 		Status: status,
 	})
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return resp.Status, nil
+	return resp.Status, resp.UserId, nil
 }
 
 func (c *grpcClient) ListDecks(ctx context.Context, pageSize, offset int32, statusFilter string) (*ListDecksResult, error) {

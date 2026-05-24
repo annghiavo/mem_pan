@@ -49,18 +49,24 @@ service DeckService {
         };
     }
 
-    rpc ListPublicFolders (ListPublicFoldersRequest) returns (ListPublicFoldersResponse) {
-        option (google.api.http) = { get: "/v1/folders/public" };
-        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            summary: "Browse public folders"; tags: "folders";
-        };
-    }
-
+    // NOTE: GetFolder must be declared BEFORE ListPublicFolders. grpc-gateway's
+    // ServeMux.Handle prepends each registration, so the LAST-registered RPC is
+    // checked first. Declaring ListPublicFolders later puts it at the front of
+    // the GET handler list, so the literal "/v1/folders/public" matches
+    // ListPublicFolders instead of being captured as folder_id="public" by
+    // GetFolder (which would 400 with "invalid folder_id").
     rpc GetFolder (GetFolderRequest) returns (GetFolderResponse) {
         option (google.api.http) = { get: "/v1/folders/{folder_id}" };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
             summary: "Get folder with decks"; tags: "folders";
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc ListPublicFolders (ListPublicFoldersRequest) returns (ListPublicFoldersResponse) {
+        option (google.api.http) = { get: "/v1/folders/public" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Browse public folders"; tags: "folders";
         };
     }
 
@@ -121,18 +127,24 @@ service DeckService {
         };
     }
 
-    rpc ListPublicDecks (ListPublicDecksRequest) returns (ListPublicDecksResponse) {
-        option (google.api.http) = { get: "/v1/decks/public" };
-        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            summary: "Search public decks"; tags: "decks";
-        };
-    }
-
+    // NOTE: GetDeck must be declared BEFORE ListPublicDecks. grpc-gateway's
+    // ServeMux.Handle prepends each registration, so the LAST-registered RPC is
+    // checked first. Declaring ListPublicDecks later puts it at the front of
+    // the GET handler list, so the literal "/v1/decks/public" matches
+    // ListPublicDecks instead of being captured as deck_id="public" by GetDeck
+    // (which would 400 with "invalid deck_id").
     rpc GetDeck (GetDeckRequest) returns (GetDeckResponse) {
         option (google.api.http) = { get: "/v1/decks/{deck_id}" };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
             summary: "Get deck detail"; tags: "decks";
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc ListPublicDecks (ListPublicDecksRequest) returns (ListPublicDecksResponse) {
+        option (google.api.http) = { get: "/v1/decks/public" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Search public decks"; tags: "decks";
         };
     }
 

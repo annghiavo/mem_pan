@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package mem_pan.moderation_fsrs.v1;
+
+option go_package = "mem_pan/services/moderation-fsrs-service/pb;moderation_fsrsv1";
+
+// ============================================================
+// Moderation Service
+// ============================================================
+
+service ModerationService {
+  // deck-service (Go) -> Python: kiểm duyệt 1 deck.
+  rpc ModerateDeck(ModerateDeckRequest) returns (ModerateDeckResponse);
+}
+
+message CardText {
+  string card_id = 1;
+  string content = 2;
+}
+
+message CardImage {
+  string card_id = 1;
+  oneof source {
+    string url = 2;     // ảnh remote
+    bytes  raw = 3;     // raw bytes
+  }
+}
+
+message ModerateDeckRequest {
+  string deck_id = 1;
+  string user_id = 2;
+  repeated CardText  texts  = 3;
+  repeated CardImage images = 4;
+}
+
+enum ModerationStatus {
+  MODERATION_STATUS_UNSPECIFIED = 0;
+  MODERATION_STATUS_CLEAN       = 1;
+  MODERATION_STATUS_VIOLATION   = 2;
+}
+
+message ItemVerdict {
+  string card_id      = 1;
+  string kind         = 2;   // "text" | "image"
+  bool   is_violation = 3;
+  float  confidence   = 4;
+  string reason       = 5;
+}
+
+message ModerateDeckResponse {
+  string deck_id = 1;
+  ModerationStatus status = 2;
+  repeated ItemVerdict items = 3;
+}
+
+// ============================================================
+// FSRS Optimization Service
+// ============================================================
+
+service FsrsOptimizationService {
+  rpc OptimizeWeights(OptimizeWeightsRequest) returns (OptimizeWeightsResponse);
+}
+
+message ReviewLog {
+  string card_id      = 1;
+  int64  review_date  = 2;   // unix seconds
+  int32  rating       = 3;   // 1..4
+  int32  elapsed_days = 4;
+}
+
+message OptimizeWeightsRequest {
+  string user_id = 1;
+  repeated ReviewLog review_logs = 2;
+}
+
+message OptimizeWeightsResponse {
+  string user_id = 1;
+  repeated float weights = 2;
+  int32  num_reviews_used = 3;
+  float  loss = 4;
+  string fsrs_version = 5;
+}
+
+// ============================================================
+// Callback services (Python -> Go)
+// ============================================================
+
+service NotificationCallback {
+  rpc SendModerationAlert(ModerationAlertRequest) returns (Ack);
+}
+
+message ModerationAlertRequest {
+  string user_id = 1;
+  string deck_id = 2;
+  string message = 3;
+  repeated string violated_card_ids = 4;
+}
+
+service DeckCallback {
+  rpc LockDeck(LockDeckRequest) returns (Ack);
+}
+
+message LockDeckRequest {
+  string deck_id = 1;
+  string reason  = 2;
+  repeated string violated_card_ids = 3;
+}
+
+message Ack {
+  bool ok = 1;
+  string detail = 2;
+}

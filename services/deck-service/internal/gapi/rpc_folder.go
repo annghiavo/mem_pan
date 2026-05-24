@@ -149,7 +149,17 @@ func (s *Server) ListPublicFolders(ctx context.Context, req *pb.ListPublicFolder
 		offset = 0
 	}
 
+	var userID uuid.UUID
+	if req.UserId != "" {
+		parsed, err := uuid.Parse(req.UserId)
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, "invalid user_id")
+		}
+		userID = parsed
+	}
+
 	page, err := s.folderSvc.ListPublicFolders(ctx, service.ListPublicFoldersParams{
+		UserID: userID,
 		Limit:  pageSize,
 		Offset: offset,
 	})

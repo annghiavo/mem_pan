@@ -40,10 +40,24 @@ func (h *Handler) Dispatch(ctx context.Context, eventType string, data []byte) e
 		return h.handleCronStudyReminder(ctx, data)
 	case events.TypeCronStreakWarning:
 		return h.handleCronStreakWarning(ctx, data)
+	case events.TypeModerationDeckDeleted:
+		return h.handleModerationDeckDeleted(ctx, data)
 	default:
 		log.Printf("[notification] unknown event type %q — skipping", eventType)
 		return nil
 	}
+}
+
+func (h *Handler) handleModerationDeckDeleted(ctx context.Context, data []byte) error {
+	var e events.ModerationDeckDeleted
+	if err := json.Unmarshal(data, &e); err != nil {
+		return err
+	}
+	if _, err := uuid.Parse(e.UserID); err != nil {
+		log.Printf("[moderation] invalid user_id %q — skipping push", e.UserID)
+		return nil
+	}
+	return h.svc.SendModerationDeckDeletedPush(ctx, e.UserID, e.DeckID, e.Reason, len(e.ViolatedCardIDs))
 }
 
 func (h *Handler) handleCronStudyReminder(ctx context.Context, data []byte) error {
@@ -133,6 +147,27 @@ func (h *Handler) handleReportResolved(ctx context.Context, data []byte) error {
 			log.Printf("[notification] report.resolved: send to %s failed: %v", user.Email, err)
 		}
 	}
+
+	if e.TargetType == "deck" && (e.Action == "hide_deck" || e.Action == "delete_deck") && e.TargetOwnerID != "" {
+		ownerID, err := uuid.Parse(e.TargetOwnerID)
+		if err == nil {
+			owner, err := h.authClient.GetUserByID(ctx, ownerID)
+			if err == nil {
+				deckStatus := "hidden"
+				if e.Action == "delete_deck" {
+					deckStatus = "deleted"
+				}
+				if err := h.svc.SendDeckModerationEmail(ctx, e.TargetOwnerID, owner.Email, owner.Username, deckStatus); err != nil {
+					log.Printf("[notification] report.resolved: send deck moderation to %s failed: %v", owner.Email, err)
+				}
+			} else {
+				log.Printf("[notification] report.resolved: lookup target owner %s failed: %v", e.TargetOwnerID, err)
+			}
+		} else {
+			log.Printf("[notification] report.resolved: bad target_owner_id %q: %v", e.TargetOwnerID, err)
+		}
+	}
+
 	return nil
 }
 

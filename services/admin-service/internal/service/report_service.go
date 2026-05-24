@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sqlc-dev/pqtype"
 
 	"mem_pan/services/admin-service/internal/authclient"
 	"mem_pan/services/admin-service/internal/db"
@@ -130,7 +129,8 @@ func (s *reportService) ProcessReport(ctx context.Context, p ProcessReportParams
 
 	// Take the moderation side-effect FIRST. If it fails, the reports stay pending
 	// so the admin can retry; better than reporting a fake outcome to the reporters.
-	if err := s.applyAction(ctx, p.Action, target); err != nil {
+	ownerID, err := s.applyAction(ctx, p.Action, target)
+	if err != nil {
 		return ProcessReportResult{}, fmt.Errorf("apply moderation action: %w", err)
 	}
 
@@ -171,12 +171,13 @@ func (s *reportService) ProcessReport(ctx context.Context, p ProcessReportParams
 	if err != nil {
 		log.Printf("[report] list reporters failed: %v", err)
 	} else if pubErr := s.publisher.PublishReportResolved(ctx, publisher.ReportResolvedEvent{
-		TargetType:  string(target.TargetType),
-		TargetID:    target.TargetID.String(),
-		Action:      string(p.Action),
-		Resolution:  resolution,
-		ReporterIDs: uuidsToStrings(reporterIDs),
-		ResolvedAt:  time.Now().UTC(),
+		TargetType:    string(target.TargetType),
+		TargetID:      target.TargetID.String(),
+		TargetOwnerID: ownerID,
+		Action:        string(p.Action),
+		Resolution:    resolution,
+		ReporterIDs:   uuidsToStrings(reporterIDs),
+		ResolvedAt:    time.Now().UTC(),
 	}); pubErr != nil {
 		log.Printf("[publisher] report.resolved: %v", pubErr)
 	}
@@ -194,7 +195,7 @@ func (s *reportService) ProcessReport(ctx context.Context, p ProcessReportParams
 		TargetType: string(target.TargetType),
 		TargetID:   target.TargetID,
 		Reason:     sqlNullStrFromPtr(p.AdminNote),
-		Metadata:   pqtype.NullRawMessage{RawMessage: logMeta, Valid: true},
+		Metadata:   sql.NullString{String: string(logMeta), Valid: true},
 	}); err != nil {
 		log.Printf("[report] moderation log insert failed: %v", err)
 	}
@@ -232,21 +233,21 @@ func validateAction(action ProcessAction, targetType string) (resolution string,
 	}
 }
 
-func (s *reportService) applyAction(ctx context.Context, action ProcessAction, target db.GetReportTargetRow) error {
+func (s *reportService) applyAction(ctx context.Context, action ProcessAction, target db.GetReportTargetRow) (string, error) {
 	switch action {
 	case ActionBanUser:
 		_, err := s.authClient.BanUser(ctx, target.TargetID, true, "moderation: report resolved")
-		return err
+		return target.TargetID.String(), err
 	case ActionHideDeck:
-		_, err := s.deckClient.UpdateDeckStatus(ctx, target.TargetID.String(), "hidden")
-		return err
+		_, ownerID, err := s.deckClient.UpdateDeckStatus(ctx, target.TargetID.String(), "hidden")
+		return ownerID, err
 	case ActionDeleteDeck:
-		_, err := s.deckClient.UpdateDeckStatus(ctx, target.TargetID.String(), "deleted")
-		return err
+		_, ownerID, err := s.deckClient.UpdateDeckStatus(ctx, target.TargetID.String(), "deleted")
+		return ownerID, err
 	case ActionDismiss:
-		return nil
+		return "", nil
 	default:
-		return errors.New("unknown action")
+		return "", errors.New("unknown action")
 	}
 }
 

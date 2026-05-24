@@ -110,6 +110,32 @@ func (mr *MockDeckRepositoryMockRecorder) CountPublicDecks(ctx any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountPublicDecks", reflect.TypeOf((*MockDeckRepository)(nil).CountPublicDecks), ctx)
 }
 
+func (m *MockDeckRepository) ListPublicDecksByUser(ctx context.Context, arg db.ListPublicDecksByUserParams) ([]db.Deck, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListPublicDecksByUser", ctx, arg)
+	ret0, _ := ret[0].([]db.Deck)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) ListPublicDecksByUser(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPublicDecksByUser", reflect.TypeOf((*MockDeckRepository)(nil).ListPublicDecksByUser), ctx, arg)
+}
+
+func (m *MockDeckRepository) CountPublicDecksByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountPublicDecksByUser", ctx, userID)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) CountPublicDecksByUser(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountPublicDecksByUser", reflect.TypeOf((*MockDeckRepository)(nil).CountPublicDecksByUser), ctx, userID)
+}
+
 func (m *MockDeckRepository) UpdateDeck(ctx context.Context, arg db.UpdateDeckParams) (db.Deck, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateDeck", ctx, arg)

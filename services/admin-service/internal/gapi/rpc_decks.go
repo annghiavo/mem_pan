@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
-	"github.com/sqlc-dev/pqtype"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -102,7 +101,7 @@ func (s *Server) UpdateDeckStatus(ctx context.Context, req *pb.UpdateDeckStatusR
 		return nil, status.Error(codes.InvalidArgument, "status must be active, hidden, or deleted")
 	}
 
-	newStatus, err := s.deckClient.UpdateDeckStatus(ctx, deckID.String(), req.GetStatus())
+	newStatus, _, err := s.deckClient.UpdateDeckStatus(ctx, deckID.String(), req.GetStatus())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to update deck status")
 	}
@@ -114,7 +113,7 @@ func (s *Server) UpdateDeckStatus(ctx context.Context, req *pb.UpdateDeckStatusR
 		TargetType: "deck",
 		TargetID:   deckID,
 		Reason:     sql.NullString{String: req.GetReason(), Valid: req.GetReason() != ""},
-		Metadata:   pqtype.NullRawMessage{RawMessage: logMeta, Valid: true},
+		Metadata:   sql.NullString{String: string(logMeta), Valid: true},
 	})
 
 	return &pb.UpdateDeckStatusResponse{

@@ -27,6 +27,7 @@ const (
 	AuthService_ResendVerification_FullMethodName = "/pb.AuthService/ResendVerification"
 	AuthService_ForgotPassword_FullMethodName     = "/pb.AuthService/ForgotPassword"
 	AuthService_ResetPassword_FullMethodName      = "/pb.AuthService/ResetPassword"
+	AuthService_GetPublicProfile_FullMethodName   = "/pb.AuthService/GetPublicProfile"
 	AuthService_GetUser_FullMethodName            = "/pb.AuthService/GetUser"
 	AuthService_UpdateUser_FullMethodName         = "/pb.AuthService/UpdateUser"
 	AuthService_ChangePassword_FullMethodName     = "/pb.AuthService/ChangePassword"
@@ -51,6 +52,12 @@ type AuthServiceClient interface {
 	ResendVerification(ctx context.Context, in *ResendVerificationRequest, opts ...grpc.CallOption) (*ResendVerificationResponse, error)
 	ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*ForgotPasswordResponse, error)
 	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetPasswordResponse, error)
+	// NOTE: GetPublicProfile must be declared BEFORE GetUser. grpc-gateway's
+	// ServeMux.Handle prepends each registration, so the LAST-registered RPC is
+	// checked first. Declaring GetUser later puts it at the front of the GET
+	// handler list, so the literal "/v1/users/me" path matches GetUser instead
+	// of being captured as user_id="me" by GetPublicProfile (which would 400).
+	GetPublicProfile(ctx context.Context, in *GetPublicProfileRequest, opts ...grpc.CallOption) (*GetPublicProfileResponse, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error)
@@ -147,6 +154,16 @@ func (c *authServiceClient) ResetPassword(ctx context.Context, in *ResetPassword
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResetPasswordResponse)
 	err := c.cc.Invoke(ctx, AuthService_ResetPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) GetPublicProfile(ctx context.Context, in *GetPublicProfileRequest, opts ...grpc.CallOption) (*GetPublicProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPublicProfileResponse)
+	err := c.cc.Invoke(ctx, AuthService_GetPublicProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -265,6 +282,12 @@ type AuthServiceServer interface {
 	ResendVerification(context.Context, *ResendVerificationRequest) (*ResendVerificationResponse, error)
 	ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error)
 	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error)
+	// NOTE: GetPublicProfile must be declared BEFORE GetUser. grpc-gateway's
+	// ServeMux.Handle prepends each registration, so the LAST-registered RPC is
+	// checked first. Declaring GetUser later puts it at the front of the GET
+	// handler list, so the literal "/v1/users/me" path matches GetUser instead
+	// of being captured as user_id="me" by GetPublicProfile (which would 400).
+	GetPublicProfile(context.Context, *GetPublicProfileRequest) (*GetPublicProfileResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
@@ -310,6 +333,9 @@ func (UnimplementedAuthServiceServer) ForgotPassword(context.Context, *ForgotPas
 }
 func (UnimplementedAuthServiceServer) ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ResetPassword not implemented")
+}
+func (UnimplementedAuthServiceServer) GetPublicProfile(context.Context, *GetPublicProfileRequest) (*GetPublicProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPublicProfile not implemented")
 }
 func (UnimplementedAuthServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
@@ -502,6 +528,24 @@ func _AuthService_ResetPassword_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).ResetPassword(ctx, req.(*ResetPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_GetPublicProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPublicProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetPublicProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GetPublicProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetPublicProfile(ctx, req.(*GetPublicProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -724,6 +768,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResetPassword",
 			Handler:    _AuthService_ResetPassword_Handler,
+		},
+		{
+			MethodName: "GetPublicProfile",
+			Handler:    _AuthService_GetPublicProfile_Handler,
 		},
 		{
 			MethodName: "GetUser",

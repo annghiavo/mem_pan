@@ -24,6 +24,15 @@ LIMIT $1 OFFSET $2;
 -- name: CountPublicDecks :one
 SELECT COUNT(*) FROM decks WHERE is_public = TRUE AND status = 'active';
 
+-- name: ListPublicDecksByUser :many
+SELECT * FROM decks
+WHERE user_id = $1 AND is_public = TRUE AND status = 'active'
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3;
+
+-- name: CountPublicDecksByUser :one
+SELECT COUNT(*) FROM decks WHERE user_id = $1 AND is_public = TRUE AND status = 'active';
+
 -- name: UpdateDeck :one
 UPDATE decks
 SET name        = COALESCE(sqlc.narg('name'), name),
@@ -34,9 +43,9 @@ RETURNING *;
 
 -- name: UpdateDeckSettings :one
 UPDATE decks
-SET settings   = $2::jsonb,
+SET settings   = sqlc.arg('settings')::jsonb,
     updated_at = now()
-WHERE deck_id = $1
+WHERE deck_id = sqlc.arg('deck_id')
 RETURNING *;
 
 -- name: UpdateDeckVisibility :one

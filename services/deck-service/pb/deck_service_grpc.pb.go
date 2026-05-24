@@ -21,8 +21,8 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	DeckService_ListFolders_FullMethodName            = "/pb.DeckService/ListFolders"
 	DeckService_CreateFolder_FullMethodName           = "/pb.DeckService/CreateFolder"
-	DeckService_ListPublicFolders_FullMethodName      = "/pb.DeckService/ListPublicFolders"
 	DeckService_GetFolder_FullMethodName              = "/pb.DeckService/GetFolder"
+	DeckService_ListPublicFolders_FullMethodName      = "/pb.DeckService/ListPublicFolders"
 	DeckService_UpdateFolderVisibility_FullMethodName = "/pb.DeckService/UpdateFolderVisibility"
 	DeckService_UpdateFolder_FullMethodName           = "/pb.DeckService/UpdateFolder"
 	DeckService_DeleteFolder_FullMethodName           = "/pb.DeckService/DeleteFolder"
@@ -30,8 +30,8 @@ const (
 	DeckService_RemoveDeckFromFolder_FullMethodName   = "/pb.DeckService/RemoveDeckFromFolder"
 	DeckService_ListDecks_FullMethodName              = "/pb.DeckService/ListDecks"
 	DeckService_CreateDeck_FullMethodName             = "/pb.DeckService/CreateDeck"
-	DeckService_ListPublicDecks_FullMethodName        = "/pb.DeckService/ListPublicDecks"
 	DeckService_GetDeck_FullMethodName                = "/pb.DeckService/GetDeck"
+	DeckService_ListPublicDecks_FullMethodName        = "/pb.DeckService/ListPublicDecks"
 	DeckService_UpdateDeck_FullMethodName             = "/pb.DeckService/UpdateDeck"
 	DeckService_DeleteDeck_FullMethodName             = "/pb.DeckService/DeleteDeck"
 	DeckService_UpdateDeckSettings_FullMethodName     = "/pb.DeckService/UpdateDeckSettings"
@@ -57,8 +57,14 @@ type DeckServiceClient interface {
 	// Folders
 	ListFolders(ctx context.Context, in *ListFoldersRequest, opts ...grpc.CallOption) (*ListFoldersResponse, error)
 	CreateFolder(ctx context.Context, in *CreateFolderRequest, opts ...grpc.CallOption) (*CreateFolderResponse, error)
-	ListPublicFolders(ctx context.Context, in *ListPublicFoldersRequest, opts ...grpc.CallOption) (*ListPublicFoldersResponse, error)
+	// NOTE: GetFolder must be declared BEFORE ListPublicFolders. grpc-gateway's
+	// ServeMux.Handle prepends each registration, so the LAST-registered RPC is
+	// checked first. Declaring ListPublicFolders later puts it at the front of
+	// the GET handler list, so the literal "/v1/folders/public" matches
+	// ListPublicFolders instead of being captured as folder_id="public" by
+	// GetFolder (which would 400 with "invalid folder_id").
 	GetFolder(ctx context.Context, in *GetFolderRequest, opts ...grpc.CallOption) (*GetFolderResponse, error)
+	ListPublicFolders(ctx context.Context, in *ListPublicFoldersRequest, opts ...grpc.CallOption) (*ListPublicFoldersResponse, error)
 	UpdateFolderVisibility(ctx context.Context, in *UpdateFolderVisibilityRequest, opts ...grpc.CallOption) (*UpdateFolderVisibilityResponse, error)
 	UpdateFolder(ctx context.Context, in *UpdateFolderRequest, opts ...grpc.CallOption) (*UpdateFolderResponse, error)
 	DeleteFolder(ctx context.Context, in *DeleteFolderRequest, opts ...grpc.CallOption) (*DeleteFolderResponse, error)
@@ -67,8 +73,14 @@ type DeckServiceClient interface {
 	// Decks
 	ListDecks(ctx context.Context, in *ListDecksRequest, opts ...grpc.CallOption) (*ListDecksResponse, error)
 	CreateDeck(ctx context.Context, in *CreateDeckRequest, opts ...grpc.CallOption) (*CreateDeckResponse, error)
-	ListPublicDecks(ctx context.Context, in *ListPublicDecksRequest, opts ...grpc.CallOption) (*ListPublicDecksResponse, error)
+	// NOTE: GetDeck must be declared BEFORE ListPublicDecks. grpc-gateway's
+	// ServeMux.Handle prepends each registration, so the LAST-registered RPC is
+	// checked first. Declaring ListPublicDecks later puts it at the front of
+	// the GET handler list, so the literal "/v1/decks/public" matches
+	// ListPublicDecks instead of being captured as deck_id="public" by GetDeck
+	// (which would 400 with "invalid deck_id").
 	GetDeck(ctx context.Context, in *GetDeckRequest, opts ...grpc.CallOption) (*GetDeckResponse, error)
+	ListPublicDecks(ctx context.Context, in *ListPublicDecksRequest, opts ...grpc.CallOption) (*ListPublicDecksResponse, error)
 	UpdateDeck(ctx context.Context, in *UpdateDeckRequest, opts ...grpc.CallOption) (*UpdateDeckResponse, error)
 	DeleteDeck(ctx context.Context, in *DeleteDeckRequest, opts ...grpc.CallOption) (*DeleteDeckResponse, error)
 	UpdateDeckSettings(ctx context.Context, in *UpdateDeckSettingsRequest, opts ...grpc.CallOption) (*UpdateDeckSettingsResponse, error)
@@ -119,20 +131,20 @@ func (c *deckServiceClient) CreateFolder(ctx context.Context, in *CreateFolderRe
 	return out, nil
 }
 
-func (c *deckServiceClient) ListPublicFolders(ctx context.Context, in *ListPublicFoldersRequest, opts ...grpc.CallOption) (*ListPublicFoldersResponse, error) {
+func (c *deckServiceClient) GetFolder(ctx context.Context, in *GetFolderRequest, opts ...grpc.CallOption) (*GetFolderResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListPublicFoldersResponse)
-	err := c.cc.Invoke(ctx, DeckService_ListPublicFolders_FullMethodName, in, out, cOpts...)
+	out := new(GetFolderResponse)
+	err := c.cc.Invoke(ctx, DeckService_GetFolder_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *deckServiceClient) GetFolder(ctx context.Context, in *GetFolderRequest, opts ...grpc.CallOption) (*GetFolderResponse, error) {
+func (c *deckServiceClient) ListPublicFolders(ctx context.Context, in *ListPublicFoldersRequest, opts ...grpc.CallOption) (*ListPublicFoldersResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetFolderResponse)
-	err := c.cc.Invoke(ctx, DeckService_GetFolder_FullMethodName, in, out, cOpts...)
+	out := new(ListPublicFoldersResponse)
+	err := c.cc.Invoke(ctx, DeckService_ListPublicFolders_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -209,20 +221,20 @@ func (c *deckServiceClient) CreateDeck(ctx context.Context, in *CreateDeckReques
 	return out, nil
 }
 
-func (c *deckServiceClient) ListPublicDecks(ctx context.Context, in *ListPublicDecksRequest, opts ...grpc.CallOption) (*ListPublicDecksResponse, error) {
+func (c *deckServiceClient) GetDeck(ctx context.Context, in *GetDeckRequest, opts ...grpc.CallOption) (*GetDeckResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListPublicDecksResponse)
-	err := c.cc.Invoke(ctx, DeckService_ListPublicDecks_FullMethodName, in, out, cOpts...)
+	out := new(GetDeckResponse)
+	err := c.cc.Invoke(ctx, DeckService_GetDeck_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *deckServiceClient) GetDeck(ctx context.Context, in *GetDeckRequest, opts ...grpc.CallOption) (*GetDeckResponse, error) {
+func (c *deckServiceClient) ListPublicDecks(ctx context.Context, in *ListPublicDecksRequest, opts ...grpc.CallOption) (*ListPublicDecksResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetDeckResponse)
-	err := c.cc.Invoke(ctx, DeckService_GetDeck_FullMethodName, in, out, cOpts...)
+	out := new(ListPublicDecksResponse)
+	err := c.cc.Invoke(ctx, DeckService_ListPublicDecks_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -396,8 +408,14 @@ type DeckServiceServer interface {
 	// Folders
 	ListFolders(context.Context, *ListFoldersRequest) (*ListFoldersResponse, error)
 	CreateFolder(context.Context, *CreateFolderRequest) (*CreateFolderResponse, error)
-	ListPublicFolders(context.Context, *ListPublicFoldersRequest) (*ListPublicFoldersResponse, error)
+	// NOTE: GetFolder must be declared BEFORE ListPublicFolders. grpc-gateway's
+	// ServeMux.Handle prepends each registration, so the LAST-registered RPC is
+	// checked first. Declaring ListPublicFolders later puts it at the front of
+	// the GET handler list, so the literal "/v1/folders/public" matches
+	// ListPublicFolders instead of being captured as folder_id="public" by
+	// GetFolder (which would 400 with "invalid folder_id").
 	GetFolder(context.Context, *GetFolderRequest) (*GetFolderResponse, error)
+	ListPublicFolders(context.Context, *ListPublicFoldersRequest) (*ListPublicFoldersResponse, error)
 	UpdateFolderVisibility(context.Context, *UpdateFolderVisibilityRequest) (*UpdateFolderVisibilityResponse, error)
 	UpdateFolder(context.Context, *UpdateFolderRequest) (*UpdateFolderResponse, error)
 	DeleteFolder(context.Context, *DeleteFolderRequest) (*DeleteFolderResponse, error)
@@ -406,8 +424,14 @@ type DeckServiceServer interface {
 	// Decks
 	ListDecks(context.Context, *ListDecksRequest) (*ListDecksResponse, error)
 	CreateDeck(context.Context, *CreateDeckRequest) (*CreateDeckResponse, error)
-	ListPublicDecks(context.Context, *ListPublicDecksRequest) (*ListPublicDecksResponse, error)
+	// NOTE: GetDeck must be declared BEFORE ListPublicDecks. grpc-gateway's
+	// ServeMux.Handle prepends each registration, so the LAST-registered RPC is
+	// checked first. Declaring ListPublicDecks later puts it at the front of
+	// the GET handler list, so the literal "/v1/decks/public" matches
+	// ListPublicDecks instead of being captured as deck_id="public" by GetDeck
+	// (which would 400 with "invalid deck_id").
 	GetDeck(context.Context, *GetDeckRequest) (*GetDeckResponse, error)
+	ListPublicDecks(context.Context, *ListPublicDecksRequest) (*ListPublicDecksResponse, error)
 	UpdateDeck(context.Context, *UpdateDeckRequest) (*UpdateDeckResponse, error)
 	DeleteDeck(context.Context, *DeleteDeckRequest) (*DeleteDeckResponse, error)
 	UpdateDeckSettings(context.Context, *UpdateDeckSettingsRequest) (*UpdateDeckSettingsResponse, error)
@@ -444,11 +468,11 @@ func (UnimplementedDeckServiceServer) ListFolders(context.Context, *ListFoldersR
 func (UnimplementedDeckServiceServer) CreateFolder(context.Context, *CreateFolderRequest) (*CreateFolderResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateFolder not implemented")
 }
-func (UnimplementedDeckServiceServer) ListPublicFolders(context.Context, *ListPublicFoldersRequest) (*ListPublicFoldersResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListPublicFolders not implemented")
-}
 func (UnimplementedDeckServiceServer) GetFolder(context.Context, *GetFolderRequest) (*GetFolderResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetFolder not implemented")
+}
+func (UnimplementedDeckServiceServer) ListPublicFolders(context.Context, *ListPublicFoldersRequest) (*ListPublicFoldersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPublicFolders not implemented")
 }
 func (UnimplementedDeckServiceServer) UpdateFolderVisibility(context.Context, *UpdateFolderVisibilityRequest) (*UpdateFolderVisibilityResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateFolderVisibility not implemented")
@@ -471,11 +495,11 @@ func (UnimplementedDeckServiceServer) ListDecks(context.Context, *ListDecksReque
 func (UnimplementedDeckServiceServer) CreateDeck(context.Context, *CreateDeckRequest) (*CreateDeckResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateDeck not implemented")
 }
-func (UnimplementedDeckServiceServer) ListPublicDecks(context.Context, *ListPublicDecksRequest) (*ListPublicDecksResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListPublicDecks not implemented")
-}
 func (UnimplementedDeckServiceServer) GetDeck(context.Context, *GetDeckRequest) (*GetDeckResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetDeck not implemented")
+}
+func (UnimplementedDeckServiceServer) ListPublicDecks(context.Context, *ListPublicDecksRequest) (*ListPublicDecksResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListPublicDecks not implemented")
 }
 func (UnimplementedDeckServiceServer) UpdateDeck(context.Context, *UpdateDeckRequest) (*UpdateDeckResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateDeck not implemented")
@@ -582,24 +606,6 @@ func _DeckService_CreateFolder_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DeckService_ListPublicFolders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPublicFoldersRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DeckServiceServer).ListPublicFolders(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DeckService_ListPublicFolders_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeckServiceServer).ListPublicFolders(ctx, req.(*ListPublicFoldersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _DeckService_GetFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetFolderRequest)
 	if err := dec(in); err != nil {
@@ -614,6 +620,24 @@ func _DeckService_GetFolder_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DeckServiceServer).GetFolder(ctx, req.(*GetFolderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeckService_ListPublicFolders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPublicFoldersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).ListPublicFolders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_ListPublicFolders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).ListPublicFolders(ctx, req.(*ListPublicFoldersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -744,24 +768,6 @@ func _DeckService_CreateDeck_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DeckService_ListPublicDecks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPublicDecksRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DeckServiceServer).ListPublicDecks(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DeckService_ListPublicDecks_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DeckServiceServer).ListPublicDecks(ctx, req.(*ListPublicDecksRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _DeckService_GetDeck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetDeckRequest)
 	if err := dec(in); err != nil {
@@ -776,6 +782,24 @@ func _DeckService_GetDeck_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DeckServiceServer).GetDeck(ctx, req.(*GetDeckRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeckService_ListPublicDecks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPublicDecksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).ListPublicDecks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_ListPublicDecks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).ListPublicDecks(ctx, req.(*ListPublicDecksRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1084,12 +1108,12 @@ var DeckService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DeckService_CreateFolder_Handler,
 		},
 		{
-			MethodName: "ListPublicFolders",
-			Handler:    _DeckService_ListPublicFolders_Handler,
-		},
-		{
 			MethodName: "GetFolder",
 			Handler:    _DeckService_GetFolder_Handler,
+		},
+		{
+			MethodName: "ListPublicFolders",
+			Handler:    _DeckService_ListPublicFolders_Handler,
 		},
 		{
 			MethodName: "UpdateFolderVisibility",
@@ -1120,12 +1144,12 @@ var DeckService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DeckService_CreateDeck_Handler,
 		},
 		{
-			MethodName: "ListPublicDecks",
-			Handler:    _DeckService_ListPublicDecks_Handler,
-		},
-		{
 			MethodName: "GetDeck",
 			Handler:    _DeckService_GetDeck_Handler,
+		},
+		{
+			MethodName: "ListPublicDecks",
+			Handler:    _DeckService_ListPublicDecks_Handler,
 		},
 		{
 			MethodName: "UpdateDeck",

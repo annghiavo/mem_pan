@@ -26,7 +26,7 @@ var File_auth_service_proto protoreflect.FileDescriptor
 
 const file_auth_service_proto_rawDesc = "" +
 	"\n" +
-	"\x12auth_service.proto\x12\x02pb\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a\x17rpc_register_user.proto\x1a\x14rpc_login_user.proto\x1a\x17rpc_refresh_token.proto\x1a\x10rpc_logout.proto\x1a\x16rpc_verify_email.proto\x1a\x1drpc_resend_verification.proto\x1a\x19rpc_forgot_password.proto\x1a\x18rpc_reset_password.proto\x1a\x12rpc_get_user.proto\x1a\x15rpc_update_user.proto\x1a\x19rpc_change_password.proto\x1a\x16rpc_verify_token.proto\x1a\x17rpc_upload_avatar.proto\x1a\x18rpc_get_user_by_id.proto\x1a\x17rpc_set_user_role.proto\x1a\x15rpc_report_user.proto\x1a\x14rpc_list_users.proto\x1a\x12rpc_ban_user.proto2\xd7\x16\n" +
+	"\x12auth_service.proto\x12\x02pb\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a\x17rpc_register_user.proto\x1a\x14rpc_login_user.proto\x1a\x17rpc_refresh_token.proto\x1a\x10rpc_logout.proto\x1a\x16rpc_verify_email.proto\x1a\x1drpc_resend_verification.proto\x1a\x19rpc_forgot_password.proto\x1a\x18rpc_reset_password.proto\x1a\x12rpc_get_user.proto\x1a\x15rpc_update_user.proto\x1a\x19rpc_change_password.proto\x1a\x16rpc_verify_token.proto\x1a\x17rpc_upload_avatar.proto\x1a\x18rpc_get_user_by_id.proto\x1a\x1crpc_get_public_profile.proto\x1a\x17rpc_set_user_role.proto\x1a\x15rpc_report_user.proto\x1a\x14rpc_list_users.proto\x1a\x12rpc_ban_user.proto2\x9d\x18\n" +
 	"\vAuthService\x12\x94\x01\n" +
 	"\fRegisterUser\x12\x17.pb.RegisterUserRequest\x1a\x18.pb.RegisterUserResponse\"Q\x92A2\n" +
 	"\x04auth\x12\rRegister user\x1a\x1bRegister a new user account\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/auth/register\x12\x93\x01\n" +
@@ -44,7 +44,9 @@ const file_auth_service_proto_rawDesc = "" +
 	"\x0eForgotPassword\x12\x19.pb.ForgotPasswordRequest\x1a\x1a.pb.ForgotPasswordResponse\"s\x92AM\n" +
 	"\x04auth\x12\x0fForgot password\x1a4Request a password reset link sent to the user email\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/v1/auth/forgot-password\x12\xbf\x01\n" +
 	"\rResetPassword\x12\x18.pb.ResetPasswordRequest\x1a\x19.pb.ResetPasswordResponse\"y\x92AT\n" +
-	"\x04auth\x12\x0eReset password\x1a<Reset the user password using the token from the reset email\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/v1/auth/reset-password\x12\x9c\x01\n" +
+	"\x04auth\x12\x0eReset password\x1a<Reset the user password using the token from the reset email\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/v1/auth/reset-password\x12\xc3\x01\n" +
+	"\x10GetPublicProfile\x12\x1b.pb.GetPublicProfileRequest\x1a\x1c.pb.GetPublicProfileResponse\"t\x92AV\n" +
+	"\x05users\x12\x12Get public profile\x1a9Get a user's public profile by ID (safe subset of fields)\x82\xd3\xe4\x93\x02\x15\x12\x13/v1/users/{user_id}\x12\x9c\x01\n" +
 	"\aGetUser\x12\x12.pb.GetUserRequest\x1a\x13.pb.GetUserResponse\"h\x92AQ\n" +
 	"\x05users\x12\x10Get current user\x1a$Get the authenticated user's profileb\x10\n" +
 	"\x0e\n" +
@@ -97,34 +99,36 @@ var file_auth_service_proto_goTypes = []any{
 	(*ResendVerificationRequest)(nil),  // 5: pb.ResendVerificationRequest
 	(*ForgotPasswordRequest)(nil),      // 6: pb.ForgotPasswordRequest
 	(*ResetPasswordRequest)(nil),       // 7: pb.ResetPasswordRequest
-	(*GetUserRequest)(nil),             // 8: pb.GetUserRequest
-	(*UpdateUserRequest)(nil),          // 9: pb.UpdateUserRequest
-	(*ChangePasswordRequest)(nil),      // 10: pb.ChangePasswordRequest
-	(*UploadAvatarRequest)(nil),        // 11: pb.UploadAvatarRequest
-	(*ReportUserRequest)(nil),          // 12: pb.ReportUserRequest
-	(*VerifyTokenRequest)(nil),         // 13: pb.VerifyTokenRequest
-	(*GetUserByIDRequest)(nil),         // 14: pb.GetUserByIDRequest
-	(*SetUserRoleRequest)(nil),         // 15: pb.SetUserRoleRequest
-	(*ListUsersRequest)(nil),           // 16: pb.ListUsersRequest
-	(*BanUserRequest)(nil),             // 17: pb.BanUserRequest
-	(*RegisterUserResponse)(nil),       // 18: pb.RegisterUserResponse
-	(*LoginUserResponse)(nil),          // 19: pb.LoginUserResponse
-	(*RefreshTokenResponse)(nil),       // 20: pb.RefreshTokenResponse
-	(*LogoutResponse)(nil),             // 21: pb.LogoutResponse
-	(*VerifyEmailResponse)(nil),        // 22: pb.VerifyEmailResponse
-	(*ResendVerificationResponse)(nil), // 23: pb.ResendVerificationResponse
-	(*ForgotPasswordResponse)(nil),     // 24: pb.ForgotPasswordResponse
-	(*ResetPasswordResponse)(nil),      // 25: pb.ResetPasswordResponse
-	(*GetUserResponse)(nil),            // 26: pb.GetUserResponse
-	(*UpdateUserResponse)(nil),         // 27: pb.UpdateUserResponse
-	(*ChangePasswordResponse)(nil),     // 28: pb.ChangePasswordResponse
-	(*UploadAvatarResponse)(nil),       // 29: pb.UploadAvatarResponse
-	(*ReportUserResponse)(nil),         // 30: pb.ReportUserResponse
-	(*VerifyTokenResponse)(nil),        // 31: pb.VerifyTokenResponse
-	(*GetUserByIDResponse)(nil),        // 32: pb.GetUserByIDResponse
-	(*SetUserRoleResponse)(nil),        // 33: pb.SetUserRoleResponse
-	(*ListUsersResponse)(nil),          // 34: pb.ListUsersResponse
-	(*BanUserResponse)(nil),            // 35: pb.BanUserResponse
+	(*GetPublicProfileRequest)(nil),    // 8: pb.GetPublicProfileRequest
+	(*GetUserRequest)(nil),             // 9: pb.GetUserRequest
+	(*UpdateUserRequest)(nil),          // 10: pb.UpdateUserRequest
+	(*ChangePasswordRequest)(nil),      // 11: pb.ChangePasswordRequest
+	(*UploadAvatarRequest)(nil),        // 12: pb.UploadAvatarRequest
+	(*ReportUserRequest)(nil),          // 13: pb.ReportUserRequest
+	(*VerifyTokenRequest)(nil),         // 14: pb.VerifyTokenRequest
+	(*GetUserByIDRequest)(nil),         // 15: pb.GetUserByIDRequest
+	(*SetUserRoleRequest)(nil),         // 16: pb.SetUserRoleRequest
+	(*ListUsersRequest)(nil),           // 17: pb.ListUsersRequest
+	(*BanUserRequest)(nil),             // 18: pb.BanUserRequest
+	(*RegisterUserResponse)(nil),       // 19: pb.RegisterUserResponse
+	(*LoginUserResponse)(nil),          // 20: pb.LoginUserResponse
+	(*RefreshTokenResponse)(nil),       // 21: pb.RefreshTokenResponse
+	(*LogoutResponse)(nil),             // 22: pb.LogoutResponse
+	(*VerifyEmailResponse)(nil),        // 23: pb.VerifyEmailResponse
+	(*ResendVerificationResponse)(nil), // 24: pb.ResendVerificationResponse
+	(*ForgotPasswordResponse)(nil),     // 25: pb.ForgotPasswordResponse
+	(*ResetPasswordResponse)(nil),      // 26: pb.ResetPasswordResponse
+	(*GetPublicProfileResponse)(nil),   // 27: pb.GetPublicProfileResponse
+	(*GetUserResponse)(nil),            // 28: pb.GetUserResponse
+	(*UpdateUserResponse)(nil),         // 29: pb.UpdateUserResponse
+	(*ChangePasswordResponse)(nil),     // 30: pb.ChangePasswordResponse
+	(*UploadAvatarResponse)(nil),       // 31: pb.UploadAvatarResponse
+	(*ReportUserResponse)(nil),         // 32: pb.ReportUserResponse
+	(*VerifyTokenResponse)(nil),        // 33: pb.VerifyTokenResponse
+	(*GetUserByIDResponse)(nil),        // 34: pb.GetUserByIDResponse
+	(*SetUserRoleResponse)(nil),        // 35: pb.SetUserRoleResponse
+	(*ListUsersResponse)(nil),          // 36: pb.ListUsersResponse
+	(*BanUserResponse)(nil),            // 37: pb.BanUserResponse
 }
 var file_auth_service_proto_depIdxs = []int32{
 	0,  // 0: pb.AuthService.RegisterUser:input_type -> pb.RegisterUserRequest
@@ -135,36 +139,38 @@ var file_auth_service_proto_depIdxs = []int32{
 	5,  // 5: pb.AuthService.ResendVerification:input_type -> pb.ResendVerificationRequest
 	6,  // 6: pb.AuthService.ForgotPassword:input_type -> pb.ForgotPasswordRequest
 	7,  // 7: pb.AuthService.ResetPassword:input_type -> pb.ResetPasswordRequest
-	8,  // 8: pb.AuthService.GetUser:input_type -> pb.GetUserRequest
-	9,  // 9: pb.AuthService.UpdateUser:input_type -> pb.UpdateUserRequest
-	10, // 10: pb.AuthService.ChangePassword:input_type -> pb.ChangePasswordRequest
-	11, // 11: pb.AuthService.UploadAvatar:input_type -> pb.UploadAvatarRequest
-	12, // 12: pb.AuthService.ReportUser:input_type -> pb.ReportUserRequest
-	13, // 13: pb.AuthService.VerifyToken:input_type -> pb.VerifyTokenRequest
-	14, // 14: pb.AuthService.GetUserByID:input_type -> pb.GetUserByIDRequest
-	15, // 15: pb.AuthService.SetUserRole:input_type -> pb.SetUserRoleRequest
-	16, // 16: pb.AuthService.ListUsers:input_type -> pb.ListUsersRequest
-	17, // 17: pb.AuthService.BanUser:input_type -> pb.BanUserRequest
-	18, // 18: pb.AuthService.RegisterUser:output_type -> pb.RegisterUserResponse
-	19, // 19: pb.AuthService.LoginUser:output_type -> pb.LoginUserResponse
-	20, // 20: pb.AuthService.RefreshToken:output_type -> pb.RefreshTokenResponse
-	21, // 21: pb.AuthService.Logout:output_type -> pb.LogoutResponse
-	22, // 22: pb.AuthService.VerifyEmail:output_type -> pb.VerifyEmailResponse
-	23, // 23: pb.AuthService.ResendVerification:output_type -> pb.ResendVerificationResponse
-	24, // 24: pb.AuthService.ForgotPassword:output_type -> pb.ForgotPasswordResponse
-	25, // 25: pb.AuthService.ResetPassword:output_type -> pb.ResetPasswordResponse
-	26, // 26: pb.AuthService.GetUser:output_type -> pb.GetUserResponse
-	27, // 27: pb.AuthService.UpdateUser:output_type -> pb.UpdateUserResponse
-	28, // 28: pb.AuthService.ChangePassword:output_type -> pb.ChangePasswordResponse
-	29, // 29: pb.AuthService.UploadAvatar:output_type -> pb.UploadAvatarResponse
-	30, // 30: pb.AuthService.ReportUser:output_type -> pb.ReportUserResponse
-	31, // 31: pb.AuthService.VerifyToken:output_type -> pb.VerifyTokenResponse
-	32, // 32: pb.AuthService.GetUserByID:output_type -> pb.GetUserByIDResponse
-	33, // 33: pb.AuthService.SetUserRole:output_type -> pb.SetUserRoleResponse
-	34, // 34: pb.AuthService.ListUsers:output_type -> pb.ListUsersResponse
-	35, // 35: pb.AuthService.BanUser:output_type -> pb.BanUserResponse
-	18, // [18:36] is the sub-list for method output_type
-	0,  // [0:18] is the sub-list for method input_type
+	8,  // 8: pb.AuthService.GetPublicProfile:input_type -> pb.GetPublicProfileRequest
+	9,  // 9: pb.AuthService.GetUser:input_type -> pb.GetUserRequest
+	10, // 10: pb.AuthService.UpdateUser:input_type -> pb.UpdateUserRequest
+	11, // 11: pb.AuthService.ChangePassword:input_type -> pb.ChangePasswordRequest
+	12, // 12: pb.AuthService.UploadAvatar:input_type -> pb.UploadAvatarRequest
+	13, // 13: pb.AuthService.ReportUser:input_type -> pb.ReportUserRequest
+	14, // 14: pb.AuthService.VerifyToken:input_type -> pb.VerifyTokenRequest
+	15, // 15: pb.AuthService.GetUserByID:input_type -> pb.GetUserByIDRequest
+	16, // 16: pb.AuthService.SetUserRole:input_type -> pb.SetUserRoleRequest
+	17, // 17: pb.AuthService.ListUsers:input_type -> pb.ListUsersRequest
+	18, // 18: pb.AuthService.BanUser:input_type -> pb.BanUserRequest
+	19, // 19: pb.AuthService.RegisterUser:output_type -> pb.RegisterUserResponse
+	20, // 20: pb.AuthService.LoginUser:output_type -> pb.LoginUserResponse
+	21, // 21: pb.AuthService.RefreshToken:output_type -> pb.RefreshTokenResponse
+	22, // 22: pb.AuthService.Logout:output_type -> pb.LogoutResponse
+	23, // 23: pb.AuthService.VerifyEmail:output_type -> pb.VerifyEmailResponse
+	24, // 24: pb.AuthService.ResendVerification:output_type -> pb.ResendVerificationResponse
+	25, // 25: pb.AuthService.ForgotPassword:output_type -> pb.ForgotPasswordResponse
+	26, // 26: pb.AuthService.ResetPassword:output_type -> pb.ResetPasswordResponse
+	27, // 27: pb.AuthService.GetPublicProfile:output_type -> pb.GetPublicProfileResponse
+	28, // 28: pb.AuthService.GetUser:output_type -> pb.GetUserResponse
+	29, // 29: pb.AuthService.UpdateUser:output_type -> pb.UpdateUserResponse
+	30, // 30: pb.AuthService.ChangePassword:output_type -> pb.ChangePasswordResponse
+	31, // 31: pb.AuthService.UploadAvatar:output_type -> pb.UploadAvatarResponse
+	32, // 32: pb.AuthService.ReportUser:output_type -> pb.ReportUserResponse
+	33, // 33: pb.AuthService.VerifyToken:output_type -> pb.VerifyTokenResponse
+	34, // 34: pb.AuthService.GetUserByID:output_type -> pb.GetUserByIDResponse
+	35, // 35: pb.AuthService.SetUserRole:output_type -> pb.SetUserRoleResponse
+	36, // 36: pb.AuthService.ListUsers:output_type -> pb.ListUsersResponse
+	37, // 37: pb.AuthService.BanUser:output_type -> pb.BanUserResponse
+	19, // [19:38] is the sub-list for method output_type
+	0,  // [0:19] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
@@ -189,6 +195,7 @@ func file_auth_service_proto_init() {
 	file_rpc_verify_token_proto_init()
 	file_rpc_upload_avatar_proto_init()
 	file_rpc_get_user_by_id_proto_init()
+	file_rpc_get_public_profile_proto_init()
 	file_rpc_set_user_role_proto_init()
 	file_rpc_report_user_proto_init()
 	file_rpc_list_users_proto_init()

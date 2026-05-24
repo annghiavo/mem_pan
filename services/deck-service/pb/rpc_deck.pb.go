@@ -233,6 +233,7 @@ type ListPublicDecksRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -279,6 +280,13 @@ func (x *ListPublicDecksRequest) GetPageSize() int32 {
 		return x.PageSize
 	}
 	return 0
+}
+
+func (x *ListPublicDecksRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
 }
 
 type ListPublicDecksResponse struct {
@@ -1417,10 +1425,11 @@ const file_rpc_deck_proto_rawDesc = "" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1b\n" +
 	"\tis_public\x18\x03 \x01(\bR\bisPublic\"2\n" +
 	"\x12CreateDeckResponse\x12\x1c\n" +
-	"\x04deck\x18\x01 \x01(\v2\b.pb.DeckR\x04deck\"I\n" +
+	"\x04deck\x18\x01 \x01(\v2\b.pb.DeckR\x04deck\"b\n" +
 	"\x16ListPublicDecksRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"O\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\"O\n" +
 	"\x17ListPublicDecksResponse\x12\x1e\n" +
 	"\x05decks\x18\x01 \x03(\v2\b.pb.DeckR\x05decks\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\")\n" +
