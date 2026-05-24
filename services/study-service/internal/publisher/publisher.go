@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"golang.org/x/oauth2/google"
 )
 
 type CardReviewedEvent struct {
@@ -56,13 +57,21 @@ type httpPublisher struct {
 
 func NewPubSubPublisher(projectID, topicID string) EventPublisher {
 	host := os.Getenv("PUBSUB_EMULATOR_HOST")
-	base := "https://pubsub.googleapis.com"
 	if host != "" {
-		base = "http://" + host
+		return &httpPublisher{
+			endpoint: fmt.Sprintf("http://%s/v1/projects/%s/topics/%s:publish", host, projectID, topicID),
+			client:   &http.Client{},
+		}
+	}
+	// Production: use metadata-server OAuth token (works on Cloud Run/GKE).
+	client, err := google.DefaultClient(context.Background(), "https://www.googleapis.com/auth/pubsub")
+	if err != nil {
+		log.Printf("[publisher] failed to acquire pubsub credentials, falling back to noop: %v", err)
+		return NewNoopPublisher()
 	}
 	return &httpPublisher{
-		endpoint: fmt.Sprintf("%s/v1/projects/%s/topics/%s:publish", base, projectID, topicID),
-		client:   &http.Client{},
+		endpoint: fmt.Sprintf("https://pubsub.googleapis.com/v1/projects/%s/topics/%s:publish", projectID, topicID),
+		client:   client,
 	}
 }
 

@@ -9,6 +9,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	statspb "mem_pan/services/stats-service/pb"
+
+	"crypto/tls"
+	"google.golang.org/grpc/credentials"
+	"strings"
 )
 
 type ReminderState struct {
@@ -31,7 +35,7 @@ type grpcClient struct {
 }
 
 func NewGRPCClient(addr string) (Client, error) {
-	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(pickCreds(addr)))
 	if err != nil {
 		return nil, err
 	}
@@ -60,3 +64,13 @@ func (c *grpcClient) ListReminderState(ctx context.Context, onlyActiveStreak boo
 }
 
 func (c *grpcClient) Close() error { return c.conn.Close() }
+
+// pickCreds returns TLS credentials when the target appears to be a
+// Cloud Run / managed endpoint (port :443 or *.run.app), otherwise an
+// insecure transport for local docker-compose or in-cluster gRPC.
+func pickCreds(addr string) credentials.TransportCredentials {
+	if strings.HasSuffix(addr, ":443") || strings.Contains(addr, ".run.app") {
+		return credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})
+	}
+	return insecure.NewCredentials()
+}

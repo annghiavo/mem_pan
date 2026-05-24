@@ -1,0 +1,281 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/**'
+      - 'pkg/**'
+      - 'proto/**'
+      - 'go.work'
+      - 'go.work.sum'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Force deploy a single service (or "all")'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - auth-service
+          - deck-service
+          - study-service
+          - stats-service
+          - admin-service
+          - notification-service
+          - search-service
+
+concurrency:
+  # One deploy at a time per service to avoid revision races; allow different
+  # branches to deploy in parallel by including ref in the key.
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write   # required for Workload Identity Federation
+
+env:
+  PROJECT_ID: mempan-cac51
+  PROJECT_NUMBER: '272885252422'
+  REGION: asia-southeast1
+  AR_REPO: mempan-services
+  GAR_HOST: asia-southeast1-docker.pkg.dev
+  RUNTIME_SA: mempan-runtime@mempan-cac51.iam.gserviceaccount.com
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  # 1. detect-changes — compute which service folders changed in this push.
+  #    Output a JSON array consumed by the matrix below so we only build the
+  #    services that actually need a new image.
+  # ─────────────────────────────────────────────────────────────────────────
+  detect-changes:
+    name: Detect changed services
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.set.outputs.services }}
+      any: ${{ steps.set.outputs.any }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Compute service set
+        id: set
+        run: |
+          set -euo pipefail
+
+          ALL='["auth-service","deck-service","study-service","stats-service","admin-service","notification-service","search-service"]'
+
+          # Manual dispatch: honour the input.
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.service }}" == "all" ]]; then
+              echo "services=$ALL" >> "$GITHUB_OUTPUT"
+            else
+              echo "services=[\"${{ inputs.service }}\"]" >> "$GITHUB_OUTPUT"
+            fi
+            echo "any=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Push event: diff against parent commit. Shared paths (go.work,
+          # pkg/**, proto/**) trigger every service.
+          diff=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" 2>/dev/null || git diff --name-only HEAD~1 HEAD)
+          echo "Changed files:"
+          echo "$diff" | sed 's/^/  /'
+
+          shared_changed=false
+          if echo "$diff" | grep -qE '^(go\.work|go\.work\.sum|pkg/|proto/|\.github/workflows/deploy\.yml)'; then
+            shared_changed=true
+          fi
+
+          if $shared_changed; then
+            echo "Shared code changed — rebuilding everything."
+            echo "services=$ALL" >> "$GITHUB_OUTPUT"
+            echo "any=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          touched=()
+          for svc in auth-service deck-service study-service stats-service admin-service notification-service search-service; do
+            if echo "$diff" | grep -q "^services/$svc/"; then
+              touched+=("\"$svc\"")
+            fi
+          done
+
+          if [[ ${#touched[@]} -eq 0 ]]; then
+            echo "No service folders touched."
+            echo "services=[]" >> "$GITHUB_OUTPUT"
+            echo "any=false" >> "$GITHUB_OUTPUT"
+          else
+            joined=$(IFS=, ; echo "${touched[*]}")
+            echo "services=[$joined]" >> "$GITHUB_OUTPUT"
+            echo "any=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 2. build-and-deploy — runs once per changed service, in parallel.
+  #    Each leg: auth → build → push → deploy.
+  # ─────────────────────────────────────────────────────────────────────────
+  build-and-deploy:
+    name: ${{ matrix.service }}
+    needs: detect-changes
+    if: needs.detect-changes.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      # Run all matrix legs in parallel; one failing leg should NOT abort the
+      # others — each service is independently deployable.
+      fail-fast: false
+      max-parallel: 7
+      matrix:
+        service: ${{ fromJSON(needs.detect-changes.outputs.services) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud (Workload Identity Federation)
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT }}
+          # token_format=access_token enables the gcloud CLI in subsequent steps.
+          token_format: access_token
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GAR_HOST }} --quiet
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set image tags
+        id: tags
+        run: |
+          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          IMG_BASE="${{ env.GAR_HOST }}/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/${{ matrix.service }}"
+          echo "sha_short=$SHA_SHORT" >> "$GITHUB_OUTPUT"
+          echo "image_sha=$IMG_BASE:$SHA_SHORT" >> "$GITHUB_OUTPUT"
+          echo "image_latest=$IMG_BASE:latest" >> "$GITHUB_OUTPUT"
+
+      - name: Build & push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: services/${{ matrix.service }}/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ steps.tags.outputs.image_sha }}
+            ${{ steps.tags.outputs.image_latest }}
+          cache-from: type=registry,ref=${{ steps.tags.outputs.image_latest }}
+          cache-to: type=inline
+
+      # Per-service env + secrets needed at runtime. Kept inline as a JSON
+      # map so the deploy step below can splice them into the gcloud command
+      # without 7 separate gigantic if-branches.
+      - name: Resolve service runtime config
+        id: runtime
+        run: |
+          declare -A SECRETS ENV_VARS
+
+          # Common env across all services
+          BASE_ENV="HTTP_SERVER_ADDRESS=:8080,GRPC_SERVER_ADDRESS=:9090,PUBSUB_PROJECT_ID=${{ env.PROJECT_ID }}"
+
+          case "${{ matrix.service }}" in
+            auth-service)
+              SECRETS=( "DATABASE_URL=auth-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "CLOUDINARY_URL=auth-cloudinary-url:latest" )
+              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=user-events,ACCESS_TOKEN_DURATION=15m,REFRESH_TOKEN_DURATION=168h,VERIFICATION_TOKEN_DURATION=24h,RESET_TOKEN_DURATION=1h"
+              ;;
+            deck-service)
+              SECRETS=( "DATABASE_URL=deck-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "CLOUDINARY_URL=deck-cloudinary-url:latest" )
+              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=deck-events,AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443"
+              ;;
+            study-service)
+              SECRETS=( "DATABASE_URL=study-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" )
+              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=study-events,AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443,DECK_SERVICE_ADDRESS=deck-service-wzed7v5hbq-as.a.run.app:443"
+              ;;
+            stats-service)
+              SECRETS=( "DATABASE_URL=stats-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "PUBSUB_PUSH_SECRET=pubsub-push-token:latest" )
+              ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443"
+              ;;
+            admin-service)
+              SECRETS=( "DATABASE_URL=admin-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "PUBSUB_PUSH_SECRET=pubsub-push-token:latest" )
+              ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443,DECK_SERVICE_ADDRESS=deck-service-wzed7v5hbq-as.a.run.app:443"
+              ;;
+            notification-service)
+              SECRETS=( "DATABASE_URL=notif-db-url:latest" "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "SMTP_PASSWORD=smtp-password:latest" "PUBSUB_PUSH_SECRET=pubsub-push-token:latest" )
+              ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443,STATS_SERVICE_ADDRESS=stats-service-wzed7v5hbq-as.a.run.app:443,STUDY_SERVICE_ADDRESS=study-service-wzed7v5hbq-as.a.run.app:443,SMTP_HOST=smtp.gmail.com,SMTP_PORT=587,SMTP_USERNAME=noreply.mempan@gmail.com,FCM_PROJECT_ID=${{ env.PROJECT_ID }}"
+              ;;
+            search-service)
+              SECRETS=( "PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest" "ELASTICSEARCH_URL=es-url:latest" "ELASTICSEARCH_API_KEY=es-api-key:latest" "PUBSUB_PUSH_SECRET=pubsub-push-token:latest" )
+              ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443,ES_DECK_INDEX=mempan-decks,ES_FOLDER_INDEX=mempan-folders,ES_CARD_INDEX=mempan-cards,ES_USER_INDEX=mempan-users"
+              ;;
+          esac
+
+          # Join secrets array with commas for the gcloud --set-secrets flag.
+          SECRET_STR=$(IFS=, ; echo "${SECRETS[*]}")
+          {
+            echo "secrets=$SECRET_STR"
+            echo "env_vars=$ENV_VARS"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy "${{ matrix.service }}" \
+            --image="${{ steps.tags.outputs.image_sha }}" \
+            --region="${{ env.REGION }}" \
+            --platform=managed \
+            --service-account="${{ env.RUNTIME_SA }}" \
+            --use-http2 \
+            --allow-unauthenticated \
+            --port=8080 \
+            --memory=512Mi \
+            --cpu=1 \
+            --min-instances=0 \
+            --max-instances=3 \
+            --timeout=300 \
+            --set-secrets="${{ steps.runtime.outputs.secrets }}" \
+            --set-env-vars="${{ steps.runtime.outputs.env_vars }}" \
+            --quiet
+
+      - name: Verify deployment
+        run: |
+          URL=$(gcloud run services describe "${{ matrix.service }}" \
+            --region="${{ env.REGION }}" \
+            --format='value(status.url)')
+          echo "Deployed: $URL"
+          # Lightweight smoke check — service must respond with any HTTP code
+          # (200, 404, 401 are all fine; only timeout/connection error fails).
+          status=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 "$URL/swagger/" || echo "000")
+          echo "Swagger probe: HTTP $status"
+          if [[ "$status" == "000" ]]; then
+            echo "::error::Service did not respond"
+            exit 1
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 3. summary — emits a single GitHub Actions summary table.
+  # ─────────────────────────────────────────────────────────────────────────
+  summary:
+    name: Deploy summary
+    needs: [detect-changes, build-and-deploy]
+    if: always() && needs.detect-changes.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Emit summary
+        run: |
+          {
+            echo "## Deploy summary"
+            echo
+            echo "**Services deployed**: \`${{ needs.detect-changes.outputs.services }}\`"
+            echo
+            echo "Gateway: https://mempan-gateway-3hd0u0cm.uc.gateway.dev"
+          } >> "$GITHUB_STEP_SUMMARY"

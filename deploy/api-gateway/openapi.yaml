@@ -1,0 +1,495 @@
+swagger: "2.0"
+info:
+  title: mempan-api
+  description: Unified gateway for mem_pan microservices on Cloud Run
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+consumes:
+  - application/json
+
+# Each "prefix → backend" group below uses {path=**} so any depth of path
+# under that prefix is forwarded to the matching Cloud Run service. The
+# path_translation: APPEND_PATH_TO_ADDRESS means the full request path is
+# appended to the backend host, so /v1/auth/login lands at
+# auth-service/v1/auth/login.
+paths:
+  # ─── auth-service ───────────────────────────────────────────────────────
+  /v1/auth/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    get: &auth_op
+      operationId: authGet
+      x-google-backend:
+        disable_auth: true
+        address: https://auth-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: authPost
+      x-google-backend:
+        disable_auth: true
+        address: https://auth-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    patch:
+      operationId: authPatch
+      x-google-backend:
+        disable_auth: true
+        address: https://auth-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    delete:
+      operationId: authDelete
+      x-google-backend:
+        disable_auth: true
+        address: https://auth-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  /v1/users/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    get:
+      operationId: usersGet
+      x-google-backend:
+        disable_auth: true
+        address: https://auth-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: usersPost
+      x-google-backend:
+        disable_auth: true
+        address: https://auth-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    patch:
+      operationId: usersPatch
+      x-google-backend:
+        disable_auth: true
+        address: https://auth-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    put:
+      operationId: usersPut
+      x-google-backend:
+        disable_auth: true
+        address: https://auth-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  # ─── deck-service ───────────────────────────────────────────────────────
+  /v1/decks:
+    get:
+      operationId: decksList
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: decksCreate
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  /v1/folders:
+    get:
+      operationId: foldersList
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: foldersCreate
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  /v1/decks/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    get:
+      operationId: decksGet
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: decksPost
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    patch:
+      operationId: decksPatch
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    put:
+      operationId: decksPut
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    delete:
+      operationId: decksDelete
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  /v1/folders/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    get:
+      operationId: foldersGet
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: foldersPost
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    patch:
+      operationId: foldersPatch
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    delete:
+      operationId: foldersDelete
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  /v1/cards/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    get:
+      operationId: cardsGet
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: cardsPost
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 60.0
+      responses:
+        '200':
+          description: ok
+    put:
+      operationId: cardsPut
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 60.0
+      responses:
+        '200':
+          description: ok
+    delete:
+      operationId: cardsDelete
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  /v1/import/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    post:
+      operationId: importPost
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 60.0
+      responses:
+        '200':
+          description: ok
+
+  # ─── study-service ──────────────────────────────────────────────────────
+  /v1/study/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    get:
+      operationId: studyGet
+      x-google-backend:
+        disable_auth: true
+        address: https://study-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: studyPost
+      x-google-backend:
+        disable_auth: true
+        address: https://study-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    put:
+      operationId: studyPut
+      x-google-backend:
+        disable_auth: true
+        address: https://study-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  # ─── stats-service ──────────────────────────────────────────────────────
+  /v1/stats/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    get:
+      operationId: statsGet
+      x-google-backend:
+        disable_auth: true
+        address: https://stats-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  # ─── admin-service ──────────────────────────────────────────────────────
+  /v1/admin/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    get:
+      operationId: adminGet
+      x-google-backend:
+        disable_auth: true
+        address: https://admin-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: adminPost
+      x-google-backend:
+        disable_auth: true
+        address: https://admin-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    patch:
+      operationId: adminPatch
+      x-google-backend:
+        disable_auth: true
+        address: https://admin-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    put:
+      operationId: adminPut
+      x-google-backend:
+        disable_auth: true
+        address: https://admin-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  # ─── notification-service ───────────────────────────────────────────────
+  /v1/notifications/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    get:
+      operationId: notifGet
+      x-google-backend:
+        disable_auth: true
+        address: https://notification-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: notifPost
+      x-google-backend:
+        disable_auth: true
+        address: https://notification-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    put:
+      operationId: notifPut
+      x-google-backend:
+        disable_auth: true
+        address: https://notification-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    delete:
+      operationId: notifDelete
+      x-google-backend:
+        disable_auth: true
+        address: https://notification-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+
+  # ─── search-service ─────────────────────────────────────────────────────
+  /v1/search/{path=**}:
+    parameters:
+      - in: path
+        name: path
+        required: true
+        type: string
+    get:
+      operationId: searchGet
+      x-google-backend:
+        disable_auth: true
+        address: https://search-service-wzed7v5hbq-as.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok

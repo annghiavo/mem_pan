@@ -8,12 +8,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 
 	"mem_pan/services/search-service/config"
@@ -58,41 +60,45 @@ func main() {
 	handler := subscriber.NewHandler(svc)
 	pushHandler := subscriber.NewPushHandler(handler, cfg.PubSubPushSecret)
 
-	grpcServer := gapi.NewServer(svc, authClient)
+	gapiServer := gapi.NewServer(svc, authClient)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	go runGRPCServer(cfg, grpcServer)
-	go runHTTPServer(cfg, pushHandler)
+	grpcServer := buildGRPCServer(gapiServer)
+	if cfg.GRPCServerAddress != "" && cfg.GRPCServerAddress != cfg.HTTPServerAddress {
+		go runStandaloneGRPC(grpcServer, cfg.GRPCServerAddress)
+	}
+	go runHTTPServer(cfg, gapiServer, pushHandler, grpcServer)
 
 	<-quit
 	log.Println("search-service shutting down")
 }
 
-func runGRPCServer(cfg config.Config, server *gapi.Server) {
+func buildGRPCServer(server *gapi.Server) *grpc.Server {
 	s := grpc.NewServer()
 	pb.RegisterSearchServiceServer(s, server)
 	reflection.Register(s)
+	return s
+}
 
-	lis, err := net.Listen("tcp", cfg.GRPCServerAddress)
+func runStandaloneGRPC(grpcServer *grpc.Server, addr string) {
+	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatalf("failed to listen on %s: %v", cfg.GRPCServerAddress, err)
+		log.Fatalf("failed to listen on %s: %v", addr, err)
 	}
-
-	log.Printf("gRPC server listening on %s", cfg.GRPCServerAddress)
-	if err := s.Serve(lis); err != nil {
+	log.Printf("gRPC server listening on %s", addr)
+	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("gRPC server failed: %v", err)
 	}
 }
 
-func runHTTPServer(cfg config.Config, pushHandler *subscriber.PushHandler) {
+func runHTTPServer(cfg config.Config, gapiServer *gapi.Server, pushHandler *subscriber.PushHandler, grpcServer *grpc.Server) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	grpcMux := runtime.NewServeMux()
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	if err := pb.RegisterSearchServiceHandlerFromEndpoint(ctx, grpcMux, cfg.GRPCServerAddress, opts); err != nil {
+	if err := pb.RegisterSearchServiceHandlerServer(ctx, grpcMux, gapiServer); err != nil {
 		log.Fatalf("failed to register HTTP gateway: %v", err)
 	}
 
@@ -106,15 +112,23 @@ func runHTTPServer(cfg config.Config, pushHandler *subscriber.PushHandler) {
 	mux.Handle("/internal/pubsub", pushHandler)
 	mux.Handle("/", grpcMux)
 
+	mixed := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.ProtoMajor == 2 && strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc") {
+			grpcServer.ServeHTTP(w, r)
+			return
+		}
+		withCORS(mux).ServeHTTP(w, r)
+	})
+
 	httpServer := &http.Server{
 		Addr:         cfg.HTTPServerAddress,
-		Handler:      withCORS(mux),
+		Handler:      h2c.NewHandler(mixed, &http2.Server{}),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
 
-	log.Printf("HTTP server listening on %s", cfg.HTTPServerAddress)
+	log.Printf("HTTP+gRPC server listening on %s", cfg.HTTPServerAddress)
 	log.Printf("Pub/Sub push endpoint: POST %s/internal/pubsub", cfg.HTTPServerAddress)
 	log.Printf("Swagger UI: http://%s/swagger/", cfg.HTTPServerAddress)
 	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
