@@ -44,7 +44,13 @@ jobs:
 
       - name: Resolve DB URL
         run: |
+          # Prefer DIRECT_URL; fall back to DATABASE_URL. Strip "-pooler" so
+          # the URL points at Neon's direct endpoint — the transaction-mode
+          # pooler rejects the prepared statements that golang-migrate uses
+          # ("bind message supplies N parameters, but prepared statement
+          # requires M").
           DB_URL="${DIRECT_URL:-$DATABASE_URL}"
+          DB_URL="${DB_URL/-pooler./.}"
           if [ -n "$DB_URL" ]; then
             echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
             echo "HAS_DB_URL=true" >> "$GITHUB_ENV"
