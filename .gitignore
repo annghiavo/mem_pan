@@ -26,3 +26,5 @@ api.cover.out
 
 # Firebase service account credentials
 services/notification-service/*-firebase-adminsdk-*.json
+*.safetensors
+ml_model/results/
