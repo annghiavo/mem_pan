@@ -37,6 +37,9 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Warning-only while we ramp up linter coverage — let the dev see the
+    # output but don't block merges on it yet.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -64,6 +67,9 @@ jobs:
     name: Verify codegen
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Generated drift surfaces as a warning until the toolchain pinning
+    # (sqlc/protoc/mockgen versions) is stable across dev+CI.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 

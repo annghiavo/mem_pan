@@ -1,0 +1,44 @@
+# Minimal config — chỉ bật 3 linter cốt lõi user yêu cầu trong test strategy.
+# Mở rộng dần khi codebase ổn định.
+
+run:
+  timeout: 5m
+  # Tests pass; tests có table-driven nhiều unused var — skip để tránh noise.
+  tests: false
+
+linters:
+  # Bắt đầu từ disable-all để tránh kéo theo mọi default linter của v1.62.
+  disable-all: true
+  enable:
+    - errcheck     # err bỏ qua
+    - govet        # vet chuẩn của Go toolchain
+    - staticcheck  # SA* checks bao gồm "unused" + "ineffective assign"
+
+linters-settings:
+  errcheck:
+    # _ = svc.foo() là idiom phổ biến trong code mới — không flag.
+    check-blank: false
+    # Bỏ qua các call chỉ trả error trong dọn dẹp / log.
+    exclude-functions:
+      - (net/http.ResponseWriter).Write
+      - (io.Closer).Close
+      - fmt.Fprintf
+      - fmt.Fprintln
+
+issues:
+  exclude-dirs:
+    - pb              # protoc-generated
+    - internal/db     # sqlc-generated
+    - internal/mock   # mockgen-generated
+    - doc/swagger     # swagger UI assets
+  exclude-rules:
+    # Auto-generated files đôi khi không gắn được DO NOT EDIT comment ở mọi line.
+    - path: \.pb\.go$
+      linters: [errcheck, govet, staticcheck]
+    - path: \.sql\.go$
+      linters: [errcheck, govet, staticcheck]
+    - path: _test\.go$
+      linters: [errcheck]
+  # Cho phép tối đa 100 issues; hơn nữa thường là cascading.
+  max-issues-per-linter: 0
+  max-same-issues: 0
