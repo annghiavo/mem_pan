@@ -149,16 +149,16 @@ class ModerationServicer(pb_grpc.ModerationServiceServicer):
         violated_card_ids: list[str],
     ) -> None:
         try:
-            await asyncio.gather(
-                self.deck_admin.update_deck_status(deck_id=deck_id, status="deleted"),
-                self.moderation_publisher.publish(
-                    event_type=TYPE_MODERATION_DECK_DELETED,
-                    payload=ModerationDeckDeletedEvent(
-                        deck_id=deck_id, user_id=user_id, reason=reason,
-                        violated_card_ids=violated_card_ids,
-                        deleted_at=datetime.now(timezone.utc),
-                    ).model_dump(mode="json"),
-                ),
+            deck_name = await self.deck_admin.update_deck_status(
+                deck_id=deck_id, status="deleted",
+            )
+            await self.moderation_publisher.publish(
+                event_type=TYPE_MODERATION_DECK_DELETED,
+                payload=ModerationDeckDeletedEvent(
+                    deck_id=deck_id, user_id=user_id, deck_name=deck_name,
+                    reason=reason, violated_card_ids=violated_card_ids,
+                    deleted_at=datetime.now(timezone.utc),
+                ).model_dump(mode="json"),
             )
         except Exception:  # noqa: BLE001
             log.exception("violation side-effects failed deck_id=%s", deck_id)

@@ -43,21 +43,27 @@ class DeckAdminClient:
             self._stub = pb_grpc.DeckServiceStub(self._channel)
         return self._stub
 
-    async def update_deck_status(self, deck_id: str, status: str) -> None:
-        """status must be one of: active | hidden | deleted."""
+    async def update_deck_status(self, deck_id: str, status: str) -> str:
+        """status must be one of: active | hidden | deleted.
+
+        Returns the deck name on success (empty string on failure) so the
+        caller can include it in the downstream notification event.
+        """
         stub = self._ensure()
         req = pb.AdminUpdateDeckStatusRequest(deck_id=deck_id, status=status)
         try:
             resp = await stub.AdminUpdateDeckStatus(req, timeout=3.0)
             log.info(
-                "deck status updated deck=%s status=%s user=%s",
-                resp.deck_id, resp.status, resp.user_id,
+                "deck status updated deck=%s status=%s user=%s name=%s",
+                resp.deck_id, resp.status, resp.user_id, resp.name,
             )
+            return resp.name
         except grpc.aio.AioRpcError as exc:
             log.error(
                 "deck status update failed deck=%s code=%s details=%s",
                 deck_id, exc.code(), exc.details(),
             )
+            return ""
 
     async def close(self) -> None:
         if self._channel is not None:

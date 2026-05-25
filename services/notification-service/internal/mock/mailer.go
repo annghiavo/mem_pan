@@ -99,14 +99,14 @@ func (mr *MockMailerMockRecorder) SendReportResolved(ctx, to, username, outcome 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendReportResolved", reflect.TypeOf((*MockMailer)(nil).SendReportResolved), ctx, to, username, outcome)
 }
 
-func (m *MockMailer) SendDeckModeration(ctx context.Context, to, username, deckStatus string) error {
+func (m *MockMailer) SendDeckModeration(ctx context.Context, to, username, deckName, deckStatus string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendDeckModeration", ctx, to, username, deckStatus)
+	ret := m.ctrl.Call(m, "SendDeckModeration", ctx, to, username, deckName, deckStatus)
 	r0, _ := ret[0].(error)
 	return r0
 }
 
-func (mr *MockMailerMockRecorder) SendDeckModeration(ctx, to, username, deckStatus any) *gomock.Call {
+func (mr *MockMailerMockRecorder) SendDeckModeration(ctx, to, username, deckName, deckStatus any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendDeckModeration", reflect.TypeOf((*MockMailer)(nil).SendDeckModeration), ctx, to, username, deckStatus)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendDeckModeration", reflect.TypeOf((*MockMailer)(nil).SendDeckModeration), ctx, to, username, deckName, deckStatus)
 }

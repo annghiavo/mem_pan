@@ -13,6 +13,7 @@ message AdminUpdateDeckStatusResponse {
     string deck_id = 1;
     string status  = 2;
     string user_id = 3;
+    string name    = 4;
 }
 
 message AdminDeckRecord {

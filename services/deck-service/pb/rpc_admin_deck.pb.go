@@ -78,6 +78,7 @@ type AdminUpdateDeckStatusResponse struct {
 	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
 	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
 	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -129,6 +130,13 @@ func (x *AdminUpdateDeckStatusResponse) GetStatus() string {
 func (x *AdminUpdateDeckStatusResponse) GetUserId() string {
 	if x != nil {
 		return x.UserId
+	}
+	return ""
+}
+
+func (x *AdminUpdateDeckStatusResponse) GetName() string {
+	if x != nil {
+		return x.Name
 	}
 	return ""
 }
@@ -360,11 +368,12 @@ const file_rpc_admin_deck_proto_rawDesc = "" +
 	"\x14rpc_admin_deck.proto\x12\x02pb\"O\n" +
 	"\x1cAdminUpdateDeckStatusRequest\x12\x17\n" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"i\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"}\n" +
 	"\x1dAdminUpdateDeckStatusResponse\x12\x17\n" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x17\n" +
-	"\auser_id\x18\x03 \x01(\tR\x06userId\"\x8b\x02\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\"\x8b\x02\n" +
 	"\x0fAdminDeckRecord\x12\x17\n" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +

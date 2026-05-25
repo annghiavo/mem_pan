@@ -120,7 +120,9 @@ class EventDispatcher:
         # 1) gRPC to deck-service — soft-delete the deck (recall-first: one bad
         #    card deletes the whole deck per spec). The row stays in DB with
         #    content_status='deleted' so admin appeal/restoration is still possible.
-        await self.deck_admin.update_deck_status(deck_id=deck_id, status="deleted")
+        deck_name = await self.deck_admin.update_deck_status(
+            deck_id=deck_id, status="deleted",
+        )
 
         # 2) Pub/Sub fan-out for notification + audit.
         await self.moderation_publisher.publish(
@@ -128,6 +130,7 @@ class EventDispatcher:
             payload=ModerationDeckDeletedEvent(
                 deck_id=deck_id,
                 user_id=user_id,
+                deck_name=deck_name,
                 reason=reason,
                 violated_card_ids=[card_id],
                 deleted_at=datetime.now(timezone.utc),

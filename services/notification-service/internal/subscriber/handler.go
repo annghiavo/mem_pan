@@ -53,11 +53,39 @@ func (h *Handler) handleModerationDeckDeleted(ctx context.Context, data []byte) 
 	if err := json.Unmarshal(data, &e); err != nil {
 		return err
 	}
-	if _, err := uuid.Parse(e.UserID); err != nil {
-		log.Printf("[moderation] invalid user_id %q — skipping push", e.UserID)
+	uid, err := uuid.Parse(e.UserID)
+	if err != nil {
+		log.Printf("[moderation] invalid user_id %q — skipping notification", e.UserID)
 		return nil
 	}
-	return h.svc.SendModerationDeckDeletedPush(ctx, e.UserID, e.DeckID, e.Reason, len(e.ViolatedCardIDs))
+
+	// 1. FCM push (in-app banner).
+	if pushErr := h.svc.SendModerationDeckDeletedPush(
+		ctx, e.UserID, e.DeckID, e.DeckName, e.Reason, len(e.ViolatedCardIDs),
+	); pushErr != nil {
+		log.Printf("[moderation] fcm push failed user=%s: %v", e.UserID, pushErr)
+	}
+
+	// 2. Email — lookup the owner's address via auth-service.
+	if h.authClient == nil {
+		log.Printf("[moderation] no authClient configured, skipping email user=%s", e.UserID)
+		return nil
+	}
+	user, err := h.authClient.GetUserByID(ctx, uid)
+	if err != nil {
+		log.Printf("[moderation] auth lookup failed user=%s: %v", e.UserID, err)
+		return nil
+	}
+	if user.Email == "" {
+		log.Printf("[moderation] user %s has no email on file, skipping", e.UserID)
+		return nil
+	}
+	if mailErr := h.svc.SendDeckModerationEmail(
+		ctx, e.UserID, user.Email, user.Username, e.DeckName, "deleted",
+	); mailErr != nil {
+		log.Printf("[moderation] email send failed user=%s to=%s: %v", e.UserID, user.Email, mailErr)
+	}
+	return nil
 }
 
 func (h *Handler) handleCronStudyReminder(ctx context.Context, data []byte) error {
@@ -157,7 +185,7 @@ func (h *Handler) handleReportResolved(ctx context.Context, data []byte) error {
 				if e.Action == "delete_deck" {
 					deckStatus = "deleted"
 				}
-				if err := h.svc.SendDeckModerationEmail(ctx, e.TargetOwnerID, owner.Email, owner.Username, deckStatus); err != nil {
+				if err := h.svc.SendDeckModerationEmail(ctx, e.TargetOwnerID, owner.Email, owner.Username, "", deckStatus); err != nil {
 					log.Printf("[notification] report.resolved: send deck moderation to %s failed: %v", owner.Email, err)
 				}
 			} else {

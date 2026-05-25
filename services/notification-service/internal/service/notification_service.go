@@ -33,8 +33,8 @@ type NotificationService interface {
 	SendPasswordResetEmail(ctx context.Context, userID, email, username, token string) error
 	SendDeckCloneReadyPush(ctx context.Context, userID, deckID, deckName string, cardCount int32) error
 	SendReportResolvedEmail(ctx context.Context, userID, email, username, outcome string) error
-	SendDeckModerationEmail(ctx context.Context, userID, email, username, deckStatus string) error
-	SendModerationDeckDeletedPush(ctx context.Context, userID, deckID, reason string, violatedCardCount int) error
+	SendDeckModerationEmail(ctx context.Context, userID, email, username, deckName, deckStatus string) error
+	SendModerationDeckDeletedPush(ctx context.Context, userID, deckID, deckName, reason string, violatedCardCount int) error
 
 	// Email template administration.
 	ListEmailTemplates(ctx context.Context) ([]db.EmailTemplate, error)
@@ -184,8 +184,8 @@ func (s *service) SendReportResolvedEmail(ctx context.Context, userID, email, us
 	return err
 }
 
-func (s *service) SendDeckModerationEmail(ctx context.Context, userID, email, username, deckStatus string) error {
-	err := s.mailer.SendDeckModeration(ctx, email, username, deckStatus)
+func (s *service) SendDeckModerationEmail(ctx context.Context, userID, email, username, deckName, deckStatus string) error {
+	err := s.mailer.SendDeckModeration(ctx, email, username, deckName, deckStatus)
 	s.log(ctx, userID, "deck_moderation", "email", email, err)
 	return err
 }
@@ -222,7 +222,7 @@ func (s *service) SendDeckCloneReadyPush(ctx context.Context, userID, deckID, de
 }
 
 func (s *service) SendModerationDeckDeletedPush(
-	ctx context.Context, userID, deckID, reason string, violatedCardCount int,
+	ctx context.Context, userID, deckID, deckName, reason string, violatedCardCount int,
 ) error {
 	uid, err := uuid.Parse(userID)
 	if err != nil {
@@ -242,16 +242,21 @@ func (s *service) SendModerationDeckDeletedPush(
 		rawTokens[i] = t.Token
 	}
 
+	deckLabel := deckName
+	if deckLabel == "" {
+		deckLabel = "Your deck"
+	}
 	title := "Deck Removed by Content Moderation"
 	body := fmt.Sprintf(
-		"Your deck was removed because %d card(s) violated our content policy (%s). "+
+		"\"%s\" was removed because %d card(s) violated our content policy (%s). "+
 			"You can appeal this decision from your account settings.",
-		violatedCardCount, reason,
+		deckLabel, violatedCardCount, reason,
 	)
 	data := map[string]string{
-		"type":    "moderation_deck_deleted",
-		"deck_id": deckID,
-		"reason":  reason,
+		"type":      "moderation_deck_deleted",
+		"deck_id":   deckID,
+		"deck_name": deckName,
+		"reason":    reason,
 	}
 
 	err = s.fcm.Send(ctx, rawTokens, title, body, data)

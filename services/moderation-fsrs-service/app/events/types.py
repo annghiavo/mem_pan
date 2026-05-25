@@ -55,6 +55,7 @@ class CardUpdatedEvent(BaseModel):
 class ModerationDeckDeletedEvent(BaseModel):
     deck_id: str
     user_id: str
+    deck_name: str = ""
     reason: Literal["text_violation", "image_violation", "mixed"]
     violated_card_ids: list[str] = Field(default_factory=list)
     deleted_at: datetime

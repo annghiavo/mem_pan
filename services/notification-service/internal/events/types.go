@@ -97,6 +97,7 @@ type CronTick struct {
 type ModerationDeckDeleted struct {
 	DeckID           string    `json:"deck_id"`
 	UserID           string    `json:"user_id"`
+	DeckName         string    `json:"deck_name"`
 	Reason           string    `json:"reason"`            // "text_violation" | "image_violation" | "mixed"
 	ViolatedCardIDs  []string  `json:"violated_card_ids"`
 	DeletedAt        time.Time `json:"deleted_at"`
