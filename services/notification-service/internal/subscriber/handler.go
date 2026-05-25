@@ -94,7 +94,10 @@ func (h *Handler) handleCronStudyReminder(ctx context.Context, data []byte) erro
 		return nil
 	}
 	now := decodeTickTime(data)
-	return h.sched.HandleStudyReminderTick(ctx, now)
+	if err := h.sched.HandleStudyReminderTick(ctx, now); err != nil {
+		log.Printf("[cron] study_reminder tick failed: %v (acking — next tick fires in 15m)", err)
+	}
+	return nil
 }
 
 func (h *Handler) handleCronStreakWarning(ctx context.Context, data []byte) error {
@@ -103,7 +106,10 @@ func (h *Handler) handleCronStreakWarning(ctx context.Context, data []byte) erro
 		return nil
 	}
 	now := decodeTickTime(data)
-	return h.sched.HandleStreakWarningTick(ctx, now)
+	if err := h.sched.HandleStreakWarningTick(ctx, now); err != nil {
+		log.Printf("[cron] streak_warning tick failed: %v (acking — next tick fires in 15m)", err)
+	}
+	return nil
 }
 
 func decodeTickTime(data []byte) time.Time {
@@ -114,12 +120,19 @@ func decodeTickTime(data []byte) time.Time {
 	return t.Now.UTC()
 }
 
+// Email send failures (SMTP rate-limit, recipient bounce, transient DNS, etc.)
+// are NOT retried via Pub/Sub. Retrying through Pub/Sub re-hits the same SMTP
+// relay within seconds and keeps Gmail's rate-limit alive indefinitely. Log
+// the failure and ack the message; the user can re-trigger if needed.
 func (h *Handler) handleUserRegistered(ctx context.Context, data []byte) error {
 	var e events.UserRegistered
 	if err := json.Unmarshal(data, &e); err != nil {
 		return err
 	}
-	return h.svc.SendWelcomeEmail(ctx, e.UserID, e.Email, e.Username)
+	if err := h.svc.SendWelcomeEmail(ctx, e.UserID, e.Email, e.Username); err != nil {
+		log.Printf("[notification] welcome email to %s failed: %v (acked)", e.Email, err)
+	}
+	return nil
 }
 
 func (h *Handler) handleEmailVerification(ctx context.Context, data []byte) error {
@@ -127,7 +140,10 @@ func (h *Handler) handleEmailVerification(ctx context.Context, data []byte) erro
 	if err := json.Unmarshal(data, &e); err != nil {
 		return err
 	}
-	return h.svc.SendVerificationEmail(ctx, e.UserID, e.Email, e.UserID, e.Token)
+	if err := h.svc.SendVerificationEmail(ctx, e.UserID, e.Email, e.UserID, e.Token); err != nil {
+		log.Printf("[notification] verification email to %s failed: %v (acked)", e.Email, err)
+	}
+	return nil
 }
 
 func (h *Handler) handlePasswordReset(ctx context.Context, data []byte) error {
@@ -135,7 +151,10 @@ func (h *Handler) handlePasswordReset(ctx context.Context, data []byte) error {
 	if err := json.Unmarshal(data, &e); err != nil {
 		return err
 	}
-	return h.svc.SendPasswordResetEmail(ctx, e.UserID, e.Email, e.UserID, e.Token)
+	if err := h.svc.SendPasswordResetEmail(ctx, e.UserID, e.Email, e.UserID, e.Token); err != nil {
+		log.Printf("[notification] password reset email to %s failed: %v (acked)", e.Email, err)
+	}
+	return nil
 }
 
 func (h *Handler) handleDeckCloneCompleted(ctx context.Context, data []byte) error {
@@ -143,7 +162,10 @@ func (h *Handler) handleDeckCloneCompleted(ctx context.Context, data []byte) err
 	if err := json.Unmarshal(data, &e); err != nil {
 		return err
 	}
-	return h.svc.SendDeckCloneReadyPush(ctx, e.UserID, e.DeckID, e.DeckName, e.CardCount)
+	if err := h.svc.SendDeckCloneReadyPush(ctx, e.UserID, e.DeckID, e.DeckName, e.CardCount); err != nil {
+		log.Printf("[notification] deck clone push user=%s deck=%s failed: %v (acked)", e.UserID, e.DeckID, err)
+	}
+	return nil
 }
 
 // handleReportResolved fans out one email per distinct reporter, looking up
