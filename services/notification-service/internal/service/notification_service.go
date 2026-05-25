@@ -34,6 +34,8 @@ type NotificationService interface {
 	SendDeckCloneReadyPush(ctx context.Context, userID, deckID, deckName string, cardCount int32) error
 	SendReportResolvedEmail(ctx context.Context, userID, email, username, outcome string) error
 	SendDeckModerationEmail(ctx context.Context, userID, email, username, deckName, deckStatus string) error
+	SendDeckDeletedWithAppealEmail(ctx context.Context, userID, email, username, deckName, reason, appealToken string) error
+	SendAppealDecidedEmail(ctx context.Context, userID, email, username, deckName, decision, note string) error
 	SendModerationDeckDeletedPush(ctx context.Context, userID, deckID, deckName, reason string, violatedCardCount int) error
 
 	// Email template administration.
@@ -73,7 +75,8 @@ type TestNotificationResult struct {
 }
 
 type Config struct {
-	AppBaseURL string // e.g. "https://mempan.app"
+	AppBaseURL      string // e.g. "https://mempan.app"
+	AdminWebBaseURL string // e.g. "https://admin.mempan.app" — root for appeal links
 }
 
 type service struct {
@@ -187,6 +190,23 @@ func (s *service) SendReportResolvedEmail(ctx context.Context, userID, email, us
 func (s *service) SendDeckModerationEmail(ctx context.Context, userID, email, username, deckName, deckStatus string) error {
 	err := s.mailer.SendDeckModeration(ctx, email, username, deckName, deckStatus)
 	s.log(ctx, userID, "deck_moderation", "email", email, err)
+	return err
+}
+
+func (s *service) SendDeckDeletedWithAppealEmail(
+	ctx context.Context, userID, email, username, deckName, reason, appealToken string,
+) error {
+	appealURL := fmt.Sprintf("%s/appeal?token=%s", s.cfg.AdminWebBaseURL, appealToken)
+	err := s.mailer.SendDeckDeletedWithAppeal(ctx, email, username, deckName, reason, appealURL)
+	s.log(ctx, userID, "deck_deleted_with_appeal", "email", email, err)
+	return err
+}
+
+func (s *service) SendAppealDecidedEmail(
+	ctx context.Context, userID, email, username, deckName, decision, note string,
+) error {
+	err := s.mailer.SendAppealDecided(ctx, email, username, deckName, decision, note)
+	s.log(ctx, userID, "appeal_decided", "email", email, err)
 	return err
 }
 

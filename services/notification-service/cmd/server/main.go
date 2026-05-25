@@ -99,7 +99,10 @@ func main() {
 		fcmSender = fcm.NewNoop()
 	}
 
-	svc := service.New(repo, m, fcmSender, templateCache, service.Config{AppBaseURL: cfg.AppBaseURL})
+	svc := service.New(repo, m, fcmSender, templateCache, service.Config{
+		AppBaseURL:      cfg.AppBaseURL,
+		AdminWebBaseURL: cfg.AdminWebBaseURL,
+	})
 
 	// Optional internal clients for reminder cron handlers. If either address
 	// is missing the scheduler stays nil and the two cron events log + skip.

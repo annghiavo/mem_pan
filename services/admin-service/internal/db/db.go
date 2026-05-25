@@ -27,8 +27,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.bulkResolveReportsByTargetStmt, err = db.PrepareContext(ctx, bulkResolveReportsByTarget); err != nil {
 		return nil, fmt.Errorf("error preparing query BulkResolveReportsByTarget: %w", err)
 	}
+	if q.countDeckAppealsStmt, err = db.PrepareContext(ctx, countDeckAppeals); err != nil {
+		return nil, fmt.Errorf("error preparing query CountDeckAppeals: %w", err)
+	}
 	if q.countReportsStmt, err = db.PrepareContext(ctx, countReports); err != nil {
 		return nil, fmt.Errorf("error preparing query CountReports: %w", err)
+	}
+	if q.createDeckAppealStmt, err = db.PrepareContext(ctx, createDeckAppeal); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateDeckAppeal: %w", err)
 	}
 	if q.createModerationLogStmt, err = db.PrepareContext(ctx, createModerationLog); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateModerationLog: %w", err)
@@ -36,17 +42,35 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createReportStmt, err = db.PrepareContext(ctx, createReport); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateReport: %w", err)
 	}
+	if q.decideDeckAppealStmt, err = db.PrepareContext(ctx, decideDeckAppeal); err != nil {
+		return nil, fmt.Errorf("error preparing query DecideDeckAppeal: %w", err)
+	}
+	if q.getDeckAppealByDeckStmt, err = db.PrepareContext(ctx, getDeckAppealByDeck); err != nil {
+		return nil, fmt.Errorf("error preparing query GetDeckAppealByDeck: %w", err)
+	}
+	if q.getDeckAppealByIDStmt, err = db.PrepareContext(ctx, getDeckAppealByID); err != nil {
+		return nil, fmt.Errorf("error preparing query GetDeckAppealByID: %w", err)
+	}
+	if q.getDeckAppealByTokenStmt, err = db.PrepareContext(ctx, getDeckAppealByToken); err != nil {
+		return nil, fmt.Errorf("error preparing query GetDeckAppealByToken: %w", err)
+	}
 	if q.getReportStmt, err = db.PrepareContext(ctx, getReport); err != nil {
 		return nil, fmt.Errorf("error preparing query GetReport: %w", err)
 	}
 	if q.getReportTargetStmt, err = db.PrepareContext(ctx, getReportTarget); err != nil {
 		return nil, fmt.Errorf("error preparing query GetReportTarget: %w", err)
 	}
+	if q.listDeckAppealsStmt, err = db.PrepareContext(ctx, listDeckAppeals); err != nil {
+		return nil, fmt.Errorf("error preparing query ListDeckAppeals: %w", err)
+	}
 	if q.listReporterIDsByTargetStmt, err = db.PrepareContext(ctx, listReporterIDsByTarget); err != nil {
 		return nil, fmt.Errorf("error preparing query ListReporterIDsByTarget: %w", err)
 	}
 	if q.listReportsStmt, err = db.PrepareContext(ctx, listReports); err != nil {
 		return nil, fmt.Errorf("error preparing query ListReports: %w", err)
+	}
+	if q.submitDeckAppealStmt, err = db.PrepareContext(ctx, submitDeckAppeal); err != nil {
+		return nil, fmt.Errorf("error preparing query SubmitDeckAppeal: %w", err)
 	}
 	return &q, nil
 }
@@ -58,9 +82,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing bulkResolveReportsByTargetStmt: %w", cerr)
 		}
 	}
+	if q.countDeckAppealsStmt != nil {
+		if cerr := q.countDeckAppealsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing countDeckAppealsStmt: %w", cerr)
+		}
+	}
 	if q.countReportsStmt != nil {
 		if cerr := q.countReportsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing countReportsStmt: %w", cerr)
+		}
+	}
+	if q.createDeckAppealStmt != nil {
+		if cerr := q.createDeckAppealStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createDeckAppealStmt: %w", cerr)
 		}
 	}
 	if q.createModerationLogStmt != nil {
@@ -73,6 +107,26 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createReportStmt: %w", cerr)
 		}
 	}
+	if q.decideDeckAppealStmt != nil {
+		if cerr := q.decideDeckAppealStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing decideDeckAppealStmt: %w", cerr)
+		}
+	}
+	if q.getDeckAppealByDeckStmt != nil {
+		if cerr := q.getDeckAppealByDeckStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getDeckAppealByDeckStmt: %w", cerr)
+		}
+	}
+	if q.getDeckAppealByIDStmt != nil {
+		if cerr := q.getDeckAppealByIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getDeckAppealByIDStmt: %w", cerr)
+		}
+	}
+	if q.getDeckAppealByTokenStmt != nil {
+		if cerr := q.getDeckAppealByTokenStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getDeckAppealByTokenStmt: %w", cerr)
+		}
+	}
 	if q.getReportStmt != nil {
 		if cerr := q.getReportStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getReportStmt: %w", cerr)
@@ -83,6 +137,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getReportTargetStmt: %w", cerr)
 		}
 	}
+	if q.listDeckAppealsStmt != nil {
+		if cerr := q.listDeckAppealsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listDeckAppealsStmt: %w", cerr)
+		}
+	}
 	if q.listReporterIDsByTargetStmt != nil {
 		if cerr := q.listReporterIDsByTargetStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listReporterIDsByTargetStmt: %w", cerr)
@@ -91,6 +150,11 @@ func (q *Queries) Close() error {
 	if q.listReportsStmt != nil {
 		if cerr := q.listReportsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listReportsStmt: %w", cerr)
+		}
+	}
+	if q.submitDeckAppealStmt != nil {
+		if cerr := q.submitDeckAppealStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing submitDeckAppealStmt: %w", cerr)
 		}
 	}
 	return err
@@ -133,13 +197,21 @@ type Queries struct {
 	db                             DBTX
 	tx                             *sql.Tx
 	bulkResolveReportsByTargetStmt *sql.Stmt
+	countDeckAppealsStmt           *sql.Stmt
 	countReportsStmt               *sql.Stmt
+	createDeckAppealStmt           *sql.Stmt
 	createModerationLogStmt        *sql.Stmt
 	createReportStmt               *sql.Stmt
+	decideDeckAppealStmt           *sql.Stmt
+	getDeckAppealByDeckStmt        *sql.Stmt
+	getDeckAppealByIDStmt          *sql.Stmt
+	getDeckAppealByTokenStmt       *sql.Stmt
 	getReportStmt                  *sql.Stmt
 	getReportTargetStmt            *sql.Stmt
+	listDeckAppealsStmt            *sql.Stmt
 	listReporterIDsByTargetStmt    *sql.Stmt
 	listReportsStmt                *sql.Stmt
+	submitDeckAppealStmt           *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -147,12 +219,20 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                             tx,
 		tx:                             tx,
 		bulkResolveReportsByTargetStmt: q.bulkResolveReportsByTargetStmt,
+		countDeckAppealsStmt:           q.countDeckAppealsStmt,
 		countReportsStmt:               q.countReportsStmt,
+		createDeckAppealStmt:           q.createDeckAppealStmt,
 		createModerationLogStmt:        q.createModerationLogStmt,
 		createReportStmt:               q.createReportStmt,
+		decideDeckAppealStmt:           q.decideDeckAppealStmt,
+		getDeckAppealByDeckStmt:        q.getDeckAppealByDeckStmt,
+		getDeckAppealByIDStmt:          q.getDeckAppealByIDStmt,
+		getDeckAppealByTokenStmt:       q.getDeckAppealByTokenStmt,
 		getReportStmt:                  q.getReportStmt,
 		getReportTargetStmt:            q.getReportTargetStmt,
+		listDeckAppealsStmt:            q.listDeckAppealsStmt,
 		listReporterIDsByTargetStmt:    q.listReporterIDsByTargetStmt,
 		listReportsStmt:                q.listReportsStmt,
+		submitDeckAppealStmt:           q.submitDeckAppealStmt,
 	}
 }

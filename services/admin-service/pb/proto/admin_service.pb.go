@@ -1704,6 +1704,422 @@ func (x *SendTestEmailResponse) GetMessage() string {
 	return ""
 }
 
+type Appeal struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	AppealId         string                 `protobuf:"bytes,1,opt,name=appeal_id,json=appealId,proto3" json:"appeal_id,omitempty"`
+	DeckId           string                 `protobuf:"bytes,2,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
+	UserId           string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DeckName         string                 `protobuf:"bytes,4,opt,name=deck_name,json=deckName,proto3" json:"deck_name,omitempty"`
+	ModerationReason string                 `protobuf:"bytes,5,opt,name=moderation_reason,json=moderationReason,proto3" json:"moderation_reason,omitempty"`
+	Status           string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"` // pending | submitted | approved | rejected
+	UserMessage      string                 `protobuf:"bytes,7,opt,name=user_message,json=userMessage,proto3" json:"user_message,omitempty"`
+	SubmittedAt      string                 `protobuf:"bytes,8,opt,name=submitted_at,json=submittedAt,proto3" json:"submitted_at,omitempty"`
+	DecidedBy        string                 `protobuf:"bytes,9,opt,name=decided_by,json=decidedBy,proto3" json:"decided_by,omitempty"`
+	DecisionNote     string                 `protobuf:"bytes,10,opt,name=decision_note,json=decisionNote,proto3" json:"decision_note,omitempty"`
+	DecidedAt        string                 `protobuf:"bytes,11,opt,name=decided_at,json=decidedAt,proto3" json:"decided_at,omitempty"`
+	CreatedAt        string                 `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt        string                 `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *Appeal) Reset() {
+	*x = Appeal{}
+	mi := &file_admin_service_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Appeal) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Appeal) ProtoMessage() {}
+
+func (x *Appeal) ProtoReflect() protoreflect.Message {
+	mi := &file_admin_service_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Appeal.ProtoReflect.Descriptor instead.
+func (*Appeal) Descriptor() ([]byte, []int) {
+	return file_admin_service_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *Appeal) GetAppealId() string {
+	if x != nil {
+		return x.AppealId
+	}
+	return ""
+}
+
+func (x *Appeal) GetDeckId() string {
+	if x != nil {
+		return x.DeckId
+	}
+	return ""
+}
+
+func (x *Appeal) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *Appeal) GetDeckName() string {
+	if x != nil {
+		return x.DeckName
+	}
+	return ""
+}
+
+func (x *Appeal) GetModerationReason() string {
+	if x != nil {
+		return x.ModerationReason
+	}
+	return ""
+}
+
+func (x *Appeal) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *Appeal) GetUserMessage() string {
+	if x != nil {
+		return x.UserMessage
+	}
+	return ""
+}
+
+func (x *Appeal) GetSubmittedAt() string {
+	if x != nil {
+		return x.SubmittedAt
+	}
+	return ""
+}
+
+func (x *Appeal) GetDecidedBy() string {
+	if x != nil {
+		return x.DecidedBy
+	}
+	return ""
+}
+
+func (x *Appeal) GetDecisionNote() string {
+	if x != nil {
+		return x.DecisionNote
+	}
+	return ""
+}
+
+func (x *Appeal) GetDecidedAt() string {
+	if x != nil {
+		return x.DecidedAt
+	}
+	return ""
+}
+
+func (x *Appeal) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *Appeal) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type GetAppealByTokenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAppealByTokenRequest) Reset() {
+	*x = GetAppealByTokenRequest{}
+	mi := &file_admin_service_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAppealByTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAppealByTokenRequest) ProtoMessage() {}
+
+func (x *GetAppealByTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_admin_service_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAppealByTokenRequest.ProtoReflect.Descriptor instead.
+func (*GetAppealByTokenRequest) Descriptor() ([]byte, []int) {
+	return file_admin_service_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *GetAppealByTokenRequest) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+type SubmitAppealRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubmitAppealRequest) Reset() {
+	*x = SubmitAppealRequest{}
+	mi := &file_admin_service_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubmitAppealRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubmitAppealRequest) ProtoMessage() {}
+
+func (x *SubmitAppealRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_admin_service_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubmitAppealRequest.ProtoReflect.Descriptor instead.
+func (*SubmitAppealRequest) Descriptor() ([]byte, []int) {
+	return file_admin_service_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *SubmitAppealRequest) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *SubmitAppealRequest) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type ListAppealsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	StatusFilter  string                 `protobuf:"bytes,3,opt,name=status_filter,json=statusFilter,proto3" json:"status_filter,omitempty"` // "", pending, submitted, approved, rejected
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAppealsRequest) Reset() {
+	*x = ListAppealsRequest{}
+	mi := &file_admin_service_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAppealsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAppealsRequest) ProtoMessage() {}
+
+func (x *ListAppealsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_admin_service_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAppealsRequest.ProtoReflect.Descriptor instead.
+func (*ListAppealsRequest) Descriptor() ([]byte, []int) {
+	return file_admin_service_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ListAppealsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListAppealsRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+func (x *ListAppealsRequest) GetStatusFilter() string {
+	if x != nil {
+		return x.StatusFilter
+	}
+	return ""
+}
+
+type ListAppealsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Appeals       []*Appeal              `protobuf:"bytes,1,rep,name=appeals,proto3" json:"appeals,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	Total         int64                  `protobuf:"varint,3,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAppealsResponse) Reset() {
+	*x = ListAppealsResponse{}
+	mi := &file_admin_service_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAppealsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAppealsResponse) ProtoMessage() {}
+
+func (x *ListAppealsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_admin_service_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAppealsResponse.ProtoReflect.Descriptor instead.
+func (*ListAppealsResponse) Descriptor() ([]byte, []int) {
+	return file_admin_service_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *ListAppealsResponse) GetAppeals() []*Appeal {
+	if x != nil {
+		return x.Appeals
+	}
+	return nil
+}
+
+func (x *ListAppealsResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
+func (x *ListAppealsResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+type DecideAppealRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AppealId      string                 `protobuf:"bytes,1,opt,name=appeal_id,json=appealId,proto3" json:"appeal_id,omitempty"`
+	Decision      string                 `protobuf:"bytes,2,opt,name=decision,proto3" json:"decision,omitempty"` // approve | reject
+	Note          string                 `protobuf:"bytes,3,opt,name=note,proto3" json:"note,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DecideAppealRequest) Reset() {
+	*x = DecideAppealRequest{}
+	mi := &file_admin_service_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DecideAppealRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DecideAppealRequest) ProtoMessage() {}
+
+func (x *DecideAppealRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_admin_service_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DecideAppealRequest.ProtoReflect.Descriptor instead.
+func (*DecideAppealRequest) Descriptor() ([]byte, []int) {
+	return file_admin_service_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *DecideAppealRequest) GetAppealId() string {
+	if x != nil {
+		return x.AppealId
+	}
+	return ""
+}
+
+func (x *DecideAppealRequest) GetDecision() string {
+	if x != nil {
+		return x.Decision
+	}
+	return ""
+}
+
+func (x *DecideAppealRequest) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
+}
+
 var File_admin_service_proto protoreflect.FileDescriptor
 
 const file_admin_service_proto_rawDesc = "" +
@@ -1855,7 +2271,44 @@ const file_admin_service_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"1\n" +
 	"\x15SendTestEmailResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\xa7\x12\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xa0\x03\n" +
+	"\x06Appeal\x12\x1b\n" +
+	"\tappeal_id\x18\x01 \x01(\tR\bappealId\x12\x17\n" +
+	"\adeck_id\x18\x02 \x01(\tR\x06deckId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tdeck_name\x18\x04 \x01(\tR\bdeckName\x12+\n" +
+	"\x11moderation_reason\x18\x05 \x01(\tR\x10moderationReason\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12!\n" +
+	"\fuser_message\x18\a \x01(\tR\vuserMessage\x12!\n" +
+	"\fsubmitted_at\x18\b \x01(\tR\vsubmittedAt\x12\x1d\n" +
+	"\n" +
+	"decided_by\x18\t \x01(\tR\tdecidedBy\x12#\n" +
+	"\rdecision_note\x18\n" +
+	" \x01(\tR\fdecisionNote\x12\x1d\n" +
+	"\n" +
+	"decided_at\x18\v \x01(\tR\tdecidedAt\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\f \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\r \x01(\tR\tupdatedAt\"/\n" +
+	"\x17GetAppealByTokenRequest\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"E\n" +
+	"\x13SubmitAppealRequest\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"u\n" +
+	"\x12ListAppealsRequest\x12\x1b\n" +
+	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x02 \x01(\tR\tpageToken\x12#\n" +
+	"\rstatus_filter\x18\x03 \x01(\tR\fstatusFilter\"|\n" +
+	"\x13ListAppealsResponse\x12'\n" +
+	"\aappeals\x18\x01 \x03(\v2\r.admin.AppealR\aappeals\x12&\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x14\n" +
+	"\x05total\x18\x03 \x01(\x03R\x05total\"b\n" +
+	"\x13DecideAppealRequest\x12\x1b\n" +
+	"\tappeal_id\x18\x01 \x01(\tR\bappealId\x12\x1a\n" +
+	"\bdecision\x18\x02 \x01(\tR\bdecision\x12\x12\n" +
+	"\x04note\x18\x03 \x01(\tR\x04note2\xb5\x17\n" +
 	"\fAdminService\x12\x98\x01\n" +
 	"\vListReports\x12\x19.admin.ListReportsRequest\x1a\x1a.admin.ListReportsResponse\"R\x92A6\n" +
 	"\x05admin\x12\x1b[Admin] See list of reportsb\x10\n" +
@@ -1916,7 +2369,21 @@ const file_admin_service_proto_rawDesc = "" +
 	"\x15admin-email-templates\x12*[Admin] Send a test email using a templateb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x022:\x01*\"-/v1/admin/email-templates/{template_key}:testB\x89\x01\x92Ac\x12\x18\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x022:\x01*\"-/v1/admin/email-templates/{template_key}:test\x12\x9f\x01\n" +
+	"\x10GetAppealByToken\x12\x1e.admin.GetAppealByTokenRequest\x1a\r.admin.Appeal\"\\\x92A/\n" +
+	"\aappeals\x12$[Public] Get appeal context by token\x82\xd3\xe4\x93\x02$\x12\"/v1/admin/appeals/by-token/{token}\x12\xa1\x01\n" +
+	"\fSubmitAppeal\x12\x1a.admin.SubmitAppealRequest\x1a\r.admin.Appeal\"f\x92A/\n" +
+	"\aappeals\x12$[Public] Submit deck appeal by token\x82\xd3\xe4\x93\x02.:\x01*\")/v1/admin/appeals/by-token/{token}:submit\x12\x98\x01\n" +
+	"\vListAppeals\x12\x19.admin.ListAppealsRequest\x1a\x1a.admin.ListAppealsResponse\"R\x92A6\n" +
+	"\aappeals\x12\x19[Admin] List deck appealsb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x13\x12\x11/v1/admin/appeals\x12\xaa\x01\n" +
+	"\fDecideAppeal\x12\x1a.admin.DecideAppealRequest\x1a\r.admin.Appeal\"o\x92AD\n" +
+	"\aappeals\x12'[Admin] Approve or reject a deck appealb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\":\x01*2\x1d/v1/admin/appeals/{appeal_id}B\x89\x01\x92Ac\x12\x18\n" +
 	"\x11Admin Service API2\x031.02\x10application/json:\x10application/jsonZ#\n" +
 	"!\n" +
 	"\n" +
@@ -1934,7 +2401,7 @@ func file_admin_service_proto_rawDescGZIP() []byte {
 	return file_admin_service_proto_rawDescData
 }
 
-var file_admin_service_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_admin_service_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
 var file_admin_service_proto_goTypes = []any{
 	(*Report)(nil),                       // 0: admin.Report
 	(*ListReportsRequest)(nil),           // 1: admin.ListReportsRequest
@@ -1962,8 +2429,14 @@ var file_admin_service_proto_goTypes = []any{
 	(*PreviewEmailTemplateResponse)(nil), // 23: admin.PreviewEmailTemplateResponse
 	(*SendTestEmailRequest)(nil),         // 24: admin.SendTestEmailRequest
 	(*SendTestEmailResponse)(nil),        // 25: admin.SendTestEmailResponse
-	nil,                                  // 26: admin.PreviewEmailTemplateRequest.DataEntry
-	nil,                                  // 27: admin.SendTestEmailRequest.DataEntry
+	(*Appeal)(nil),                       // 26: admin.Appeal
+	(*GetAppealByTokenRequest)(nil),      // 27: admin.GetAppealByTokenRequest
+	(*SubmitAppealRequest)(nil),          // 28: admin.SubmitAppealRequest
+	(*ListAppealsRequest)(nil),           // 29: admin.ListAppealsRequest
+	(*ListAppealsResponse)(nil),          // 30: admin.ListAppealsResponse
+	(*DecideAppealRequest)(nil),          // 31: admin.DecideAppealRequest
+	nil,                                  // 32: admin.PreviewEmailTemplateRequest.DataEntry
+	nil,                                  // 33: admin.SendTestEmailRequest.DataEntry
 }
 var file_admin_service_proto_depIdxs = []int32{
 	0,  // 0: admin.ListReportsResponse.reports:type_name -> admin.Report
@@ -1972,37 +2445,46 @@ var file_admin_service_proto_depIdxs = []int32{
 	5,  // 3: admin.BanUserResponse.user:type_name -> admin.User
 	12, // 4: admin.ListDecksResponse.decks:type_name -> admin.AdminDeck
 	17, // 5: admin.ListEmailTemplatesResponse.templates:type_name -> admin.EmailTemplate
-	26, // 6: admin.PreviewEmailTemplateRequest.data:type_name -> admin.PreviewEmailTemplateRequest.DataEntry
-	27, // 7: admin.SendTestEmailRequest.data:type_name -> admin.SendTestEmailRequest.DataEntry
-	1,  // 8: admin.AdminService.ListReports:input_type -> admin.ListReportsRequest
-	3,  // 9: admin.AdminService.ProcessReport:input_type -> admin.ProcessReportRequest
-	6,  // 10: admin.AdminService.ListUsers:input_type -> admin.ListUsersRequest
-	8,  // 11: admin.AdminService.BanUser:input_type -> admin.BanUserRequest
-	13, // 12: admin.AdminService.ListDecks:input_type -> admin.ListDecksRequest
-	10, // 13: admin.AdminService.UpdateDeckStatus:input_type -> admin.UpdateDeckStatusRequest
-	15, // 14: admin.AdminService.PromoteModerator:input_type -> admin.PromoteModeratorRequest
-	18, // 15: admin.AdminService.ListEmailTemplates:input_type -> admin.ListEmailTemplatesRequest
-	20, // 16: admin.AdminService.GetEmailTemplate:input_type -> admin.GetEmailTemplateRequest
-	21, // 17: admin.AdminService.UpdateEmailTemplate:input_type -> admin.UpdateEmailTemplateRequest
-	22, // 18: admin.AdminService.PreviewEmailTemplate:input_type -> admin.PreviewEmailTemplateRequest
-	24, // 19: admin.AdminService.SendTestEmail:input_type -> admin.SendTestEmailRequest
-	2,  // 20: admin.AdminService.ListReports:output_type -> admin.ListReportsResponse
-	4,  // 21: admin.AdminService.ProcessReport:output_type -> admin.ProcessReportResponse
-	7,  // 22: admin.AdminService.ListUsers:output_type -> admin.ListUsersResponse
-	9,  // 23: admin.AdminService.BanUser:output_type -> admin.BanUserResponse
-	14, // 24: admin.AdminService.ListDecks:output_type -> admin.ListDecksResponse
-	11, // 25: admin.AdminService.UpdateDeckStatus:output_type -> admin.UpdateDeckStatusResponse
-	16, // 26: admin.AdminService.PromoteModerator:output_type -> admin.PromoteModeratorResponse
-	19, // 27: admin.AdminService.ListEmailTemplates:output_type -> admin.ListEmailTemplatesResponse
-	17, // 28: admin.AdminService.GetEmailTemplate:output_type -> admin.EmailTemplate
-	17, // 29: admin.AdminService.UpdateEmailTemplate:output_type -> admin.EmailTemplate
-	23, // 30: admin.AdminService.PreviewEmailTemplate:output_type -> admin.PreviewEmailTemplateResponse
-	25, // 31: admin.AdminService.SendTestEmail:output_type -> admin.SendTestEmailResponse
-	20, // [20:32] is the sub-list for method output_type
-	8,  // [8:20] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	32, // 6: admin.PreviewEmailTemplateRequest.data:type_name -> admin.PreviewEmailTemplateRequest.DataEntry
+	33, // 7: admin.SendTestEmailRequest.data:type_name -> admin.SendTestEmailRequest.DataEntry
+	26, // 8: admin.ListAppealsResponse.appeals:type_name -> admin.Appeal
+	1,  // 9: admin.AdminService.ListReports:input_type -> admin.ListReportsRequest
+	3,  // 10: admin.AdminService.ProcessReport:input_type -> admin.ProcessReportRequest
+	6,  // 11: admin.AdminService.ListUsers:input_type -> admin.ListUsersRequest
+	8,  // 12: admin.AdminService.BanUser:input_type -> admin.BanUserRequest
+	13, // 13: admin.AdminService.ListDecks:input_type -> admin.ListDecksRequest
+	10, // 14: admin.AdminService.UpdateDeckStatus:input_type -> admin.UpdateDeckStatusRequest
+	15, // 15: admin.AdminService.PromoteModerator:input_type -> admin.PromoteModeratorRequest
+	18, // 16: admin.AdminService.ListEmailTemplates:input_type -> admin.ListEmailTemplatesRequest
+	20, // 17: admin.AdminService.GetEmailTemplate:input_type -> admin.GetEmailTemplateRequest
+	21, // 18: admin.AdminService.UpdateEmailTemplate:input_type -> admin.UpdateEmailTemplateRequest
+	22, // 19: admin.AdminService.PreviewEmailTemplate:input_type -> admin.PreviewEmailTemplateRequest
+	24, // 20: admin.AdminService.SendTestEmail:input_type -> admin.SendTestEmailRequest
+	27, // 21: admin.AdminService.GetAppealByToken:input_type -> admin.GetAppealByTokenRequest
+	28, // 22: admin.AdminService.SubmitAppeal:input_type -> admin.SubmitAppealRequest
+	29, // 23: admin.AdminService.ListAppeals:input_type -> admin.ListAppealsRequest
+	31, // 24: admin.AdminService.DecideAppeal:input_type -> admin.DecideAppealRequest
+	2,  // 25: admin.AdminService.ListReports:output_type -> admin.ListReportsResponse
+	4,  // 26: admin.AdminService.ProcessReport:output_type -> admin.ProcessReportResponse
+	7,  // 27: admin.AdminService.ListUsers:output_type -> admin.ListUsersResponse
+	9,  // 28: admin.AdminService.BanUser:output_type -> admin.BanUserResponse
+	14, // 29: admin.AdminService.ListDecks:output_type -> admin.ListDecksResponse
+	11, // 30: admin.AdminService.UpdateDeckStatus:output_type -> admin.UpdateDeckStatusResponse
+	16, // 31: admin.AdminService.PromoteModerator:output_type -> admin.PromoteModeratorResponse
+	19, // 32: admin.AdminService.ListEmailTemplates:output_type -> admin.ListEmailTemplatesResponse
+	17, // 33: admin.AdminService.GetEmailTemplate:output_type -> admin.EmailTemplate
+	17, // 34: admin.AdminService.UpdateEmailTemplate:output_type -> admin.EmailTemplate
+	23, // 35: admin.AdminService.PreviewEmailTemplate:output_type -> admin.PreviewEmailTemplateResponse
+	25, // 36: admin.AdminService.SendTestEmail:output_type -> admin.SendTestEmailResponse
+	26, // 37: admin.AdminService.GetAppealByToken:output_type -> admin.Appeal
+	26, // 38: admin.AdminService.SubmitAppeal:output_type -> admin.Appeal
+	30, // 39: admin.AdminService.ListAppeals:output_type -> admin.ListAppealsResponse
+	26, // 40: admin.AdminService.DecideAppeal:output_type -> admin.Appeal
+	25, // [25:41] is the sub-list for method output_type
+	9,  // [9:25] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_admin_service_proto_init() }
@@ -2016,7 +2498,7 @@ func file_admin_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_admin_service_proto_rawDesc), len(file_admin_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   28,
+			NumMessages:   34,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

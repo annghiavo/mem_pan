@@ -32,6 +32,10 @@ type Config struct {
 
 	// App base URL used to build links in emails
 	AppBaseURL string
+
+	// Admin web base URL — used to build the appeal CTA link in the
+	// deck-deletion email (deck owners visit this URL to file an appeal).
+	AdminWebBaseURL string
 }
 
 func Load() (Config, error) {
@@ -55,7 +59,8 @@ func Load() (Config, error) {
 		FCMProjectID:       getEnv("FCM_PROJECT_ID", ""),
 		FCMCredentialsFile: getEnv("FCM_CREDENTIALS_FILE", ""),
 
-		AppBaseURL: getEnv("APP_BASE_URL", "https://mempan.app"),
+		AppBaseURL:      getEnv("APP_BASE_URL", "https://mempan.app"),
+		AdminWebBaseURL: getEnv("ADMIN_WEB_BASE_URL", "http://localhost:5173"),
 	}
 
 	if cfg.DBUrl == "" {

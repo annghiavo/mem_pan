@@ -14,13 +14,21 @@ type Querier interface {
 	// Updates every pending report for the same (target_type, target_id) so that
 	// one admin decision covers every duplicate report. Returns all affected rows.
 	BulkResolveReportsByTarget(ctx context.Context, arg BulkResolveReportsByTargetParams) ([]Report, error)
+	CountDeckAppeals(ctx context.Context, statusFilter NullAppealStatus) (int64, error)
 	CountReports(ctx context.Context, statusFilter NullReportStatus) (int64, error)
+	CreateDeckAppeal(ctx context.Context, arg CreateDeckAppealParams) (DeckAppeal, error)
 	CreateModerationLog(ctx context.Context, arg CreateModerationLogParams) (ModerationLog, error)
 	CreateReport(ctx context.Context, arg CreateReportParams) (Report, error)
+	DecideDeckAppeal(ctx context.Context, arg DecideDeckAppealParams) (DeckAppeal, error)
+	GetDeckAppealByDeck(ctx context.Context, deckID uuid.UUID) (DeckAppeal, error)
+	GetDeckAppealByID(ctx context.Context, appealID uuid.UUID) (DeckAppeal, error)
+	GetDeckAppealByToken(ctx context.Context, token string) (DeckAppeal, error)
 	GetReport(ctx context.Context, reportID uuid.UUID) (Report, error)
 	GetReportTarget(ctx context.Context, reportID uuid.UUID) (GetReportTargetRow, error)
+	ListDeckAppeals(ctx context.Context, arg ListDeckAppealsParams) ([]DeckAppeal, error)
 	ListReporterIDsByTarget(ctx context.Context, arg ListReporterIDsByTargetParams) ([]uuid.UUID, error)
 	ListReports(ctx context.Context, arg ListReportsParams) ([]Report, error)
+	SubmitDeckAppeal(ctx context.Context, arg SubmitDeckAppealParams) (DeckAppeal, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -67,10 +67,11 @@ type ReportService interface {
 }
 
 type reportService struct {
-	reportRepo repository.ReportRepository
-	authClient authclient.Client
-	deckClient deckclient.Client
-	publisher  publisher.EventPublisher
+	reportRepo    repository.ReportRepository
+	authClient    authclient.Client
+	deckClient    deckclient.Client
+	publisher     publisher.EventPublisher
+	appealService AppealService
 }
 
 func NewReportService(
@@ -78,15 +79,17 @@ func NewReportService(
 	authClient authclient.Client,
 	deckClient deckclient.Client,
 	pub publisher.EventPublisher,
+	appealSvc AppealService,
 ) ReportService {
 	if pub == nil {
 		pub = publisher.NewNoopPublisher()
 	}
 	return &reportService{
-		reportRepo: reportRepo,
-		authClient: authClient,
-		deckClient: deckClient,
-		publisher:  pub,
+		reportRepo:    reportRepo,
+		authClient:    authClient,
+		deckClient:    deckClient,
+		publisher:     pub,
+		appealService: appealSvc,
 	}
 }
 
@@ -242,12 +245,38 @@ func (s *reportService) applyAction(ctx context.Context, action ProcessAction, t
 		_, ownerID, err := s.deckClient.UpdateDeckStatus(ctx, target.TargetID.String(), "hidden")
 		return ownerID, err
 	case ActionDeleteDeck:
-		_, ownerID, err := s.deckClient.UpdateDeckStatus(ctx, target.TargetID.String(), "deleted")
-		return ownerID, err
+		deckName, ownerID, err := s.deckClient.UpdateDeckStatus(ctx, target.TargetID.String(), "deleted")
+		if err != nil {
+			return ownerID, err
+		}
+		s.ensureAppeal(ctx, target.TargetID, ownerID, deckName)
+		return ownerID, nil
 	case ActionDismiss:
 		return "", nil
 	default:
 		return "", errors.New("unknown action")
+	}
+}
+
+// ensureAppeal mints a deck-appeal row + email to the owner. Best-effort: logs
+// on failure but does not roll back the moderation action — the deck has
+// already been deleted.
+func (s *reportService) ensureAppeal(ctx context.Context, deckID uuid.UUID, ownerIDStr, deckName string) {
+	if s.appealService == nil || ownerIDStr == "" {
+		return
+	}
+	ownerID, err := uuid.Parse(ownerIDStr)
+	if err != nil {
+		log.Printf("[report] cannot mint appeal: bad owner_id %q: %v", ownerIDStr, err)
+		return
+	}
+	if _, _, err := s.appealService.EnsureAppealForDeletedDeck(ctx, EnsureAppealParams{
+		DeckID:           deckID,
+		UserID:           ownerID,
+		DeckName:         deckName,
+		ModerationReason: "Reported and removed by a moderator",
+	}); err != nil {
+		log.Printf("[report] ensure appeal failed deck=%s: %v", deckID, err)
 	}
 }
 

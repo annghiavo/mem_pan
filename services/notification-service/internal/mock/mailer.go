@@ -110,3 +110,27 @@ func (mr *MockMailerMockRecorder) SendDeckModeration(ctx, to, username, deckName
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendDeckModeration", reflect.TypeOf((*MockMailer)(nil).SendDeckModeration), ctx, to, username, deckName, deckStatus)
 }
+
+func (m *MockMailer) SendDeckDeletedWithAppeal(ctx context.Context, to, username, deckName, reason, appealURL string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendDeckDeletedWithAppeal", ctx, to, username, deckName, reason, appealURL)
+	r0, _ := ret[0].(error)
+	return r0
+}
+
+func (mr *MockMailerMockRecorder) SendDeckDeletedWithAppeal(ctx, to, username, deckName, reason, appealURL any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendDeckDeletedWithAppeal", reflect.TypeOf((*MockMailer)(nil).SendDeckDeletedWithAppeal), ctx, to, username, deckName, reason, appealURL)
+}
+
+func (m *MockMailer) SendAppealDecided(ctx context.Context, to, username, deckName, decision, note string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendAppealDecided", ctx, to, username, deckName, decision, note)
+	r0, _ := ret[0].(error)
+	return r0
+}
+
+func (mr *MockMailerMockRecorder) SendAppealDecided(ctx, to, username, deckName, decision, note any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendAppealDecided", reflect.TypeOf((*MockMailer)(nil).SendAppealDecided), ctx, to, username, deckName, decision, note)
+}

@@ -128,6 +128,40 @@ service AdminService {
             security: { security_requirement: { key: "BearerAuth"; value: {} } };
         };
     }
+
+    // ----- Deck appeals -----
+
+    // Public — used by the deck owner from the link in their deletion email.
+    rpc GetAppealByToken (GetAppealByTokenRequest) returns (Appeal) {
+        option (google.api.http) = { get: "/v1/admin/appeals/by-token/{token}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Public] Get appeal context by token"; tags: "appeals";
+        };
+    }
+
+    rpc SubmitAppeal (SubmitAppealRequest) returns (Appeal) {
+        option (google.api.http) = { post: "/v1/admin/appeals/by-token/{token}:submit"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Public] Submit deck appeal by token"; tags: "appeals";
+        };
+    }
+
+    // Admin/moderator endpoints.
+    rpc ListAppeals (ListAppealsRequest) returns (ListAppealsResponse) {
+        option (google.api.http) = { get: "/v1/admin/appeals" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] List deck appeals"; tags: "appeals";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc DecideAppeal (DecideAppealRequest) returns (Appeal) {
+        option (google.api.http) = { patch: "/v1/admin/appeals/{appeal_id}"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "[Admin] Approve or reject a deck appeal"; tags: "appeals";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
 }
 
 // Message definitions
@@ -299,4 +333,49 @@ message SendTestEmailRequest {
 
 message SendTestEmailResponse {
     string message = 1;
+}
+
+// ----- Appeals -----
+
+message Appeal {
+    string appeal_id         = 1;
+    string deck_id           = 2;
+    string user_id           = 3;
+    string deck_name         = 4;
+    string moderation_reason = 5;
+    string status            = 6;   // pending | submitted | approved | rejected
+    string user_message      = 7;
+    string submitted_at      = 8;
+    string decided_by        = 9;
+    string decision_note     = 10;
+    string decided_at        = 11;
+    string created_at        = 12;
+    string updated_at        = 13;
+}
+
+message GetAppealByTokenRequest {
+    string token = 1;
+}
+
+message SubmitAppealRequest {
+    string token   = 1;
+    string message = 2;
+}
+
+message ListAppealsRequest {
+    int32  page_size     = 1;
+    string page_token    = 2;
+    string status_filter = 3;   // "", pending, submitted, approved, rejected
+}
+
+message ListAppealsResponse {
+    repeated Appeal appeals         = 1;
+    string          next_page_token = 2;
+    int64           total           = 3;
+}
+
+message DecideAppealRequest {
+    string appeal_id = 1;
+    string decision  = 2;   // approve | reject
+    string note      = 3;
 }

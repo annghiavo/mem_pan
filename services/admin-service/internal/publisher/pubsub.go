@@ -78,3 +78,11 @@ func (p *httpPublisher) publish(ctx context.Context, eventType string, payload a
 func (p *httpPublisher) PublishReportResolved(ctx context.Context, event ReportResolvedEvent) error {
 	return p.publish(ctx, "report.resolved", event)
 }
+
+func (p *httpPublisher) PublishDeckAppealAvailable(ctx context.Context, event DeckAppealAvailableEvent) error {
+	return p.publish(ctx, "deck.appeal_available", event)
+}
+
+func (p *httpPublisher) PublishAppealDecided(ctx context.Context, event AppealDecidedEvent) error {
+	return p.publish(ctx, "appeal.decided", event)
+}

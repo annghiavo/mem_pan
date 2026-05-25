@@ -20,10 +20,12 @@ const (
 	KeyEmailVerification  = "email_verification"
 	KeyPasswordReset      = "password_reset"
 	KeyStudyReminder      = "study_reminder"
-	KeyReportResolved     = "report_resolved"
-	KeyDeckModeration     = "deck_moderation"
-	DefaultLocale         = "en"
-	defaultCacheTTL       = 60 * time.Second
+	KeyReportResolved        = "report_resolved"
+	KeyDeckModeration        = "deck_moderation"
+	KeyDeckDeletedWithAppeal = "deck_deleted_with_appeal"
+	KeyAppealDecided         = "appeal_decided"
+	DefaultLocale            = "en"
+	defaultCacheTTL          = 60 * time.Second
 )
 
 // Template is a renderable email template loaded from storage.
@@ -54,6 +56,8 @@ type Mailer interface {
 	SendPasswordReset(ctx context.Context, to, username, resetURL string) error
 	SendReportResolved(ctx context.Context, to, username, outcome string) error
 	SendDeckModeration(ctx context.Context, to, username, deckName, deckStatus string) error
+	SendDeckDeletedWithAppeal(ctx context.Context, to, username, deckName, reason, appealURL string) error
+	SendAppealDecided(ctx context.Context, to, username, deckName, decision, note string) error
 }
 
 type Config struct {
@@ -138,6 +142,42 @@ func (m *smtpMailer) SendDeckModeration(ctx context.Context, to, username, deckN
 	})
 }
 
+func (m *smtpMailer) SendDeckDeletedWithAppeal(
+	ctx context.Context, to, username, deckName, reason, appealURL string,
+) error {
+	if deckName == "" {
+		deckName = "your deck"
+	}
+	return m.Send(ctx, to, KeyDeckDeletedWithAppeal, map[string]string{
+		"Username":  username,
+		"DeckName":  deckName,
+		"Reason":    reason,
+		"AppealURL": appealURL,
+	})
+}
+
+func (m *smtpMailer) SendAppealDecided(
+	ctx context.Context, to, username, deckName, decision, note string,
+) error {
+	if deckName == "" {
+		deckName = "your deck"
+	}
+	outcome := decision
+	switch decision {
+	case "approved":
+		outcome = "approved — your deck has been restored"
+	case "rejected":
+		outcome = "rejected — the deletion stands"
+	}
+	return m.Send(ctx, to, KeyAppealDecided, map[string]string{
+		"Username":     username,
+		"DeckName":     deckName,
+		"Decision":     decision,
+		"Outcome":      outcome,
+		"DecisionNote": note,
+	})
+}
+
 // noopMailer silently discards all emails (used when SMTP is not configured).
 type noopMailer struct{}
 
@@ -150,6 +190,12 @@ func (n *noopMailer) SendEmailVerification(context.Context, string, string, stri
 func (n *noopMailer) SendPasswordReset(context.Context, string, string, string) error  { return nil }
 func (n *noopMailer) SendReportResolved(context.Context, string, string, string) error { return nil }
 func (n *noopMailer) SendDeckModeration(context.Context, string, string, string, string) error {
+	return nil
+}
+func (n *noopMailer) SendDeckDeletedWithAppeal(context.Context, string, string, string, string, string) error {
+	return nil
+}
+func (n *noopMailer) SendAppealDecided(context.Context, string, string, string, string, string) error {
 	return nil
 }
 
@@ -287,6 +333,39 @@ var defaultTemplates = map[string]Template{
 		Subject: "Important update regarding your MemPan deck \"{{.DeckName}}\"",
 		HTML:    "<!DOCTYPE html><html><body>\n<h2>Hi {{.Username}},</h2>\n<p>Your deck <strong>\"{{.DeckName}}\"</strong> has been <strong>{{.DeckStatus}}</strong> due to a violation of our content policies.</p>\n<p>If you believe this is a mistake, please contact support.</p>\n</body></html>",
 		Text:    "Hi {{.Username}},\n\nYour deck \"{{.DeckName}}\" has been {{.DeckStatus}} due to a violation of our content policies.\n\nIf you believe this is a mistake, please contact support.\n",
+	},
+	KeyDeckDeletedWithAppeal: {
+		Subject: "Your MemPan deck \"{{.DeckName}}\" was removed — you can appeal",
+		HTML: "<!DOCTYPE html><html><body>\n" +
+			"<h2>Hi {{.Username}},</h2>\n" +
+			"<p>Your deck <strong>\"{{.DeckName}}\"</strong> has been <strong>removed</strong> from MemPan.</p>\n" +
+			"<p><strong>Reason:</strong> {{.Reason}}</p>\n" +
+			"<p>If you believe this is a mistake, you can appeal this decision. A moderator will review your case and email you with the final outcome.</p>\n" +
+			"<p style=\"margin:24px 0;\"><a href=\"{{.AppealURL}}\" style=\"background:#2563eb;color:white;padding:10px 18px;border-radius:6px;text-decoration:none;font-weight:600;\">Submit an appeal</a></p>\n" +
+			"<p style=\"font-size:13px;color:#666;\">Or copy this link into your browser:<br/>{{.AppealURL}}</p>\n" +
+			"<p style=\"font-size:13px;color:#666;\">This link is unique to your deck and can only be used to file one appeal.</p>\n" +
+			"</body></html>",
+		Text: "Hi {{.Username}},\n\n" +
+			"Your deck \"{{.DeckName}}\" has been removed from MemPan.\n\n" +
+			"Reason: {{.Reason}}\n\n" +
+			"If you believe this is a mistake, you can appeal this decision. A moderator will review your case and email you with the final outcome.\n\n" +
+			"Submit an appeal:\n{{.AppealURL}}\n\n" +
+			"This link is unique to your deck and can only be used to file one appeal.\n",
+	},
+	KeyAppealDecided: {
+		Subject: "Decision on your MemPan deck appeal for \"{{.DeckName}}\"",
+		HTML: "<!DOCTYPE html><html><body>\n" +
+			"<h2>Hi {{.Username}},</h2>\n" +
+			"<p>A moderator has reviewed your appeal for the deck <strong>\"{{.DeckName}}\"</strong>.</p>\n" +
+			"<p><strong>Decision:</strong> {{.Outcome}}.</p>\n" +
+			"{{if .DecisionNote}}<p><strong>Moderator note:</strong> {{.DecisionNote}}</p>{{end}}\n" +
+			"<p>This appeal is now closed. No further action is required.</p>\n" +
+			"</body></html>",
+		Text: "Hi {{.Username}},\n\n" +
+			"A moderator has reviewed your appeal for the deck \"{{.DeckName}}\".\n\n" +
+			"Decision: {{.Outcome}}.\n" +
+			"{{if .DecisionNote}}Moderator note: {{.DecisionNote}}\n{{end}}\n" +
+			"This appeal is now closed. No further action is required.\n",
 	},
 }
 

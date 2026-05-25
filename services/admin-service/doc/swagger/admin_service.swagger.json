@@ -16,6 +16,170 @@
     "application/json"
   ],
   "paths": {
+    "/v1/admin/appeals": {
+      "get": {
+        "summary": "[Admin] List deck appeals",
+        "operationId": "AdminService_ListAppeals",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/adminListAppealsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "statusFilter",
+            "description": "\"\", pending, submitted, approved, rejected",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "appeals"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/admin/appeals/by-token/{token}": {
+      "get": {
+        "summary": "[Public] Get appeal context by token",
+        "operationId": "AdminService_GetAppealByToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/adminAppeal"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "appeals"
+        ]
+      }
+    },
+    "/v1/admin/appeals/by-token/{token}:submit": {
+      "post": {
+        "summary": "[Public] Submit deck appeal by token",
+        "operationId": "AdminService_SubmitAppeal",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/adminAppeal"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminServiceSubmitAppealBody"
+            }
+          }
+        ],
+        "tags": [
+          "appeals"
+        ]
+      }
+    },
+    "/v1/admin/appeals/{appealId}": {
+      "patch": {
+        "summary": "[Admin] Approve or reject a deck appeal",
+        "operationId": "AdminService_DecideAppeal",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/adminAppeal"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appealId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminServiceDecideAppealBody"
+            }
+          }
+        ],
+        "tags": [
+          "appeals"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/v1/admin/decks": {
       "get": {
         "summary": "[Admin] List all decks (filter by status)",
@@ -549,6 +713,18 @@
         }
       }
     },
+    "AdminServiceDecideAppealBody": {
+      "type": "object",
+      "properties": {
+        "decision": {
+          "type": "string",
+          "title": "approve | reject"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
     "AdminServicePreviewEmailTemplateBody": {
       "type": "object",
       "properties": {
@@ -589,6 +765,14 @@
           "additionalProperties": {
             "type": "string"
           }
+        }
+      }
+    },
+    "AdminServiceSubmitAppealBody": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
         }
       }
     },
@@ -654,6 +838,51 @@
         }
       }
     },
+    "adminAppeal": {
+      "type": "object",
+      "properties": {
+        "appealId": {
+          "type": "string"
+        },
+        "deckId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "deckName": {
+          "type": "string"
+        },
+        "moderationReason": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "title": "pending | submitted | approved | rejected"
+        },
+        "userMessage": {
+          "type": "string"
+        },
+        "submittedAt": {
+          "type": "string"
+        },
+        "decidedBy": {
+          "type": "string"
+        },
+        "decisionNote": {
+          "type": "string"
+        },
+        "decidedAt": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
     "adminBanUserResponse": {
       "type": "object",
       "properties": {
@@ -704,6 +933,25 @@
         },
         "updatedAt": {
           "type": "string"
+        }
+      }
+    },
+    "adminListAppealsResponse": {
+      "type": "object",
+      "properties": {
+        "appeals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/adminAppeal"
+          }
+        },
+        "nextPageToken": {
+          "type": "string"
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },

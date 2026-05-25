@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"log"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -12,6 +13,7 @@ import (
 
 	"mem_pan/services/admin-service/internal/db"
 	"mem_pan/services/admin-service/internal/deckclient"
+	"mem_pan/services/admin-service/internal/service"
 	pb "mem_pan/services/admin-service/pb/proto"
 )
 
@@ -101,7 +103,7 @@ func (s *Server) UpdateDeckStatus(ctx context.Context, req *pb.UpdateDeckStatusR
 		return nil, status.Error(codes.InvalidArgument, "status must be active, hidden, or deleted")
 	}
 
-	newStatus, _, err := s.deckClient.UpdateDeckStatus(ctx, deckID.String(), req.GetStatus())
+	newStatus, ownerID, err := s.deckClient.UpdateDeckStatus(ctx, deckID.String(), req.GetStatus())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to update deck status")
 	}
@@ -115,6 +117,25 @@ func (s *Server) UpdateDeckStatus(ctx context.Context, req *pb.UpdateDeckStatusR
 		Reason:     sql.NullString{String: req.GetReason(), Valid: req.GetReason() != ""},
 		Metadata:   sql.NullString{String: string(logMeta), Valid: true},
 	})
+
+	// When the admin directly deletes a deck (outside the report flow) we still
+	// need to give the owner the chance to appeal — same email + admin UI as the
+	// auto-moderation case.
+	if newStatus == "deleted" && ownerID != "" && s.appealSvc != nil {
+		if ownerUUID, parseErr := uuid.Parse(ownerID); parseErr == nil {
+			reason := req.GetReason()
+			if reason == "" {
+				reason = "Removed by a moderator"
+			}
+			if _, _, err := s.appealSvc.EnsureAppealForDeletedDeck(ctx, service.EnsureAppealParams{
+				DeckID:           deckID,
+				UserID:           ownerUUID,
+				ModerationReason: reason,
+			}); err != nil {
+				log.Printf("[admin] ensure appeal failed deck=%s: %v", deckID, err)
+			}
+		}
+	}
 
 	return &pb.UpdateDeckStatusResponse{
 		DeckId: deckID.String(),

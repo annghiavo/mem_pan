@@ -30,6 +30,16 @@ const (
 	// content_status='deleted' so the owner can appeal. Consumed by
 	// notification-service (FCM alert to the owner) and admin-service (audit log).
 	TypeModerationDeckDeleted = "moderation.deck_deleted"
+
+	// Published by admin-service the first time a deck-deletion gets an appeal
+	// row minted (auto-mod OR admin action). notification-service sends the
+	// owner the deletion email — with the appeal link this time.
+	TypeDeckAppealAvailable = "deck.appeal_available"
+
+	// Published by admin-service after a moderator approves or rejects an
+	// appeal. notification-service sends the final decision email (no appeal
+	// CTA — appeal is closed).
+	TypeAppealDecided = "appeal.decided"
 )
 
 type Envelope struct {
@@ -102,4 +112,29 @@ type ModerationDeckDeleted struct {
 	ViolatedCardIDs  []string  `json:"violated_card_ids"`
 	DeletedAt        time.Time `json:"deleted_at"`
 	ModeratorVersion string    `json:"moderator_version"`
+}
+
+// DeckAppealAvailable is published by admin-service once it has minted an
+// appeal row for a deck that was just deleted. notification-service sends the
+// deck-owner email — with the appeal CTA + token-link.
+type DeckAppealAvailable struct {
+	AppealToken      string    `json:"appeal_token"`
+	DeckID           string    `json:"deck_id"`
+	UserID           string    `json:"user_id"`
+	DeckName         string    `json:"deck_name"`
+	ModerationReason string    `json:"moderation_reason"`
+	CreatedAt        time.Time `json:"created_at"`
+}
+
+// AppealDecided is published by admin-service after a moderator approves or
+// rejects an appeal. notification-service sends the final email — no CTA, the
+// appeal is closed.
+type AppealDecided struct {
+	AppealID     string    `json:"appeal_id"`
+	DeckID       string    `json:"deck_id"`
+	UserID       string    `json:"user_id"`
+	DeckName     string    `json:"deck_name"`
+	Decision     string    `json:"decision"` // approved | rejected
+	DecisionNote string    `json:"decision_note"`
+	DecidedAt    time.Time `json:"decided_at"`
 }

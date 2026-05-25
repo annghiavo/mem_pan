@@ -31,6 +31,10 @@ const (
 	AdminService_UpdateEmailTemplate_FullMethodName  = "/admin.AdminService/UpdateEmailTemplate"
 	AdminService_PreviewEmailTemplate_FullMethodName = "/admin.AdminService/PreviewEmailTemplate"
 	AdminService_SendTestEmail_FullMethodName        = "/admin.AdminService/SendTestEmail"
+	AdminService_GetAppealByToken_FullMethodName     = "/admin.AdminService/GetAppealByToken"
+	AdminService_SubmitAppeal_FullMethodName         = "/admin.AdminService/SubmitAppeal"
+	AdminService_ListAppeals_FullMethodName          = "/admin.AdminService/ListAppeals"
+	AdminService_DecideAppeal_FullMethodName         = "/admin.AdminService/DecideAppeal"
 )
 
 // AdminServiceClient is the client API for AdminService service.
@@ -53,6 +57,12 @@ type AdminServiceClient interface {
 	UpdateEmailTemplate(ctx context.Context, in *UpdateEmailTemplateRequest, opts ...grpc.CallOption) (*EmailTemplate, error)
 	PreviewEmailTemplate(ctx context.Context, in *PreviewEmailTemplateRequest, opts ...grpc.CallOption) (*PreviewEmailTemplateResponse, error)
 	SendTestEmail(ctx context.Context, in *SendTestEmailRequest, opts ...grpc.CallOption) (*SendTestEmailResponse, error)
+	// Public — used by the deck owner from the link in their deletion email.
+	GetAppealByToken(ctx context.Context, in *GetAppealByTokenRequest, opts ...grpc.CallOption) (*Appeal, error)
+	SubmitAppeal(ctx context.Context, in *SubmitAppealRequest, opts ...grpc.CallOption) (*Appeal, error)
+	// Admin/moderator endpoints.
+	ListAppeals(ctx context.Context, in *ListAppealsRequest, opts ...grpc.CallOption) (*ListAppealsResponse, error)
+	DecideAppeal(ctx context.Context, in *DecideAppealRequest, opts ...grpc.CallOption) (*Appeal, error)
 }
 
 type adminServiceClient struct {
@@ -183,6 +193,46 @@ func (c *adminServiceClient) SendTestEmail(ctx context.Context, in *SendTestEmai
 	return out, nil
 }
 
+func (c *adminServiceClient) GetAppealByToken(ctx context.Context, in *GetAppealByTokenRequest, opts ...grpc.CallOption) (*Appeal, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Appeal)
+	err := c.cc.Invoke(ctx, AdminService_GetAppealByToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) SubmitAppeal(ctx context.Context, in *SubmitAppealRequest, opts ...grpc.CallOption) (*Appeal, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Appeal)
+	err := c.cc.Invoke(ctx, AdminService_SubmitAppeal_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) ListAppeals(ctx context.Context, in *ListAppealsRequest, opts ...grpc.CallOption) (*ListAppealsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAppealsResponse)
+	err := c.cc.Invoke(ctx, AdminService_ListAppeals_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) DecideAppeal(ctx context.Context, in *DecideAppealRequest, opts ...grpc.CallOption) (*Appeal, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Appeal)
+	err := c.cc.Invoke(ctx, AdminService_DecideAppeal_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServiceServer is the server API for AdminService service.
 // All implementations must embed UnimplementedAdminServiceServer
 // for forward compatibility.
@@ -203,6 +253,12 @@ type AdminServiceServer interface {
 	UpdateEmailTemplate(context.Context, *UpdateEmailTemplateRequest) (*EmailTemplate, error)
 	PreviewEmailTemplate(context.Context, *PreviewEmailTemplateRequest) (*PreviewEmailTemplateResponse, error)
 	SendTestEmail(context.Context, *SendTestEmailRequest) (*SendTestEmailResponse, error)
+	// Public — used by the deck owner from the link in their deletion email.
+	GetAppealByToken(context.Context, *GetAppealByTokenRequest) (*Appeal, error)
+	SubmitAppeal(context.Context, *SubmitAppealRequest) (*Appeal, error)
+	// Admin/moderator endpoints.
+	ListAppeals(context.Context, *ListAppealsRequest) (*ListAppealsResponse, error)
+	DecideAppeal(context.Context, *DecideAppealRequest) (*Appeal, error)
 	mustEmbedUnimplementedAdminServiceServer()
 }
 
@@ -248,6 +304,18 @@ func (UnimplementedAdminServiceServer) PreviewEmailTemplate(context.Context, *Pr
 }
 func (UnimplementedAdminServiceServer) SendTestEmail(context.Context, *SendTestEmailRequest) (*SendTestEmailResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendTestEmail not implemented")
+}
+func (UnimplementedAdminServiceServer) GetAppealByToken(context.Context, *GetAppealByTokenRequest) (*Appeal, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAppealByToken not implemented")
+}
+func (UnimplementedAdminServiceServer) SubmitAppeal(context.Context, *SubmitAppealRequest) (*Appeal, error) {
+	return nil, status.Error(codes.Unimplemented, "method SubmitAppeal not implemented")
+}
+func (UnimplementedAdminServiceServer) ListAppeals(context.Context, *ListAppealsRequest) (*ListAppealsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListAppeals not implemented")
+}
+func (UnimplementedAdminServiceServer) DecideAppeal(context.Context, *DecideAppealRequest) (*Appeal, error) {
+	return nil, status.Error(codes.Unimplemented, "method DecideAppeal not implemented")
 }
 func (UnimplementedAdminServiceServer) mustEmbedUnimplementedAdminServiceServer() {}
 func (UnimplementedAdminServiceServer) testEmbeddedByValue()                      {}
@@ -486,6 +554,78 @@ func _AdminService_SendTestEmail_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminService_GetAppealByToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAppealByTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).GetAppealByToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_GetAppealByToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).GetAppealByToken(ctx, req.(*GetAppealByTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_SubmitAppeal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubmitAppealRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).SubmitAppeal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_SubmitAppeal_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).SubmitAppeal(ctx, req.(*SubmitAppealRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_ListAppeals_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAppealsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).ListAppeals(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_ListAppeals_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).ListAppeals(ctx, req.(*ListAppealsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_DecideAppeal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DecideAppealRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).DecideAppeal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_DecideAppeal_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).DecideAppeal(ctx, req.(*DecideAppealRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AdminService_ServiceDesc is the grpc.ServiceDesc for AdminService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -540,6 +680,22 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendTestEmail",
 			Handler:    _AdminService_SendTestEmail_Handler,
+		},
+		{
+			MethodName: "GetAppealByToken",
+			Handler:    _AdminService_GetAppealByToken_Handler,
+		},
+		{
+			MethodName: "SubmitAppeal",
+			Handler:    _AdminService_SubmitAppeal_Handler,
+		},
+		{
+			MethodName: "ListAppeals",
+			Handler:    _AdminService_ListAppeals_Handler,
+		},
+		{
+			MethodName: "DecideAppeal",
+			Handler:    _AdminService_DecideAppeal_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

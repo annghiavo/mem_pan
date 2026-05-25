@@ -42,48 +42,99 @@ func (h *Handler) Dispatch(ctx context.Context, eventType string, data []byte) e
 		return h.handleCronStreakWarning(ctx, data)
 	case events.TypeModerationDeckDeleted:
 		return h.handleModerationDeckDeleted(ctx, data)
+	case events.TypeDeckAppealAvailable:
+		return h.handleDeckAppealAvailable(ctx, data)
+	case events.TypeAppealDecided:
+		return h.handleAppealDecided(ctx, data)
 	default:
 		log.Printf("[notification] unknown event type %q — skipping", eventType)
 		return nil
 	}
 }
 
+// handleModerationDeckDeleted only sends the FCM push notification.
+//
+// The deck-owner email is intentionally NOT sent here — admin-service consumes
+// the same event, mints a deck_appeals row, and publishes deck.appeal_available
+// which carries the appeal token used to build the email's appeal link.
 func (h *Handler) handleModerationDeckDeleted(ctx context.Context, data []byte) error {
 	var e events.ModerationDeckDeleted
 	if err := json.Unmarshal(data, &e); err != nil {
 		return err
 	}
-	uid, err := uuid.Parse(e.UserID)
-	if err != nil {
+	if _, err := uuid.Parse(e.UserID); err != nil {
 		log.Printf("[moderation] invalid user_id %q — skipping notification", e.UserID)
 		return nil
 	}
 
-	// 1. FCM push (in-app banner).
 	if pushErr := h.svc.SendModerationDeckDeletedPush(
 		ctx, e.UserID, e.DeckID, e.DeckName, e.Reason, len(e.ViolatedCardIDs),
 	); pushErr != nil {
 		log.Printf("[moderation] fcm push failed user=%s: %v", e.UserID, pushErr)
 	}
+	return nil
+}
 
-	// 2. Email — lookup the owner's address via auth-service.
+// handleDeckAppealAvailable sends the deletion email WITH the appeal link.
+func (h *Handler) handleDeckAppealAvailable(ctx context.Context, data []byte) error {
+	var e events.DeckAppealAvailable
+	if err := json.Unmarshal(data, &e); err != nil {
+		return err
+	}
 	if h.authClient == nil {
-		log.Printf("[moderation] no authClient configured, skipping email user=%s", e.UserID)
+		log.Printf("[appeal] deck.appeal_available: authClient not configured — skipping email user=%s", e.UserID)
+		return nil
+	}
+	uid, err := uuid.Parse(e.UserID)
+	if err != nil {
+		log.Printf("[appeal] deck.appeal_available: bad user_id %q — skipping", e.UserID)
 		return nil
 	}
 	user, err := h.authClient.GetUserByID(ctx, uid)
 	if err != nil {
-		log.Printf("[moderation] auth lookup failed user=%s: %v", e.UserID, err)
+		log.Printf("[appeal] deck.appeal_available: auth lookup failed user=%s: %v", e.UserID, err)
 		return nil
 	}
 	if user.Email == "" {
-		log.Printf("[moderation] user %s has no email on file, skipping", e.UserID)
+		log.Printf("[appeal] deck.appeal_available: user %s has no email — skipping", e.UserID)
 		return nil
 	}
-	if mailErr := h.svc.SendDeckModerationEmail(
-		ctx, e.UserID, user.Email, user.Username, e.DeckName, "deleted",
+	if mailErr := h.svc.SendDeckDeletedWithAppealEmail(
+		ctx, e.UserID, user.Email, user.Username, e.DeckName, e.ModerationReason, e.AppealToken,
 	); mailErr != nil {
-		log.Printf("[moderation] email send failed user=%s to=%s: %v", e.UserID, user.Email, mailErr)
+		log.Printf("[appeal] deck.appeal_available: send failed user=%s to=%s: %v", e.UserID, user.Email, mailErr)
+	}
+	return nil
+}
+
+// handleAppealDecided sends the final email — appeal closed, no CTA.
+func (h *Handler) handleAppealDecided(ctx context.Context, data []byte) error {
+	var e events.AppealDecided
+	if err := json.Unmarshal(data, &e); err != nil {
+		return err
+	}
+	if h.authClient == nil {
+		log.Printf("[appeal] appeal.decided: authClient not configured — skipping email user=%s", e.UserID)
+		return nil
+	}
+	uid, err := uuid.Parse(e.UserID)
+	if err != nil {
+		log.Printf("[appeal] appeal.decided: bad user_id %q — skipping", e.UserID)
+		return nil
+	}
+	user, err := h.authClient.GetUserByID(ctx, uid)
+	if err != nil {
+		log.Printf("[appeal] appeal.decided: auth lookup failed user=%s: %v", e.UserID, err)
+		return nil
+	}
+	if user.Email == "" {
+		log.Printf("[appeal] appeal.decided: user %s has no email — skipping", e.UserID)
+		return nil
+	}
+	if mailErr := h.svc.SendAppealDecidedEmail(
+		ctx, e.UserID, user.Email, user.Username, e.DeckName, e.Decision, e.DecisionNote,
+	); mailErr != nil {
+		log.Printf("[appeal] appeal.decided: send failed user=%s to=%s: %v", e.UserID, user.Email, mailErr)
 	}
 	return nil
 }
@@ -198,25 +249,10 @@ func (h *Handler) handleReportResolved(ctx context.Context, data []byte) error {
 		}
 	}
 
-	if e.TargetType == "deck" && (e.Action == "hide_deck" || e.Action == "delete_deck") && e.TargetOwnerID != "" {
-		ownerID, err := uuid.Parse(e.TargetOwnerID)
-		if err == nil {
-			owner, err := h.authClient.GetUserByID(ctx, ownerID)
-			if err == nil {
-				deckStatus := "hidden"
-				if e.Action == "delete_deck" {
-					deckStatus = "deleted"
-				}
-				if err := h.svc.SendDeckModerationEmail(ctx, e.TargetOwnerID, owner.Email, owner.Username, "", deckStatus); err != nil {
-					log.Printf("[notification] report.resolved: send deck moderation to %s failed: %v", owner.Email, err)
-				}
-			} else {
-				log.Printf("[notification] report.resolved: lookup target owner %s failed: %v", e.TargetOwnerID, err)
-			}
-		} else {
-			log.Printf("[notification] report.resolved: bad target_owner_id %q: %v", e.TargetOwnerID, err)
-		}
-	}
+	// The deck-owner email is intentionally NOT sent here. For `delete_deck`,
+	// admin-service mints a deck-appeal row and publishes deck.appeal_available
+	// — that's the path that emails the owner with the appeal link. For
+	// `hide_deck`, the owner is not emailed (the deck simply hides).
 
 	return nil
 }

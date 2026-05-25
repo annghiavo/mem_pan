@@ -87,11 +87,13 @@ func main() {
 	}
 
 	reportRepo := repository.NewReportRepository(database)
-	reportSvc := service.NewReportService(reportRepo, authClient, deckClient, pub)
+	appealRepo := repository.NewAppealRepository(database)
+	appealSvc := service.NewAppealService(appealRepo, reportRepo, deckClient, pub)
+	reportSvc := service.NewReportService(reportRepo, authClient, deckClient, pub, appealSvc)
 
-	server := gapi.NewServer(reportSvc, reportRepo, authClient, notifyClient, deckClient)
+	server := gapi.NewServer(reportSvc, appealSvc, reportRepo, authClient, notifyClient, deckClient)
 
-	subHandler := subscriber.NewHandler(reportRepo)
+	subHandler := subscriber.NewHandler(reportRepo, appealSvc)
 	pushHandler := subscriber.NewPushHandler(subHandler, cfg.PubSubPushSecret)
 
 	quit := make(chan os.Signal, 1)

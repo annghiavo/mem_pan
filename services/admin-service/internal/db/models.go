@@ -13,6 +13,50 @@ import (
 	"github.com/google/uuid"
 )
 
+type AppealStatus string
+
+const (
+	AppealStatusPending   AppealStatus = "pending"
+	AppealStatusSubmitted AppealStatus = "submitted"
+	AppealStatusApproved  AppealStatus = "approved"
+	AppealStatusRejected  AppealStatus = "rejected"
+)
+
+func (e *AppealStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AppealStatus(s)
+	case string:
+		*e = AppealStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AppealStatus: %T", src)
+	}
+	return nil
+}
+
+type NullAppealStatus struct {
+	AppealStatus AppealStatus `json:"appeal_status"`
+	Valid        bool         `json:"valid"` // Valid is true if AppealStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAppealStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.AppealStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AppealStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAppealStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AppealStatus), nil
+}
+
 type ReportCategory string
 
 const (
@@ -144,6 +188,23 @@ func (ns NullReportTargetType) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.ReportTargetType), nil
+}
+
+type DeckAppeal struct {
+	AppealID         uuid.UUID      `json:"appeal_id"`
+	Token            string         `json:"token"`
+	DeckID           uuid.UUID      `json:"deck_id"`
+	UserID           uuid.UUID      `json:"user_id"`
+	DeckName         string         `json:"deck_name"`
+	ModerationReason string         `json:"moderation_reason"`
+	Status           AppealStatus   `json:"status"`
+	UserMessage      sql.NullString `json:"user_message"`
+	SubmittedAt      sql.NullTime   `json:"submitted_at"`
+	DecidedBy        uuid.NullUUID  `json:"decided_by"`
+	DecisionNote     sql.NullString `json:"decision_note"`
+	DecidedAt        sql.NullTime   `json:"decided_at"`
+	CreatedAt        time.Time      `json:"created_at"`
+	UpdatedAt        time.Time      `json:"updated_at"`
 }
 
 type ModerationLog struct {

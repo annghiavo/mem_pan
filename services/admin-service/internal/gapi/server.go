@@ -18,6 +18,7 @@ import (
 type Server struct {
 	pb.UnimplementedAdminServiceServer
 	reportSvc    service.ReportService
+	appealSvc    service.AppealService
 	reportRepo   repository.ReportRepository
 	authClient   authclient.Client
 	notifyClient notifyclient.Client
@@ -26,6 +27,7 @@ type Server struct {
 
 func NewServer(
 	reportSvc service.ReportService,
+	appealSvc service.AppealService,
 	reportRepo repository.ReportRepository,
 	authClient authclient.Client,
 	notifyClient notifyclient.Client,
@@ -33,6 +35,7 @@ func NewServer(
 ) *Server {
 	return &Server{
 		reportSvc:    reportSvc,
+		appealSvc:    appealSvc,
 		reportRepo:   reportRepo,
 		authClient:   authClient,
 		notifyClient: notifyClient,
@@ -44,6 +47,14 @@ func toGRPCError(err error) error {
 	switch {
 	case errors.Is(err, domain.ErrReportNotFound):
 		return status.Error(codes.NotFound, err.Error())
+	case errors.Is(err, domain.ErrAppealNotFound):
+		return status.Error(codes.NotFound, err.Error())
+	case errors.Is(err, domain.ErrAppealAlreadyExists):
+		return status.Error(codes.AlreadyExists, err.Error())
+	case errors.Is(err, domain.ErrAppealNotSubmittable):
+		return status.Error(codes.FailedPrecondition, err.Error())
+	case errors.Is(err, domain.ErrInvalidAppealAction):
+		return status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, domain.ErrForbidden):
 		return status.Error(codes.PermissionDenied, err.Error())
 	case errors.Is(err, domain.ErrAdminRequired):
