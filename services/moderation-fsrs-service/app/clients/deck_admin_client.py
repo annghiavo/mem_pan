@@ -23,6 +23,10 @@ from pb import deck_admin_pb2_grpc as pb_grpc
 log = logging.getLogger(__name__)
 
 
+def _is_cloud_run(addr: str) -> bool:
+    return addr.endswith(":443") or ".run.app" in addr
+
+
 class DeckAdminClient:
     def __init__(self, addr: str) -> None:
         self.addr = addr
@@ -31,7 +35,11 @@ class DeckAdminClient:
 
     def _ensure(self) -> pb_grpc.DeckServiceStub:
         if self._stub is None:
-            self._channel = grpc.aio.insecure_channel(self.addr)
+            if _is_cloud_run(self.addr):
+                creds = grpc.ssl_channel_credentials()
+                self._channel = grpc.aio.secure_channel(self.addr, creds)
+            else:
+                self._channel = grpc.aio.insecure_channel(self.addr)
             self._stub = pb_grpc.DeckServiceStub(self._channel)
         return self._stub
 

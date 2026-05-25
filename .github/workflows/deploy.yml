@@ -212,7 +212,7 @@ jobs:
               ;;
             admin-service)
               SECRET_STR="DATABASE_URL=admin-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,PUBSUB_PUSH_SECRET=pubsub-push-token:latest"
-              ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443,DECK_SERVICE_ADDRESS=deck-service-wzed7v5hbq-as.a.run.app:443"
+              ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-as.a.run.app:443,DECK_SERVICE_ADDRESS=deck-service-wzed7v5hbq-as.a.run.app:443,NOTIFICATION_SERVICE_ADDRESS=notification-service-wzed7v5hbq-as.a.run.app:443"
               ;;
             notification-service)
               SECRET_STR="DATABASE_URL=notif-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,SMTP_PASSWORD=smtp-password:latest,PUBSUB_PUSH_SECRET=pubsub-push-token:latest"
