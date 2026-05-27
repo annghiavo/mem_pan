@@ -10,8 +10,8 @@
 
 ```bash
 gcloud config set project mempan-cac51
-gcloud config set run/region asia-southeast1
-gcloud auth configure-docker asia-southeast1-docker.pkg.dev
+gcloud config set run/region asia-southeast3
+gcloud auth configure-docker asia-southeast3-docker.pkg.dev
 # Docker desktop / OrbStack đang chạy:
 docker info >/dev/null
 ```
@@ -34,7 +34,7 @@ cd services/moderation-fsrs-service
 
 # Tag theo SHA short để dễ rollback. Push thêm `latest` để cache cho lần sau.
 SHA=$(git rev-parse --short HEAD)
-IMG_BASE="asia-southeast1-docker.pkg.dev/mempan-cac51/mempan-services/moderation-fsrs-service"
+IMG_BASE="asia-southeast3-docker.pkg.dev/mempan-cac51/mempan-services/moderation-fsrs-service"
 
 docker buildx build \
   --platform=linux/amd64 \
@@ -56,7 +56,7 @@ Kiểm tra image đã push:
 
 ```bash
 gcloud artifacts docker images list \
-  asia-southeast1-docker.pkg.dev/mempan-cac51/mempan-services/moderation-fsrs-service \
+  asia-southeast3-docker.pkg.dev/mempan-cac51/mempan-services/moderation-fsrs-service \
   --include-tags --limit=3
 ```
 
@@ -66,15 +66,15 @@ gcloud artifacts docker images list \
 
 ```bash
 SHA=$(git rev-parse --short HEAD)
-IMG="asia-southeast1-docker.pkg.dev/mempan-cac51/mempan-services/moderation-fsrs-service:$SHA"
+IMG="asia-southeast3-docker.pkg.dev/mempan-cac51/mempan-services/moderation-fsrs-service:$SHA"
 
 gcloud run deploy moderation-fsrs-service \
   --image="$IMG" \
-  --region=asia-southeast1 \
+  --region=asia-southeast3 \
   --platform=managed \
   --service-account=mempan-runtime@mempan-cac51.iam.gserviceaccount.com \
   --execution-environment=gen2 \
-  --use-http2 \
+  --no-use-http2 \
   --allow-unauthenticated \
   --port=8080 \
   --memory=4Gi \
@@ -83,12 +83,27 @@ gcloud run deploy moderation-fsrs-service \
   --min-instances=0 \
   --max-instances=2 \
   --timeout=300 \
-  --add-volume="name=models,type=cloud-storage,bucket=mempan-cac51-models" \
+  --add-volume="name=models,type=cloud-storage,bucket=mempan-cac51-models-se3" \
   --add-volume-mount="volume=models,mount-path=/models" \
   --set-secrets="PUBSUB_PUSH_SECRET=pubsub-push-token:latest" \
-  --set-env-vars="HTTP_PORT=8080,GRPC_PORT=9090,PUBSUB_PROJECT_ID=mempan-cac51,DECK_SERVICE_ADDR=deck-service-wzed7v5hbq-as.a.run.app:443,TEXT_MODEL_DIR=/models/flashcard_text_moderator,IMAGE_MODEL_DIR=/models/flashcard_image_moderator" \
+  --set-env-vars="HTTP_PORT=8080,GRPC_PORT=9090,PUBSUB_PROJECT_ID=mempan-cac51,DECK_SERVICE_ADDR=deck-service-wzed7v5hbq-eu.a.run.app:443,TEXT_MODEL_DIR=/models/flashcard_text_moderator,IMAGE_MODEL_DIR=/models/flashcard_image_moderator" \
   --quiet
 ```
+
+> ⚠️ **`--no-use-http2` là bắt buộc.** Service chạy HTTP server bằng **aiohttp (HTTP/1.1)**.
+> Nếu bật `--use-http2`, Cloud Run đẩy h2c vào container → aiohttp parse fail
+> (`BadHttpMessage: PRI/Upgrade`) → mọi request kể cả Pub/Sub push trả **502**.
+>
+> ⚠️ **Startup probe mặc định (240s) không đủ.** Load 2 model (~150s) + bind port
+> vượt 240s → revision fail "container failed to start". Sau khi deploy, nới probe:
+> ```bash
+> gcloud run services describe moderation-fsrs-service --region=asia-southeast3 --format=export > /tmp/mod.yaml
+> # sửa startupProbe: failureThreshold=60, periodSeconds=10, timeoutSeconds=10 (≈600s); xoá label startupProbeType: Default
+> gcloud run services replace /tmp/mod.yaml --region=asia-southeast3
+> ```
+>
+> 📦 **Bucket model `mempan-cac51-models-se3`** phải cùng region (asia-southeast3) với
+> service để FUSE đọc nhanh và tránh egress chéo region.
 
 Cờ phải hiểu:
 - `--execution-environment=gen2`: **bắt buộc** để có GCS FUSE driver.
@@ -109,7 +124,7 @@ card/deck event vào đây). Subscription đẩy push tới `/internal/pubsub`.
 
 ```bash
 MOD_URL=$(gcloud run services describe moderation-fsrs-service \
-  --region=asia-southeast1 --format='value(status.url)')
+  --region=asia-southeast3 --format='value(status.url)')
 TOKEN=$(gcloud secrets versions access latest --secret=pubsub-push-token)
 
 gcloud pubsub subscriptions create moderation-deck-events-sub \
@@ -139,7 +154,7 @@ gcloud pubsub subscriptions list --filter='name~moderation' \
 # 1. Service alive
 curl -sS -w "\nHTTP %{http_code}\n" \
   "$(gcloud run services describe moderation-fsrs-service \
-       --region=asia-southeast1 --format='value(status.url)')/swagger" | head
+       --region=asia-southeast3 --format='value(status.url)')/swagger" | head
 
 # 2. Logs khi container start xong
 gcloud logging read \
@@ -195,7 +210,7 @@ gcloud storage cp -r ml_model/results/flashcard_text_moderator \
 
 # Restart service để pick up (Cloud Run cache FUSE mount theo revision)
 gcloud run services update moderation-fsrs-service \
-  --region=asia-southeast1 --clear-base-image --quiet
+  --region=asia-southeast3 --clear-base-image --quiet
 ```
 
 Hoặc trigger 1 deploy mới với cùng image SHA — bất cứ revision mới nào
@@ -208,11 +223,11 @@ cũng tạo FUSE mount fresh.
 ```bash
 # Xem 5 revision gần nhất
 gcloud run revisions list --service=moderation-fsrs-service \
-  --region=asia-southeast1 --limit=5
+  --region=asia-southeast3 --limit=5
 
 # Route 100% traffic về revision cũ
 gcloud run services update-traffic moderation-fsrs-service \
-  --region=asia-southeast1 \
+  --region=asia-southeast3 \
   --to-revisions=moderation-fsrs-service-00001-xyz=100
 ```
 
