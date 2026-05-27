@@ -200,7 +200,7 @@ jobs:
               ;;
             deck-service)
               SECRET_STR="DATABASE_URL=deck-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,CLOUDINARY_URL=deck-cloudinary-url:latest"
-              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=deck-events,AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-eu.a.run.app:443"
+              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=deck-events,AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-eu.a.run.app:443,STUDY_SERVICE_ADDRESS=study-service-wzed7v5hbq-eu.a.run.app:443"
               ;;
             study-service)
               SECRET_STR="DATABASE_URL=study-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest"
