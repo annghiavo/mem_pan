@@ -30,3 +30,6 @@ UPDATE deck_stats SET
     deck_name  = $2,
     updated_at = CURRENT_TIMESTAMP
 WHERE deck_id = $1;
+
+-- name: DeleteDeckStats :exec
+DELETE FROM deck_stats WHERE deck_id = $1 AND user_id = $2;

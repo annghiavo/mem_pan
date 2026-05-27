@@ -19,6 +19,7 @@ type StatsRepository interface {
 	IncrementReview(ctx context.Context, arg db.IncrementReviewParams) error
 	UpdateStreak(ctx context.Context, userID uuid.UUID, streak int32, lastDate time.Time) error
 	IncrementUserCards(ctx context.Context, userID uuid.UUID) error
+	DecrementUserCards(ctx context.Context, userID uuid.UUID, count int32) error
 	UpdateUserProfile(ctx context.Context, userID uuid.UUID, username, avatarURL string) error
 
 	// daily_stats
@@ -32,10 +33,12 @@ type StatsRepository interface {
 	IncrementDeckTotalCards(ctx context.Context, deckID uuid.UUID) error
 	ShiftDeckCardStates(ctx context.Context, arg db.ShiftDeckCardStatesParams) error
 	UpdateDeckName(ctx context.Context, deckID uuid.UUID, name string) error
+	DeleteDeckStats(ctx context.Context, deckID, userID uuid.UUID) error
 
 	// deck_progress_snapshots
 	UpsertDeckProgressSnapshot(ctx context.Context, arg db.UpsertDeckProgressSnapshotParams) error
 	ListDeckProgressSnapshots(ctx context.Context, deckID uuid.UUID, from, to time.Time) ([]db.DeckProgressSnapshot, error)
+	DeleteDeckProgressSnapshots(ctx context.Context, deckID, userID uuid.UUID) error
 
 	// Reminder cron support
 	BumpActivityBucket(ctx context.Context, userID uuid.UUID, hour int16, dayType int16, count int32) error
@@ -95,6 +98,13 @@ func (r *statsRepository) IncrementUserCards(ctx context.Context, userID uuid.UU
 	return r.q.IncrementUserCards(ctx, userID)
 }
 
+func (r *statsRepository) DecrementUserCards(ctx context.Context, userID uuid.UUID, count int32) error {
+	return r.q.DecrementUserCards(ctx, db.DecrementUserCardsParams{
+		UserID:     userID,
+		TotalCards: count,
+	})
+}
+
 func (r *statsRepository) UpdateUserProfile(ctx context.Context, userID uuid.UUID, username, avatarURL string) error {
 	return r.q.UpdateUserProfile(ctx, db.UpdateUserProfileParams{
 		UserID:    userID,
@@ -150,15 +160,29 @@ func (r *statsRepository) UpdateDeckName(ctx context.Context, deckID uuid.UUID, 
 	})
 }
 
+func (r *statsRepository) DeleteDeckStats(ctx context.Context, deckID, userID uuid.UUID) error {
+	return r.q.DeleteDeckStats(ctx, db.DeleteDeckStatsParams{
+		DeckID: deckID,
+		UserID: userID,
+	})
+}
+
 func (r *statsRepository) UpsertDeckProgressSnapshot(ctx context.Context, arg db.UpsertDeckProgressSnapshotParams) error {
 	return r.q.UpsertDeckProgressSnapshot(ctx, arg)
 }
 
 func (r *statsRepository) ListDeckProgressSnapshots(ctx context.Context, deckID uuid.UUID, from, to time.Time) ([]db.DeckProgressSnapshot, error) {
 	return r.q.ListDeckProgressSnapshots(ctx, db.ListDeckProgressSnapshotsParams{
-		DeckID:        deckID,
-		SnapshotDate:  from,
+		DeckID:         deckID,
+		SnapshotDate:   from,
 		SnapshotDate_2: to,
+	})
+}
+
+func (r *statsRepository) DeleteDeckProgressSnapshots(ctx context.Context, deckID, userID uuid.UUID) error {
+	return r.q.DeleteDeckProgressSnapshots(ctx, db.DeleteDeckProgressSnapshotsParams{
+		DeckID: deckID,
+		UserID: userID,
 	})
 }
 
@@ -186,9 +210,9 @@ func (r *statsRepository) SetOptimalHours(ctx context.Context, userID uuid.UUID,
 		we = sql.NullInt16{Int16: *weekend, Valid: true}
 	}
 	return r.q.SetOptimalHours(ctx, db.SetOptimalHoursParams{
-		UserID:               userID,
-		OptimalHourWeekday:   wd,
-		OptimalHourWeekend:   we,
+		UserID:             userID,
+		OptimalHourWeekday: wd,
+		OptimalHourWeekend: we,
 	})
 }
 

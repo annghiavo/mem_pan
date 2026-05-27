@@ -116,6 +116,23 @@ func (q *Queries) IncrementUserCards(ctx context.Context, userID uuid.UUID) erro
 	return err
 }
 
+const decrementUserCards = `-- name: DecrementUserCards :exec
+UPDATE user_stats SET
+    total_cards = GREATEST(0, total_cards - $2),
+    updated_at  = CURRENT_TIMESTAMP
+WHERE user_id = $1
+`
+
+type DecrementUserCardsParams struct {
+	UserID     uuid.UUID `json:"user_id"`
+	TotalCards int32     `json:"total_cards"`
+}
+
+func (q *Queries) DecrementUserCards(ctx context.Context, arg DecrementUserCardsParams) error {
+	_, err := q.db.ExecContext(ctx, decrementUserCards, arg.UserID, arg.TotalCards)
+	return err
+}
+
 const updateStreak = `-- name: UpdateStreak :exec
 UPDATE user_stats SET
     current_streak    = $2,

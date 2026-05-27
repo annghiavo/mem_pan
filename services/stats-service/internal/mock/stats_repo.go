@@ -106,6 +106,20 @@ func (mr *MockStatsRepositoryMockRecorder) IncrementUserCards(ctx, userID any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncrementUserCards", reflect.TypeOf((*MockStatsRepository)(nil).IncrementUserCards), ctx, userID)
 }
 
+// DecrementUserCards
+
+func (m *MockStatsRepository) DecrementUserCards(ctx context.Context, userID uuid.UUID, count int32) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DecrementUserCards", ctx, userID, count)
+	r0, _ := ret[0].(error)
+	return r0
+}
+
+func (mr *MockStatsRepositoryMockRecorder) DecrementUserCards(ctx, userID, count any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DecrementUserCards", reflect.TypeOf((*MockStatsRepository)(nil).DecrementUserCards), ctx, userID, count)
+}
+
 // UpdateUserProfile
 
 func (m *MockStatsRepository) UpdateUserProfile(ctx context.Context, userID uuid.UUID, username, avatarURL string) error {
@@ -233,6 +247,34 @@ func (m *MockStatsRepository) UpdateDeckName(ctx context.Context, deckID uuid.UU
 func (mr *MockStatsRepositoryMockRecorder) UpdateDeckName(ctx, deckID, name any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDeckName", reflect.TypeOf((*MockStatsRepository)(nil).UpdateDeckName), ctx, deckID, name)
+}
+
+// DeleteDeckStats
+
+func (m *MockStatsRepository) DeleteDeckStats(ctx context.Context, deckID, userID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteDeckStats", ctx, deckID, userID)
+	r0, _ := ret[0].(error)
+	return r0
+}
+
+func (mr *MockStatsRepositoryMockRecorder) DeleteDeckStats(ctx, deckID, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteDeckStats", reflect.TypeOf((*MockStatsRepository)(nil).DeleteDeckStats), ctx, deckID, userID)
+}
+
+// DeleteDeckProgressSnapshots
+
+func (m *MockStatsRepository) DeleteDeckProgressSnapshots(ctx context.Context, deckID, userID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteDeckProgressSnapshots", ctx, deckID, userID)
+	r0, _ := ret[0].(error)
+	return r0
+}
+
+func (mr *MockStatsRepositoryMockRecorder) DeleteDeckProgressSnapshots(ctx, deckID, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteDeckProgressSnapshots", reflect.TypeOf((*MockStatsRepository)(nil).DeleteDeckProgressSnapshots), ctx, deckID, userID)
 }
 
 // UpsertDeckProgressSnapshot

@@ -60,7 +60,7 @@ func Load() (Config, error) {
 		FCMCredentialsFile: getEnv("FCM_CREDENTIALS_FILE", ""),
 
 		AppBaseURL:      getEnv("APP_BASE_URL", "https://mempan.app"),
-		AdminWebBaseURL: getEnv("ADMIN_WEB_BASE_URL", "http://localhost:5173"),
+		AdminWebBaseURL: getEnv("ADMIN_WEB_BASE_URL", "https://admin-web-tawny-kappa.vercel.app"),
 	}
 
 	if cfg.DBUrl == "" {

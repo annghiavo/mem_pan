@@ -6,6 +6,7 @@ const (
 	TypeUserRegistered = "user.registered"
 	TypeDeckCreated    = "deck.created"
 	TypeDeckUpdated    = "deck.updated"
+	TypeDeckDeleted    = "deck.deleted"
 	TypeCardCreated    = "card.created"
 	TypeCardReviewed   = "card.reviewed"
 )
@@ -39,6 +40,15 @@ type DeckUpdated struct {
 	DeckName string `json:"deck_name"`
 }
 
+// Published by deck-service on deck.deleted (soft delete).
+// Payload carries only the identifiers; the handler removes the deck-scoped
+// aggregates (deck_stats, deck_progress_snapshots) but keeps the user's
+// lifetime learning achievements intact.
+type DeckDeleted struct {
+	DeckID string `json:"deck_id"`
+	UserID string `json:"user_id"`
+}
+
 // Published by deck-service on card.created
 type CardCreated struct {
 	CardID    string    `json:"card_id"`
@@ -52,6 +62,7 @@ type CardCreated struct {
 // moment of the review. It's used for two timezone-sensitive aggregations:
 //   - streak computation (day boundary follows the user's local midnight)
 //   - activity histogram bucket (hour_of_day is local)
+//
 // May be empty for legacy events; the handler falls back to UTC.
 type CardReviewed struct {
 	UserID         string    `json:"user_id"`

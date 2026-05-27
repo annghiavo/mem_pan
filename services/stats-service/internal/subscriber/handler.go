@@ -4,12 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"log"
 	"time"
 
 	"github.com/google/uuid"
 
 	"mem_pan/services/stats-service/internal/db"
+	"mem_pan/services/stats-service/internal/domain"
 	"mem_pan/services/stats-service/internal/events"
 	"mem_pan/services/stats-service/internal/repository"
 )
@@ -32,6 +34,8 @@ func (h *Handler) Dispatch(ctx context.Context, eventType string, data []byte) e
 		return h.handleDeckCreated(ctx, data)
 	case events.TypeDeckUpdated:
 		return h.handleDeckUpdated(ctx, data)
+	case events.TypeDeckDeleted:
+		return h.handleDeckDeleted(ctx, data)
 	case events.TypeCardCreated:
 		return h.handleCardCreated(ctx, data)
 	case events.TypeCardReviewed:
@@ -90,6 +94,51 @@ func (h *Handler) handleDeckUpdated(ctx context.Context, data []byte) error {
 	}
 
 	return h.repo.UpdateDeckName(ctx, deckID, e.DeckName)
+}
+
+// handleDeckDeleted removes the deck-scoped aggregates when a deck is deleted.
+// It deletes deck_stats and deck_progress_snapshots for the deck, and subtracts
+// the deck's card count from the user's lifetime total_cards. The user's
+// learning achievements (streak, total_reviews, study time, daily heatmap,
+// activity buckets) live in separate rows and are deliberately left untouched.
+//
+// Ordering matters: read the card count from deck_stats *before* deleting that
+// row, otherwise the decrement amount is lost. All operations are idempotent —
+// a redelivered event finds deck_stats already gone (GetDeckStats returns
+// ErrDeckStatsNotFound) and skips the decrement, and the DELETEs are no-ops.
+func (h *Handler) handleDeckDeleted(ctx context.Context, data []byte) error {
+	var e events.DeckDeleted
+	if err := json.Unmarshal(data, &e); err != nil {
+		return err
+	}
+
+	deckID, err := uuid.Parse(e.DeckID)
+	if err != nil {
+		return err
+	}
+	userID, err := uuid.Parse(e.UserID)
+	if err != nil {
+		return err
+	}
+
+	// Read the deck's card count before deleting deck_stats so we can adjust the
+	// user's lifetime collection size. If the deck_stats row is already gone
+	// (duplicate event, or the deck was created before stats-service existed),
+	// skip the decrement rather than failing.
+	if ds, err := h.repo.GetDeckStats(ctx, deckID); err == nil {
+		if ds.TotalCards > 0 {
+			if err := h.repo.DecrementUserCards(ctx, userID, ds.TotalCards); err != nil {
+				return err
+			}
+		}
+	} else if !errors.Is(err, domain.ErrDeckStatsNotFound) {
+		return err
+	}
+
+	if err := h.repo.DeleteDeckProgressSnapshots(ctx, deckID, userID); err != nil {
+		return err
+	}
+	return h.repo.DeleteDeckStats(ctx, deckID, userID)
 }
 
 func (h *Handler) handleCardCreated(ctx context.Context, data []byte) error {

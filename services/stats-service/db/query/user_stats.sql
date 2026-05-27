@@ -30,6 +30,16 @@ UPDATE user_stats SET
     updated_at  = CURRENT_TIMESTAMP
 WHERE user_id = $1;
 
+-- name: DecrementUserCards :exec
+-- Subtract the card count of a deleted deck. GREATEST clamps at 0 so a lost/
+-- duplicated event can never push the lifetime card count negative. Only the
+-- card collection size is adjusted — streaks, reviews and study time (the
+-- user's learning achievements) are intentionally left untouched.
+UPDATE user_stats SET
+    total_cards = GREATEST(0, total_cards - $2),
+    updated_at  = CURRENT_TIMESTAMP
+WHERE user_id = $1;
+
 -- name: UpdateUserProfile :exec
 UPDATE user_stats SET
     username   = $2,

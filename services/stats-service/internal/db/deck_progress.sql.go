@@ -88,3 +88,17 @@ func (q *Queries) UpsertDeckProgressSnapshot(ctx context.Context, arg UpsertDeck
 	)
 	return err
 }
+
+const deleteDeckProgressSnapshots = `-- name: DeleteDeckProgressSnapshots :exec
+DELETE FROM deck_progress_snapshots WHERE deck_id = $1 AND user_id = $2
+`
+
+type DeleteDeckProgressSnapshotsParams struct {
+	DeckID uuid.UUID `json:"deck_id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) DeleteDeckProgressSnapshots(ctx context.Context, arg DeleteDeckProgressSnapshotsParams) error {
+	_, err := q.db.ExecContext(ctx, deleteDeckProgressSnapshots, arg.DeckID, arg.UserID)
+	return err
+}

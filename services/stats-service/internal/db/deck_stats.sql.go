@@ -147,3 +147,17 @@ func (q *Queries) UpdateDeckName(ctx context.Context, arg UpdateDeckNameParams) 
 	_, err := q.db.ExecContext(ctx, updateDeckName, arg.DeckID, arg.DeckName)
 	return err
 }
+
+const deleteDeckStats = `-- name: DeleteDeckStats :exec
+DELETE FROM deck_stats WHERE deck_id = $1 AND user_id = $2
+`
+
+type DeleteDeckStatsParams struct {
+	DeckID uuid.UUID `json:"deck_id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) DeleteDeckStats(ctx context.Context, arg DeleteDeckStatsParams) error {
+	_, err := q.db.ExecContext(ctx, deleteDeckStats, arg.DeckID, arg.UserID)
+	return err
+}

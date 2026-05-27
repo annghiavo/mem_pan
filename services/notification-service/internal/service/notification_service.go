@@ -76,7 +76,7 @@ type TestNotificationResult struct {
 
 type Config struct {
 	AppBaseURL      string // e.g. "https://mempan.app"
-	AdminWebBaseURL string // e.g. "https://admin.mempan.app" — root for appeal links
+	AdminWebBaseURL string // e.g. "https://admin-web-tawny-kappa.vercel.app" — root for appeal links
 }
 
 type service struct {
