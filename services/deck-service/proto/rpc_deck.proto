@@ -37,6 +37,20 @@ message ListPublicDecksResponse {
     int64         total = 2;
 }
 
+message ListTopPublicDecksRequest {
+    int32 limit       = 1; // max decks; <=0 falls back to 10
+    int32 window_days = 2; // trending window; <=0 falls back to 7 days
+}
+
+message RankedPublicDeck {
+    Deck  deck          = 1;
+    int64 learner_count = 2; // distinct learners within the trending window
+}
+
+message ListTopPublicDecksResponse {
+    repeated RankedPublicDeck decks = 1;
+}
+
 message GetDeckRequest {
     string deck_id = 1;
 }
@@ -45,6 +59,9 @@ message GetDeckResponse {
     Deck   deck             = 1;
     string creator_username = 2;
     string creator_avatar   = 3;
+    // Distinct users who have ever studied this deck (owner included). Best
+    // effort: 0 if study-service is unreachable.
+    int64  learner_count    = 4;
 }
 
 message UpdateDeckRequest {

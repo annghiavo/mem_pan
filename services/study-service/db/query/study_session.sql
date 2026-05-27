@@ -58,3 +58,20 @@ SELECT DISTINCT ON (deck_id) deck_id, last_accessed_at
 FROM study_sessions
 WHERE user_id = $1
 ORDER BY deck_id, last_accessed_at DESC;
+
+-- name: CountDeckLearners :one
+-- Distinct users who have ever started a study session on this deck. Used by
+-- deck-service to show a "learners" count on the deck detail page. The deck
+-- owner studying their own deck is included.
+SELECT COUNT(DISTINCT user_id) FROM study_sessions WHERE deck_id = $1;
+
+-- name: TopDecksByLearners :many
+-- Ranks decks by the number of distinct users who had study activity within
+-- the trending window (last_accessed_at >= $1). deck-service then filters this
+-- list down to public, active decks. The deck owner's own activity is included.
+SELECT deck_id, COUNT(DISTINCT user_id) AS learners
+FROM study_sessions
+WHERE last_accessed_at >= $1
+GROUP BY deck_id
+ORDER BY learners DESC, deck_id
+LIMIT $2;

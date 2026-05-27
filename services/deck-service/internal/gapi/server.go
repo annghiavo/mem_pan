@@ -13,18 +13,20 @@ import (
 	"mem_pan/services/deck-service/internal/domain"
 	"mem_pan/services/deck-service/internal/publisher"
 	"mem_pan/services/deck-service/internal/service"
+	"mem_pan/services/deck-service/internal/studyclient"
 	"mem_pan/services/deck-service/internal/uploader"
 	"mem_pan/services/deck-service/pb"
 )
 
 type Server struct {
 	pb.UnimplementedDeckServiceServer
-	folderSvc  service.FolderService
-	deckSvc    service.DeckService
-	cardSvc    service.CardService
-	authClient authclient.Client
-	uploader   uploader.ImageUploader
-	pub        publisher.EventPublisher
+	folderSvc   service.FolderService
+	deckSvc     service.DeckService
+	cardSvc     service.CardService
+	authClient  authclient.Client
+	studyClient studyclient.Client
+	uploader    uploader.ImageUploader
+	pub         publisher.EventPublisher
 }
 
 func NewServer(
@@ -32,16 +34,18 @@ func NewServer(
 	deckSvc service.DeckService,
 	cardSvc service.CardService,
 	authClient authclient.Client,
+	studyClient studyclient.Client,
 	imageUploader uploader.ImageUploader,
 	pub publisher.EventPublisher,
 ) *Server {
 	return &Server{
-		folderSvc:  folderSvc,
-		deckSvc:    deckSvc,
-		cardSvc:    cardSvc,
-		authClient: authClient,
-		uploader:   imageUploader,
-		pub:        pub,
+		folderSvc:   folderSvc,
+		deckSvc:     deckSvc,
+		cardSvc:     cardSvc,
+		authClient:  authClient,
+		studyClient: studyClient,
+		uploader:    imageUploader,
+		pub:         pub,
 	}
 }
 

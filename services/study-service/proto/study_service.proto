@@ -121,6 +121,16 @@ service StudyService {
     // end of today in the given IANA timezone, for a single user. Used by
     // notification-service reminder crons.
     rpc CountDueForUser (CountDueForUserRequest) returns (CountDueForUserResponse);
+
+    // Internal-only. Returns the number of distinct users who have ever started
+    // a study session on the deck (deck owner included). Used by deck-service
+    // to show a learner count on the deck detail page.
+    rpc CountDeckLearners (CountDeckLearnersRequest) returns (CountDeckLearnersResponse);
+
+    // Internal-only. Ranks decks by distinct learners active within the last
+    // window_days days (trending). deck-service filters the result down to
+    // public decks for the "top public decks" leaderboard.
+    rpc TopDecksByLearners (TopDecksByLearnersRequest) returns (TopDecksByLearnersResponse);
 }
 
 message CountDueForUserRequest {
@@ -130,4 +140,26 @@ message CountDueForUserRequest {
 
 message CountDueForUserResponse {
     int32 due_today = 1;
+}
+
+message CountDeckLearnersRequest {
+    string deck_id = 1;
+}
+
+message CountDeckLearnersResponse {
+    int64 count = 1;
+}
+
+message TopDecksByLearnersRequest {
+    int32 window_days = 1; // trending window; <=0 falls back to 7 days
+    int32 limit       = 2; // max rows; <=0 falls back to 10, capped at 100
+}
+
+message DeckLearners {
+    string deck_id  = 1;
+    int64  learners = 2;
+}
+
+message TopDecksByLearnersResponse {
+    repeated DeckLearners decks = 1;
 }

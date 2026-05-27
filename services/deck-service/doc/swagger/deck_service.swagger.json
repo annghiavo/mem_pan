@@ -253,6 +253,47 @@
         ]
       }
     },
+    "/v1/decks/public/top": {
+      "get": {
+        "summary": "Top public decks by learners",
+        "operationId": "DeckService_ListTopPublicDecks",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbListTopPublicDecksResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "description": "max decks; \u003c=0 falls back to 10",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "windowDays",
+            "description": "trending window; \u003c=0 falls back to 7 days",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "decks"
+        ]
+      }
+    },
     "/v1/decks/{deckId}": {
       "get": {
         "summary": "Get deck detail",
@@ -1222,6 +1263,72 @@
         }
       }
     },
+    "pbAdminDeckRecord": {
+      "type": "object",
+      "properties": {
+        "deckId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "isPublic": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        },
+        "cardCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "pbAdminListDecksResponse": {
+      "type": "object",
+      "properties": {
+        "decks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/pbAdminDeckRecord"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "pbAdminUpdateDeckStatusResponse": {
+      "type": "object",
+      "properties": {
+        "deckId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
     "pbBulkCardItem": {
       "type": "object",
       "properties": {
@@ -1522,6 +1629,11 @@
         },
         "creatorAvatar": {
           "type": "string"
+        },
+        "learnerCount": {
+          "type": "string",
+          "format": "int64",
+          "description": "Distinct users who have ever studied this deck (owner included). Best\neffort: 0 if study-service is unreachable."
         }
       }
     },
@@ -1613,6 +1725,18 @@
         }
       }
     },
+    "pbListTopPublicDecksResponse": {
+      "type": "object",
+      "properties": {
+        "decks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/pbRankedPublicDeck"
+          }
+        }
+      }
+    },
     "pbParseImportFileRequest": {
       "type": "object",
       "properties": {
@@ -1650,6 +1774,19 @@
         },
         "back": {
           "type": "string"
+        }
+      }
+    },
+    "pbRankedPublicDeck": {
+      "type": "object",
+      "properties": {
+        "deck": {
+          "$ref": "#/definitions/pbDeck"
+        },
+        "learnerCount": {
+          "type": "string",
+          "format": "int64",
+          "title": "distinct learners within the trending window"
         }
       }
     },

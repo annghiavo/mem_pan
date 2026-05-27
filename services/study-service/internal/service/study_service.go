@@ -22,7 +22,19 @@ import (
 const (
 	defaultNewCardsLimit    = int32(20)
 	defaultReviewCardsLimit = int32(200)
+
+	// Trending-window defaults for TopDecksByLearners.
+	defaultTrendingWindowDays = int32(7)
+	defaultTopDecksLimit      = int32(10)
+	maxTopDecksLimit          = int32(100)
 )
+
+// DeckLearners is one row of the trending leaderboard: a deck and the number of
+// distinct users who studied it within the requested window.
+type DeckLearners struct {
+	DeckID   uuid.UUID
+	Learners int64
+}
 
 type StartSessionParams struct {
 	UserID        uuid.UUID
@@ -82,6 +94,14 @@ type StudyService interface {
 	GetRecentSessionCards(ctx context.Context, userID uuid.UUID) (*SessionResult, error)
 	GetRecentDecks(ctx context.Context, userID uuid.UUID) ([]RecentDeck, error)
 	GetDeckProgress(ctx context.Context, userID, deckID uuid.UUID) (*DeckProgress, error)
+	// CountDeckLearners returns the number of distinct users who have ever
+	// started a study session on the deck (the owner is included). Consumed by
+	// deck-service to show a learner count on the deck detail page.
+	CountDeckLearners(ctx context.Context, deckID uuid.UUID) (int64, error)
+	// TopDecksByLearners ranks decks by distinct learners active within the last
+	// windowDays days (trending). Consumed by deck-service, which filters the
+	// result down to public decks. Returns at most limit rows.
+	TopDecksByLearners(ctx context.Context, windowDays, limit int32) ([]DeckLearners, error)
 }
 
 type studyService struct {
@@ -399,6 +419,35 @@ func (s *studyService) GetDueCards(ctx context.Context, userID uuid.UUID, deckID
 		UserID: userID,
 		Limit:  1000,
 	})
+}
+
+func (s *studyService) CountDeckLearners(ctx context.Context, deckID uuid.UUID) (int64, error) {
+	return s.sessionRepo.CountDeckLearners(ctx, deckID)
+}
+
+func (s *studyService) TopDecksByLearners(ctx context.Context, windowDays, limit int32) ([]DeckLearners, error) {
+	if windowDays <= 0 {
+		windowDays = defaultTrendingWindowDays
+	}
+	if limit <= 0 {
+		limit = defaultTopDecksLimit
+	}
+	if limit > maxTopDecksLimit {
+		limit = maxTopDecksLimit
+	}
+	since := time.Now().AddDate(0, 0, -int(windowDays))
+	rows, err := s.sessionRepo.TopDecksByLearners(ctx, db.TopDecksByLearnersParams{
+		LastAccessedAt: since,
+		Limit:          limit,
+	})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]DeckLearners, len(rows))
+	for i, r := range rows {
+		out[i] = DeckLearners{DeckID: r.DeckID, Learners: r.Learners}
+	}
+	return out, nil
 }
 
 func (s *studyService) CountDueByEndOfDay(ctx context.Context, userID uuid.UUID, timezone string) (int32, error) {

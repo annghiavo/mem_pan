@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 
@@ -65,6 +66,11 @@ type DeckService interface {
 	GetDeck(ctx context.Context, deckID, userID uuid.UUID, publicOK bool) (db.Deck, error)
 	ListDecks(ctx context.Context, p ListDecksParams) (DecksPage, error)
 	ListPublicDecks(ctx context.Context, p ListPublicDecksParams) (DecksPage, error)
+	// ListPublicDecksByIDs returns the public, active decks among the given IDs,
+	// preserving the input order. Used to hydrate the trending leaderboard whose
+	// ranking is computed by study-service. Missing/private/deleted IDs are
+	// silently dropped.
+	ListPublicDecksByIDs(ctx context.Context, ids []uuid.UUID) ([]db.Deck, error)
 	UpdateDeck(ctx context.Context, p UpdateDeckParams) (db.Deck, error)
 	DeleteDeck(ctx context.Context, deckID, userID uuid.UUID) error
 	UpdateSettings(ctx context.Context, deckID, userID uuid.UUID, settings DeckSettings) (db.Deck, error)
@@ -127,6 +133,23 @@ func (s *deckService) GetDeck(ctx context.Context, deckID, userID uuid.UUID, pub
 		}
 	}
 	return deck, nil
+}
+
+func (s *deckService) ListPublicDecksByIDs(ctx context.Context, ids []uuid.UUID) ([]db.Deck, error) {
+	out := make([]db.Deck, 0, len(ids))
+	for _, id := range ids {
+		deck, err := s.deckRepo.GetDeckByID(ctx, id)
+		if err != nil {
+			if errors.Is(err, domain.ErrDeckNotFound) {
+				continue
+			}
+			return nil, err
+		}
+		if deck.IsPublic && deck.Status == string(db.ContentStatusActive) {
+			out = append(out, deck)
+		}
+	}
+	return out, nil
 }
 
 func (s *deckService) ListDecks(ctx context.Context, p ListDecksParams) (DecksPage, error) {

@@ -32,6 +32,7 @@ const (
 	DeckService_CreateDeck_FullMethodName             = "/pb.DeckService/CreateDeck"
 	DeckService_GetDeck_FullMethodName                = "/pb.DeckService/GetDeck"
 	DeckService_ListPublicDecks_FullMethodName        = "/pb.DeckService/ListPublicDecks"
+	DeckService_ListTopPublicDecks_FullMethodName     = "/pb.DeckService/ListTopPublicDecks"
 	DeckService_UpdateDeck_FullMethodName             = "/pb.DeckService/UpdateDeck"
 	DeckService_DeleteDeck_FullMethodName             = "/pb.DeckService/DeleteDeck"
 	DeckService_UpdateDeckSettings_FullMethodName     = "/pb.DeckService/UpdateDeckSettings"
@@ -81,6 +82,10 @@ type DeckServiceClient interface {
 	// (which would 400 with "invalid deck_id").
 	GetDeck(ctx context.Context, in *GetDeckRequest, opts ...grpc.CallOption) (*GetDeckResponse, error)
 	ListPublicDecks(ctx context.Context, in *ListPublicDecksRequest, opts ...grpc.CallOption) (*ListPublicDecksResponse, error)
+	// Trending leaderboard: public decks ranked by distinct learners active in
+	// the last window_days days. Public (no auth), like ListPublicDecks. The
+	// ranking is computed by study-service; deck-service hydrates + filters.
+	ListTopPublicDecks(ctx context.Context, in *ListTopPublicDecksRequest, opts ...grpc.CallOption) (*ListTopPublicDecksResponse, error)
 	UpdateDeck(ctx context.Context, in *UpdateDeckRequest, opts ...grpc.CallOption) (*UpdateDeckResponse, error)
 	DeleteDeck(ctx context.Context, in *DeleteDeckRequest, opts ...grpc.CallOption) (*DeleteDeckResponse, error)
 	UpdateDeckSettings(ctx context.Context, in *UpdateDeckSettingsRequest, opts ...grpc.CallOption) (*UpdateDeckSettingsResponse, error)
@@ -235,6 +240,16 @@ func (c *deckServiceClient) ListPublicDecks(ctx context.Context, in *ListPublicD
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListPublicDecksResponse)
 	err := c.cc.Invoke(ctx, DeckService_ListPublicDecks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deckServiceClient) ListTopPublicDecks(ctx context.Context, in *ListTopPublicDecksRequest, opts ...grpc.CallOption) (*ListTopPublicDecksResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTopPublicDecksResponse)
+	err := c.cc.Invoke(ctx, DeckService_ListTopPublicDecks_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -432,6 +447,10 @@ type DeckServiceServer interface {
 	// (which would 400 with "invalid deck_id").
 	GetDeck(context.Context, *GetDeckRequest) (*GetDeckResponse, error)
 	ListPublicDecks(context.Context, *ListPublicDecksRequest) (*ListPublicDecksResponse, error)
+	// Trending leaderboard: public decks ranked by distinct learners active in
+	// the last window_days days. Public (no auth), like ListPublicDecks. The
+	// ranking is computed by study-service; deck-service hydrates + filters.
+	ListTopPublicDecks(context.Context, *ListTopPublicDecksRequest) (*ListTopPublicDecksResponse, error)
 	UpdateDeck(context.Context, *UpdateDeckRequest) (*UpdateDeckResponse, error)
 	DeleteDeck(context.Context, *DeleteDeckRequest) (*DeleteDeckResponse, error)
 	UpdateDeckSettings(context.Context, *UpdateDeckSettingsRequest) (*UpdateDeckSettingsResponse, error)
@@ -500,6 +519,9 @@ func (UnimplementedDeckServiceServer) GetDeck(context.Context, *GetDeckRequest) 
 }
 func (UnimplementedDeckServiceServer) ListPublicDecks(context.Context, *ListPublicDecksRequest) (*ListPublicDecksResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListPublicDecks not implemented")
+}
+func (UnimplementedDeckServiceServer) ListTopPublicDecks(context.Context, *ListTopPublicDecksRequest) (*ListTopPublicDecksResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTopPublicDecks not implemented")
 }
 func (UnimplementedDeckServiceServer) UpdateDeck(context.Context, *UpdateDeckRequest) (*UpdateDeckResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateDeck not implemented")
@@ -800,6 +822,24 @@ func _DeckService_ListPublicDecks_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DeckServiceServer).ListPublicDecks(ctx, req.(*ListPublicDecksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeckService_ListTopPublicDecks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTopPublicDecksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).ListTopPublicDecks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_ListTopPublicDecks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).ListTopPublicDecks(ctx, req.(*ListTopPublicDecksRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1150,6 +1190,10 @@ var DeckService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListPublicDecks",
 			Handler:    _DeckService_ListPublicDecks_Handler,
+		},
+		{
+			MethodName: "ListTopPublicDecks",
+			Handler:    _DeckService_ListTopPublicDecks_Handler,
 		},
 		{
 			MethodName: "UpdateDeck",

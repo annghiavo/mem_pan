@@ -31,6 +31,8 @@ const (
 	StudyService_UpdateDeckSettings_FullMethodName    = "/study.StudyService/UpdateDeckSettings"
 	StudyService_CheckAnswer_FullMethodName           = "/study.StudyService/CheckAnswer"
 	StudyService_CountDueForUser_FullMethodName       = "/study.StudyService/CountDueForUser"
+	StudyService_CountDeckLearners_FullMethodName     = "/study.StudyService/CountDeckLearners"
+	StudyService_TopDecksByLearners_FullMethodName    = "/study.StudyService/TopDecksByLearners"
 )
 
 // StudyServiceClient is the client API for StudyService service.
@@ -52,6 +54,14 @@ type StudyServiceClient interface {
 	// end of today in the given IANA timezone, for a single user. Used by
 	// notification-service reminder crons.
 	CountDueForUser(ctx context.Context, in *CountDueForUserRequest, opts ...grpc.CallOption) (*CountDueForUserResponse, error)
+	// Internal-only. Returns the number of distinct users who have ever started
+	// a study session on the deck (deck owner included). Used by deck-service
+	// to show a learner count on the deck detail page.
+	CountDeckLearners(ctx context.Context, in *CountDeckLearnersRequest, opts ...grpc.CallOption) (*CountDeckLearnersResponse, error)
+	// Internal-only. Ranks decks by distinct learners active within the last
+	// window_days days (trending). deck-service filters the result down to
+	// public decks for the "top public decks" leaderboard.
+	TopDecksByLearners(ctx context.Context, in *TopDecksByLearnersRequest, opts ...grpc.CallOption) (*TopDecksByLearnersResponse, error)
 }
 
 type studyServiceClient struct {
@@ -182,6 +192,26 @@ func (c *studyServiceClient) CountDueForUser(ctx context.Context, in *CountDueFo
 	return out, nil
 }
 
+func (c *studyServiceClient) CountDeckLearners(ctx context.Context, in *CountDeckLearnersRequest, opts ...grpc.CallOption) (*CountDeckLearnersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CountDeckLearnersResponse)
+	err := c.cc.Invoke(ctx, StudyService_CountDeckLearners_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *studyServiceClient) TopDecksByLearners(ctx context.Context, in *TopDecksByLearnersRequest, opts ...grpc.CallOption) (*TopDecksByLearnersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TopDecksByLearnersResponse)
+	err := c.cc.Invoke(ctx, StudyService_TopDecksByLearners_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StudyServiceServer is the server API for StudyService service.
 // All implementations must embed UnimplementedStudyServiceServer
 // for forward compatibility.
@@ -201,6 +231,14 @@ type StudyServiceServer interface {
 	// end of today in the given IANA timezone, for a single user. Used by
 	// notification-service reminder crons.
 	CountDueForUser(context.Context, *CountDueForUserRequest) (*CountDueForUserResponse, error)
+	// Internal-only. Returns the number of distinct users who have ever started
+	// a study session on the deck (deck owner included). Used by deck-service
+	// to show a learner count on the deck detail page.
+	CountDeckLearners(context.Context, *CountDeckLearnersRequest) (*CountDeckLearnersResponse, error)
+	// Internal-only. Ranks decks by distinct learners active within the last
+	// window_days days (trending). deck-service filters the result down to
+	// public decks for the "top public decks" leaderboard.
+	TopDecksByLearners(context.Context, *TopDecksByLearnersRequest) (*TopDecksByLearnersResponse, error)
 	mustEmbedUnimplementedStudyServiceServer()
 }
 
@@ -246,6 +284,12 @@ func (UnimplementedStudyServiceServer) CheckAnswer(context.Context, *CheckAnswer
 }
 func (UnimplementedStudyServiceServer) CountDueForUser(context.Context, *CountDueForUserRequest) (*CountDueForUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CountDueForUser not implemented")
+}
+func (UnimplementedStudyServiceServer) CountDeckLearners(context.Context, *CountDeckLearnersRequest) (*CountDeckLearnersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CountDeckLearners not implemented")
+}
+func (UnimplementedStudyServiceServer) TopDecksByLearners(context.Context, *TopDecksByLearnersRequest) (*TopDecksByLearnersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method TopDecksByLearners not implemented")
 }
 func (UnimplementedStudyServiceServer) mustEmbedUnimplementedStudyServiceServer() {}
 func (UnimplementedStudyServiceServer) testEmbeddedByValue()                      {}
@@ -484,6 +528,42 @@ func _StudyService_CountDueForUser_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StudyService_CountDeckLearners_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CountDeckLearnersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceServer).CountDeckLearners(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StudyService_CountDeckLearners_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceServer).CountDeckLearners(ctx, req.(*CountDeckLearnersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StudyService_TopDecksByLearners_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TopDecksByLearnersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceServer).TopDecksByLearners(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StudyService_TopDecksByLearners_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceServer).TopDecksByLearners(ctx, req.(*TopDecksByLearnersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StudyService_ServiceDesc is the grpc.ServiceDesc for StudyService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -538,6 +618,14 @@ var StudyService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CountDueForUser",
 			Handler:    _StudyService_CountDueForUser_Handler,
+		},
+		{
+			MethodName: "CountDeckLearners",
+			Handler:    _StudyService_CountDeckLearners_Handler,
+		},
+		{
+			MethodName: "TopDecksByLearners",
+			Handler:    _StudyService_TopDecksByLearners_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
