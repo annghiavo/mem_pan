@@ -112,10 +112,16 @@ services:
       - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
       - PUBSUB_PROJECT_ID=local-dev
       - PUBSUB_TOPIC=study-events
+      # FSRS weight-optimization cron (POST /internal/fsrs/optimize)
+      - MODERATION_SERVICE_ADDRESS=moderation-service:50051
+      - FSRS_OPTIMIZE_MIN_REVIEWS=50   # low for local/demo; prod default is 1000
+      - FSRS_OPTIMIZE_MAX_USERS=200
+      - CRON_SECRET=local-dev-cron-secret
     depends_on:
       - auth-service
       - deck-service
       - pubsub-emulator
+      - moderation-service
     expose:
       - "8082"
       - "9092"

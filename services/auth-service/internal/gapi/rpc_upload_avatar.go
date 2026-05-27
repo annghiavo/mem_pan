@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -25,6 +26,23 @@ var allowedImageMIME = map[string]bool{
 	"image/png":  true,
 	"image/gif":  true,
 	"image/webp": true,
+}
+
+// avatarURLWithVersion appends Cloudinary's asset version as a cache-busting
+// query param. Avatars are uploaded with a fixed PublicID + Overwrite=true, so
+// SecureURL stays identical across uploads — clients (React Native <Image>) and
+// the CDN keep serving the cached old image even though the bytes changed.
+// Version changes on every overwrite, so ?v=<version> yields a fresh URL.
+func avatarURLWithVersion(result *uploader.UploadResult) string {
+	url := result.SecureURL
+	if result.Version <= 0 {
+		return url
+	}
+	sep := "?"
+	if strings.Contains(url, "?") {
+		sep = "&"
+	}
+	return fmt.Sprintf("%s%sv=%d", url, sep, result.Version)
 }
 
 // UploadAvatar satisfies the gRPC interface for gRPC clients.
@@ -56,7 +74,7 @@ func (s *Server) UploadAvatar(ctx context.Context, req *pb.UploadAvatarRequest) 
 		return nil, status.Error(codes.Internal, "failed to upload image")
 	}
 
-	avatarURL := result.SecureURL
+	avatarURL := avatarURLWithVersion(result)
 	user, err := s.userSvc.UpdateProfile(ctx, payload.UserID, service.UpdateProfileParams{
 		AvatarURL: &avatarURL,
 	})
@@ -137,7 +155,7 @@ func (s *Server) UploadAvatarHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	avatarURL := result.SecureURL
+	avatarURL := avatarURLWithVersion(result)
 	user, err := s.userSvc.UpdateProfile(r.Context(), payload.UserID, service.UpdateProfileParams{
 		AvatarURL: &avatarURL,
 	})

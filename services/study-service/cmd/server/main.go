@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"io/fs"
 	"log"
 	"log/slog"
@@ -27,7 +28,9 @@ import (
 	"mem_pan/services/study-service/doc"
 	"mem_pan/services/study-service/internal/authclient"
 	"mem_pan/services/study-service/internal/deckclient"
+	"mem_pan/services/study-service/internal/fsrsopt"
 	"mem_pan/services/study-service/internal/gapi"
+	"mem_pan/services/study-service/internal/moderationclient"
 	"mem_pan/services/study-service/internal/publisher"
 	"mem_pan/services/study-service/internal/repository"
 	"mem_pan/services/study-service/internal/service"
@@ -96,6 +99,23 @@ func main() {
 	)
 	settingsSvc := service.NewSettingsService(deckSettingsRepo)
 
+	// FSRS weight-optimization cron. Wired only when moderation-fsrs-service is
+	// reachable; otherwise POST /internal/fsrs/optimize replies 503.
+	var optimizer *fsrsopt.Optimizer
+	if cfg.ModerationServiceAddress != "" {
+		moderationClient, err := moderationclient.NewGRPCClient(cfg.ModerationServiceAddress)
+		if err != nil {
+			log.Fatal("moderation client:", err)
+		}
+		defer moderationClient.Close()
+		optimizer = fsrsopt.New(revlogRepo, weightsRepo, moderationClient,
+			cfg.FsrsOptimizeMinReviews, cfg.FsrsOptimizeMaxUsers)
+		log.Printf("fsrs optimization cron enabled (min_reviews=%d max_users=%d)",
+			cfg.FsrsOptimizeMinReviews, cfg.FsrsOptimizeMaxUsers)
+	} else {
+		log.Println("MODERATION_SERVICE_ADDRESS unset — fsrs optimization cron disabled")
+	}
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
@@ -104,7 +124,7 @@ func main() {
 	if cfg.GRPCServerAddress != "" && cfg.GRPCServerAddress != cfg.HTTPServerAddress {
 		go runStandaloneGRPC(grpcServer, cfg.GRPCServerAddress)
 	}
-	go runHTTPGateway(cfg, gapiServer, grpcServer, slogger)
+	go runHTTPGateway(cfg, gapiServer, grpcServer, optimizer, slogger)
 
 	<-quit
 	log.Println("study-service shutting down")
@@ -128,7 +148,7 @@ func runStandaloneGRPC(grpcServer *grpc.Server, addr string) {
 	}
 }
 
-func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server, grpcServer *grpc.Server, logger *slog.Logger) {
+func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server, grpcServer *grpc.Server, optimizer *fsrsopt.Optimizer, logger *slog.Logger) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -144,6 +164,7 @@ func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server, grpcServer *grpc
 
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFiles))))
+	httpMux.HandleFunc("/internal/fsrs/optimize", fsrsOptimizeHandler(cfg, optimizer))
 	httpMux.Handle("/", grpcMux)
 
 	wrapped := middleware.HTTPLogger(logger)(withCORS(httpMux))
@@ -170,3 +191,34 @@ func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server, grpcServer *grpc
 	}
 }
 
+// fsrsOptimizeHandler triggers one FSRS weight-optimization pass. It is meant to
+// be called by Cloud Scheduler once a day, guarded by a shared secret. The batch
+// can run for minutes, so it overrides the server's 15s WriteTimeout per request.
+func fsrsOptimizeHandler(cfg config.Config, optimizer *fsrsopt.Optimizer) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		if cfg.CronSecret != "" && r.Header.Get("X-Cron-Secret") != cfg.CronSecret {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		if optimizer == nil {
+			http.Error(w, "fsrs optimization not configured", http.StatusServiceUnavailable)
+			return
+		}
+
+		// Lift the write deadline so a multi-minute batch isn't cut off mid-run.
+		_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(25 * time.Minute))
+
+		summary, err := optimizer.RunOnce(r.Context())
+		if err != nil {
+			log.Printf("[fsrs-opt] run failed: %v", err)
+			http.Error(w, "optimization run failed", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(summary)
+	}
+}

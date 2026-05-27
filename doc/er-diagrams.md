@@ -32,7 +32,7 @@ Với mô hình **database-per-service**, đây là câu hỏi cần trả lời
 
 ### Cách 1 — Một ERD vật lý chung (KHÔNG ÁP DỤNG)
 
-> ❌ **Không khuyến nghị** vẽ một sơ đồ duy nhất với tất cả ~22 bảng nối nhau bằng khoá ngoại.
+> ❌ **Không khuyến nghị** vẽ một sơ đồ duy nhất với tất cả ~23 bảng nối nhau bằng khoá ngoại.
 
 **Lý do:**
 
@@ -294,7 +294,7 @@ erDiagram
         UUID target_id "logical→DECKS/USERS"
         report_category reason_category
         report_status status
-        UUID assigned_to "logical→USERS (admin)"
+        varchar resolution
         UUID resolved_by "logical→USERS (admin)"
         timestamptz resolved_at
     }
@@ -305,6 +305,16 @@ erDiagram
         varchar target_type
         UUID target_id
         jsonb metadata
+    }
+    DECK_APPEALS {
+        UUID appeal_id PK
+        varchar token UK
+        UUID deck_id UK "logical→DECKS"
+        UUID user_id "logical→USERS"
+        appeal_status status
+        UUID decided_by "logical→USERS (admin)"
+        timestamptz submitted_at
+        timestamptz decided_at
     }
 
     %% ============== PHYSICAL FK (cùng DB) ==============
@@ -333,6 +343,7 @@ erDiagram
     USERS                ||..o{ NOTIFICATION_LOG            : "logical"
     USERS                ||..o{ REPORTS                     : "logical reporter"
     USERS                ||..o{ MODERATION_LOGS             : "logical admin"
+    USERS                ||..o{ DECK_APPEALS                : "logical owner"
     USERS                ||..o{ USER_FSRS_WEIGHTS           : "logical"
     USERS                ||..o{ DECK_STUDY_SETTINGS         : "logical"
     DECKS                ||..o{ USER_CARDS                  : "logical"
@@ -340,6 +351,7 @@ erDiagram
     DECKS                ||..|| DECK_STATS                  : "logical 1-1"
     DECKS                ||..o{ DECK_PROGRESS_SNAPSHOTS     : "logical"
     DECKS                ||..o{ DECK_STUDY_SETTINGS         : "logical"
+    DECKS                ||..|| DECK_APPEALS                : "logical 1-1"
     CARDS                ||..o{ USER_CARDS                  : "logical"
     CARDS                ||..o{ SESSION_CARDS               : "logical"
 ```
@@ -404,6 +416,53 @@ erDiagram
         timestamptz created_at
     }
 ```
+
+**Bảng mô tả các trường:**
+
+*Bảng `users`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| user_id | UUID | PK | Định danh người dùng, default `gen_random_uuid()`. |
+| username | VARCHAR | UK | Tên đăng nhập, NOT NULL, duy nhất. |
+| email | VARCHAR | UK | Địa chỉ email, NOT NULL, duy nhất. |
+| password_hash | TEXT | | Mật khẩu đã băm (bcrypt cost 10), NOT NULL. |
+| full_name | VARCHAR | | Họ tên đầy đủ, nullable. |
+| avatar_url | TEXT | | URL ảnh đại diện (Cloudinary), nullable. |
+| role | user_role | | Vai trò người dùng, default `'user'`. |
+| is_banned | BOOLEAN | | Đã bị cấm hay chưa, default FALSE. |
+| banned_at | TIMESTAMPTZ | | Thời điểm bị cấm, nullable. |
+| banned_reason | TEXT | | Lý do bị cấm, nullable. |
+| email_verified | BOOLEAN | | Email đã được xác minh chưa, default FALSE. |
+| timezone | TEXT | | Múi giờ IANA (vd `Asia/Ho_Chi_Minh`), NOT NULL default `'UTC'`. |
+| last_login_at | TIMESTAMPTZ | | Lần đăng nhập gần nhất, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `refresh_tokens`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| token_id | UUID | PK | Định danh token, default `gen_random_uuid()`. |
+| user_id | UUID | FK | Tham chiếu `users.user_id`, NOT NULL, `ON DELETE CASCADE`. |
+| token_hash | TEXT | UK | SHA-256 của raw refresh token, NOT NULL, duy nhất. |
+| user_agent | TEXT | | Thông tin trình duyệt/thiết bị, nullable. |
+| ip_address | INET | | Địa chỉ IP của client, nullable. |
+| expires_at | TIMESTAMPTZ | | Thời điểm hết hạn (168h), NOT NULL. |
+| revoked_at | TIMESTAMPTZ | | Thời điểm thu hồi (khi logout), nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `verification_tokens`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| token_id | UUID | PK | Định danh token, default `gen_random_uuid()`. |
+| user_id | UUID | FK | Tham chiếu `users.user_id`, NOT NULL, `ON DELETE CASCADE`. |
+| token_hash | TEXT | UK | SHA-256 của raw token, NOT NULL, duy nhất. |
+| type | verification_token_type | | Loại token: `email_verification` \| `password_reset`. |
+| expires_at | TIMESTAMPTZ | | Thời điểm hết hạn (24h hoặc 1h), NOT NULL. |
+| used_at | TIMESTAMPTZ | | Thời điểm token được dùng, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
 
 **Index đáng chú ý:**
 - `idx_refresh_tokens_user_id` — phục vụ "danh sách thiết bị đang đăng nhập".
@@ -485,6 +544,71 @@ erDiagram
         timestamptz added_at
     }
 ```
+
+**Bảng mô tả các trường:**
+
+*Bảng `folders`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| folder_id | UUID | PK | Định danh folder, default `gen_random_uuid()`. |
+| user_id | UUID | | Chủ sở hữu — logical → `auth_db.users`, NOT NULL. |
+| name | VARCHAR(100) | | Tên folder, NOT NULL. |
+| description | TEXT | | Mô tả, nullable. |
+| is_public | BOOLEAN | | Folder công khai hay không, NOT NULL default FALSE. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `decks`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| deck_id | UUID | PK | Định danh deck, default `gen_random_uuid()`. |
+| user_id | UUID | | Chủ sở hữu — logical → `auth_db.users`, NOT NULL. |
+| name | VARCHAR(200) | | Tên deck, NOT NULL. |
+| description | TEXT | | Mô tả, nullable. |
+| is_public | BOOLEAN | | Deck công khai hay không, NOT NULL default FALSE. |
+| status | content_status | | Trạng thái: `active` \| `hidden` \| `deleted`, default `'active'`. |
+| settings | JSONB | | Cấu hình học (quiz_type, answer_side, …), NOT NULL có default. |
+| card_count | INTEGER | | Số thẻ (denormalized), NOT NULL default 0. |
+| cloned_from | UUID | | Deck nguồn nếu được clone, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `notes`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| note_id | UUID | PK | Định danh note, default `gen_random_uuid()`. |
+| user_id | UUID | | Tác giả — logical → `auth_db.users`, NOT NULL. |
+| content_front | TEXT | | Nội dung mặt trước, NOT NULL. |
+| content_back | TEXT | | Nội dung mặt sau, NOT NULL. |
+| image_url | TEXT | | URL ảnh minh hoạ (Cloudinary), nullable. |
+| lang_front | card_language | | Ngôn ngữ mặt trước, NOT NULL default `'en'`. |
+| lang_back | card_language | | Ngôn ngữ mặt sau, NOT NULL default `'en'`. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `cards`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| card_id | UUID | PK | Định danh card, default `gen_random_uuid()`. |
+| user_id | UUID | | Tác giả — logical → `auth_db.users`, NOT NULL. |
+| deck_id | UUID | FK | Tham chiếu `decks.deck_id`, NOT NULL, `ON DELETE CASCADE`. |
+| note_id | UUID | FK | Tham chiếu `notes.note_id`, NOT NULL, `ON DELETE CASCADE`. |
+| position | INTEGER | | Vị trí thẻ trong deck, NOT NULL default 0. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+
+> Ràng buộc: `UNIQUE (deck_id, note_id)` — một note không bị thêm trùng vào cùng một deck.
+
+*Bảng `folder_decks` (bảng liên kết N-N)*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| folder_id | UUID | PK, FK | Tham chiếu `folders.folder_id`, `ON DELETE CASCADE`. |
+| deck_id | UUID | PK, FK | Tham chiếu `decks.deck_id`, `ON DELETE CASCADE`. |
+| added_at | TIMESTAMPTZ | | Thời điểm thêm deck vào folder, default `CURRENT_TIMESTAMP`. |
 
 **Index đáng chú ý:**
 - `idx_decks_is_public` — **partial index** `WHERE is_public=TRUE AND status='active'`. Chỉ index các deck công khai → giảm dung lượng index, tăng tốc query "khám phá deck".
@@ -612,6 +736,107 @@ erDiagram
     }
 ```
 
+**Bảng mô tả các trường:**
+
+*Bảng `user_cards`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| user_card_id | UUID | PK | Định danh, default `gen_random_uuid()`. |
+| user_id | UUID | | Logical → `auth_db.users`, NOT NULL. |
+| card_id | UUID | | Logical → `deck_db.cards`, NOT NULL. |
+| deck_id | UUID | | Logical → `deck_db.decks`, NOT NULL. |
+| state | card_state | | Trạng thái FSRS: `new`/`learning`/`review`/`relearning`, default `'new'`. |
+| stability | DOUBLE PRECISION | | Độ ổn định FSRS, NOT NULL default 0. |
+| difficulty | DOUBLE PRECISION | | Độ khó FSRS, NOT NULL default 0. |
+| reps | INTEGER | | Số lần ôn, NOT NULL default 0. |
+| lapses | INTEGER | | Số lần quên, NOT NULL default 0. |
+| scheduled_days | INTEGER | | Số ngày lịch hẹn, NOT NULL default 0. |
+| t_avg | DOUBLE PRECISION | | Thời gian suy nghĩ trung bình (s), NOT NULL default 5.0. |
+| next_review_date | TIMESTAMPTZ | | Ngày ôn kế tiếp, NOT NULL default `CURRENT_TIMESTAMP`. |
+| last_review_date | TIMESTAMPTZ | | Lần ôn gần nhất, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
+
+> Ràng buộc: `UNIQUE (user_id, card_id, deck_id)`.
+
+*Bảng `study_sessions`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| session_id | UUID | PK | Định danh phiên học, default `gen_random_uuid()`. |
+| user_id | UUID | | Logical → `auth_db.users`, NOT NULL. |
+| deck_id | UUID | | Logical → `deck_db.decks`, NOT NULL. |
+| status | session_status | | `ongoing` \| `completed` \| `abandoned`, default `'ongoing'`. |
+| total_cards | INTEGER | | Tổng số thẻ trong phiên, NOT NULL default 0. |
+| completed_cards | INTEGER | | Số thẻ đã hoàn thành, NOT NULL default 0. |
+| last_completed_index | INTEGER | | Vị trí thẻ hoàn thành gần nhất, NOT NULL default -1. |
+| started_at | TIMESTAMPTZ | | Thời điểm bắt đầu, default `CURRENT_TIMESTAMP`. |
+| finished_at | TIMESTAMPTZ | | Thời điểm kết thúc, nullable. |
+| last_accessed_at | TIMESTAMPTZ | | Lần truy cập gần nhất, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `session_cards`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| session_id | UUID | PK, FK | Tham chiếu `study_sessions.session_id`, `ON DELETE CASCADE`. |
+| position | INTEGER | PK | Vị trí thẻ trong phiên, NOT NULL. |
+| card_id | UUID | | Logical → `deck_db.cards`, NOT NULL. |
+| user_card_id | UUID | FK | Tham chiếu `user_cards.user_card_id`, NOT NULL. |
+| reviewed_at | TIMESTAMPTZ | | Thời điểm ôn thẻ này, nullable. |
+| rating | SMALLINT | | Điểm đánh giá 1-4, nullable. |
+
+*Bảng `revlogs`* (append-only — không bao giờ xoá)
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| log_id | UUID | PK | Định danh bản ghi log, default `gen_random_uuid()`. |
+| user_id | UUID | | Logical → `auth_db.users`, NOT NULL. |
+| card_id | UUID | | Logical → `deck_db.cards`, NOT NULL. |
+| user_card_id | UUID | FK | Tham chiếu `user_cards.user_card_id`, NOT NULL. |
+| session_id | UUID | FK | Tham chiếu `study_sessions.session_id`, nullable. |
+| rating | SMALLINT | | Điểm đánh giá, NOT NULL, `CHECK BETWEEN 1 AND 4`. |
+| duration_ms | INTEGER | | Thời gian trả lời (ms), NOT NULL. |
+| state_before | card_state | | Trạng thái trước `Schedule()`, NOT NULL. |
+| stability_before | DOUBLE PRECISION | | Độ ổn định trước, NOT NULL. |
+| difficulty_before | DOUBLE PRECISION | | Độ khó trước, NOT NULL. |
+| elapsed_days | INTEGER | | Số ngày đã trôi qua, NOT NULL. |
+| scheduled_days | INTEGER | | Số ngày lịch hẹn, NOT NULL. |
+| state_after | card_state | | Trạng thái sau `Schedule()`, NOT NULL. |
+| stability_after | DOUBLE PRECISION | | Độ ổn định sau, NOT NULL. |
+| difficulty_after | DOUBLE PRECISION | | Độ khó sau, NOT NULL. |
+| review_time | TIMESTAMPTZ | | Thời điểm ôn, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `user_fsrs_weights`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| user_id | UUID | PK | Logical → `auth_db.users`, NOT NULL. |
+| version | INTEGER | PK | Phiên bản trọng số, NOT NULL default 1. |
+| weights | DOUBLE PRECISION[] | | Vector 21 trọng số FSRS, NOT NULL (default = community benchmark). |
+| is_active | BOOLEAN | | Bản đang dùng hay không, NOT NULL default TRUE. |
+| trained_on_reviews | INTEGER | | Số revlog dùng để train, nullable. |
+| training_loss | DOUBLE PRECISION | | Loss khi train, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `deck_study_settings`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| user_id | UUID | PK | Logical → `auth_db.users`, NOT NULL. |
+| deck_id | UUID | PK | Logical → `deck_db.decks`, NOT NULL. |
+| shuffle_terms | BOOLEAN | | Xáo trộn thẻ, NOT NULL default FALSE. |
+| text_to_speech | BOOLEAN | | Đọc to nội dung, NOT NULL default FALSE. |
+| answer_with_term | BOOLEAN | | Trả lời bằng thuật ngữ, NOT NULL default TRUE. |
+| answer_with_definition | BOOLEAN | | Trả lời bằng định nghĩa, NOT NULL default TRUE. |
+| question_type_flashcards | BOOLEAN | | Bật dạng flashcard, NOT NULL default FALSE. |
+| question_type_multiple_choice | BOOLEAN | | Bật dạng trắc nghiệm, NOT NULL default TRUE. |
+| question_type_written | BOOLEAN | | Bật dạng tự luận, NOT NULL default TRUE. |
+| strictness_level | VARCHAR(20) | | Độ nghiêm khắc, NOT NULL default `'flexible'`, `CHECK IN (flexible, strict)`. |
+| require_retyping_correct_answer | BOOLEAN | | Bắt gõ lại đáp án đúng, NOT NULL default FALSE. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
+
 **Index đáng chú ý:**
 - `idx_user_cards_due` — **partial index** `(user_id, next_review_date) WHERE state != 'new'`. Cực kỳ quan trọng — query "lấy thẻ đến hạn" chạy mỗi khi user mở deck, partial index loại trừ thẻ chưa từng học để giảm kích thước index 30–50%.
 - `idx_user_cards_state` — phục vụ thống kê theo state.
@@ -688,6 +913,76 @@ erDiagram
     }
 ```
 
+**Bảng mô tả các trường:**
+
+*Bảng `user_stats`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| user_id | UUID | PK | Logical → `auth_db.users`. |
+| total_cards | INTEGER | | Tổng số thẻ, NOT NULL default 0. |
+| total_reviews | INTEGER | | Tổng số lượt ôn, NOT NULL default 0. |
+| total_study_time_ms | BIGINT | | Tổng thời gian học (ms), NOT NULL default 0. |
+| current_streak | INTEGER | | Chuỗi ngày học hiện tại, NOT NULL default 0. |
+| longest_streak | INTEGER | | Chuỗi ngày học dài nhất, NOT NULL default 0. |
+| last_studied_date | DATE | | Ngày học gần nhất, nullable. |
+| total_correct | INTEGER | | Tổng lượt trả lời đúng, NOT NULL default 0. |
+| total_incorrect | INTEGER | | Tổng lượt trả lời sai, NOT NULL default 0. |
+| username | VARCHAR(50) | | Tên người dùng (denormalized từ `auth_db`), nullable. |
+| avatar_url | TEXT | | URL avatar (denormalized từ `auth_db`), nullable. |
+| optimal_hour_weekday | SMALLINT | | Giờ học tối ưu ngày thường (học bằng AI), nullable. |
+| optimal_hour_weekend | SMALLINT | | Giờ học tối ưu cuối tuần, nullable. |
+| reminder_local_time | TIME | | Giờ địa phương gửi nhắc, NOT NULL default `'21:00:00'`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `daily_stats`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| user_id | UUID | PK | Logical → `auth_db.users`. |
+| study_date | DATE | PK | Ngày học. |
+| reviews_count | INTEGER | | Số lượt ôn trong ngày, NOT NULL default 0. |
+| new_cards_count | INTEGER | | Số thẻ mới học trong ngày, NOT NULL default 0. |
+| study_time_ms | BIGINT | | Thời gian học trong ngày (ms), NOT NULL default 0. |
+| correct_count | INTEGER | | Số lượt đúng trong ngày, NOT NULL default 0. |
+
+*Bảng `deck_stats`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| deck_id | UUID | PK | Logical → `deck_db.decks`. |
+| user_id | UUID | | Logical → `auth_db.users`, NOT NULL. |
+| total_cards | INTEGER | | Tổng số thẻ, NOT NULL default 0. |
+| new_cards | INTEGER | | Số thẻ ở trạng thái new, NOT NULL default 0. |
+| learning_cards | INTEGER | | Số thẻ đang học, NOT NULL default 0. |
+| review_cards | INTEGER | | Số thẻ đang ôn, NOT NULL default 0. |
+| mastered_cards | INTEGER | | Số thẻ đã thành thạo, NOT NULL default 0. |
+| due_today | INTEGER | | Số thẻ đến hạn hôm nay, NOT NULL default 0. |
+| deck_name | VARCHAR(200) | | Tên deck (denormalized từ `deck_db`), nullable. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `deck_progress_snapshots`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| deck_id | UUID | PK | Logical → `deck_db.decks`. |
+| user_id | UUID | PK | Logical → `auth_db.users`. |
+| snapshot_date | DATE | PK | Ngày chụp snapshot. |
+| new_count | INTEGER | | Số thẻ new tại thời điểm chụp, NOT NULL. |
+| learning_count | INTEGER | | Số thẻ learning, NOT NULL. |
+| review_count | INTEGER | | Số thẻ review, NOT NULL. |
+| mastered_count | INTEGER | | Số thẻ đã thành thạo, NOT NULL. |
+
+*Bảng `user_activity_buckets`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| user_id | UUID | PK | Logical → `auth_db.users`. |
+| hour_of_day | SMALLINT | PK | Giờ trong ngày (giờ địa phương), `CHECK BETWEEN 0 AND 23`. |
+| day_type | SMALLINT | PK | 0 = ngày thường, 1 = cuối tuần, `CHECK BETWEEN 0 AND 1`. |
+| review_count | INTEGER | | Số lượt ôn trong bucket, NOT NULL default 0. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
+
 **Quyết định thiết kế:**
 - **Denormalize `username`, `avatar_url`, `deck_name`** vào `user_stats` và `deck_stats`. Lý do: bảng xếp hạng và dashboard cần hiển thị tên ngay, không thể `JOIN` xuyên DB. Khi `auth_db.users` đổi username, sự kiện `UserUpdated` đồng bộ trường này.
 - **`user_activity_buckets`** lưu histogram theo (giờ, kiểu ngày) — dùng để tính `optimal_hour_weekday/weekend` cho gợi ý giờ học cá nhân hoá (`optimal_hour = argmax(P(user_active | hour, day_type))`).
@@ -752,15 +1047,75 @@ erDiagram
     }
 ```
 
+**Bảng mô tả các trường:**
+
+*Bảng `fcm_tokens`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| id | UUID | PK | Định danh, default `gen_random_uuid()`. |
+| user_id | UUID | | Logical → `auth_db.users`, NOT NULL. |
+| token | TEXT | UK | FCM registration token, NOT NULL, duy nhất. |
+| device_name | TEXT | | Tên thiết bị, NOT NULL default `''`. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `NOW()`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `NOW()`. |
+
+*Bảng `notification_log`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| id | UUID | PK | Định danh, default `gen_random_uuid()`. |
+| user_id | UUID | | Logical → `auth_db.users`, nullable. |
+| notification_type | TEXT | | Loại thông báo (`study_reminder`, `deck_moderation`, …), NOT NULL. |
+| channel | TEXT | | Kênh gửi: `fcm` \| `email`, NOT NULL. |
+| recipient | TEXT | | FCM token hoặc email người nhận, NOT NULL. |
+| status | TEXT | | Trạng thái gửi, NOT NULL default `'sent'` (`sent`/`failed`). |
+| error_message | TEXT | | Thông báo lỗi nếu fail, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `NOW()`. |
+
+*Bảng `email_templates`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| id | UUID | PK | Định danh, default `gen_random_uuid()`. |
+| template_key | TEXT | | Khoá template (`welcome`, `email_verification`, …), NOT NULL. |
+| locale | TEXT | | Ngôn ngữ, NOT NULL default `'en'`. |
+| subject | TEXT | | Tiêu đề email (Go template syntax), NOT NULL. |
+| html_body | TEXT | | Nội dung HTML (Go template), NOT NULL. |
+| text_body | TEXT | | Nội dung plaintext fallback (Go template), NOT NULL. |
+| variables | JSONB | | Danh sách tên biến bắt buộc, NOT NULL default `'[]'`. |
+| is_active | BOOLEAN | | Template đang dùng hay không, NOT NULL default TRUE. |
+| version | INT | | Phiên bản hiện tại, NOT NULL default 1. |
+| updated_by | UUID | | Admin chỉnh sửa — logical → `auth_db.users`, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `NOW()`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `NOW()`. |
+
+> Ràng buộc: `UNIQUE (template_key, locale)`.
+
+*Bảng `email_template_versions`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| id | UUID | PK | Định danh, default `gen_random_uuid()`. |
+| template_id | UUID | FK | Tham chiếu `email_templates.id`, NOT NULL, `ON DELETE CASCADE`. |
+| version | INT | | Số phiên bản, NOT NULL. |
+| subject | TEXT | | Tiêu đề tại phiên bản này, NOT NULL. |
+| html_body | TEXT | | Nội dung HTML tại phiên bản này, NOT NULL. |
+| text_body | TEXT | | Nội dung plaintext tại phiên bản này, NOT NULL. |
+| updated_by | UUID | | Admin chỉnh sửa — logical → `auth_db.users`, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `NOW()`. |
+
+> Ràng buộc: `UNIQUE (template_id, version)`.
+
 **Quyết định thiết kế:**
 - **`email_templates` không hardcode trong code** — admin có thể sửa template qua admin web mà không cần redeploy. Mỗi lần update sẽ snapshot vào `email_template_versions` để rollback.
 - **`fcm_tokens.token UNIQUE`** — cùng một token không được đăng ký cho hai user (FCM đảm bảo token duy nhất per device per app).
 - **`notification_log` có `status` + `error_message`** — phục vụ audit và debug, ví dụ khi FCM trả `InvalidRegistration` thì service tự xoá token khỏi `fcm_tokens`.
-- **Các template seeded** (qua migration `000002`, `000003`, `000004`): `welcome`, `email_verification`, `password_reset`, `study_reminder`, `report_resolved`, `deck_moderation`.
+- **Các template seeded** (qua migration `000002`–`000005`): `welcome`, `email_verification`, `password_reset`, `study_reminder`, `report_resolved`, `deck_moderation`, `deck_deleted_with_appeal`, `appeal_decided`.
 
 ### 4.6. `admin_db` — admin-service
 
-**Trách nhiệm:** Quản lý báo cáo vi phạm và audit log các hành động kiểm duyệt.
+**Trách nhiệm:** Quản lý báo cáo vi phạm, kháng nghị xoá deck, và audit log các hành động kiểm duyệt.
 
 **Custom types:**
 ```sql
@@ -770,6 +1125,7 @@ CREATE TYPE report_category    AS ENUM (
     'inappropriate_content','copyright_violation','spam',
     'harassment','misinformation','other'
 );
+CREATE TYPE appeal_status      AS ENUM ('pending', 'submitted', 'approved', 'rejected');
 ```
 
 ```mermaid
@@ -782,7 +1138,6 @@ erDiagram
         report_category reason_category
         text description "nullable"
         report_status status "default 'pending'"
-        uuid assigned_to "logical → auth_db.users (admin) — nullable"
         text admin_note "nullable"
         varchar resolution "banned|deleted|warned|no_action — nullable"
         uuid resolved_by "logical → auth_db.users (admin) — nullable"
@@ -801,18 +1156,90 @@ erDiagram
         jsonb metadata "thông tin bổ sung"
         timestamptz created_at
     }
+
+    DECK_APPEALS {
+        uuid appeal_id PK
+        varchar token UK "one-time token trong email"
+        uuid deck_id UK "logical → deck_db.decks — một appeal/deck"
+        uuid user_id "logical → auth_db.users — chủ deck"
+        text deck_name
+        text moderation_reason "default ''"
+        appeal_status status "default 'pending'"
+        text user_message "nullable — khi user submit"
+        timestamptz submitted_at "nullable"
+        uuid decided_by "logical → auth_db.users (admin) — nullable"
+        text decision_note "nullable"
+        timestamptz decided_at "nullable"
+        timestamptz created_at
+        timestamptz updated_at
+    }
 ```
+
+**Bảng mô tả các trường:**
+
+*Bảng `reports`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| report_id | UUID | PK | Định danh báo cáo, default `gen_random_uuid()`. |
+| reporter_id | UUID | | Người báo cáo — logical → `auth_db.users`, NOT NULL. |
+| target_type | report_target_type | | Loại đối tượng: `deck` \| `user` \| `note`, NOT NULL. |
+| target_id | UUID | | ID đối tượng bị báo cáo (polymorphic), NOT NULL. |
+| reason_category | report_category | | Nhóm lý do báo cáo, NOT NULL. |
+| description | TEXT | | Mô tả chi tiết, nullable. |
+| status | report_status | | `pending`/`reviewing`/`resolved`/`dismissed`, default `'pending'`. |
+| admin_note | TEXT | | Ghi chú của admin, nullable. |
+| resolution | VARCHAR(50) | | Kết quả: `banned`/`deleted`/`warned`/`no_action`, nullable. |
+| resolved_by | UUID | | Admin xử lý — logical → `auth_db.users`, nullable. |
+| resolved_at | TIMESTAMPTZ | | Thời điểm xử lý xong, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `moderation_logs`* (append-only — audit trail bất biến)
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| log_id | UUID | PK | Định danh log, default `gen_random_uuid()`. |
+| admin_id | UUID | | Admin thực hiện — logical → `auth_db.users`, NOT NULL. |
+| action | VARCHAR(50) | | Hành động: `ban_user`/`hide_deck`/`resolve_report`/…, NOT NULL. |
+| target_type | VARCHAR(20) | | Loại đối tượng: `user`/`deck`/`report`, NOT NULL. |
+| target_id | UUID | | ID đối tượng tác động, NOT NULL. |
+| reason | TEXT | | Lý do, nullable. |
+| metadata | JSONB | | Thông tin bổ sung tuỳ action, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+
+*Bảng `deck_appeals`*
+
+| Tên trường | Kiểu dữ liệu | Khoá | Mô tả |
+|---|---|---|---|
+| appeal_id | UUID | PK | Định danh kháng nghị, default `gen_random_uuid()`. |
+| token | VARCHAR(80) | UK | Token một lần trong email xoá deck, NOT NULL, duy nhất. |
+| deck_id | UUID | UK | Logical → `deck_db.decks`, NOT NULL, duy nhất (một appeal/deck). |
+| user_id | UUID | | Chủ deck — logical → `auth_db.users`, NOT NULL. |
+| deck_name | TEXT | | Tên deck (snapshot), NOT NULL. |
+| moderation_reason | TEXT | | Lý do bị gỡ, NOT NULL default `''`. |
+| status | appeal_status | | `pending`/`submitted`/`approved`/`rejected`, default `'pending'`. |
+| user_message | TEXT | | Nội dung kháng nghị của user, nullable. |
+| submitted_at | TIMESTAMPTZ | | Thời điểm user gửi kháng nghị, nullable. |
+| decided_by | UUID | | Admin quyết định — logical → `auth_db.users`, nullable. |
+| decision_note | TEXT | | Ghi chú quyết định, nullable. |
+| decided_at | TIMESTAMPTZ | | Thời điểm quyết định, nullable. |
+| created_at | TIMESTAMPTZ | | Thời điểm tạo, default `CURRENT_TIMESTAMP`. |
+| updated_at | TIMESTAMPTZ | | Thời điểm cập nhật, default `CURRENT_TIMESTAMP`. |
 
 **Index đáng chú ý:**
 - `idx_reports_status` — `(status, created_at DESC)` để liệt kê queue report cho moderator.
-- `idx_reports_assigned` — **partial index** `WHERE status IN ('pending','reviewing')` — chỉ index các report đang xử lý.
 - `idx_reports_target` — lookup nhanh "có bao nhiêu report về target này".
-- `idx_moderation_logs_admin`, `idx_moderation_logs_target` — phục vụ audit.
+- `idx_reports_reporter` — lookup report theo người báo cáo.
+- `idx_moderation_logs_admin`, `idx_moderation_logs_target`, `idx_moderation_logs_created` — phục vụ audit.
+- `idx_deck_appeals_status` — `(status, created_at DESC)` liệt kê queue kháng nghị.
+- `idx_deck_appeals_user` — lookup kháng nghị theo chủ deck.
 
 **Quyết định thiết kế:**
 - **`target_id` không có FK vật lý** vì target có thể trỏ tới `deck_db.decks`, `auth_db.users`, hoặc `deck_db.notes` tuỳ `target_type` — là pattern polymorphic association.
 - **`moderation_logs` là append-only** — không bao giờ UPDATE/DELETE, đảm bảo audit trail bất biến.
 - **`metadata JSONB`** linh hoạt cho mọi loại action (ví dụ `ban_user` có thể có `{"ban_duration_days": 30}`, `hide_deck` có thể có `{"moderation_score": 0.93, "model_version": "v2"}`).
+- **`deck_appeals` dùng `token` một lần thay vì auth.** Khi deck bị xoá (thủ công hoặc auto-moderation), một bản ghi `pending` được tạo; user nhận email kèm link `/appeal?token=...` để gửi kháng nghị (`submitted`); admin sau đó `approved`/`rejected`. Ràng buộc `UNIQUE (deck_id)` đảm bảo mỗi deck chỉ có một kháng nghị.
 
 ---
 
@@ -839,8 +1266,9 @@ erDiagram
 | stats_db | deck_stats | user_id | Thống kê deck | `UserDeleted` → xoá |
 | notif_db | fcm_tokens | user_id | Token thiết bị | `UserDeleted` → xoá |
 | notif_db | notification_log | user_id | Audit log | `UserDeleted` → giữ lại (anonymize) |
-| admin_db | reports | reporter_id, assigned_to, resolved_by | Người báo cáo / xử lý | `UserDeleted` → giữ lại (anonymize) |
+| admin_db | reports | reporter_id, resolved_by | Người báo cáo / xử lý | `UserDeleted` → giữ lại (anonymize) |
 | admin_db | moderation_logs | admin_id | Admin thực hiện | KHÔNG xoá (audit trail bất biến) |
+| admin_db | deck_appeals | user_id, decided_by | Chủ deck / admin quyết định | `UserDeleted` → giữ lại (anonymize) |
 
 ### 5.2. Tham chiếu tới `deck_db.decks.deck_id`
 
@@ -853,6 +1281,7 @@ erDiagram
 | study_db | deck_study_settings | deck_id | Cấu hình | `DeckDeleted` → xoá |
 | stats_db | deck_stats | deck_id | Thống kê deck | `DeckUpdated` → cập nhật tên; `DeckDeleted` → xoá |
 | stats_db | deck_progress_snapshots | deck_id | Lịch sử tiến độ | `DeckDeleted` → giữ lại |
+| admin_db | deck_appeals | deck_id | Kháng nghị xoá deck | `DeckDeleted` → tạo bản ghi `pending`; giữ lại để xử lý |
 
 ### 5.3. Tham chiếu tới `deck_db.cards.card_id`
 
@@ -898,6 +1327,7 @@ Tất cả bảng đều có 4 cột chuẩn (trừ bảng append-only như `rev
 | admin_db | `report_target_type` | `deck`, `user`, `note` |
 | admin_db | `report_status` | `pending`, `reviewing`, `resolved`, `dismissed` |
 | admin_db | `report_category` | `inappropriate_content`, `copyright_violation`, `spam`, `harassment`, `misinformation`, `other` |
+| admin_db | `appeal_status` | `pending`, `submitted`, `approved`, `rejected` |
 
 ### 6.3. Quy ước index
 
@@ -917,7 +1347,7 @@ Tất cả bảng đều có 4 cột chuẩn (trừ bảng append-only như `rev
 
 ---
 
-*Tài liệu lập ngày 2026-05-25. Tham chiếu chéo:*
+*Tài liệu lập ngày 2026-05-25, cập nhật 2026-05-27 (đồng bộ với migration mới nhất: bỏ `reports.assigned_to`, thêm bảng `deck_appeals`, thêm bảng mô tả trường cho từng thực thể). Tham chiếu chéo:*
 - *`doc/tech-stack-report.md` — tổng quan công nghệ và lý do chọn Postgres / Neon.*
 - *`doc/uml-diagrams.md` — class diagram của domain layer (đối tượng tương ứng các bảng).*
 - *`services/<svc>/db/migration/` — nguồn chân lý cho schema của từng database.*

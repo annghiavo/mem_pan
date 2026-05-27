@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -78,6 +79,50 @@ func (q *Queries) InsertRevlog(ctx context.Context, arg InsertRevlogParams) (Rev
 	return i, err
 }
 
+const listReviewLogsForOptimize = `-- name: ListReviewLogsForOptimize :many
+SELECT card_id, rating, elapsed_days, review_time
+FROM revlogs
+WHERE user_id = $1
+ORDER BY review_time ASC
+`
+
+type ListReviewLogsForOptimizeRow struct {
+	CardID      uuid.UUID `json:"card_id"`
+	Rating      int16     `json:"rating"`
+	ElapsedDays int32     `json:"elapsed_days"`
+	ReviewTime  time.Time `json:"review_time"`
+}
+
+// Training samples for the optimizer, oldest first (elapsed_days is relative to
+// the previous review, so chronological order matters).
+func (q *Queries) ListReviewLogsForOptimize(ctx context.Context, userID uuid.UUID) ([]ListReviewLogsForOptimizeRow, error) {
+	rows, err := q.db.QueryContext(ctx, listReviewLogsForOptimize, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListReviewLogsForOptimizeRow{}
+	for rows.Next() {
+		var i ListReviewLogsForOptimizeRow
+		if err := rows.Scan(
+			&i.CardID,
+			&i.Rating,
+			&i.ElapsedDays,
+			&i.ReviewTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listRevlogsByUserCard = `-- name: ListRevlogsByUserCard :many
 SELECT log_id, user_id, card_id, user_card_id, session_id, rating, duration_ms, state_before, stability_before, difficulty_before, elapsed_days, scheduled_days, state_after, stability_after, difficulty_after, review_time FROM revlogs
 WHERE user_card_id = $1
@@ -117,6 +162,44 @@ func (q *Queries) ListRevlogsByUserCard(ctx context.Context, arg ListRevlogsByUs
 			&i.DifficultyAfter,
 			&i.ReviewTime,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsersWithMinReviews = `-- name: ListUsersWithMinReviews :many
+SELECT user_id, COUNT(*) AS review_count
+FROM revlogs
+GROUP BY user_id
+HAVING COUNT(*) >= $1::bigint
+ORDER BY review_count DESC
+`
+
+type ListUsersWithMinReviewsRow struct {
+	UserID      uuid.UUID `json:"user_id"`
+	ReviewCount int64     `json:"review_count"`
+}
+
+// Users eligible for FSRS weight optimization: those with at least $1 reviews.
+// Driven by the daily optimization cron.
+func (q *Queries) ListUsersWithMinReviews(ctx context.Context, minReviews int64) ([]ListUsersWithMinReviewsRow, error) {
+	rows, err := q.db.QueryContext(ctx, listUsersWithMinReviews, minReviews)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListUsersWithMinReviewsRow{}
+	for rows.Next() {
+		var i ListUsersWithMinReviewsRow
+		if err := rows.Scan(&i.UserID, &i.ReviewCount); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
