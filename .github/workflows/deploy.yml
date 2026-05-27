@@ -40,9 +40,9 @@ permissions:
 env:
   PROJECT_ID: mempan-cac51
   PROJECT_NUMBER: '272885252422'
-  REGION: asia-southeast1
+  REGION: asia-southeast3
   AR_REPO: mempan-services
-  GAR_HOST: asia-southeast1-docker.pkg.dev
+  GAR_HOST: asia-southeast3-docker.pkg.dev
   RUNTIME_SA: mempan-runtime@mempan-cac51.iam.gserviceaccount.com
 
 jobs:
