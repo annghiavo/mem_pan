@@ -67,6 +67,12 @@ message DeckProgressResponse {
     int32  memorized_count = 4;
     int32  total_count     = 5;
     repeated ProgressTag tags = 6;
+    // Soonest next_review_date among the user's non-new cards in this deck.
+    // Unset when the deck has no scheduled (non-new) cards yet. The client
+    // renders the countdown from this absolute timestamp.
+    google.protobuf.Timestamp next_review_date = 7;
+    // Number of non-new cards already due (next_review_date <= now).
+    int32 due_now = 8;
 }
 
 message StudySettings {

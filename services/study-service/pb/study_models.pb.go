@@ -534,8 +534,14 @@ type DeckProgressResponse struct {
 	MemorizedCount int32                  `protobuf:"varint,4,opt,name=memorized_count,json=memorizedCount,proto3" json:"memorized_count,omitempty"`
 	TotalCount     int32                  `protobuf:"varint,5,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"`
 	Tags           []*ProgressTag         `protobuf:"bytes,6,rep,name=tags,proto3" json:"tags,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// Soonest next_review_date among the user's non-new cards in this deck.
+	// Unset when the deck has no scheduled (non-new) cards yet. The client
+	// renders the countdown from this absolute timestamp.
+	NextReviewDate *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=next_review_date,json=nextReviewDate,proto3" json:"next_review_date,omitempty"`
+	// Number of non-new cards already due (next_review_date <= now).
+	DueNow        int32 `protobuf:"varint,8,opt,name=due_now,json=dueNow,proto3" json:"due_now,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeckProgressResponse) Reset() {
@@ -608,6 +614,20 @@ func (x *DeckProgressResponse) GetTags() []*ProgressTag {
 		return x.Tags
 	}
 	return nil
+}
+
+func (x *DeckProgressResponse) GetNextReviewDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.NextReviewDate
+	}
+	return nil
+}
+
+func (x *DeckProgressResponse) GetDueNow() int32 {
+	if x != nil {
+		return x.DueNow
+	}
+	return 0
 }
 
 type StudySettings struct {
@@ -774,7 +794,7 @@ const file_study_models_proto_rawDesc = "" +
 	"\vProgressTag\x12\x14\n" +
 	"\x05label\x18\x01 \x01(\tR\x05label\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x19\n" +
-	"\bcard_ids\x18\x03 \x03(\tR\acardIds\"\xdf\x01\n" +
+	"\bcard_ids\x18\x03 \x03(\tR\acardIds\"\xbe\x02\n" +
 	"\x14DeckProgressResponse\x12\x17\n" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x1b\n" +
 	"\tnew_count\x18\x02 \x01(\x05R\bnewCount\x12\x1f\n" +
@@ -783,7 +803,9 @@ const file_study_models_proto_rawDesc = "" +
 	"\x0fmemorized_count\x18\x04 \x01(\x05R\x0ememorizedCount\x12\x1f\n" +
 	"\vtotal_count\x18\x05 \x01(\x05R\n" +
 	"totalCount\x12&\n" +
-	"\x04tags\x18\x06 \x03(\v2\x12.study.ProgressTagR\x04tags\"\xdd\x03\n" +
+	"\x04tags\x18\x06 \x03(\v2\x12.study.ProgressTagR\x04tags\x12D\n" +
+	"\x10next_review_date\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x0enextReviewDate\x12\x17\n" +
+	"\adue_now\x18\b \x01(\x05R\x06dueNow\"\xdd\x03\n" +
 	"\rStudySettings\x12#\n" +
 	"\rshuffle_terms\x18\x01 \x01(\bR\fshuffleTerms\x12$\n" +
 	"\x0etext_to_speech\x18\x02 \x01(\bR\ftextToSpeech\x12(\n" +
@@ -828,11 +850,12 @@ var file_study_models_proto_depIdxs = []int32{
 	8, // 5: study.DueCard.next_review_date:type_name -> google.protobuf.Timestamp
 	8, // 6: study.RecentDeckItem.last_accessed_at:type_name -> google.protobuf.Timestamp
 	5, // 7: study.DeckProgressResponse.tags:type_name -> study.ProgressTag
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	8, // 8: study.DeckProgressResponse.next_review_date:type_name -> google.protobuf.Timestamp
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	9, // [9:9] is the sub-list for extension type_name
+	9, // [9:9] is the sub-list for extension extendee
+	0, // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_study_models_proto_init() }

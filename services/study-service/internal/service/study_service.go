@@ -79,6 +79,11 @@ type DeckProgress struct {
 	MemorizedCount int32
 	TotalCount     int32
 	Tags           []ProgressTag
+	// NextReviewDate is the soonest next_review_date among non-new cards, or
+	// nil when the deck has no scheduled cards. DueNow counts non-new cards
+	// already due (next_review_date <= now).
+	NextReviewDate *time.Time
+	DueNow         int32
 }
 
 type StudyService interface {
@@ -504,6 +509,7 @@ func (s *studyService) GetDeckProgress(ctx context.Context, userID, deckID uuid.
 	learnIDs := make([]uuid.UUID, 0)
 	memorizedIDs := make([]uuid.UUID, 0)
 
+	now := time.Now()
 	progress := &DeckProgress{DeckID: deckID}
 	for _, c := range cards {
 		switch c.State {
@@ -518,6 +524,18 @@ func (s *studyService) GetDeckProgress(ctx context.Context, userID, deckID uuid.
 			memorizedIDs = append(memorizedIDs, c.CardID)
 		}
 		progress.TotalCount++
+
+		// Track the soonest review across non-new cards so the client can show
+		// a deck-level countdown. Cards already past due bump DueNow.
+		if c.State != string(db.CardStateNew) {
+			if c.NextReviewDate.Before(now) || c.NextReviewDate.Equal(now) {
+				progress.DueNow++
+			}
+			if progress.NextReviewDate == nil || c.NextReviewDate.Before(*progress.NextReviewDate) {
+				t := c.NextReviewDate
+				progress.NextReviewDate = &t
+			}
+		}
 	}
 	progress.Tags = []ProgressTag{
 		{Label: "new", Count: progress.NewCount, CardIDs: newIDs},

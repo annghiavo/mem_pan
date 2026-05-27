@@ -201,12 +201,17 @@ func (s *Server) GetDeckProgress(ctx context.Context, req *pb.GetDeckProgressReq
 		}
 		tags[i] = &pb.ProgressTag{Label: t.Label, Count: t.Count, CardIds: cardIDs}
 	}
-	return &pb.DeckProgressResponse{
+	resp := &pb.DeckProgressResponse{
 		DeckId:         progress.DeckID.String(),
 		NewCount:       progress.NewCount,
 		LearnCount:     progress.LearnCount,
 		MemorizedCount: progress.MemorizedCount,
 		TotalCount:     progress.TotalCount,
 		Tags:           tags,
-	}, nil
+		DueNow:         progress.DueNow,
+	}
+	if progress.NextReviewDate != nil {
+		resp.NextReviewDate = timestamppb.New(*progress.NextReviewDate)
+	}
+	return resp, nil
 }
