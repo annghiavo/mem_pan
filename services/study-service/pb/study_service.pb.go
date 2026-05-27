@@ -119,6 +119,242 @@ func (x *CountDueForUserResponse) GetDueToday() int32 {
 	return 0
 }
 
+type CountDeckLearnersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CountDeckLearnersRequest) Reset() {
+	*x = CountDeckLearnersRequest{}
+	mi := &file_study_service_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CountDeckLearnersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CountDeckLearnersRequest) ProtoMessage() {}
+
+func (x *CountDeckLearnersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_study_service_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CountDeckLearnersRequest.ProtoReflect.Descriptor instead.
+func (*CountDeckLearnersRequest) Descriptor() ([]byte, []int) {
+	return file_study_service_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *CountDeckLearnersRequest) GetDeckId() string {
+	if x != nil {
+		return x.DeckId
+	}
+	return ""
+}
+
+type CountDeckLearnersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Count         int64                  `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CountDeckLearnersResponse) Reset() {
+	*x = CountDeckLearnersResponse{}
+	mi := &file_study_service_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CountDeckLearnersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CountDeckLearnersResponse) ProtoMessage() {}
+
+func (x *CountDeckLearnersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_study_service_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CountDeckLearnersResponse.ProtoReflect.Descriptor instead.
+func (*CountDeckLearnersResponse) Descriptor() ([]byte, []int) {
+	return file_study_service_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CountDeckLearnersResponse) GetCount() int64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+type TopDecksByLearnersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	WindowDays    int32                  `protobuf:"varint,1,opt,name=window_days,json=windowDays,proto3" json:"window_days,omitempty"` // trending window; <=0 falls back to 7 days
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`                             // max rows; <=0 falls back to 10, capped at 100
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TopDecksByLearnersRequest) Reset() {
+	*x = TopDecksByLearnersRequest{}
+	mi := &file_study_service_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TopDecksByLearnersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TopDecksByLearnersRequest) ProtoMessage() {}
+
+func (x *TopDecksByLearnersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_study_service_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TopDecksByLearnersRequest.ProtoReflect.Descriptor instead.
+func (*TopDecksByLearnersRequest) Descriptor() ([]byte, []int) {
+	return file_study_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TopDecksByLearnersRequest) GetWindowDays() int32 {
+	if x != nil {
+		return x.WindowDays
+	}
+	return 0
+}
+
+func (x *TopDecksByLearnersRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type DeckLearners struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
+	Learners      int64                  `protobuf:"varint,2,opt,name=learners,proto3" json:"learners,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeckLearners) Reset() {
+	*x = DeckLearners{}
+	mi := &file_study_service_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeckLearners) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeckLearners) ProtoMessage() {}
+
+func (x *DeckLearners) ProtoReflect() protoreflect.Message {
+	mi := &file_study_service_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeckLearners.ProtoReflect.Descriptor instead.
+func (*DeckLearners) Descriptor() ([]byte, []int) {
+	return file_study_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *DeckLearners) GetDeckId() string {
+	if x != nil {
+		return x.DeckId
+	}
+	return ""
+}
+
+func (x *DeckLearners) GetLearners() int64 {
+	if x != nil {
+		return x.Learners
+	}
+	return 0
+}
+
+type TopDecksByLearnersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Decks         []*DeckLearners        `protobuf:"bytes,1,rep,name=decks,proto3" json:"decks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TopDecksByLearnersResponse) Reset() {
+	*x = TopDecksByLearnersResponse{}
+	mi := &file_study_service_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TopDecksByLearnersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TopDecksByLearnersResponse) ProtoMessage() {}
+
+func (x *TopDecksByLearnersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_study_service_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TopDecksByLearnersResponse.ProtoReflect.Descriptor instead.
+func (*TopDecksByLearnersResponse) Descriptor() ([]byte, []int) {
+	return file_study_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *TopDecksByLearnersResponse) GetDecks() []*DeckLearners {
+	if x != nil {
+		return x.Decks
+	}
+	return nil
+}
+
 var File_study_service_proto protoreflect.FileDescriptor
 
 const file_study_service_proto_rawDesc = "" +
@@ -128,7 +364,20 @@ const file_study_service_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
 	"\btimezone\x18\x02 \x01(\tR\btimezone\"6\n" +
 	"\x17CountDueForUserResponse\x12\x1b\n" +
-	"\tdue_today\x18\x01 \x01(\x05R\bdueToday2\xed\x11\n" +
+	"\tdue_today\x18\x01 \x01(\x05R\bdueToday\"3\n" +
+	"\x18CountDeckLearnersRequest\x12\x17\n" +
+	"\adeck_id\x18\x01 \x01(\tR\x06deckId\"1\n" +
+	"\x19CountDeckLearnersResponse\x12\x14\n" +
+	"\x05count\x18\x01 \x01(\x03R\x05count\"R\n" +
+	"\x19TopDecksByLearnersRequest\x12\x1f\n" +
+	"\vwindow_days\x18\x01 \x01(\x05R\n" +
+	"windowDays\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"C\n" +
+	"\fDeckLearners\x12\x17\n" +
+	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x1a\n" +
+	"\blearners\x18\x02 \x01(\x03R\blearners\"G\n" +
+	"\x1aTopDecksByLearnersResponse\x12)\n" +
+	"\x05decks\x18\x01 \x03(\v2\x13.study.DeckLearnersR\x05decks2\xa0\x13\n" +
 	"\fStudyService\x12\xa4\x01\n" +
 	"\fStartSession\x12\x1a.study.StartSessionRequest\x1a\x1b.study.StartSessionResponse\"[\x92A;\n" +
 	"\x05study\x12 Start a study session for a deckb\x10\n" +
@@ -187,7 +436,9 @@ const file_study_service_proto_rawDesc = "" +
 	"\x0e\n" +
 	"\n" +
 	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02+:\x01*\"&/v1/study/decks/{deck_id}/check-answer\x12P\n" +
-	"\x0fCountDueForUser\x12\x1d.study.CountDueForUserRequest\x1a\x1e.study.CountDueForUserResponseB\x89\x01\x92Ac\x12\x18\n" +
+	"\x0fCountDueForUser\x12\x1d.study.CountDueForUserRequest\x1a\x1e.study.CountDueForUserResponse\x12V\n" +
+	"\x11CountDeckLearners\x12\x1f.study.CountDeckLearnersRequest\x1a .study.CountDeckLearnersResponse\x12Y\n" +
+	"\x12TopDecksByLearners\x12 .study.TopDecksByLearnersRequest\x1a!.study.TopDecksByLearnersResponseB\x89\x01\x92Ac\x12\x18\n" +
 	"\x11Study Service API2\x031.02\x10application/json:\x10application/jsonZ#\n" +
 	"!\n" +
 	"\n" +
@@ -205,63 +456,73 @@ func file_study_service_proto_rawDescGZIP() []byte {
 	return file_study_service_proto_rawDescData
 }
 
-var file_study_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_study_service_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_study_service_proto_goTypes = []any{
 	(*CountDueForUserRequest)(nil),          // 0: study.CountDueForUserRequest
 	(*CountDueForUserResponse)(nil),         // 1: study.CountDueForUserResponse
-	(*StartSessionRequest)(nil),             // 2: study.StartSessionRequest
-	(*GetSessionRequest)(nil),               // 3: study.GetSessionRequest
-	(*ReviewCardRequest)(nil),               // 4: study.ReviewCardRequest
-	(*FinishSessionRequest)(nil),            // 5: study.FinishSessionRequest
-	(*GetDueCardsRequest)(nil),              // 6: study.GetDueCardsRequest
-	(*GetRecentSessionCardsRequest)(nil),    // 7: study.GetRecentSessionCardsRequest
-	(*GetRecentDecksRequest)(nil),           // 8: study.GetRecentDecksRequest
-	(*GetDeckProgressRequest)(nil),          // 9: study.GetDeckProgressRequest
-	(*GetStudyDeckSettingsRequest)(nil),     // 10: study.GetStudyDeckSettingsRequest
-	(*UpdateStudyDeckSettingsRequest)(nil),  // 11: study.UpdateStudyDeckSettingsRequest
-	(*CheckAnswerRequest)(nil),              // 12: study.CheckAnswerRequest
-	(*StartSessionResponse)(nil),            // 13: study.StartSessionResponse
-	(*GetSessionResponse)(nil),              // 14: study.GetSessionResponse
-	(*ReviewCardResponse)(nil),              // 15: study.ReviewCardResponse
-	(*FinishSessionResponse)(nil),           // 16: study.FinishSessionResponse
-	(*GetDueCardsResponse)(nil),             // 17: study.GetDueCardsResponse
-	(*GetRecentSessionCardsResponse)(nil),   // 18: study.GetRecentSessionCardsResponse
-	(*GetRecentDecksResponse)(nil),          // 19: study.GetRecentDecksResponse
-	(*DeckProgressResponse)(nil),            // 20: study.DeckProgressResponse
-	(*GetStudyDeckSettingsResponse)(nil),    // 21: study.GetStudyDeckSettingsResponse
-	(*UpdateStudyDeckSettingsResponse)(nil), // 22: study.UpdateStudyDeckSettingsResponse
-	(*CheckAnswerResponse)(nil),             // 23: study.CheckAnswerResponse
+	(*CountDeckLearnersRequest)(nil),        // 2: study.CountDeckLearnersRequest
+	(*CountDeckLearnersResponse)(nil),       // 3: study.CountDeckLearnersResponse
+	(*TopDecksByLearnersRequest)(nil),       // 4: study.TopDecksByLearnersRequest
+	(*DeckLearners)(nil),                    // 5: study.DeckLearners
+	(*TopDecksByLearnersResponse)(nil),      // 6: study.TopDecksByLearnersResponse
+	(*StartSessionRequest)(nil),             // 7: study.StartSessionRequest
+	(*GetSessionRequest)(nil),               // 8: study.GetSessionRequest
+	(*ReviewCardRequest)(nil),               // 9: study.ReviewCardRequest
+	(*FinishSessionRequest)(nil),            // 10: study.FinishSessionRequest
+	(*GetDueCardsRequest)(nil),              // 11: study.GetDueCardsRequest
+	(*GetRecentSessionCardsRequest)(nil),    // 12: study.GetRecentSessionCardsRequest
+	(*GetRecentDecksRequest)(nil),           // 13: study.GetRecentDecksRequest
+	(*GetDeckProgressRequest)(nil),          // 14: study.GetDeckProgressRequest
+	(*GetStudyDeckSettingsRequest)(nil),     // 15: study.GetStudyDeckSettingsRequest
+	(*UpdateStudyDeckSettingsRequest)(nil),  // 16: study.UpdateStudyDeckSettingsRequest
+	(*CheckAnswerRequest)(nil),              // 17: study.CheckAnswerRequest
+	(*StartSessionResponse)(nil),            // 18: study.StartSessionResponse
+	(*GetSessionResponse)(nil),              // 19: study.GetSessionResponse
+	(*ReviewCardResponse)(nil),              // 20: study.ReviewCardResponse
+	(*FinishSessionResponse)(nil),           // 21: study.FinishSessionResponse
+	(*GetDueCardsResponse)(nil),             // 22: study.GetDueCardsResponse
+	(*GetRecentSessionCardsResponse)(nil),   // 23: study.GetRecentSessionCardsResponse
+	(*GetRecentDecksResponse)(nil),          // 24: study.GetRecentDecksResponse
+	(*DeckProgressResponse)(nil),            // 25: study.DeckProgressResponse
+	(*GetStudyDeckSettingsResponse)(nil),    // 26: study.GetStudyDeckSettingsResponse
+	(*UpdateStudyDeckSettingsResponse)(nil), // 27: study.UpdateStudyDeckSettingsResponse
+	(*CheckAnswerResponse)(nil),             // 28: study.CheckAnswerResponse
 }
 var file_study_service_proto_depIdxs = []int32{
-	2,  // 0: study.StudyService.StartSession:input_type -> study.StartSessionRequest
-	3,  // 1: study.StudyService.GetSession:input_type -> study.GetSessionRequest
-	4,  // 2: study.StudyService.ReviewCard:input_type -> study.ReviewCardRequest
-	5,  // 3: study.StudyService.FinishSession:input_type -> study.FinishSessionRequest
-	6,  // 4: study.StudyService.GetDueCards:input_type -> study.GetDueCardsRequest
-	7,  // 5: study.StudyService.GetRecentSessionCards:input_type -> study.GetRecentSessionCardsRequest
-	8,  // 6: study.StudyService.GetRecentDecks:input_type -> study.GetRecentDecksRequest
-	9,  // 7: study.StudyService.GetDeckProgress:input_type -> study.GetDeckProgressRequest
-	10, // 8: study.StudyService.GetDeckSettings:input_type -> study.GetStudyDeckSettingsRequest
-	11, // 9: study.StudyService.UpdateDeckSettings:input_type -> study.UpdateStudyDeckSettingsRequest
-	12, // 10: study.StudyService.CheckAnswer:input_type -> study.CheckAnswerRequest
-	0,  // 11: study.StudyService.CountDueForUser:input_type -> study.CountDueForUserRequest
-	13, // 12: study.StudyService.StartSession:output_type -> study.StartSessionResponse
-	14, // 13: study.StudyService.GetSession:output_type -> study.GetSessionResponse
-	15, // 14: study.StudyService.ReviewCard:output_type -> study.ReviewCardResponse
-	16, // 15: study.StudyService.FinishSession:output_type -> study.FinishSessionResponse
-	17, // 16: study.StudyService.GetDueCards:output_type -> study.GetDueCardsResponse
-	18, // 17: study.StudyService.GetRecentSessionCards:output_type -> study.GetRecentSessionCardsResponse
-	19, // 18: study.StudyService.GetRecentDecks:output_type -> study.GetRecentDecksResponse
-	20, // 19: study.StudyService.GetDeckProgress:output_type -> study.DeckProgressResponse
-	21, // 20: study.StudyService.GetDeckSettings:output_type -> study.GetStudyDeckSettingsResponse
-	22, // 21: study.StudyService.UpdateDeckSettings:output_type -> study.UpdateStudyDeckSettingsResponse
-	23, // 22: study.StudyService.CheckAnswer:output_type -> study.CheckAnswerResponse
-	1,  // 23: study.StudyService.CountDueForUser:output_type -> study.CountDueForUserResponse
-	12, // [12:24] is the sub-list for method output_type
-	0,  // [0:12] is the sub-list for method input_type
-	0,  // [0:0] is the sub-list for extension type_name
-	0,  // [0:0] is the sub-list for extension extendee
-	0,  // [0:0] is the sub-list for field type_name
+	5,  // 0: study.TopDecksByLearnersResponse.decks:type_name -> study.DeckLearners
+	7,  // 1: study.StudyService.StartSession:input_type -> study.StartSessionRequest
+	8,  // 2: study.StudyService.GetSession:input_type -> study.GetSessionRequest
+	9,  // 3: study.StudyService.ReviewCard:input_type -> study.ReviewCardRequest
+	10, // 4: study.StudyService.FinishSession:input_type -> study.FinishSessionRequest
+	11, // 5: study.StudyService.GetDueCards:input_type -> study.GetDueCardsRequest
+	12, // 6: study.StudyService.GetRecentSessionCards:input_type -> study.GetRecentSessionCardsRequest
+	13, // 7: study.StudyService.GetRecentDecks:input_type -> study.GetRecentDecksRequest
+	14, // 8: study.StudyService.GetDeckProgress:input_type -> study.GetDeckProgressRequest
+	15, // 9: study.StudyService.GetDeckSettings:input_type -> study.GetStudyDeckSettingsRequest
+	16, // 10: study.StudyService.UpdateDeckSettings:input_type -> study.UpdateStudyDeckSettingsRequest
+	17, // 11: study.StudyService.CheckAnswer:input_type -> study.CheckAnswerRequest
+	0,  // 12: study.StudyService.CountDueForUser:input_type -> study.CountDueForUserRequest
+	2,  // 13: study.StudyService.CountDeckLearners:input_type -> study.CountDeckLearnersRequest
+	4,  // 14: study.StudyService.TopDecksByLearners:input_type -> study.TopDecksByLearnersRequest
+	18, // 15: study.StudyService.StartSession:output_type -> study.StartSessionResponse
+	19, // 16: study.StudyService.GetSession:output_type -> study.GetSessionResponse
+	20, // 17: study.StudyService.ReviewCard:output_type -> study.ReviewCardResponse
+	21, // 18: study.StudyService.FinishSession:output_type -> study.FinishSessionResponse
+	22, // 19: study.StudyService.GetDueCards:output_type -> study.GetDueCardsResponse
+	23, // 20: study.StudyService.GetRecentSessionCards:output_type -> study.GetRecentSessionCardsResponse
+	24, // 21: study.StudyService.GetRecentDecks:output_type -> study.GetRecentDecksResponse
+	25, // 22: study.StudyService.GetDeckProgress:output_type -> study.DeckProgressResponse
+	26, // 23: study.StudyService.GetDeckSettings:output_type -> study.GetStudyDeckSettingsResponse
+	27, // 24: study.StudyService.UpdateDeckSettings:output_type -> study.UpdateStudyDeckSettingsResponse
+	28, // 25: study.StudyService.CheckAnswer:output_type -> study.CheckAnswerResponse
+	1,  // 26: study.StudyService.CountDueForUser:output_type -> study.CountDueForUserResponse
+	3,  // 27: study.StudyService.CountDeckLearners:output_type -> study.CountDeckLearnersResponse
+	6,  // 28: study.StudyService.TopDecksByLearners:output_type -> study.TopDecksByLearnersResponse
+	15, // [15:29] is the sub-list for method output_type
+	1,  // [1:15] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_study_service_proto_init() }
@@ -277,7 +538,7 @@ func file_study_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_study_service_proto_rawDesc), len(file_study_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

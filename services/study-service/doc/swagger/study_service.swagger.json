@@ -512,6 +512,36 @@
         }
       }
     },
+    "studyCountDeckLearnersResponse": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "studyCountDueForUserResponse": {
+      "type": "object",
+      "properties": {
+        "dueToday": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "studyDeckLearners": {
+      "type": "object",
+      "properties": {
+        "deckId": {
+          "type": "string"
+        },
+        "learners": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "studyDeckProgressResponse": {
       "type": "object",
       "properties": {
@@ -777,6 +807,18 @@
         },
         "requireRetypingCorrectAnswer": {
           "type": "boolean"
+        }
+      }
+    },
+    "studyTopDecksByLearnersResponse": {
+      "type": "object",
+      "properties": {
+        "decks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/studyDeckLearners"
+          }
         }
       }
     },

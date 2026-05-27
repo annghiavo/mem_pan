@@ -20,6 +20,8 @@ type StudySessionRepository interface {
 	IncrementCompletedCards(ctx context.Context, id uuid.UUID) (db.StudySession, error)
 	GetMostRecentSession(ctx context.Context, userID uuid.UUID) (db.StudySession, error)
 	ListRecentDecks(ctx context.Context, userID uuid.UUID) ([]db.ListRecentDecksRow, error)
+	CountDeckLearners(ctx context.Context, deckID uuid.UUID) (int64, error)
+	TopDecksByLearners(ctx context.Context, arg db.TopDecksByLearnersParams) ([]db.TopDecksByLearnersRow, error)
 }
 
 type studySessionRepository struct {
@@ -80,4 +82,12 @@ func (r *studySessionRepository) GetMostRecentSession(ctx context.Context, userI
 
 func (r *studySessionRepository) ListRecentDecks(ctx context.Context, userID uuid.UUID) ([]db.ListRecentDecksRow, error) {
 	return r.q.ListRecentDecks(ctx, userID)
+}
+
+func (r *studySessionRepository) CountDeckLearners(ctx context.Context, deckID uuid.UUID) (int64, error) {
+	return r.q.CountDeckLearners(ctx, deckID)
+}
+
+func (r *studySessionRepository) TopDecksByLearners(ctx context.Context, arg db.TopDecksByLearnersParams) ([]db.TopDecksByLearnersRow, error) {
+	return r.q.TopDecksByLearners(ctx, arg)
 }

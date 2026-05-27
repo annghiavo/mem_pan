@@ -30,6 +30,7 @@ import (
 	"mem_pan/services/deck-service/internal/publisher"
 	"mem_pan/services/deck-service/internal/repository"
 	"mem_pan/services/deck-service/internal/service"
+	"mem_pan/services/deck-service/internal/studyclient"
 	"mem_pan/services/deck-service/internal/uploader"
 	"mem_pan/services/deck-service/pb"
 )
@@ -65,6 +66,18 @@ func main() {
 	}
 	defer authClient.Close()
 
+	// Optional: study-service powers the learner count on the deck detail page.
+	var studyClient studyclient.Client
+	if cfg.StudyServiceAddress != "" {
+		studyClient, err = studyclient.NewGRPCClient(cfg.StudyServiceAddress)
+		if err != nil {
+			log.Fatal("study client:", err)
+		}
+		defer studyClient.Close()
+	} else {
+		log.Println("STUDY_SERVICE_ADDRESS not set — deck learner count disabled")
+	}
+
 	folderRepo := repository.NewFolderRepository(database)
 	deckRepo := repository.NewDeckRepository(database)
 	noteRepo := repository.NewNoteRepository(database)
@@ -92,7 +105,7 @@ func main() {
 		log.Println("CLOUDINARY_URL not set — image upload disabled")
 	}
 
-	server := gapi.NewServer(folderSvc, deckSvc, cardSvc, authClient, imageUploader, pub)
+	server := gapi.NewServer(folderSvc, deckSvc, cardSvc, authClient, studyClient, imageUploader, pub)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

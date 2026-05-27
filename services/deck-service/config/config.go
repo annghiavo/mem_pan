@@ -10,6 +10,7 @@ type Config struct {
 	GRPCServerAddress   string
 	HTTPServerAddress   string
 	AuthServiceAddress  string
+	StudyServiceAddress string
 	CloudinaryURL       string
 	PubSubProjectID     string
 	PubSubTopic         string
@@ -21,7 +22,10 @@ func Load() (Config, error) {
 		GRPCServerAddress:  getEnv("GRPC_SERVER_ADDRESS", ":9091"),
 		HTTPServerAddress:  getEnv("HTTP_SERVER_ADDRESS", ":8081"),
 		AuthServiceAddress: getEnv("AUTH_SERVICE_ADDRESS", "localhost:9090"),
-		CloudinaryURL:      os.Getenv("CLOUDINARY_URL"),
+		// Optional: enables the learner count on the deck detail page. When
+		// empty the count is simply omitted (left at 0).
+		StudyServiceAddress: os.Getenv("STUDY_SERVICE_ADDRESS"),
+		CloudinaryURL:       os.Getenv("CLOUDINARY_URL"),
 		PubSubProjectID:    getEnv("PUBSUB_PROJECT_ID", ""),
 		PubSubTopic:        getEnv("PUBSUB_TOPIC", "deck-events"),
 	}

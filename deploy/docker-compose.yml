@@ -81,6 +81,7 @@ services:
       - ../services/deck-service/app.env
     environment:
       - AUTH_SERVICE_ADDRESS=auth-service:9090
+      - STUDY_SERVICE_ADDRESS=study-service:9092
       - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
       - PUBSUB_PROJECT_ID=local-dev
       - PUBSUB_TOPIC=deck-events

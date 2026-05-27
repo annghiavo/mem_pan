@@ -148,6 +148,16 @@ service DeckService {
         };
     }
 
+    // Trending leaderboard: public decks ranked by distinct learners active in
+    // the last window_days days. Public (no auth), like ListPublicDecks. The
+    // ranking is computed by study-service; deck-service hydrates + filters.
+    rpc ListTopPublicDecks (ListTopPublicDecksRequest) returns (ListTopPublicDecksResponse) {
+        option (google.api.http) = { get: "/v1/decks/public/top" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Top public decks by learners"; tags: "decks";
+        };
+    }
+
     rpc UpdateDeck (UpdateDeckRequest) returns (UpdateDeckResponse) {
         option (google.api.http) = { put: "/v1/decks/{deck_id}"; body: "*" };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {

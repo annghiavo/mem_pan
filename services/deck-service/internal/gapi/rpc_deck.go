@@ -119,6 +119,12 @@ func (s *Server) GetDeck(ctx context.Context, req *pb.GetDeckRequest) (*pb.GetDe
 		resp.CreatorUsername = creator.Username
 		resp.CreatorAvatar = creator.AvatarURL
 	}
+	// Best-effort learner count from study-service; leave 0 if unavailable.
+	if s.studyClient != nil {
+		if count, err := s.studyClient.CountDeckLearners(ctx, deckID); err == nil {
+			resp.LearnerCount = count
+		}
+	}
 	return resp, nil
 }
 
