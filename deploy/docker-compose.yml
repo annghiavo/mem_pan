@@ -262,7 +262,6 @@ services:
       - ../ml_model/results/flashcard_image_moderator:/models/flashcard_image_moderator:ro
     depends_on:
       - deck-service
-      - notification-service
       - pubsub-emulator
     expose:
       - "8087"   # HTTP (Pub/Sub push receiver + healthz + /metrics)
