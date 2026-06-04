@@ -17,6 +17,7 @@ type CardRepository interface {
 	ListCardsByDeck(ctx context.Context, deckID uuid.UUID) ([]db.ListCardsByDeckRow, error)
 	DeleteCard(ctx context.Context, arg db.DeleteCardParams) error
 	CountCardsByDeck(ctx context.Context, deckID uuid.UUID) (int64, error)
+	UpdateCardPosition(ctx context.Context, arg db.UpdateCardPositionParams) error
 }
 
 type cardRepository struct {
@@ -49,4 +50,8 @@ func (r *cardRepository) DeleteCard(ctx context.Context, arg db.DeleteCardParams
 
 func (r *cardRepository) CountCardsByDeck(ctx context.Context, deckID uuid.UUID) (int64, error) {
 	return r.q.CountCardsByDeck(ctx, deckID)
+}
+
+func (r *cardRepository) UpdateCardPosition(ctx context.Context, arg db.UpdateCardPositionParams) error {
+	return r.q.UpdateCardPosition(ctx, arg)
 }

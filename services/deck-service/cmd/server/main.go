@@ -172,6 +172,7 @@ func runHTTPGateway(cfg config.Config, srv *gapi.Server, grpcServer *grpc.Server
 	// which would reject them with "invalid multipart form".
 	httpMux.HandleFunc("POST /v1/decks/{deck_id}/cards", dispatchMultipart(srv.ServeCreateCard, grpcMux))
 	httpMux.HandleFunc("PUT /v1/cards/{card_id}", dispatchMultipart(srv.ServeUpdateCard, grpcMux))
+	httpMux.HandleFunc("PUT /v1/decks/{deck_id}/cards/reorder", srv.ServeReorderCards)
 	httpMux.Handle("/", grpcMux)
 
 	wrapped := middleware.HTTPLogger(logger)(withCORS(httpMux))

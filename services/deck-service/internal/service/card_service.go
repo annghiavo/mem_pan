@@ -40,6 +40,9 @@ type CardService interface {
 	ListCardsByDeck(ctx context.Context, deckID, userID uuid.UUID) ([]db.ListCardsByDeckRow, error)
 	UpdateCard(ctx context.Context, p UpdateCardParams) (db.GetCardByIDRow, error)
 	DeleteCard(ctx context.Context, cardID, userID uuid.UUID) error
+	// ReorderCards updates the position of each card in the provided ordered list.
+	// cardIDs must contain only card IDs belonging to the specified deck.
+	ReorderCards(ctx context.Context, deckID, userID uuid.UUID, cardIDs []uuid.UUID) error
 }
 
 type cardService struct {
@@ -319,3 +322,22 @@ func (s *cardService) DeleteCard(ctx context.Context, cardID, userID uuid.UUID) 
 	return nil
 }
 
+func (s *cardService) ReorderCards(ctx context.Context, deckID, userID uuid.UUID, cardIDs []uuid.UUID) error {
+	deck, err := s.deckRepo.GetDeckByID(ctx, deckID)
+	if err != nil {
+		return err
+	}
+	if deck.UserID != userID {
+		return domain.ErrForbidden
+	}
+	for i, cid := range cardIDs {
+		if err := s.cardRepo.UpdateCardPosition(ctx, db.UpdateCardPositionParams{
+			Position: int32(i),
+			CardID:   cid,
+			UserID:   userID,
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
