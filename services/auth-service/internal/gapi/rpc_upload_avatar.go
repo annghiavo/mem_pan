@@ -71,7 +71,10 @@ func (s *Server) UploadAvatar(ctx context.Context, req *pb.UploadAvatarRequest) 
 		ResourceType: "image",
 	})
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to upload image")
+		return nil, status.Errorf(codes.Internal, "failed to upload image: %v", err)
+	}
+	if result.Error.Message != "" {
+		return nil, status.Errorf(codes.Internal, "cloudinary API error: %s", result.Error.Message)
 	}
 
 	avatarURL := avatarURLWithVersion(result)
@@ -151,7 +154,11 @@ func (s *Server) UploadAvatarHTTP(w http.ResponseWriter, r *http.Request) {
 		ResourceType: "image",
 	})
 	if err != nil {
-		http.Error(w, "failed to upload image", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("failed to upload image: %v", err), http.StatusInternalServerError)
+		return
+	}
+	if result.Error.Message != "" {
+		http.Error(w, fmt.Sprintf("cloudinary API error: %s", result.Error.Message), http.StatusInternalServerError)
 		return
 	}
 

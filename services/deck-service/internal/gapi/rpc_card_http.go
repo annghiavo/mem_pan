@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"mime/multipart"
@@ -173,4 +174,52 @@ func (s *Server) uploadFile(ctx context.Context, file multipart.File) (*string, 
 		return nil, err
 	}
 	return &url, nil
+}
+
+// ServeReorderCards handles PUT /v1/decks/{deck_id}/cards/reorder.
+// Body (JSON): { "card_ids": ["uuid1", "uuid2", ...] }
+// The provided order becomes the new position sequence (0-indexed).
+func (s *Server) ServeReorderCards(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	if auth := r.Header.Get("Authorization"); auth != "" {
+		ctx = metadata.NewIncomingContext(ctx, metadata.Pairs("authorization", auth))
+	}
+	payload, err := s.authorizeUser(ctx)
+	if err != nil {
+		writeHTTPError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	deckID, err := uuid.Parse(r.PathValue("deck_id"))
+	if err != nil {
+		writeHTTPError(w, http.StatusBadRequest, "invalid deck_id")
+		return
+	}
+
+	var body struct {
+		CardIDs []string `json:"card_ids"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || len(body.CardIDs) == 0 {
+		writeHTTPError(w, http.StatusBadRequest, "card_ids is required")
+		return
+	}
+
+	cardUUIDs := make([]uuid.UUID, 0, len(body.CardIDs))
+	for _, id := range body.CardIDs {
+		uid, err := uuid.Parse(id)
+		if err != nil {
+			writeHTTPError(w, http.StatusBadRequest, "invalid card_id: "+id)
+			return
+		}
+		cardUUIDs = append(cardUUIDs, uid)
+	}
+
+	if err := s.cardSvc.ReorderCards(ctx, deckID, payload.UserID, cardUUIDs); err != nil {
+		st, _ := status.FromError(toGRPCError(err))
+		writeHTTPError(w, grpcCodeToHTTP(st.Code()), st.Message())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, `{"success":true}`)
 }
