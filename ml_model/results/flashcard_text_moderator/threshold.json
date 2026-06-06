@@ -1,5 +1,5 @@
 {
-  "recall_threshold": 0.35,
+  "recall_threshold": 0.60,
   "best_f1_threshold": 0.5999999999999999,
   "best_f1": 0.8742737624912852
 }

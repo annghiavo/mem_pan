@@ -18,6 +18,8 @@ CSV/TSV — two-column rows, auto-detected separator, blank rows skipped, BOM-sa
 
   ./scripts/reset-data.sh
 
+  docker compose restart search-service
+
 
 
   # Study reminder push

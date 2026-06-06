@@ -140,7 +140,17 @@ func (h *Handler) deckDeleted(ctx context.Context, data []byte) error {
 	if err := json.Unmarshal(data, &e); err != nil {
 		return err
 	}
-	return h.svc.DeleteDeck(ctx, e.DeckID)
+	// Delete the deck document first.
+	if err := h.svc.DeleteDeck(ctx, e.DeckID); err != nil {
+		return err
+	}
+	// Purge ALL card documents belonging to this deck so they can never
+	// appear as orphaned results in card-content search (Phase 2).
+	// Non-fatal: deck is already gone so orphans are cosmetic, but log for visibility.
+	if err := h.svc.DeleteCardsByDeck(ctx, e.DeckID); err != nil {
+		log.Printf("[search] WARN purge cards for deleted deck=%s failed: %v", e.DeckID, err)
+	}
+	return nil
 }
 
 func (h *Handler) folderCreated(ctx context.Context, data []byte) error {

@@ -58,17 +58,45 @@ func (sr *SearchResult) Decode(i int, out any) error {
 	return json.Unmarshal(sr.Hits[i].Source, out)
 }
 
-// MultiMatchOrMatchAll returns a query clause that matches all docs when q is empty,
-// otherwise a multi_match across the given fields.
+// MultiMatchOrMatchAll returns a query clause that matches all docs when q is empty.
+// When q is non-empty it returns a bool-should combining:
+//
+//  1. A fuzzy multi_match (handles typos like "englsh" → "english"):
+//     - fuzziness "AUTO"    → 0 edit for 1-2 chars, 1 edit for 3-5, 2 edits for 6+
+//     - prefix_length 0     → no character is anchored (more permissive for mid-word typos)
+//     - max_expansions 100  → ES explores more fuzzy variants before cutting off
+//     - operator "or"       → any matching term contributes
+//
+//  2. A phrase_prefix multi_match (handles partial typing like "engl" → "english"):
+//     - boost 0.5           → lower weight than exact fuzzy so typo results still rank well
 func MultiMatchOrMatchAll(q string, fields []string) map[string]any {
 	if q == "" {
 		return map[string]any{"match_all": map[string]any{}}
 	}
 	return map[string]any{
-		"multi_match": map[string]any{
-			"query":  q,
-			"fields": fields,
-			"type":   "best_fields",
+		"bool": map[string]any{
+			"should": []map[string]any{
+				{
+					"multi_match": map[string]any{
+						"query":          q,
+						"fields":         fields,
+						"type":           "most_fields",
+						"fuzziness":      "AUTO",
+						"prefix_length":  0,
+						"max_expansions": 100,
+						"operator":       "or",
+					},
+				},
+				{
+					"multi_match": map[string]any{
+						"query":  q,
+						"fields": fields,
+						"type":   "phrase_prefix",
+						"boost":  0.5,
+					},
+				},
+			},
+			"minimum_should_match": 1,
 		},
 	}
 }

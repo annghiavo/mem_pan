@@ -82,6 +82,33 @@ func (c *Client) DeleteUser(ctx context.Context, id string) error {
 	return c.deleteDoc(ctx, c.Indices.User, id)
 }
 
+// DeleteCardsByDeckID removes ALL card documents that belong to deckID using
+// Elasticsearch delete-by-query. This must be called whenever a deck is deleted
+// so that orphaned card documents cannot surface in Phase-2 card-content search.
+func (c *Client) DeleteCardsByDeckID(ctx context.Context, deckID string) error {
+	body, err := json.Marshal(map[string]any{
+		"query": map[string]any{
+			"term": map[string]any{"deck_id": deckID},
+		},
+	})
+	if err != nil {
+		return err
+	}
+	res, err := c.ES.DeleteByQuery(
+		[]string{c.Indices.Card},
+		bytes.NewReader(body),
+		c.ES.DeleteByQuery.WithContext(ctx),
+	)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.IsError() {
+		return fmt.Errorf("delete cards by deck %s: %s", deckID, res.String())
+	}
+	return nil
+}
+
 // UpdateDeckPartial applies a partial JSON-merge update to a deck document.
 // If the document does not exist, it is upserted with the merged fields.
 func (c *Client) UpdateDeckPartial(ctx context.Context, id string, partial map[string]any) error {

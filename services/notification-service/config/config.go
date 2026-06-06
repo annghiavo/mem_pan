@@ -59,7 +59,7 @@ func Load() (Config, error) {
 		FCMProjectID:       getEnv("FCM_PROJECT_ID", ""),
 		FCMCredentialsFile: getEnv("FCM_CREDENTIALS_FILE", ""),
 
-		AppBaseURL:      getEnv("APP_BASE_URL", "https://mempan.app"),
+		AppBaseURL:      getEnv("APP_BASE_URL", "https://mem-pan-mb.vercel.app"),
 		AdminWebBaseURL: getEnv("ADMIN_WEB_BASE_URL", "https://admin-web-tawny-kappa.vercel.app"),
 	}
 
