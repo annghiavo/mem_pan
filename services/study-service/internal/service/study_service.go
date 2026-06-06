@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/sync/errgroup"
 	gofsrs "github.com/open-spaced-repetition/go-fsrs/v4"
 
 	"mem_pan/services/study-service/internal/db"
@@ -171,16 +172,23 @@ func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (
 		return nil, domain.ErrDeckEmpty
 	}
 
-	// Upsert user_card records for every card in the deck.
+	// Upsert user_card records for every card in the deck concurrently.
+	g, gCtx := errgroup.WithContext(ctx)
+	g.SetLimit(20) // Avoid exhausting DB connection pool
 	for _, dc := range deckCards {
-		_, err := s.userCardRepo.UpsertUserCard(ctx, db.UpsertUserCardParams{
-			UserID: p.UserID,
-			CardID: dc.CardID,
-			DeckID: dc.DeckID,
+		cardID := dc.CardID
+		deckID := dc.DeckID
+		g.Go(func() error {
+			_, err := s.userCardRepo.UpsertUserCard(gCtx, db.UpsertUserCardParams{
+				UserID: p.UserID,
+				CardID: cardID,
+				DeckID: deckID,
+			})
+			return err
 		})
-		if err != nil {
-			return nil, err
-		}
+	}
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
 
 	newLimit := p.NewCardsLimit
@@ -226,18 +234,30 @@ func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (
 		return nil, err
 	}
 
-	sessionCards := make([]db.SessionCard, 0, len(selected))
+	sessionCards := make([]db.SessionCard, len(selected))
+	g2, gCtx2 := errgroup.WithContext(ctx)
+	g2.SetLimit(20)
+
 	for i, uc := range selected {
-		sc, err := s.sessionCardRepo.InsertSessionCard(ctx, db.InsertSessionCardParams{
-			SessionID:  session.SessionID,
-			Position:   int32(i),
-			CardID:     uc.CardID,
-			UserCardID: uc.UserCardID,
+		idx := i
+		cardID := uc.CardID
+		userCardID := uc.UserCardID
+		g2.Go(func() error {
+			sc, err := s.sessionCardRepo.InsertSessionCard(gCtx2, db.InsertSessionCardParams{
+				SessionID:  session.SessionID,
+				Position:   int32(idx),
+				CardID:     cardID,
+				UserCardID: userCardID,
+			})
+			if err != nil {
+				return err
+			}
+			sessionCards[idx] = sc
+			return nil
 		})
-		if err != nil {
-			return nil, err
-		}
-		sessionCards = append(sessionCards, sc)
+	}
+	if err := g2.Wait(); err != nil {
+		return nil, err
 	}
 
 	return &SessionResult{Session: session, Cards: sessionCards}, nil
