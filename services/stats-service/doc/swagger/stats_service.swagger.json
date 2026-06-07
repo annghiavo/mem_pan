@@ -118,6 +118,14 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "timezone",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
         "tags": [
           "stats"
         ],
@@ -366,6 +374,48 @@
             "type": "object",
             "$ref": "#/definitions/statsDeckStat"
           }
+        }
+      }
+    },
+    "statsListReminderStateResponse": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/statsUserReminderState"
+          }
+        }
+      }
+    },
+    "statsUserReminderState": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "currentStreak": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "lastStudiedDate": {
+          "type": "string",
+          "title": "YYYY-MM-DD or \"\" if never"
+        },
+        "optimalHourWeekday": {
+          "type": "integer",
+          "format": "int32",
+          "title": "0-23, -1 if unset"
+        },
+        "optimalHourWeekend": {
+          "type": "integer",
+          "format": "int32",
+          "title": "0-23, -1 if unset"
+        },
+        "reminderLocalTime": {
+          "type": "string",
+          "title": "HH:MM (24h), default \"21:00\""
         }
       }
     },

@@ -111,8 +111,9 @@ message UserStats {
     string updated_at          = 12;
 }
 
-message GetMyStatsRequest {}
-
+message GetMyStatsRequest {
+    string timezone = 1;
+}
 message GetMyStatsResponse {
     UserStats stats = 1;
 }

@@ -330,6 +330,7 @@ func (x *UserStats) GetUpdatedAt() string {
 
 type GetMyStatsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Timezone      string                 `protobuf:"bytes,1,opt,name=timezone,proto3" json:"timezone,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -362,6 +363,13 @@ func (x *GetMyStatsRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GetMyStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetMyStatsRequest) Descriptor() ([]byte, []int) {
 	return file_stats_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetMyStatsRequest) GetTimezone() string {
+	if x != nil {
+		return x.Timezone
+	}
+	return ""
 }
 
 type GetMyStatsResponse struct {
@@ -1076,8 +1084,9 @@ const file_stats_service_proto_rawDesc = "" +
 	"\n" +
 	"avatar_url\x18\v \x01(\tR\tavatarUrl\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\f \x01(\tR\tupdatedAt\"\x13\n" +
-	"\x11GetMyStatsRequest\"<\n" +
+	"updated_at\x18\f \x01(\tR\tupdatedAt\"/\n" +
+	"\x11GetMyStatsRequest\x12\x1a\n" +
+	"\btimezone\x18\x01 \x01(\tR\btimezone\"<\n" +
 	"\x12GetMyStatsResponse\x12&\n" +
 	"\x05stats\x18\x01 \x01(\v2\x10.stats.UserStatsR\x05stats\"\xc5\x01\n" +
 	"\x0eDailyStatEntry\x12\x1d\n" +

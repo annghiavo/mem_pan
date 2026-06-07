@@ -12,7 +12,7 @@ import (
 	pb "mem_pan/services/stats-service/pb"
 )
 
-func (s *Server) GetMyStats(ctx context.Context, _ *pb.GetMyStatsRequest) (*pb.GetMyStatsResponse, error) {
+func (s *Server) GetMyStats(ctx context.Context, req *pb.GetMyStatsRequest) (*pb.GetMyStatsResponse, error) {
 	payload, err := s.authorizeUser(ctx)
 	if err != nil {
 		return nil, err
@@ -21,6 +21,31 @@ func (s *Server) GetMyStats(ctx context.Context, _ *pb.GetMyStatsRequest) (*pb.G
 	row, err := s.statsSvc.GetUserStats(ctx, payload.UserID)
 	if err != nil {
 		return nil, toGRPCError(err)
+	}
+
+	// Just-In-Time Streak Evaluation
+	if row.LastStudiedDate.Valid {
+		tz := req.GetTimezone()
+		loc, err := time.LoadLocation(tz)
+		if err != nil || tz == "" {
+			loc = time.UTC
+		}
+
+		now := time.Now().In(loc)
+		today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+
+		ly, lm, ld := row.LastStudiedDate.Time.UTC().Date()
+		ty, tm, td := today.Date()
+		isToday := (ly == ty && lm == tm && ld == td)
+
+		yy, ym, yd := today.AddDate(0, 0, -1).Date()
+		isYesterday := (ly == yy && lm == ym && ld == yd)
+
+		if !isToday && !isYesterday {
+			row.CurrentStreak = 0 // Streak has expired
+		}
+	} else {
+		row.CurrentStreak = 0
 	}
 
 	return &pb.GetMyStatsResponse{Stats: userStatToPb(row)}, nil
