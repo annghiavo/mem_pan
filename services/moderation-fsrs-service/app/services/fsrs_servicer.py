@@ -45,7 +45,7 @@ def _run_optimizer(rows: list[dict]) -> tuple[list[float], float, str]:
     df_raw.to_csv("revlog.csv", index=False)
 
     try:
-        optimizer = Optimizer()
+        optimizer = Optimizer(float_delta_t=True)
         # Create time series (Step 2)
         optimizer.create_time_series("UTC", "2006-10-02", 4, analysis=False)
         # Define model parameters (Step 3)
