@@ -36,7 +36,7 @@ func Load() (Config, error) {
 		// 1000 is the FSRS-recommended minimum for trustworthy optimization;
 		// below ~400 the fit overfits and can underperform the defaults.
 		// Lower it (e.g. 50) for a demo so the cron actually has work to do.
-		FsrsOptimizeMinReviews: getEnvInt64("FSRS_OPTIMIZE_MIN_REVIEWS", 1000),
+		FsrsOptimizeMinReviews: getEnvInt64("FSRS_OPTIMIZE_MIN_REVIEWS", 10),
 		FsrsOptimizeMaxUsers:   int(getEnvInt64("FSRS_OPTIMIZE_MAX_USERS", 200)),
 		CronSecret:             getEnv("CRON_SECRET", ""),
 	}

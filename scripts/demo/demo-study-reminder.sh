@@ -66,10 +66,10 @@ cat <<'TIP'
          SET optimal_hour_weekday = NULL,
              optimal_hour_weekend = NULL,
              reminder_local_time  = '21:00'
-       WHERE user_id = '<USER_ID>';
+       WHERE user_id = 'c12adea4-2dc6-4303-be27-4ab1896bb8c8';
   • đã gửi study_reminder hôm nay rồi? (dedup) — xóa log để gửi lại:
       DELETE FROM notification_log
-       WHERE user_id = '<USER_ID>'
+       WHERE user_id = 'c12adea4-2dc6-4303-be27-4ab1896bb8c8'
          AND notification_type = 'study_reminder'
          AND created_at >= date_trunc('day', now());
   • xem log notification-service: dòng "[cron] study_reminder: sent to <uid> (N devices)".
