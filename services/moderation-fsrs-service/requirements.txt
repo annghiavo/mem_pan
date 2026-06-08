@@ -25,7 +25,7 @@ protobuf==5.28.3
 aiohttp==3.10.11
 
 # ===== FSRS optimizer =====
-fsrs-optimizer==5.5.0
+fsrs-optimizer==6.2.0
 pandas==2.2.3
 
 # ===== Observability =====
