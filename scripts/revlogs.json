@@ -1,0 +1,3852 @@
+[
+  {
+    "card_id": "34a0f6f6-2d37-4ee1-83ae-c9c43a35add2",
+    "rating": 4,
+    "review_time": "2026-05-21T16:02:39.584846Z"
+  },
+  {
+    "card_id": "05b3b8a1-407e-42eb-9036-bd5fcb85f283",
+    "rating": 3,
+    "review_time": "2026-05-21T16:02:52.468647Z"
+  },
+  {
+    "card_id": "05b3b8a1-407e-42eb-9036-bd5fcb85f283",
+    "rating": 1,
+    "review_time": "2026-05-22T05:54:26.744545Z"
+  },
+  {
+    "card_id": "05b3b8a1-407e-42eb-9036-bd5fcb85f283",
+    "rating": 2,
+    "review_time": "2026-05-22T06:30:39.546445Z"
+  },
+  {
+    "card_id": "05b3b8a1-407e-42eb-9036-bd5fcb85f283",
+    "rating": 3,
+    "review_time": "2026-05-22T14:28:13.625163Z"
+  },
+  {
+    "card_id": "9ca3101c-0fe2-473b-8968-bd606c170241",
+    "rating": 3,
+    "review_time": "2026-05-22T14:29:37.811823Z"
+  },
+  {
+    "card_id": "419d6294-4169-4319-bbfc-f7d269fa3831",
+    "rating": 3,
+    "review_time": "2026-05-23T01:49:50.384816Z"
+  },
+  {
+    "card_id": "b0f61ba0-1fa2-4cbf-b465-e0e5a3ae73b2",
+    "rating": 4,
+    "review_time": "2026-05-23T01:49:56.596822Z"
+  },
+  {
+    "card_id": "419d6294-4169-4319-bbfc-f7d269fa3831",
+    "rating": 3,
+    "review_time": "2026-05-23T02:02:44.028339Z"
+  },
+  {
+    "card_id": "b7e0b9a8-0450-408a-93e5-6beef1080233",
+    "rating": 4,
+    "review_time": "2026-05-23T02:08:34.807752Z"
+  },
+  {
+    "card_id": "a06c3630-01fc-4abf-b3c9-01e784e3e268",
+    "rating": 4,
+    "review_time": "2026-05-23T02:08:42.108351Z"
+  },
+  {
+    "card_id": "98cca189-2b43-40c5-9e24-04d76430158b",
+    "rating": 4,
+    "review_time": "2026-05-23T02:15:55.9993Z"
+  },
+  {
+    "card_id": "6171d18b-a775-4b14-8bd4-a17b86b59f06",
+    "rating": 4,
+    "review_time": "2026-05-23T02:16:06.089851Z"
+  },
+  {
+    "card_id": "720be1fd-2299-46b7-a4fc-128d906fea7d",
+    "rating": 3,
+    "review_time": "2026-05-24T01:16:13.890513Z"
+  },
+  {
+    "card_id": "53c1e8d1-c17e-445e-b5b9-c4e5f2bfc9bb",
+    "rating": 3,
+    "review_time": "2026-05-24T01:51:14.175751Z"
+  },
+  {
+    "card_id": "118e7c17-9392-4eff-abaf-2a18c2875438",
+    "rating": 4,
+    "review_time": "2026-05-24T01:51:20.433412Z"
+  },
+  {
+    "card_id": "53c1e8d1-c17e-445e-b5b9-c4e5f2bfc9bb",
+    "rating": 2,
+    "review_time": "2026-05-24T05:06:27.411783Z"
+  },
+  {
+    "card_id": "53c1e8d1-c17e-445e-b5b9-c4e5f2bfc9bb",
+    "rating": 3,
+    "review_time": "2026-05-24T18:39:31.281788Z"
+  },
+  {
+    "card_id": "ac2efabf-3838-4ff3-a77f-c54320a8d4b9",
+    "rating": 3,
+    "review_time": "2026-05-24T18:40:51.163619Z"
+  },
+  {
+    "card_id": "4bf4faa1-3351-4b2e-af46-6ad953f9c645",
+    "rating": 4,
+    "review_time": "2026-05-24T18:40:57.249774Z"
+  },
+  {
+    "card_id": "31474b23-a5bc-4902-92d2-7ef2c199f3d2",
+    "rating": 2,
+    "review_time": "2026-05-27T07:35:59.766843Z"
+  },
+  {
+    "card_id": "5de1bd3b-802a-481d-a02d-d2f6c217642e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:36:00.5783Z"
+  },
+  {
+    "card_id": "18b947b4-438a-4580-ae1a-d44130674208",
+    "rating": 4,
+    "review_time": "2026-05-27T07:36:01.647978Z"
+  },
+  {
+    "card_id": "887160e6-e20f-4c66-95d8-314924f3f96d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:36:02.527386Z"
+  },
+  {
+    "card_id": "d74d138e-13e1-4f7e-a20f-3468603a95df",
+    "rating": 3,
+    "review_time": "2026-05-27T07:36:03.453658Z"
+  },
+  {
+    "card_id": "23b359f5-e303-46a8-81e0-0149232de354",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:30.682648Z"
+  },
+  {
+    "card_id": "95bca88c-7f69-4a35-935c-9fa0a6fa5513",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:31.591413Z"
+  },
+  {
+    "card_id": "762fa6e4-87d1-49a6-a31d-038f0b596221",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:32.343206Z"
+  },
+  {
+    "card_id": "add831b0-3bb6-4aa0-99c9-eb5d3a4f063b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:33.044521Z"
+  },
+  {
+    "card_id": "d0893bb7-053e-4f9a-8530-a29450bd9b15",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:33.973845Z"
+  },
+  {
+    "card_id": "a7c6a5c7-9277-4167-8eb3-61333073bb77",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:35.33808Z"
+  },
+  {
+    "card_id": "21b9d05d-fa74-4007-a7fa-c3d09590bf24",
+    "rating": 2,
+    "review_time": "2026-05-27T07:37:36.260848Z"
+  },
+  {
+    "card_id": "29e0c245-d9dd-4922-9bf8-abfc7a5b131d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:37:37.089202Z"
+  },
+  {
+    "card_id": "eda292d5-41fe-481e-bef8-f58e2f640202",
+    "rating": 2,
+    "review_time": "2026-05-27T07:37:38.210321Z"
+  },
+  {
+    "card_id": "c8a839c6-b4e6-4fde-8921-c2fdbce01f7e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:39.062284Z"
+  },
+  {
+    "card_id": "89274f43-ea83-4685-9890-9e8438b9908b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:39.840847Z"
+  },
+  {
+    "card_id": "5e319d89-c93d-4e01-9590-cf17133c3650",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:40.839057Z"
+  },
+  {
+    "card_id": "4c3acd22-86d9-4cee-9467-919d6c123459",
+    "rating": 4,
+    "review_time": "2026-05-27T07:37:41.601043Z"
+  },
+  {
+    "card_id": "10e7b756-b098-45a0-a2fd-f912e31809b9",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:42.330535Z"
+  },
+  {
+    "card_id": "9a6b8d3b-d629-42e9-8c1c-01c195ea314d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:37:43.267611Z"
+  },
+  {
+    "card_id": "d23a0adf-1bb0-45a0-8f05-2af0727ae077",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:44.273066Z"
+  },
+  {
+    "card_id": "80f59d4b-b678-4dfb-9065-813755897d67",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:45.127176Z"
+  },
+  {
+    "card_id": "b5e66643-e699-4afc-8423-3d6885c5c260",
+    "rating": 4,
+    "review_time": "2026-05-27T07:37:46.044925Z"
+  },
+  {
+    "card_id": "90610096-8bd1-4de3-95db-768e94dcb841",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:46.971574Z"
+  },
+  {
+    "card_id": "6080fb7a-aa19-412f-ae2c-36c1d4600ccd",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:47.903819Z"
+  },
+  {
+    "card_id": "ee7950fc-fa99-4e86-9ae7-c9c59ddc391b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:50.675192Z"
+  },
+  {
+    "card_id": "b8aa1ac3-8c99-4a66-ba35-22a1daabc570",
+    "rating": 4,
+    "review_time": "2026-05-27T07:37:51.579635Z"
+  },
+  {
+    "card_id": "7ca2d3a3-c6eb-4865-bfec-425166c104b3",
+    "rating": 2,
+    "review_time": "2026-05-27T07:37:52.53239Z"
+  },
+  {
+    "card_id": "42acfe55-4aff-4175-9a83-4a4e29110d9d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:53.389521Z"
+  },
+  {
+    "card_id": "60e20420-2659-4e22-9ff1-b5b447d9178c",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:59.097098Z"
+  },
+  {
+    "card_id": "834c8302-d197-4dcc-9cd0-ab1df4a239ea",
+    "rating": 3,
+    "review_time": "2026-05-27T07:37:59.865515Z"
+  },
+  {
+    "card_id": "089d5b10-d8d9-4eeb-8071-d2c59d4738c5",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:00.647052Z"
+  },
+  {
+    "card_id": "7e7e5a04-84bb-43be-851d-b0f3746969a0",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:01.799942Z"
+  },
+  {
+    "card_id": "846f9144-13d6-4e70-b732-e8d4ff8cc1e1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:02.628892Z"
+  },
+  {
+    "card_id": "b2dea1e8-adf6-42f4-998d-0c9acda060ee",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:03.37292Z"
+  },
+  {
+    "card_id": "946ff657-6827-4d26-a9cc-2972bb0ab6fb",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:04.097081Z"
+  },
+  {
+    "card_id": "89d0a3d9-332d-499e-8553-f89c20a62e26",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:04.925326Z"
+  },
+  {
+    "card_id": "be185b80-aa42-422b-9ac1-d6132a3570f9",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:05.740165Z"
+  },
+  {
+    "card_id": "cc881f1e-b26d-4cbf-aa78-52791d92604c",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:06.65654Z"
+  },
+  {
+    "card_id": "d02a6edc-10ee-47c5-bef5-9bc6e162ca05",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:07.547747Z"
+  },
+  {
+    "card_id": "f852852f-e24e-4857-a889-abc72b41fb17",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:08.37495Z"
+  },
+  {
+    "card_id": "b6daf3ee-9d6f-4d98-a583-fa7641eaf698",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:09.388124Z"
+  },
+  {
+    "card_id": "9f530dc2-bffc-472a-9648-d26b0f37e76d",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:10.163896Z"
+  },
+  {
+    "card_id": "bd72f4e6-7054-4ea0-8a96-d980371405f9",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:11.236547Z"
+  },
+  {
+    "card_id": "8b374c7e-1ad9-47f0-b416-313c898f24c2",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:12.186182Z"
+  },
+  {
+    "card_id": "19e7a721-3569-451d-82bf-720fe1692331",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:13.079108Z"
+  },
+  {
+    "card_id": "da7f808f-34de-4fd9-8f38-edc2b21674c1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:13.872329Z"
+  },
+  {
+    "card_id": "dd573629-7eff-4f5f-b66b-3ec9a0bb0609",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:14.979378Z"
+  },
+  {
+    "card_id": "c47fd88e-31b8-4a82-992c-0bd1c10a4c5e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:15.822794Z"
+  },
+  {
+    "card_id": "141b0b74-9834-4d67-95fc-cee7d07bf3d1",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:18.798894Z"
+  },
+  {
+    "card_id": "72ed2c04-030b-45cb-ad94-654e48f117b8",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:19.784698Z"
+  },
+  {
+    "card_id": "9d95d9f2-1fd8-46f6-85b1-b46cd91df9c2",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:20.724675Z"
+  },
+  {
+    "card_id": "1c1553ec-c996-4806-b348-0871bb89dcf1",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:21.683335Z"
+  },
+  {
+    "card_id": "f1c4d9f1-1332-42e4-af29-3291cb41905a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:22.643224Z"
+  },
+  {
+    "card_id": "af58381d-1aff-49bb-b03e-6ca8dd335688",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:23.64456Z"
+  },
+  {
+    "card_id": "8f0b73c1-83f9-479b-bbc1-4bd74ef4b955",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:24.41394Z"
+  },
+  {
+    "card_id": "560596cd-0700-4e3c-a11b-e9256e606bd1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:25.259119Z"
+  },
+  {
+    "card_id": "db60f3db-5ebb-4831-841b-0ade29daaf1e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:26.309589Z"
+  },
+  {
+    "card_id": "4fe1395f-b0a5-4950-80de-5dfa8b16d687",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:27.206189Z"
+  },
+  {
+    "card_id": "4a1e2241-08d3-4455-adc0-617bcc11e844",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:27.959329Z"
+  },
+  {
+    "card_id": "e4a47992-e4c2-4edc-9c55-62893638a4bb",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:28.739964Z"
+  },
+  {
+    "card_id": "d392cbcb-1cf6-45f2-98b5-35b7f2a8ca5a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:29.479937Z"
+  },
+  {
+    "card_id": "e1dc05c4-85bd-4984-a80d-4ef69b4897f9",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:30.292582Z"
+  },
+  {
+    "card_id": "b3bfc426-02a3-43be-b38f-29ae8df130ca",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:31.170922Z"
+  },
+  {
+    "card_id": "114512c2-99e5-4881-8d83-8db7d9f5de6b",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:32.209715Z"
+  },
+  {
+    "card_id": "bde0346b-e4a0-4d96-8407-5fd0194b5dd4",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:32.990094Z"
+  },
+  {
+    "card_id": "33f113ec-abd0-4dc0-9788-5f363559874a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:34.444983Z"
+  },
+  {
+    "card_id": "d196366a-fea7-4a5c-911d-f14eb6f92320",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:35.214042Z"
+  },
+  {
+    "card_id": "82e83322-0ff3-4d62-8cf3-0e7eaf3a9c93",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:36.089198Z"
+  },
+  {
+    "card_id": "1ff1bd0d-8a03-4207-b0bf-895fc3c6d37e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:39.683995Z"
+  },
+  {
+    "card_id": "21d89e95-ce70-45ce-8a82-d41de63f4837",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:40.435269Z"
+  },
+  {
+    "card_id": "4f46388f-6c76-4a07-acd9-b7cfdcaff768",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:41.362609Z"
+  },
+  {
+    "card_id": "8baee6ca-a525-4c78-9dc6-35df14871441",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:42.172417Z"
+  },
+  {
+    "card_id": "1dbbf12a-03f7-4ef7-969c-ecb76191c5d5",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:43.186625Z"
+  },
+  {
+    "card_id": "26547f80-cfe3-4728-9ee0-d085a1f7659a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:44.124784Z"
+  },
+  {
+    "card_id": "cf7852e2-85db-4022-a368-c890caa8b4fb",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:45.355105Z"
+  },
+  {
+    "card_id": "04f34959-e6e7-47eb-99d1-27789d437774",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:46.360864Z"
+  },
+  {
+    "card_id": "ac72876e-23c1-4087-be68-d877dfb30257",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:47.168343Z"
+  },
+  {
+    "card_id": "9b4530f2-1f31-4274-a34b-f8b492efacee",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:48.089581Z"
+  },
+  {
+    "card_id": "9caca391-6320-4445-bf45-fe21ae095d33",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:48.841924Z"
+  },
+  {
+    "card_id": "8792f304-bebe-4582-946f-18c8651f567a",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:49.606665Z"
+  },
+  {
+    "card_id": "fd14d71d-5be0-426b-bab3-72cd12a0d6e1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:50.6189Z"
+  },
+  {
+    "card_id": "dcf90581-d0e2-402c-bd91-12b15f7b6239",
+    "rating": 2,
+    "review_time": "2026-05-27T07:38:51.50631Z"
+  },
+  {
+    "card_id": "03c59ce9-16a0-4d8f-b820-0e3c5e6ba930",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:52.296816Z"
+  },
+  {
+    "card_id": "516d673c-d232-4821-bf12-a72709249920",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:53.352251Z"
+  },
+  {
+    "card_id": "deaf841a-52d7-4247-a1c4-3a6039ceb435",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:54.372769Z"
+  },
+  {
+    "card_id": "6f6440e3-110a-4ee2-8202-1a34582b9b1b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:55.159712Z"
+  },
+  {
+    "card_id": "343e1a2a-294e-4ef6-998c-e0592dcc544e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:38:56.08888Z"
+  },
+  {
+    "card_id": "5f58b3f4-a641-459d-9095-08a6a4ff0f3b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:38:57.172791Z"
+  },
+  {
+    "card_id": "3b120c8c-2ec5-4bda-8168-8128b2d8e39f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:01.015537Z"
+  },
+  {
+    "card_id": "f24a7ddb-6a0c-490d-aa95-368f7a47e0b8",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:01.910247Z"
+  },
+  {
+    "card_id": "d50d05e0-9968-4fa5-9537-ab471823cdbb",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:02.849021Z"
+  },
+  {
+    "card_id": "75180d94-8ce3-41bc-953d-5dfa970a6db6",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:03.750198Z"
+  },
+  {
+    "card_id": "21ebcdc2-1d43-4c09-8b05-84681a5e378c",
+    "rating": 2,
+    "review_time": "2026-05-27T07:39:04.758702Z"
+  },
+  {
+    "card_id": "c27b17e3-0728-4b09-ab11-61a920d969c6",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:05.628101Z"
+  },
+  {
+    "card_id": "645f4f2d-6e3e-4c8a-976c-29fb77daafd4",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:06.590118Z"
+  },
+  {
+    "card_id": "a63abea7-b9e9-43ad-9b09-b3c228e83d20",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:07.465556Z"
+  },
+  {
+    "card_id": "f18393e5-e503-40b7-bc57-6199a9fda901",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:08.424057Z"
+  },
+  {
+    "card_id": "c733a5a8-5614-41e3-8a63-ca28bcf9961d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:09.328423Z"
+  },
+  {
+    "card_id": "393a40ee-a922-4af6-b4ec-b69425ce1226",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:10.073702Z"
+  },
+  {
+    "card_id": "0db5915f-367c-4c90-a7fa-efa0bb5598c0",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:10.824914Z"
+  },
+  {
+    "card_id": "3acf483a-332f-4898-b388-45c69cd76a2e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:11.756692Z"
+  },
+  {
+    "card_id": "7b29549f-6976-41a2-87a9-d1e6d5ed25ae",
+    "rating": 2,
+    "review_time": "2026-05-27T07:39:12.515447Z"
+  },
+  {
+    "card_id": "3a814eaf-24d3-41e2-8baf-05f17e07165f",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:13.624226Z"
+  },
+  {
+    "card_id": "5345e04b-4665-4c74-a550-a52230dbdcf7",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:14.619535Z"
+  },
+  {
+    "card_id": "d8fd7900-60af-4c29-958c-8b7afbb5631f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:15.42133Z"
+  },
+  {
+    "card_id": "4687e9c9-27d1-4caf-be52-74a560d8969d",
+    "rating": 2,
+    "review_time": "2026-05-27T07:39:16.436822Z"
+  },
+  {
+    "card_id": "d866111d-c813-41ca-a544-d605e6d6f24f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:17.285388Z"
+  },
+  {
+    "card_id": "d2cfd872-2291-422b-ad8b-9e1547cd40fc",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:18.210928Z"
+  },
+  {
+    "card_id": "0c3caffb-f81a-4f63-b632-e3da89995c4c",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:21.643975Z"
+  },
+  {
+    "card_id": "decd5656-0edd-4dbe-b899-a8a34b760a94",
+    "rating": 2,
+    "review_time": "2026-05-27T07:39:22.357571Z"
+  },
+  {
+    "card_id": "d0b3509f-f7bc-4c2a-aadc-aee86a1290e7",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:23.134029Z"
+  },
+  {
+    "card_id": "d3883067-1c80-4ade-9033-31bb14e9f918",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:24.039309Z"
+  },
+  {
+    "card_id": "6d55a6e4-2833-45b4-b450-85139e516f7d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:24.969521Z"
+  },
+  {
+    "card_id": "d67dee5f-f948-44a0-af0a-a7be4875fad4",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:25.739379Z"
+  },
+  {
+    "card_id": "8add35ad-292a-44c4-bb56-a99ce3b0ed61",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:28.865841Z"
+  },
+  {
+    "card_id": "0b79fec4-23cb-40ec-9222-1f867fa461a2",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:29.879549Z"
+  },
+  {
+    "card_id": "ccb4849b-6a37-47f4-b59f-c25ef236c161",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:30.833591Z"
+  },
+  {
+    "card_id": "08ecc27f-d344-4dbc-b0ae-980b04c2a39b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:34.50987Z"
+  },
+  {
+    "card_id": "ddc8cb03-89ea-484b-bbe3-8676a7921eb1",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:35.25951Z"
+  },
+  {
+    "card_id": "488d47d1-3060-4655-a401-20306c2d12fe",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:36.253029Z"
+  },
+  {
+    "card_id": "3a5690a1-3ddd-486d-b727-efe415c4e0c9",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:37.272871Z"
+  },
+  {
+    "card_id": "6f8bb85c-f2c0-4f68-9c8b-eb9c63c7542b",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:38.393702Z"
+  },
+  {
+    "card_id": "5660e54b-285a-4f74-b26c-316a98fc2687",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:39.422695Z"
+  },
+  {
+    "card_id": "23dbfa38-f2e5-4b8a-ae25-3fa11f77301e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:40.193762Z"
+  },
+  {
+    "card_id": "fc88c905-459b-4d05-a6c0-5ca9152516d0",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:40.967913Z"
+  },
+  {
+    "card_id": "ec9e3ebb-f2d8-47da-82a3-d3e6c5849edd",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:41.727577Z"
+  },
+  {
+    "card_id": "20c574f9-b4cd-4bf9-899b-8bc7977ae34f",
+    "rating": 2,
+    "review_time": "2026-05-27T07:39:42.801632Z"
+  },
+  {
+    "card_id": "5c43fc41-b0c2-42fb-9465-8d826b78b1f7",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:43.692619Z"
+  },
+  {
+    "card_id": "20f31368-fbcb-4274-8b73-b4ba7bddedf8",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:47.122762Z"
+  },
+  {
+    "card_id": "5a667f99-4aac-48ac-b9be-cf44b2659ec9",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:48.041064Z"
+  },
+  {
+    "card_id": "697b6319-cf7b-4670-b182-d3aef9700b30",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:48.93438Z"
+  },
+  {
+    "card_id": "73f46db2-36df-4037-9641-f3672fb3ebca",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:49.678632Z"
+  },
+  {
+    "card_id": "4a610522-923c-49fa-9e58-6ce123e9775a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:50.444167Z"
+  },
+  {
+    "card_id": "8a9b39f3-8a06-4333-916a-d1ae5b8e16f1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:51.380521Z"
+  },
+  {
+    "card_id": "65ebc249-fa39-4bec-8ee1-cc7efce3f903",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:52.247891Z"
+  },
+  {
+    "card_id": "2dc1ca2c-c729-411f-87b9-7706cfa32110",
+    "rating": 2,
+    "review_time": "2026-05-27T07:39:53.274422Z"
+  },
+  {
+    "card_id": "b4fde6d0-2aa6-4e59-888a-920ea423bfed",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:54.261054Z"
+  },
+  {
+    "card_id": "43b37da6-7f73-40dc-9d0b-f5996458f176",
+    "rating": 2,
+    "review_time": "2026-05-27T07:39:55.329403Z"
+  },
+  {
+    "card_id": "b92b6ee4-bf7e-4999-aff1-25d730b3800d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:56.107131Z"
+  },
+  {
+    "card_id": "e0820b1b-2b86-42e6-94ad-da84cde944cf",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:56.895604Z"
+  },
+  {
+    "card_id": "b903776a-489d-4b88-83bd-03ca1fa227ef",
+    "rating": 3,
+    "review_time": "2026-05-27T07:39:57.805608Z"
+  },
+  {
+    "card_id": "1aa5f2ba-6d4d-4dfe-b37a-7a351988cc35",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:58.753608Z"
+  },
+  {
+    "card_id": "6fb7b0ea-6263-4718-a4ef-c184f2d8f6b8",
+    "rating": 4,
+    "review_time": "2026-05-27T07:39:59.695765Z"
+  },
+  {
+    "card_id": "8b681a7b-25fe-4d20-bb3e-f940e0dc89d4",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:00.59458Z"
+  },
+  {
+    "card_id": "85d0ceb9-2260-4a06-b70b-fcbd807844be",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:01.524748Z"
+  },
+  {
+    "card_id": "de7052ad-f955-4112-8882-e44e7fcd069c",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:02.312779Z"
+  },
+  {
+    "card_id": "0b2b7890-7730-4f53-80fd-c2190dae1e60",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:03.471031Z"
+  },
+  {
+    "card_id": "6b7f5681-f666-42e3-944b-a6434180af15",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:04.592769Z"
+  },
+  {
+    "card_id": "297cc415-a965-4195-97b3-6f410fa4b8b0",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:07.60407Z"
+  },
+  {
+    "card_id": "dfd2fe96-acb0-4dc0-ae96-8f0550cdb86f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:08.658783Z"
+  },
+  {
+    "card_id": "bf51f7d5-720a-47b0-8bec-4c71f5924217",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:09.520433Z"
+  },
+  {
+    "card_id": "00ae0ce0-64c9-4d60-a36f-a6883c62dbc0",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:10.720928Z"
+  },
+  {
+    "card_id": "af106280-bd9d-48fa-a0d4-3569baae19eb",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:11.649027Z"
+  },
+  {
+    "card_id": "5fa2bca5-7506-45cd-ae79-d0dfc347b630",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:12.749665Z"
+  },
+  {
+    "card_id": "0c584e7b-7b7e-4595-8019-37009fb87b69",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:13.530291Z"
+  },
+  {
+    "card_id": "44e353aa-693c-4514-8eeb-76df1df18707",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:14.425694Z"
+  },
+  {
+    "card_id": "5f8008f5-bfb9-47c8-a998-58da3fcec699",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:15.359093Z"
+  },
+  {
+    "card_id": "dbf51aaf-f5ff-49eb-b262-2e2063042958",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:16.282422Z"
+  },
+  {
+    "card_id": "52b13867-3eaa-4aee-87ca-54700accc23b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:17.188322Z"
+  },
+  {
+    "card_id": "d4b6d41f-648a-4315-88c6-a39891c15f07",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:18.099097Z"
+  },
+  {
+    "card_id": "9fd9fdc4-a096-4808-b00d-9f9e89dbf26a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:19.010891Z"
+  },
+  {
+    "card_id": "e6fceee2-5da4-4022-96ef-2abfc5f8e56c",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:20.146794Z"
+  },
+  {
+    "card_id": "46d82d59-57b4-4092-bc0d-caeb06a61e8d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:21.210146Z"
+  },
+  {
+    "card_id": "d3a92c3b-8069-446d-9619-ea3c49fa506c",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:22.169784Z"
+  },
+  {
+    "card_id": "9701f51a-0ef1-4e1a-b871-319907d8e303",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:23.013308Z"
+  },
+  {
+    "card_id": "bb31ea1d-b1b1-4ce0-84fd-54bf7ddf0ed2",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:23.970333Z"
+  },
+  {
+    "card_id": "e4f50bec-2a09-40f7-8b72-27ec7b519480",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:24.874971Z"
+  },
+  {
+    "card_id": "04985826-86b3-45d6-83c1-b090fac650fc",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:25.778932Z"
+  },
+  {
+    "card_id": "e0839b82-fca1-4f96-97f3-6e222d6c7392",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:29.215469Z"
+  },
+  {
+    "card_id": "6d81f368-71d8-4f81-b6e2-c5d5096d36a9",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:30.048128Z"
+  },
+  {
+    "card_id": "22bcff30-d941-42b9-9c85-79159633c7e2",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:31.014522Z"
+  },
+  {
+    "card_id": "a5bade3e-7148-4e4c-836f-8fec85cf7316",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:31.922024Z"
+  },
+  {
+    "card_id": "d61d0928-2871-4233-b5b4-1465ec2f83fe",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:32.901807Z"
+  },
+  {
+    "card_id": "67381e50-1cef-4255-bb2b-51a50d5f4bdb",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:33.773067Z"
+  },
+  {
+    "card_id": "329f22e8-2be1-43c0-ade8-7285f6eab0fe",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:34.81994Z"
+  },
+  {
+    "card_id": "01fb92da-3c82-409e-accd-ec10e7359a6b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:35.594117Z"
+  },
+  {
+    "card_id": "b6e2e046-7f26-4a35-a3ae-4f61a81759c1",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:36.332901Z"
+  },
+  {
+    "card_id": "951903be-5d67-4974-a6f8-0d31f0c89c74",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:37.166969Z"
+  },
+  {
+    "card_id": "657ad039-7805-4345-bf5b-c62965466a77",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:37.9056Z"
+  },
+  {
+    "card_id": "22974ed0-3d57-47dd-a20e-e5748c046cd4",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:39.015577Z"
+  },
+  {
+    "card_id": "73b18586-98cd-40f7-9e68-e85b3f4262f9",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:39.914324Z"
+  },
+  {
+    "card_id": "cfc8a547-69a9-46c3-b2e5-7f550205c0dc",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:40.829398Z"
+  },
+  {
+    "card_id": "32147611-d0ac-4b72-be7f-b8877637036e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:41.660498Z"
+  },
+  {
+    "card_id": "27ce4ff9-c213-464a-9b4f-321d7ae51eea",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:42.717444Z"
+  },
+  {
+    "card_id": "2aa6ccbd-02fa-4162-a7bb-fc5ba228aeee",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:43.599276Z"
+  },
+  {
+    "card_id": "6b5e8ad0-e505-4c5c-b7b2-4833a56eecfc",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:44.425296Z"
+  },
+  {
+    "card_id": "2ebebedf-cd19-4a1b-9417-4c86a4e5ee3f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:45.443989Z"
+  },
+  {
+    "card_id": "236802c1-27ae-4a8b-b880-2582fe715d68",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:46.365349Z"
+  },
+  {
+    "card_id": "7c72bd3e-bed2-4eb5-882e-bfe9475bf769",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:50.048093Z"
+  },
+  {
+    "card_id": "a65daaa6-6c52-4704-86ec-075f100be440",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:50.79291Z"
+  },
+  {
+    "card_id": "9b85aa77-a692-4bde-8e54-d5dd45998063",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:51.565624Z"
+  },
+  {
+    "card_id": "7c963505-c6a6-4635-822f-5f83bedc3151",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:52.582905Z"
+  },
+  {
+    "card_id": "3d381fe1-3083-41a9-87a2-e9ad2a33a58b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:53.420237Z"
+  },
+  {
+    "card_id": "913756ec-46d8-4c03-872c-227db13aefe3",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:54.387542Z"
+  },
+  {
+    "card_id": "18ffeb4c-9b92-4406-876b-2e5a14a26c92",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:55.340811Z"
+  },
+  {
+    "card_id": "b848769e-4cfc-4252-9c49-51108ac53c53",
+    "rating": 2,
+    "review_time": "2026-05-27T07:40:56.275547Z"
+  },
+  {
+    "card_id": "ef3c939b-0f7a-46a6-a859-c3af90e48d18",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:57.125055Z"
+  },
+  {
+    "card_id": "a27130a2-9d43-4123-b4e9-3f714ac90ff4",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:57.894495Z"
+  },
+  {
+    "card_id": "8d3c068a-45a4-4876-b284-d330906a5e1e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:40:58.685069Z"
+  },
+  {
+    "card_id": "214a9b0f-d8d1-4f75-a10a-e04271f7ed34",
+    "rating": 3,
+    "review_time": "2026-05-27T07:40:59.485488Z"
+  },
+  {
+    "card_id": "d9fa43cf-57fe-48a4-9c0a-ecd2bf6d7b68",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:00.540288Z"
+  },
+  {
+    "card_id": "bc7dd57b-6917-4b3b-8dd4-d18a565aa1ab",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:01.40702Z"
+  },
+  {
+    "card_id": "8d2b41fd-8c7a-437a-947d-c0fdf3685ada",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:02.387099Z"
+  },
+  {
+    "card_id": "20abdcdb-4df8-4a7d-9c6b-fee414ba21ad",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:03.61329Z"
+  },
+  {
+    "card_id": "21f31450-ae12-471d-bfbd-e3731340e951",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:04.521698Z"
+  },
+  {
+    "card_id": "a8dd97c7-2843-46c8-87f2-3d4df5a5f631",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:05.622396Z"
+  },
+  {
+    "card_id": "ad237480-0182-44ce-95af-7ce634bd8d12",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:06.970007Z"
+  },
+  {
+    "card_id": "54255fd4-ea37-43b0-8b45-8a483ef9660b",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:07.899776Z"
+  },
+  {
+    "card_id": "872e24a8-bc2f-43b6-b851-6e929952a527",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:12.026837Z"
+  },
+  {
+    "card_id": "fa2be08d-2c11-4fe5-b592-2cc1ed090d7c",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:12.833196Z"
+  },
+  {
+    "card_id": "51097230-94c4-47eb-88f4-cc042b9b94c7",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:13.722407Z"
+  },
+  {
+    "card_id": "96d0d7e3-38cf-4665-99a0-138cc9cfb4ea",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:14.502622Z"
+  },
+  {
+    "card_id": "6512e415-e7b2-46fa-9d8a-a8ac276b4099",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:15.579413Z"
+  },
+  {
+    "card_id": "32fc92fc-48d6-4885-81e1-2434ec933002",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:16.444661Z"
+  },
+  {
+    "card_id": "712152c9-6944-4614-8caf-163993faf4ba",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:17.515199Z"
+  },
+  {
+    "card_id": "821d77a8-5ccc-42f7-b03e-0d59b659bf9f",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:18.345012Z"
+  },
+  {
+    "card_id": "b6fade4f-b96d-4b13-be3c-a4ff0fc4a129",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:19.26203Z"
+  },
+  {
+    "card_id": "9b5dd543-50bc-4c2f-b658-02a69b03ec47",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:20.069852Z"
+  },
+  {
+    "card_id": "90040614-6518-4d1e-b69f-fcca6c1e9517",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:21.086185Z"
+  },
+  {
+    "card_id": "ab9cd737-2c2e-478c-a269-35a50d608778",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:21.807978Z"
+  },
+  {
+    "card_id": "2bd55319-4b96-43fd-8ebd-9338d7b1bc8c",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:22.566811Z"
+  },
+  {
+    "card_id": "bee1a6f4-84c4-402b-96db-8e01a945e148",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:23.827486Z"
+  },
+  {
+    "card_id": "b96370c7-e6a9-4e22-9fef-8b332d66d3f1",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:24.762516Z"
+  },
+  {
+    "card_id": "576df237-f421-483c-853c-5716ebec37fe",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:25.672946Z"
+  },
+  {
+    "card_id": "ec9e01bb-207c-4314-87b6-18d0e6794526",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:26.591268Z"
+  },
+  {
+    "card_id": "131e032b-a25e-428a-a92d-51103cbd3a2e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:27.281144Z"
+  },
+  {
+    "card_id": "ab4782f8-8391-4be6-9bc7-b997a803aad4",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:27.990583Z"
+  },
+  {
+    "card_id": "ce6c9997-70e0-477f-8fe1-7a8a267c5eff",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:28.730751Z"
+  },
+  {
+    "card_id": "6bf6c762-2894-4788-b4ac-dc40987e4e08",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:31.655404Z"
+  },
+  {
+    "card_id": "05bfd4e1-a1b3-4a57-a687-a472201de82a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:32.429279Z"
+  },
+  {
+    "card_id": "2d69be47-2722-4ded-b84f-a4a4e3ac8637",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:33.16814Z"
+  },
+  {
+    "card_id": "0ce7f4bd-84dc-46ae-8670-9deef40086a7",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:33.91607Z"
+  },
+  {
+    "card_id": "0af88142-337b-4f53-acc6-f9a692f0d096",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:34.946407Z"
+  },
+  {
+    "card_id": "f2416f49-32d9-4d9d-ae8c-27af8debe37b",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:35.775802Z"
+  },
+  {
+    "card_id": "416a4c1e-51a7-49b1-a0d3-dfe232c3e0db",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:36.58203Z"
+  },
+  {
+    "card_id": "de02f285-ea45-4cb2-90ea-5ae0fa77ff48",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:37.379739Z"
+  },
+  {
+    "card_id": "b7535d30-a82b-4da0-b473-8ab1a5da3a32",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:38.122559Z"
+  },
+  {
+    "card_id": "9a547ab0-953b-49f5-a41e-c7b1f390a132",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:39.194263Z"
+  },
+  {
+    "card_id": "b388ea42-d30b-4eac-96e5-cd721db8530e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:40.181521Z"
+  },
+  {
+    "card_id": "732a4816-c086-4e02-9700-08e9964c2d18",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:40.92965Z"
+  },
+  {
+    "card_id": "840b8091-f9d3-4e73-b98d-6df1c2c4e6f7",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:41.674398Z"
+  },
+  {
+    "card_id": "765f65eb-3230-4104-aeea-3186810d9cf6",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:42.59221Z"
+  },
+  {
+    "card_id": "9a6ef84e-3b85-42ff-99ba-81597d18d0d0",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:43.337117Z"
+  },
+  {
+    "card_id": "13ea1ade-f0fb-4e6a-bc9e-2806e5dfe19a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:44.067361Z"
+  },
+  {
+    "card_id": "e641c9f1-c644-452d-b7e6-3698c148e467",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:44.775219Z"
+  },
+  {
+    "card_id": "e91cebd0-1653-4dcb-9aef-4a6d617326e9",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:45.650819Z"
+  },
+  {
+    "card_id": "884dba6c-d8b9-4835-bb03-d08245d38d8a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:46.719991Z"
+  },
+  {
+    "card_id": "ab881273-3613-4703-b496-0b8a69998eb8",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:47.464501Z"
+  },
+  {
+    "card_id": "e67bc84f-4052-459b-a210-2d4ef217ac71",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:50.797662Z"
+  },
+  {
+    "card_id": "7405319d-ce4c-4e25-9523-d405ff780e4b",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:51.776519Z"
+  },
+  {
+    "card_id": "396244c5-1421-4de0-bfd8-78adbb4875db",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:52.807948Z"
+  },
+  {
+    "card_id": "9d955fc7-99f9-4e90-86e0-f7def1b288a5",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:54.097036Z"
+  },
+  {
+    "card_id": "ab878bd2-387d-4ba7-bf57-ae6fab355ba0",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:54.892714Z"
+  },
+  {
+    "card_id": "ceaeb4a3-2f98-461f-bb34-71020a7c4c3d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:55.607125Z"
+  },
+  {
+    "card_id": "e1c6d9d9-08d8-4420-9dd0-ffc2d825cb3f",
+    "rating": 4,
+    "review_time": "2026-05-27T07:41:56.423729Z"
+  },
+  {
+    "card_id": "a96c4c33-2006-4caf-957f-96fa0d512aa3",
+    "rating": 2,
+    "review_time": "2026-05-27T07:41:57.179961Z"
+  },
+  {
+    "card_id": "e56077e8-6f88-4fed-a237-eb4283543b26",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:57.934555Z"
+  },
+  {
+    "card_id": "2949d885-4c03-4740-aa71-2b0ebd03ac00",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:58.881857Z"
+  },
+  {
+    "card_id": "22ba6771-8da3-4182-8ea3-b183ffbab9dd",
+    "rating": 3,
+    "review_time": "2026-05-27T07:41:59.767657Z"
+  },
+  {
+    "card_id": "d620eeb8-e017-4385-aaab-73886f6e7522",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:00.718604Z"
+  },
+  {
+    "card_id": "ba41fa8d-4866-4acd-bcfa-01955730f0b9",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:01.462271Z"
+  },
+  {
+    "card_id": "d92b1f5e-a4b0-4885-b13c-4961a19098ca",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:02.167155Z"
+  },
+  {
+    "card_id": "502f4736-f98c-40f6-b42f-1a23ba92d822",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:02.939578Z"
+  },
+  {
+    "card_id": "e7e68037-f968-462d-a6ee-b136f264678f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:03.761863Z"
+  },
+  {
+    "card_id": "d7bfb6da-d2e7-4864-856d-704ae1099f73",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:04.713494Z"
+  },
+  {
+    "card_id": "59f6127b-2027-4e9f-b1d8-113ace3bb071",
+    "rating": 2,
+    "review_time": "2026-05-27T07:42:05.510107Z"
+  },
+  {
+    "card_id": "41df8deb-40d5-4772-ada7-8e7a516a41ab",
+    "rating": 2,
+    "review_time": "2026-05-27T07:42:06.257317Z"
+  },
+  {
+    "card_id": "0080490e-2db3-45d9-b03b-975ad672ba17",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:07.140445Z"
+  },
+  {
+    "card_id": "2f2d2503-b5a8-4131-8fc5-f686d54f8c6f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:10.54796Z"
+  },
+  {
+    "card_id": "30860504-4800-477b-be8e-38a45684276e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:11.297657Z"
+  },
+  {
+    "card_id": "3c398bbe-370a-473a-a23a-e06d6ebe4e12",
+    "rating": 2,
+    "review_time": "2026-05-27T07:42:12.04991Z"
+  },
+  {
+    "card_id": "8309bfb3-8aa6-453f-a191-cbb56006cf57",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:12.861297Z"
+  },
+  {
+    "card_id": "0ea16e8f-8c51-4983-aa98-c20d245b2458",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:13.968897Z"
+  },
+  {
+    "card_id": "a7fd5956-2acf-4773-9cc6-d49132e562a2",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:14.857105Z"
+  },
+  {
+    "card_id": "736a4ccf-2772-4c64-9f29-13bf5e47e83a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:15.793463Z"
+  },
+  {
+    "card_id": "fcdd2d3d-a204-40f7-aaa8-708f4c701ae8",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:16.706535Z"
+  },
+  {
+    "card_id": "dd6a24d9-c2d3-4b45-b60b-13f6a422b6f8",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:17.614263Z"
+  },
+  {
+    "card_id": "14ac08ee-e08c-49a4-bc53-76823a0595b0",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:18.550069Z"
+  },
+  {
+    "card_id": "f3345ea6-ed49-41e6-9eb5-6ea3b90b3381",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:19.782812Z"
+  },
+  {
+    "card_id": "01c6efb6-5c8c-4b82-8637-a5858031668d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:20.717409Z"
+  },
+  {
+    "card_id": "e61be340-f78c-4dfa-adf1-09b09234330d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:21.539324Z"
+  },
+  {
+    "card_id": "1274c1b8-a6d1-40a0-bdcb-4646686c8556",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:22.640814Z"
+  },
+  {
+    "card_id": "f46dfaab-6c82-4528-b83d-523b341802ad",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:23.764686Z"
+  },
+  {
+    "card_id": "1ef635db-6f75-424d-a290-344ce5d09be3",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:24.685381Z"
+  },
+  {
+    "card_id": "b821d5a4-7990-4b6f-af81-269be69c3cb6",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:25.658471Z"
+  },
+  {
+    "card_id": "f1a29532-5223-467e-82a7-c236ae8f769f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:26.579058Z"
+  },
+  {
+    "card_id": "97e0dace-6370-451a-bb2e-6fe1f6c19607",
+    "rating": 2,
+    "review_time": "2026-05-27T07:42:27.428878Z"
+  },
+  {
+    "card_id": "603fde79-4f43-4401-b682-fcdefacf65ee",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:28.252357Z"
+  },
+  {
+    "card_id": "6c4025a2-950e-41db-89e5-6e2652c9e023",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:31.630727Z"
+  },
+  {
+    "card_id": "5c82f1b5-8b03-4e7f-83b2-33071f7a7750",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:32.887851Z"
+  },
+  {
+    "card_id": "313a174b-9156-44b8-89dd-f1394637327d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:33.684599Z"
+  },
+  {
+    "card_id": "115891ea-8394-47af-a4bf-b2241c4e73a0",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:34.483129Z"
+  },
+  {
+    "card_id": "efe215a6-ddbf-49dc-be09-51f32442c54b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:35.536823Z"
+  },
+  {
+    "card_id": "fbe942b1-3a91-4cff-84b2-9ca7e2d70db3",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:36.736111Z"
+  },
+  {
+    "card_id": "6aa19e25-3e45-4780-8e86-bbb621d322a4",
+    "rating": 2,
+    "review_time": "2026-05-27T07:42:37.922566Z"
+  },
+  {
+    "card_id": "528267c4-130a-48f4-9552-2282ec2968e9",
+    "rating": 2,
+    "review_time": "2026-05-27T07:42:38.786542Z"
+  },
+  {
+    "card_id": "7b2f7a99-a0ef-4e18-9e6b-2e4a0995e14a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:39.750421Z"
+  },
+  {
+    "card_id": "e622c8c9-1ce8-4e1f-8243-2310640893c3",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:40.620547Z"
+  },
+  {
+    "card_id": "d8242e5e-6d9a-47e4-8a5d-17e565d47c8e",
+    "rating": 2,
+    "review_time": "2026-05-27T07:42:41.382341Z"
+  },
+  {
+    "card_id": "5ed4235c-d876-4b7b-b817-eb09430ca221",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:42.123218Z"
+  },
+  {
+    "card_id": "7eeecc4a-8afb-493a-808f-96952c676013",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:43.133281Z"
+  },
+  {
+    "card_id": "3d149494-e313-4698-b0fb-86ec5a354b52",
+    "rating": 2,
+    "review_time": "2026-05-27T07:42:43.887099Z"
+  },
+  {
+    "card_id": "be8ad8ed-ca8f-4285-b9f4-d8e897673c90",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:44.750942Z"
+  },
+  {
+    "card_id": "e42412f1-88ff-49df-9b6e-423b68fd1993",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:45.583448Z"
+  },
+  {
+    "card_id": "1036e46c-415d-4721-9d21-ebd6daefa2d9",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:46.473597Z"
+  },
+  {
+    "card_id": "7764c255-4a15-4151-9fcb-b080591040b9",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:47.406054Z"
+  },
+  {
+    "card_id": "2e50c107-6cca-4d71-bc64-6026f584f60b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:48.180412Z"
+  },
+  {
+    "card_id": "a13677e4-5fa4-41af-abed-6eab5359bd86",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:49.277947Z"
+  },
+  {
+    "card_id": "435530b8-270b-4350-a86c-0dfa5837200a",
+    "rating": 2,
+    "review_time": "2026-05-27T07:42:52.007958Z"
+  },
+  {
+    "card_id": "bf76d0c4-6149-444b-855c-9baa2ce9788f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:53.046463Z"
+  },
+  {
+    "card_id": "ba34968e-0fac-4268-8472-787548d3c46f",
+    "rating": 2,
+    "review_time": "2026-05-27T07:42:53.934196Z"
+  },
+  {
+    "card_id": "20014fc3-0405-4f58-b539-2dafbd189da7",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:54.795062Z"
+  },
+  {
+    "card_id": "200ea4af-ed61-47fd-ac63-04886d261446",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:55.674766Z"
+  },
+  {
+    "card_id": "8adaa947-386a-42c6-9035-154dd5090f1b",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:56.613161Z"
+  },
+  {
+    "card_id": "405c5b4f-e2e9-4fa5-be79-3ff464288c97",
+    "rating": 4,
+    "review_time": "2026-05-27T07:42:57.471555Z"
+  },
+  {
+    "card_id": "aa0311a4-c66f-4c51-8e8c-662f0decb6e6",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:58.48852Z"
+  },
+  {
+    "card_id": "9f184c91-c152-4f4f-b9fc-262ff6f67d23",
+    "rating": 3,
+    "review_time": "2026-05-27T07:42:59.353672Z"
+  },
+  {
+    "card_id": "64452a2a-19e7-46de-b6fc-59149b9d1884",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:00.793738Z"
+  },
+  {
+    "card_id": "6560b88c-a7aa-4ea6-9b1c-994346016c71",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:01.504781Z"
+  },
+  {
+    "card_id": "ea9ec542-7f98-4a4a-847d-ac42b35e5588",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:02.481697Z"
+  },
+  {
+    "card_id": "abc3e3ed-c744-44d4-89dd-5dc46164ca5a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:03.231369Z"
+  },
+  {
+    "card_id": "9829bf1e-1af6-405c-aec9-4298e8de8949",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:04.344122Z"
+  },
+  {
+    "card_id": "df6af5ab-e8ea-4c09-8707-6ed98a59aa4e",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:05.102654Z"
+  },
+  {
+    "card_id": "65c3f846-5738-440e-b641-a7ead46b770d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:05.824946Z"
+  },
+  {
+    "card_id": "3aaa3b03-1270-49f4-943a-899b9421762a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:06.75773Z"
+  },
+  {
+    "card_id": "0d1b85b0-8263-48e9-9dfb-b670035b9d96",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:07.755457Z"
+  },
+  {
+    "card_id": "8764f8b9-0024-429f-bec2-f1dc19469038",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:08.787366Z"
+  },
+  {
+    "card_id": "9604926d-ce75-43ef-8832-4100b5cd63a5",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:09.866984Z"
+  },
+  {
+    "card_id": "e363385e-f187-429e-9a47-688d525d1ba3",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:12.747344Z"
+  },
+  {
+    "card_id": "96cf9d9d-74c0-4d63-ab05-ff470393db4d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:13.827419Z"
+  },
+  {
+    "card_id": "0ddf659c-0c07-44c8-924d-cccd848b3d53",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:14.734791Z"
+  },
+  {
+    "card_id": "fb206b36-1404-45af-b643-db83158cc520",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:15.425932Z"
+  },
+  {
+    "card_id": "2fb5a26a-ec27-4482-a3f6-b05ee6060e10",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:16.242266Z"
+  },
+  {
+    "card_id": "48361d09-e1bd-442b-860b-3d7afc6f14db",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:17.208445Z"
+  },
+  {
+    "card_id": "0bb68977-58ed-4eff-9498-22e8a9a038d1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:18.133253Z"
+  },
+  {
+    "card_id": "505c41f4-13ca-4372-b55a-ba34594f01b7",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:19.083727Z"
+  },
+  {
+    "card_id": "ab108c98-6106-4f16-9d6a-63a609cd8bee",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:19.80144Z"
+  },
+  {
+    "card_id": "5fea656c-fa2c-4b1a-9b83-3ae7e3bfbb5d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:20.617792Z"
+  },
+  {
+    "card_id": "ba93cdfe-bec2-4c59-9456-e38401715e73",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:21.480526Z"
+  },
+  {
+    "card_id": "ae5f23ae-cc1c-479a-9c36-f484047e5f58",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:22.338418Z"
+  },
+  {
+    "card_id": "7c83b402-2f5d-4a88-b862-05c61aff85a2",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:23.355629Z"
+  },
+  {
+    "card_id": "a9b89c3a-ffef-48fd-b376-e4e60a40c7b1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:24.25998Z"
+  },
+  {
+    "card_id": "7a3edc2f-34cb-495b-b298-bc777e5f01c6",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:25.207802Z"
+  },
+  {
+    "card_id": "1e84a006-3ecb-4f78-bfdc-df8630b6cb26",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:26.097981Z"
+  },
+  {
+    "card_id": "c9cfba08-5d76-4e15-a4a3-9b52a7e30ab0",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:27.036693Z"
+  },
+  {
+    "card_id": "c8e93733-e46d-44d2-b738-859cfdd1d5b2",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:27.73713Z"
+  },
+  {
+    "card_id": "5ee80c3e-9807-4b15-a833-de8c0c419236",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:28.738064Z"
+  },
+  {
+    "card_id": "40c8aaa0-8087-41b4-8026-9c264878a71c",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:29.474406Z"
+  },
+  {
+    "card_id": "707e8370-37de-4896-a25a-05567226eb12",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:32.548712Z"
+  },
+  {
+    "card_id": "e6a69156-6db2-456b-b989-2d9b89d4e1ec",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:33.326509Z"
+  },
+  {
+    "card_id": "a4eca6b2-5969-4389-9b6b-757d4d7aa06a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:34.448195Z"
+  },
+  {
+    "card_id": "62502ebd-926e-41c1-978e-8525e6313a72",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:35.280798Z"
+  },
+  {
+    "card_id": "46c997ff-add3-40c9-9240-5ed2efeec578",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:35.968385Z"
+  },
+  {
+    "card_id": "924f7380-07b4-4a84-a803-6b1c08715ab1",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:36.857794Z"
+  },
+  {
+    "card_id": "b9ee46c9-19d7-44c8-874e-1b9d69ac256b",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:37.577869Z"
+  },
+  {
+    "card_id": "362f3588-ecda-440c-a1a2-04c780c913ad",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:38.387681Z"
+  },
+  {
+    "card_id": "4e2346b2-6dc9-471c-81fd-9a518296031e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:39.353317Z"
+  },
+  {
+    "card_id": "c8a1b56a-c10e-4332-8391-cb29b133d5cf",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:40.268031Z"
+  },
+  {
+    "card_id": "a9f5bfaf-7467-42ad-95a9-325d28965f92",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:41.008245Z"
+  },
+  {
+    "card_id": "12fee3bc-b562-461b-aab4-c1bc0f448ade",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:41.726138Z"
+  },
+  {
+    "card_id": "5a81d5ca-3ecd-4805-aaba-036c1d7b4996",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:42.460698Z"
+  },
+  {
+    "card_id": "06d71bbe-080e-4ff9-a514-acddcdedbd34",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:43.29007Z"
+  },
+  {
+    "card_id": "442fb990-1ee6-4c8a-ae77-42f1818fc665",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:44.327317Z"
+  },
+  {
+    "card_id": "40bff21a-02cf-4d71-a841-0605cc7140ab",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:45.183288Z"
+  },
+  {
+    "card_id": "7a3267f7-2417-4cd6-af83-b5cd1b316d77",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:46.04151Z"
+  },
+  {
+    "card_id": "88a7ccea-7c43-4344-aae0-cbe7cb21b1c6",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:46.8026Z"
+  },
+  {
+    "card_id": "63f1c504-cb4b-4281-aa59-4a17b9f6b034",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:47.557547Z"
+  },
+  {
+    "card_id": "7df2cd8b-0f32-4730-ae75-e4be492917c8",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:48.633979Z"
+  },
+  {
+    "card_id": "06b311d4-2297-453b-9383-ae9711a2e8eb",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:51.516857Z"
+  },
+  {
+    "card_id": "a6ed1943-f31c-4a5e-9b35-83d9395dff8b",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:52.243221Z"
+  },
+  {
+    "card_id": "780aa9a5-1021-4d5d-a75a-41f54fb60d04",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:52.952877Z"
+  },
+  {
+    "card_id": "255a984b-be44-4aaf-91b6-4911d5ab2711",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:53.648367Z"
+  },
+  {
+    "card_id": "0a716e2e-1b38-447d-8e38-1d64ad451487",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:54.528326Z"
+  },
+  {
+    "card_id": "15ba5a7c-79ee-4eec-9f53-de126d8c6596",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:55.411044Z"
+  },
+  {
+    "card_id": "3f9d259b-db89-430e-b2b0-0a0a7bce3cc3",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:56.254489Z"
+  },
+  {
+    "card_id": "5f5c71f1-b361-4bb5-807f-4bd7453e5617",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:57.03673Z"
+  },
+  {
+    "card_id": "4c3756cc-4f3d-4354-a6d2-5b0394cc2991",
+    "rating": 4,
+    "review_time": "2026-05-27T07:43:57.934475Z"
+  },
+  {
+    "card_id": "307b0a01-57cf-498f-8fe7-6b3507397cdd",
+    "rating": 2,
+    "review_time": "2026-05-27T07:43:58.708347Z"
+  },
+  {
+    "card_id": "cead1674-eda2-40e7-91e2-1f32da836009",
+    "rating": 3,
+    "review_time": "2026-05-27T07:43:59.447196Z"
+  },
+  {
+    "card_id": "8d870f83-7a67-4620-81bb-42e010b8c38a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:00.507034Z"
+  },
+  {
+    "card_id": "0f040c20-6009-4561-bef5-e771e662f5a3",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:01.237485Z"
+  },
+  {
+    "card_id": "f24e36e2-b80f-4f42-8d91-efcef7586eec",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:01.986853Z"
+  },
+  {
+    "card_id": "9ac58c2c-efa2-40c0-af63-1a064630e47e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:02.971784Z"
+  },
+  {
+    "card_id": "8caff609-54e5-4be4-b855-4584cc7a0be7",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:03.728721Z"
+  },
+  {
+    "card_id": "37c300c4-8540-4615-8d30-4c363b08365c",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:04.54359Z"
+  },
+  {
+    "card_id": "28c4745b-05e5-4756-b187-995f72b91306",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:05.337553Z"
+  },
+  {
+    "card_id": "e0703c0d-b023-40ea-b847-5880abbecd59",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:06.169957Z"
+  },
+  {
+    "card_id": "43b027a5-6ec6-4502-8580-a73fe206c5a9",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:06.944297Z"
+  },
+  {
+    "card_id": "fa7f76fe-776d-43a6-a689-b91b3ca34e93",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:09.726292Z"
+  },
+  {
+    "card_id": "33477108-a255-416d-a45b-d41063ec45fd",
+    "rating": 2,
+    "review_time": "2026-05-27T07:44:10.687827Z"
+  },
+  {
+    "card_id": "b444639b-e11d-4bdd-b642-86787760d06f",
+    "rating": 2,
+    "review_time": "2026-05-27T07:44:11.432442Z"
+  },
+  {
+    "card_id": "aaea2d17-89f1-40d8-a549-033cd638500f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:12.356022Z"
+  },
+  {
+    "card_id": "7e5859e6-b8b0-43ee-a042-f4302b75b3e8",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:13.428515Z"
+  },
+  {
+    "card_id": "5e115c1e-fd48-41ca-aa02-06474e628ac8",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:14.369355Z"
+  },
+  {
+    "card_id": "5eb82992-70bc-43e5-93fe-86b88d93b5eb",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:15.134286Z"
+  },
+  {
+    "card_id": "8c594743-a688-426a-a269-0857b0ee17db",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:16.212948Z"
+  },
+  {
+    "card_id": "8724a1c2-9a16-4fea-992b-0131d358cbd1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:17.230332Z"
+  },
+  {
+    "card_id": "be43222c-8cea-4138-97f3-c61dabe450f5",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:18.354493Z"
+  },
+  {
+    "card_id": "0c3c9ae3-0130-42d0-868b-e1d42a561c72",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:19.110979Z"
+  },
+  {
+    "card_id": "ea119893-31a5-454e-848b-518ed19457dd",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:19.803062Z"
+  },
+  {
+    "card_id": "72ffea6a-db35-4169-8cc1-420adc60677e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:20.800371Z"
+  },
+  {
+    "card_id": "525c491e-820a-4090-ac9c-3009e1ffc4ed",
+    "rating": 2,
+    "review_time": "2026-05-27T07:44:21.587317Z"
+  },
+  {
+    "card_id": "a4418fe5-c898-4f33-97f4-1bb003affe0f",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:22.600908Z"
+  },
+  {
+    "card_id": "28087132-de6a-48b5-824c-adb307c65f2e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:23.607502Z"
+  },
+  {
+    "card_id": "b01fe1bf-ab72-4d4f-bc5a-695dcc327e41",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:24.477069Z"
+  },
+  {
+    "card_id": "3084fa3f-4c15-44d7-afdf-0e7115c04b0f",
+    "rating": 2,
+    "review_time": "2026-05-27T07:44:25.411655Z"
+  },
+  {
+    "card_id": "ed9cc6ef-eeb9-4b04-a02a-1d3f1ddcd5ef",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:26.323196Z"
+  },
+  {
+    "card_id": "fa9f8793-46ab-458f-97a5-c5b476cce372",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:27.218868Z"
+  },
+  {
+    "card_id": "69f121d8-b6d3-4319-9c2b-1a4599836cff",
+    "rating": 2,
+    "review_time": "2026-05-27T07:44:30.086954Z"
+  },
+  {
+    "card_id": "fc3df69a-27ab-481e-930d-71a9a6377af5",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:30.857061Z"
+  },
+  {
+    "card_id": "94e9ee48-7d6a-4de3-8933-efdc8fb6fb91",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:32.104726Z"
+  },
+  {
+    "card_id": "886014c4-90dd-4840-b55a-23951794c64c",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:33.100445Z"
+  },
+  {
+    "card_id": "0bee8366-a704-4777-85f5-a46d4b6403cc",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:34.024755Z"
+  },
+  {
+    "card_id": "064d936e-06b9-4663-a3a1-f813307d754d",
+    "rating": 2,
+    "review_time": "2026-05-27T07:44:34.934148Z"
+  },
+  {
+    "card_id": "1e0c15dc-0ba3-4555-8935-90d4054ac16a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:35.712274Z"
+  },
+  {
+    "card_id": "a557b1f1-da1f-4472-ace2-2e6a37d5c018",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:36.781005Z"
+  },
+  {
+    "card_id": "d79341b4-440d-4997-900f-e91c695c7765",
+    "rating": 2,
+    "review_time": "2026-05-27T07:44:37.726952Z"
+  },
+  {
+    "card_id": "aba5d2a9-6c26-4f5a-8f5b-f28507bfd7dc",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:38.946907Z"
+  },
+  {
+    "card_id": "2d1fe8de-5709-47b1-8bbe-ec30a706c260",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:39.830138Z"
+  },
+  {
+    "card_id": "e3a25fd7-5f91-4f16-b883-e435d13aa2ef",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:40.782864Z"
+  },
+  {
+    "card_id": "9f62bb92-c04c-4318-aa44-59cc68678d46",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:41.520547Z"
+  },
+  {
+    "card_id": "a1943c58-7a0f-407d-9c3e-8c8ecaec13aa",
+    "rating": 2,
+    "review_time": "2026-05-27T07:44:42.246036Z"
+  },
+  {
+    "card_id": "6d8010f9-7f17-43e4-83d0-b02eee44d81d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:43.218181Z"
+  },
+  {
+    "card_id": "bf8e38d6-af69-4038-a994-8796a77e07e8",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:44.183391Z"
+  },
+  {
+    "card_id": "b05f222e-9255-481f-9f29-28e229cd6378",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:45.067811Z"
+  },
+  {
+    "card_id": "804154f8-e84f-43a5-9218-35b40fc43b70",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:45.992396Z"
+  },
+  {
+    "card_id": "7f07c4fa-b0ec-4bdf-9e1a-ad94a4e41b56",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:47.185897Z"
+  },
+  {
+    "card_id": "060d8ca9-3838-468e-91cc-f8fafee2dc62",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:47.928783Z"
+  },
+  {
+    "card_id": "556af360-a0ab-4d7b-bf52-4d71c572a715",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:50.768908Z"
+  },
+  {
+    "card_id": "590c9914-c7c5-4682-a153-a29d8d90c96b",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:51.639178Z"
+  },
+  {
+    "card_id": "ba92e265-38ea-4b9a-9aec-07d7351af2d7",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:52.889407Z"
+  },
+  {
+    "card_id": "5b30ff4a-39c5-4d1d-879c-ea6ef16d0c2f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:53.672684Z"
+  },
+  {
+    "card_id": "2121fc3e-7bec-4ef3-96db-489b9483b280",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:54.597107Z"
+  },
+  {
+    "card_id": "e3162b5b-638e-44ee-a473-436cc810d821",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:55.610298Z"
+  },
+  {
+    "card_id": "eaf62f81-a000-4ef1-b703-7f552c478761",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:56.366969Z"
+  },
+  {
+    "card_id": "06cc2530-0d44-4485-9c73-5a7ba91b4c09",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:57.090136Z"
+  },
+  {
+    "card_id": "ec7b5c4c-8897-424b-9f31-419770443e2e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:44:57.96845Z"
+  },
+  {
+    "card_id": "2151d5a5-2b5c-44d9-a4fa-6972b602e1f8",
+    "rating": 2,
+    "review_time": "2026-05-27T07:44:58.988132Z"
+  },
+  {
+    "card_id": "ba9cf5c3-ed37-453e-ba2f-e2a5f8ac82e6",
+    "rating": 3,
+    "review_time": "2026-05-27T07:44:59.842816Z"
+  },
+  {
+    "card_id": "04f7d8b3-af27-4037-b94e-dcbfc4608271",
+    "rating": 2,
+    "review_time": "2026-05-27T07:45:00.559641Z"
+  },
+  {
+    "card_id": "d31c65a8-e8a9-4929-9ee0-84f92c53293d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:01.307654Z"
+  },
+  {
+    "card_id": "4fcf0073-475a-4346-83fb-2d33b23151a0",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:02.50456Z"
+  },
+  {
+    "card_id": "16e12a7b-0f17-4fb6-8ed4-cd83768458b1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:03.503099Z"
+  },
+  {
+    "card_id": "1e0dadd4-627f-479f-bb51-8e85bf27bdd4",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:04.273758Z"
+  },
+  {
+    "card_id": "50800faa-02e6-4126-8003-0a7a0ecb529d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:05.009282Z"
+  },
+  {
+    "card_id": "f0dc07ad-ea2b-4539-bcf0-e225814fbc26",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:05.753625Z"
+  },
+  {
+    "card_id": "127c6804-3ee7-49ad-8992-96f34128a9dc",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:06.48039Z"
+  },
+  {
+    "card_id": "9e5ca771-5763-46a8-93e7-0c6c66d8f19d",
+    "rating": 2,
+    "review_time": "2026-05-27T07:45:07.49745Z"
+  },
+  {
+    "card_id": "7f49b017-6edd-469d-848d-329b9f5d8382",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:10.286437Z"
+  },
+  {
+    "card_id": "4b468d84-d074-4d32-9ab1-00e3bbeb9321",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:11.030868Z"
+  },
+  {
+    "card_id": "cd161db6-d551-4341-97e2-33c8c24bf6c7",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:12.17235Z"
+  },
+  {
+    "card_id": "38f3e794-0546-4389-a529-3ea49a35e77c",
+    "rating": 2,
+    "review_time": "2026-05-27T07:45:12.937456Z"
+  },
+  {
+    "card_id": "6cc5e8c3-608b-4af2-a658-80ed25215fa2",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:14.352222Z"
+  },
+  {
+    "card_id": "e14c2e53-08ed-4c7f-9698-1f1dfdf184f7",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:15.49537Z"
+  },
+  {
+    "card_id": "94b2489a-89db-4db8-a4d5-e4946155cd64",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:16.708628Z"
+  },
+  {
+    "card_id": "58b8fef5-be5b-4eb6-8c61-ff76f4a68cef",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:17.455843Z"
+  },
+  {
+    "card_id": "b937d741-444b-4b9b-a628-fe73d4dad532",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:18.340158Z"
+  },
+  {
+    "card_id": "c2242161-ba1d-49d8-af1f-34e2017d62f1",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:19.119481Z"
+  },
+  {
+    "card_id": "a4b307d6-b217-4b39-ac39-f101e9828014",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:19.935067Z"
+  },
+  {
+    "card_id": "a9e3b240-c1f3-4cec-9e2f-3b604c699fde",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:20.710345Z"
+  },
+  {
+    "card_id": "694cf97e-8195-4eed-aa81-dd6f5dcf1bc1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:21.425017Z"
+  },
+  {
+    "card_id": "c546f376-28f2-446b-a6b3-a44a80e7a716",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:22.208101Z"
+  },
+  {
+    "card_id": "f499c050-7962-48aa-be0b-358086c22592",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:23.200916Z"
+  },
+  {
+    "card_id": "1a3b1d3b-cdc5-4668-a8d8-819cb8498611",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:24.108566Z"
+  },
+  {
+    "card_id": "ae7e5dad-7696-47ba-8455-d6c9745a3f14",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:24.859835Z"
+  },
+  {
+    "card_id": "56085832-deab-4f65-9342-5e2fb1582200",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:25.738802Z"
+  },
+  {
+    "card_id": "960a712d-617d-4191-9948-d397d97a4e19",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:26.471205Z"
+  },
+  {
+    "card_id": "22f1b10f-1a59-40c1-802e-4412ed373e24",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:27.234641Z"
+  },
+  {
+    "card_id": "abf758a2-edf5-443e-9e78-29505d817e1f",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:30.556712Z"
+  },
+  {
+    "card_id": "c7eaedbf-382a-4f9e-93a6-8fc60c7e2476",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:31.446618Z"
+  },
+  {
+    "card_id": "b17783c8-af40-45d1-9e5c-ad731d4f2fd7",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:32.384091Z"
+  },
+  {
+    "card_id": "83ecdf57-d9d1-400f-bcf4-3c82ef6f03af",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:33.15086Z"
+  },
+  {
+    "card_id": "7729ad9e-3972-4d3a-8f28-6bb988ae1071",
+    "rating": 2,
+    "review_time": "2026-05-27T07:45:34.209273Z"
+  },
+  {
+    "card_id": "7c7b6a8b-5c7c-4ea5-86e3-013c67968071",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:35.0649Z"
+  },
+  {
+    "card_id": "2d29fbff-ebc9-495d-9f02-9216a01a5a34",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:35.812421Z"
+  },
+  {
+    "card_id": "2c11d7bb-e8f7-4771-924b-d9a39628662a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:36.548665Z"
+  },
+  {
+    "card_id": "ed22967c-ce4d-4b0b-8cf0-daa506515372",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:37.375574Z"
+  },
+  {
+    "card_id": "325690c2-c65b-4f66-b296-feaa9fe636f1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:38.183752Z"
+  },
+  {
+    "card_id": "cb7eef41-bfca-45fa-80e7-387a1e337034",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:39.109883Z"
+  },
+  {
+    "card_id": "408abefb-ff60-473a-bb9c-34697cdc4be8",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:39.814005Z"
+  },
+  {
+    "card_id": "b489d324-2664-4822-9681-82f2174ce7ac",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:40.52937Z"
+  },
+  {
+    "card_id": "5a25d942-9511-4f2e-8162-a62edf87b039",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:41.234235Z"
+  },
+  {
+    "card_id": "31196b67-b745-45c6-95ca-8f4e7771a6df",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:42.042303Z"
+  },
+  {
+    "card_id": "11ee1349-c4cf-4b5a-ac0d-66da6d6ae675",
+    "rating": 2,
+    "review_time": "2026-05-27T07:45:42.792574Z"
+  },
+  {
+    "card_id": "ccc0804c-880d-46de-a35e-3c21810f338c",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:43.534453Z"
+  },
+  {
+    "card_id": "65e99da7-4514-45db-86cf-ce09eeb45a26",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:44.36763Z"
+  },
+  {
+    "card_id": "4cd836ce-eb7f-4adc-a5ea-409de223e245",
+    "rating": 2,
+    "review_time": "2026-05-27T07:45:45.19349Z"
+  },
+  {
+    "card_id": "19b12aca-7bde-4068-ac61-d2e41c1f1375",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:46.225337Z"
+  },
+  {
+    "card_id": "6ba64872-2a21-4069-a915-c767b7031a18",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:49.505789Z"
+  },
+  {
+    "card_id": "ee51a871-1bc8-4fe6-9259-8d973b186981",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:50.563818Z"
+  },
+  {
+    "card_id": "d6981baa-2b69-4bba-a5ee-0bba1db2c9ff",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:51.303235Z"
+  },
+  {
+    "card_id": "a328d474-ae73-4b43-b11b-332852884bdc",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:52.090237Z"
+  },
+  {
+    "card_id": "61466795-756a-4895-877b-0471c4fb8a15",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:52.94786Z"
+  },
+  {
+    "card_id": "581506e0-38a1-46df-8efd-6d959082cba4",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:53.782891Z"
+  },
+  {
+    "card_id": "9daf40b5-4de8-44e6-b837-6c380c5d6836",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:54.61402Z"
+  },
+  {
+    "card_id": "2b9ff9ee-4803-43f7-8908-14e6505ee826",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:55.40348Z"
+  },
+  {
+    "card_id": "c47d3821-6404-4241-88c4-d8d567e22f04",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:56.393059Z"
+  },
+  {
+    "card_id": "3e036f06-a987-424f-81c2-6892ec9f4166",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:57.373112Z"
+  },
+  {
+    "card_id": "180397e8-46c4-409a-882e-7537a9d59af9",
+    "rating": 4,
+    "review_time": "2026-05-27T07:45:58.174575Z"
+  },
+  {
+    "card_id": "a3cdbd49-23d0-411f-b57f-9a60fffbfe56",
+    "rating": 3,
+    "review_time": "2026-05-27T07:45:59.100681Z"
+  },
+  {
+    "card_id": "1907ca4c-4f53-470a-802e-a8e7130d8790",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:00.12468Z"
+  },
+  {
+    "card_id": "c9bb2176-b890-4fbe-92c5-426eead0842d",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:01.297532Z"
+  },
+  {
+    "card_id": "df647f75-35ea-49aa-a838-45dd6964cc1e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:02.162119Z"
+  },
+  {
+    "card_id": "2d70cb35-e262-4623-a2ad-58e0af1178ee",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:02.930557Z"
+  },
+  {
+    "card_id": "a0c0794e-27a5-41ef-bb36-66ea4c8844e4",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:03.852976Z"
+  },
+  {
+    "card_id": "67596fcc-19f3-468b-a499-104a4dee1b08",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:04.576936Z"
+  },
+  {
+    "card_id": "6c34f9b2-d61a-44f4-b61c-f85b4e44dce1",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:05.28293Z"
+  },
+  {
+    "card_id": "79421317-59d3-4ace-a59f-1d08a4aca39a",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:06.001786Z"
+  },
+  {
+    "card_id": "450e57fc-7ded-437b-acaf-b0b5e3a22450",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:08.580434Z"
+  },
+  {
+    "card_id": "a3ecec47-0267-4107-90d6-9124786b712a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:09.574491Z"
+  },
+  {
+    "card_id": "3f15dc3b-1a43-4454-a74d-cde4e7b4ea0e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:10.318464Z"
+  },
+  {
+    "card_id": "a62cc7ca-0cbf-4e51-b007-f97dc96737d1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:11.233735Z"
+  },
+  {
+    "card_id": "e4fcf8c0-f5ee-4f4f-b45c-4752e135acc5",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:12.324957Z"
+  },
+  {
+    "card_id": "3ad27b38-5f04-4005-ba80-0a3d84cb8566",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:13.236814Z"
+  },
+  {
+    "card_id": "be35f67e-bff4-4c53-bbaa-fac0a685da98",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:14.16022Z"
+  },
+  {
+    "card_id": "08a50c2a-567a-401d-aa06-bb757514e126",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:14.865182Z"
+  },
+  {
+    "card_id": "891f38d2-e24d-4dfe-b8d7-c23700a75828",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:15.650218Z"
+  },
+  {
+    "card_id": "f7e621be-47ff-4745-bae1-5cafa40a010a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:19.278617Z"
+  },
+  {
+    "card_id": "52d97b08-086e-4ac2-a7c5-4d11c5888a49",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:20.107496Z"
+  },
+  {
+    "card_id": "e5a17239-b7b0-4585-ab6c-f482e7a5bf82",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:20.954558Z"
+  },
+  {
+    "card_id": "5bdc861f-d67e-4606-bbbe-11f29c9a1795",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:21.808002Z"
+  },
+  {
+    "card_id": "4ca5d899-2b13-42dc-8592-b66a94d592b3",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:22.902246Z"
+  },
+  {
+    "card_id": "b6e29c83-9c1a-4eaf-b7e0-435135f406f8",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:23.65743Z"
+  },
+  {
+    "card_id": "be718937-3430-49a2-a06d-ba3817360dce",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:24.564957Z"
+  },
+  {
+    "card_id": "59ef585c-4d52-4dff-a41b-cb2a1c0cc7db",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:25.302865Z"
+  },
+  {
+    "card_id": "e3b9e879-5bf0-4647-8754-7d7403564406",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:26.163535Z"
+  },
+  {
+    "card_id": "64f6fcf3-28a5-4982-9c75-78b99a24c7bd",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:26.981815Z"
+  },
+  {
+    "card_id": "590a0d11-ce7d-4dcd-9388-90ad81117a79",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:29.442057Z"
+  },
+  {
+    "card_id": "6e8d24ec-f47a-47de-85bb-23fbb5c9a990",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:30.655548Z"
+  },
+  {
+    "card_id": "588c13a1-58e0-420f-a64c-3fc61a410082",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:31.684581Z"
+  },
+  {
+    "card_id": "0f5ce7bb-62ea-4fec-b8c4-af204f603b00",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:32.720534Z"
+  },
+  {
+    "card_id": "b3b337a1-a677-4e74-b7c0-789448e6e497",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:33.903024Z"
+  },
+  {
+    "card_id": "d9334050-fa2d-4cf6-a100-c843df729969",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:34.733343Z"
+  },
+  {
+    "card_id": "93abc57d-d112-485e-8375-9ed3fad86aab",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:35.421703Z"
+  },
+  {
+    "card_id": "7c0324cc-61bd-44fa-8569-8cf3dd49c4e9",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:36.222269Z"
+  },
+  {
+    "card_id": "30ea036b-2fe3-47f5-ae71-5b7df4bb0dc1",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:39.113622Z"
+  },
+  {
+    "card_id": "ce0bd192-2489-4bdb-adb8-024e0a25353b",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:40.010376Z"
+  },
+  {
+    "card_id": "68966754-2418-4396-8fe8-cc2fd80c279e",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:40.728286Z"
+  },
+  {
+    "card_id": "8653c83f-3e99-4274-b6c5-f15eaeaf7ec7",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:41.693112Z"
+  },
+  {
+    "card_id": "881274f6-a3ae-488e-8c8d-ad07a45ee4a2",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:42.735427Z"
+  },
+  {
+    "card_id": "abd6fd98-6771-4716-b8f1-9a86e32fde97",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:43.624832Z"
+  },
+  {
+    "card_id": "9c58ff31-56ae-4007-bf2d-2add064a7149",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:44.564542Z"
+  },
+  {
+    "card_id": "763d4abc-c4f2-4ed4-aaed-08a20fe9440e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:45.471676Z"
+  },
+  {
+    "card_id": "67dd7016-f46e-41c3-b140-a25fe952c295",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:46.288926Z"
+  },
+  {
+    "card_id": "de40850f-1f83-484a-adf6-7313a15f4be3",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:47.112578Z"
+  },
+  {
+    "card_id": "bfc6562e-fcbe-4503-917e-f346e14950b7",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:47.972484Z"
+  },
+  {
+    "card_id": "207b8c95-4cc7-4d63-9053-4dfdaf36b726",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:48.855089Z"
+  },
+  {
+    "card_id": "acef9e54-43dc-4b93-ad90-a30736d21ec8",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:51.46186Z"
+  },
+  {
+    "card_id": "2da7dcd2-999f-423f-95a4-d0713f330650",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:52.22964Z"
+  },
+  {
+    "card_id": "d41ccd7d-3b94-4c62-ae1a-20c694c24dde",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:53.247033Z"
+  },
+  {
+    "card_id": "6ce8d358-d329-4975-981f-ebc39bc5e5a0",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:54.092458Z"
+  },
+  {
+    "card_id": "c889a6a2-d394-4fa6-acb7-402c6e293f35",
+    "rating": 2,
+    "review_time": "2026-05-27T07:46:55.141584Z"
+  },
+  {
+    "card_id": "0fd28c16-f7a1-4141-9368-b70cdd93086e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:55.917636Z"
+  },
+  {
+    "card_id": "a3e4373e-328a-4d32-8739-68b8661dada9",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:56.843896Z"
+  },
+  {
+    "card_id": "23a99975-cf3b-4d2a-8e3d-9c0e6d3fed9d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:57.765611Z"
+  },
+  {
+    "card_id": "41f1c28e-8870-422d-ae75-ad8b8d9d830c",
+    "rating": 3,
+    "review_time": "2026-05-27T07:46:58.491883Z"
+  },
+  {
+    "card_id": "2ca7bc39-b340-4886-b87a-f99d95105b64",
+    "rating": 4,
+    "review_time": "2026-05-27T07:46:59.338175Z"
+  },
+  {
+    "card_id": "7e644351-1a44-4819-beeb-f5e39203337f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:00.250903Z"
+  },
+  {
+    "card_id": "de95d0d5-ea24-49a6-bafb-c81649316d67",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:01.115787Z"
+  },
+  {
+    "card_id": "755679da-d8b8-49b0-a39f-ee1b05aa0890",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:02.085835Z"
+  },
+  {
+    "card_id": "a5c83f59-dfdb-45b9-86e9-b9ec5a9eb83e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:04.837035Z"
+  },
+  {
+    "card_id": "418a9bd3-393d-49eb-a5d7-d4d8e2df2cb4",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:05.658665Z"
+  },
+  {
+    "card_id": "c364cb43-2540-45b2-b453-9d4e7a2c5940",
+    "rating": 2,
+    "review_time": "2026-05-27T07:47:06.509385Z"
+  },
+  {
+    "card_id": "501bfd6b-850b-42b8-a8e7-ff96272dc766",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:07.218615Z"
+  },
+  {
+    "card_id": "101f1be2-5eab-4ab2-b903-97219c157992",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:07.921688Z"
+  },
+  {
+    "card_id": "4bc40447-c7d8-4234-bcc3-f650b9f1da38",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:08.773492Z"
+  },
+  {
+    "card_id": "ce83d4d9-36ca-4506-b8c2-ed6699b301ca",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:09.748235Z"
+  },
+  {
+    "card_id": "1cadc385-dc7d-4af0-b868-6ee19dee331d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:10.683683Z"
+  },
+  {
+    "card_id": "6b268ecc-4f4b-4df9-930d-0f87e06793be",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:13.201972Z"
+  },
+  {
+    "card_id": "e413b34a-1091-40dc-b239-85ee0847dc08",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:13.987481Z"
+  },
+  {
+    "card_id": "189745e7-dcb4-4ee0-a5ec-8b938289a20e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:14.784974Z"
+  },
+  {
+    "card_id": "ce5d3a45-1778-472b-916d-5404fbefe952",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:15.490469Z"
+  },
+  {
+    "card_id": "87688460-fab0-4987-b520-23cc906a9449",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:16.592244Z"
+  },
+  {
+    "card_id": "b9a7ec32-ea97-4fb6-a4d9-09c2b2fdc478",
+    "rating": 2,
+    "review_time": "2026-05-27T07:47:17.52659Z"
+  },
+  {
+    "card_id": "333d003a-7d71-4e00-b57c-d14850112085",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:18.276426Z"
+  },
+  {
+    "card_id": "86a8b06c-0bac-4888-bed3-d2f114698dd8",
+    "rating": 2,
+    "review_time": "2026-05-27T07:47:19.105397Z"
+  },
+  {
+    "card_id": "56edcbc0-8226-4dd8-8e16-5d3fe153523c",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:19.837627Z"
+  },
+  {
+    "card_id": "e571251d-f122-4ac3-9929-6e9e13c745d2",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:20.792965Z"
+  },
+  {
+    "card_id": "eb778cb3-235a-4718-8d46-cbf0465a4bba",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:23.284716Z"
+  },
+  {
+    "card_id": "ce2ca1d5-af38-4630-981b-4e6b5c95f481",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:24.218596Z"
+  },
+  {
+    "card_id": "e626bffd-f250-41c9-843c-1c61f343886f",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:25.022467Z"
+  },
+  {
+    "card_id": "1a1f2d41-35d8-4016-a048-7dd84bf34d6a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:25.727142Z"
+  },
+  {
+    "card_id": "cecf2a83-5a26-4a94-80a5-7ed9eef6149f",
+    "rating": 2,
+    "review_time": "2026-05-27T07:47:26.425688Z"
+  },
+  {
+    "card_id": "63a9455d-0a69-46f3-ad21-8980cae4eb24",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:27.369788Z"
+  },
+  {
+    "card_id": "c7d0fb8e-2542-46c5-890c-00a34f88da28",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:28.440824Z"
+  },
+  {
+    "card_id": "506850e1-6e6d-422a-a1b8-261ef8e0adcb",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:29.175548Z"
+  },
+  {
+    "card_id": "96ba8ca2-9555-4f82-93f4-e97dd4242443",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:30.033469Z"
+  },
+  {
+    "card_id": "769682ad-1847-4c59-a1ec-7476bc729f47",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:33.20107Z"
+  },
+  {
+    "card_id": "002a37f6-bc9c-4cb1-beed-701ea105239d",
+    "rating": 2,
+    "review_time": "2026-05-27T07:47:33.957562Z"
+  },
+  {
+    "card_id": "904babd0-df5b-429e-9421-32a6e591e235",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:35.038309Z"
+  },
+  {
+    "card_id": "bf638d2d-450a-4425-9d83-608518208238",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:36.047431Z"
+  },
+  {
+    "card_id": "b5b97d94-2544-4632-b979-e40cf8b5f3fd",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:36.894643Z"
+  },
+  {
+    "card_id": "be57a91f-e146-49ec-b16f-32020c73ba72",
+    "rating": 2,
+    "review_time": "2026-05-27T07:47:37.679737Z"
+  },
+  {
+    "card_id": "27409697-e1c6-41c1-8a58-5e8308f6c930",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:38.680444Z"
+  },
+  {
+    "card_id": "9e3f6515-fbbe-44bb-9e1b-ce2876c0270b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:39.595527Z"
+  },
+  {
+    "card_id": "64eb6e12-dadf-4f3c-b73e-19ad77773bca",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:40.487736Z"
+  },
+  {
+    "card_id": "02d9ef9c-90a2-4050-bd70-5d8c7d4eeda2",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:43.163107Z"
+  },
+  {
+    "card_id": "9f159556-ef1e-4297-ae74-310722fdc13b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:43.872134Z"
+  },
+  {
+    "card_id": "dd8060d8-80da-4b06-8fd3-d93b17d5face",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:44.617865Z"
+  },
+  {
+    "card_id": "ae81cf64-fd27-419e-9fcb-b2fac6e2c3f1",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:45.445125Z"
+  },
+  {
+    "card_id": "80c217f5-d8cc-4d3b-b282-d8f954fcba61",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:46.30813Z"
+  },
+  {
+    "card_id": "b290d2e3-6bef-4af2-9f48-1f7ab8f984d9",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:47.219412Z"
+  },
+  {
+    "card_id": "f8d10fc1-1e93-468a-bd45-09c9c7050c67",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:47.947621Z"
+  },
+  {
+    "card_id": "55e4e2bf-3920-4091-9418-b8a497d3f7ff",
+    "rating": 2,
+    "review_time": "2026-05-27T07:47:48.651568Z"
+  },
+  {
+    "card_id": "71909de7-e78e-400b-a119-d20561896011",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:49.38374Z"
+  },
+  {
+    "card_id": "1d4bcb02-5dbb-4533-a404-c509c565874a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:50.114372Z"
+  },
+  {
+    "card_id": "338123e1-ab85-4aba-82a1-1105d9a7d662",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:53.35635Z"
+  },
+  {
+    "card_id": "574c4558-923a-45c8-885f-7f1334e620cc",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:54.480754Z"
+  },
+  {
+    "card_id": "497c65d0-f580-411d-90b1-8be2f5d6c4c8",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:55.269413Z"
+  },
+  {
+    "card_id": "30728d0d-c13f-44ff-a52e-e959b65aea63",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:56.119686Z"
+  },
+  {
+    "card_id": "94d664f3-1461-4b34-9639-e066983f4742",
+    "rating": 2,
+    "review_time": "2026-05-27T07:47:57.083916Z"
+  },
+  {
+    "card_id": "e3439b40-8eeb-45c0-98bf-925ff2019014",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:57.85326Z"
+  },
+  {
+    "card_id": "4f20de9f-c73c-4a58-a781-14cc43c6b3c6",
+    "rating": 4,
+    "review_time": "2026-05-27T07:47:59.023041Z"
+  },
+  {
+    "card_id": "e2dd2c72-3524-4337-8ea5-f3f25b937e71",
+    "rating": 3,
+    "review_time": "2026-05-27T07:47:59.787471Z"
+  },
+  {
+    "card_id": "169f0776-c113-4135-9457-6a8f271496ce",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:00.561876Z"
+  },
+  {
+    "card_id": "0f81f911-d852-4816-a7b4-b8eacd5c2a7a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:01.372072Z"
+  },
+  {
+    "card_id": "4529bd5f-691d-411f-9c79-13b4cf20d431",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:04.454998Z"
+  },
+  {
+    "card_id": "cef10f45-9c37-4c3c-b816-adabb05d883c",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:05.211493Z"
+  },
+  {
+    "card_id": "64b05deb-2f45-4182-9557-6588369a9973",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:05.947051Z"
+  },
+  {
+    "card_id": "839c04fd-7851-48a9-84ce-a575e92464a8",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:07.184813Z"
+  },
+  {
+    "card_id": "d46d9c68-4f65-4af2-966d-b6d8c164ca98",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:07.874698Z"
+  },
+  {
+    "card_id": "4783b4b2-b40a-4da0-95f8-aa0c0cda31b7",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:10.825726Z"
+  },
+  {
+    "card_id": "6fe5d28e-aac4-4cb2-b11c-f97644a37011",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:11.852011Z"
+  },
+  {
+    "card_id": "3fdef4bc-96ed-4960-a96e-97fbf904557e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:12.585439Z"
+  },
+  {
+    "card_id": "05ccdda5-5f72-48a7-8104-053694336c86",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:13.671975Z"
+  },
+  {
+    "card_id": "5ed38721-8fba-4cf2-a1af-e994b0cdcd49",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:14.394413Z"
+  },
+  {
+    "card_id": "f52514a0-ad1b-49c1-a118-5449921e4f6e",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:15.182709Z"
+  },
+  {
+    "card_id": "81da2ffe-850b-4428-a344-0094d4fd5193",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:15.898197Z"
+  },
+  {
+    "card_id": "54821b3b-32f2-4385-9138-52d7c47af03d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:16.7094Z"
+  },
+  {
+    "card_id": "9192a07e-a36b-43d7-ac9c-9a3ee64680f6",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:17.683625Z"
+  },
+  {
+    "card_id": "7d9d46a0-44ce-42fd-9fa6-ae3a29771316",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:20.201555Z"
+  },
+  {
+    "card_id": "aa4b3a07-5437-4049-bc3f-6a23b3a77ccd",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:21.064424Z"
+  },
+  {
+    "card_id": "a398b3b9-7fe0-48f7-8956-ec387a75c139",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:21.958667Z"
+  },
+  {
+    "card_id": "f2f7bc5b-376e-4592-b1bd-108d94376063",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:22.981835Z"
+  },
+  {
+    "card_id": "1a08684f-8e26-4a93-8d81-2dc08cba6942",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:23.710871Z"
+  },
+  {
+    "card_id": "d10462f5-f983-4a59-b4b9-b40a58a8b385",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:24.559468Z"
+  },
+  {
+    "card_id": "c9623999-3f7b-440a-9525-047c35f0fe0b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:25.635611Z"
+  },
+  {
+    "card_id": "6719bc11-bebf-45ef-a344-e00ecd9defe7",
+    "rating": 2,
+    "review_time": "2026-05-27T07:48:26.400607Z"
+  },
+  {
+    "card_id": "12db754f-0cef-441a-bffe-24cafb689c9a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:29.310454Z"
+  },
+  {
+    "card_id": "fe7ef721-d19d-431f-a47a-cb00165c8a06",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:30.290147Z"
+  },
+  {
+    "card_id": "3e7d88a0-60ca-4073-96cc-c2d72f1d1452",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:31.209573Z"
+  },
+  {
+    "card_id": "4bf2650d-b77b-454f-8780-420ce23087f3",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:32.096455Z"
+  },
+  {
+    "card_id": "65af8ef6-0fb9-4dec-bc7d-fce0ade4ef22",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:33.023949Z"
+  },
+  {
+    "card_id": "098b9138-20e7-42d5-8552-260832dd264e",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:33.876575Z"
+  },
+  {
+    "card_id": "657efcee-8e8a-42c3-afca-831a671eac73",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:34.660797Z"
+  },
+  {
+    "card_id": "eda7342e-21e1-4582-b384-5fac897c7a68",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:35.424621Z"
+  },
+  {
+    "card_id": "bee4c36f-b915-4db6-9acf-d20174e3a52d",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:36.390512Z"
+  },
+  {
+    "card_id": "9ebbcb56-5f54-4305-9c64-a9f7d6dd6bfd",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:37.115913Z"
+  },
+  {
+    "card_id": "65f5347f-6d36-40c8-a563-181af7541966",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:38.227249Z"
+  },
+  {
+    "card_id": "d3ca99c9-c6df-45bc-a848-512e6e0b4f01",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:41.277859Z"
+  },
+  {
+    "card_id": "0dec2b1f-183d-4b22-a455-5866f6c524dc",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:42.02249Z"
+  },
+  {
+    "card_id": "d2c0d771-b046-4c67-8402-eb6eb2bf1f4c",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:42.862684Z"
+  },
+  {
+    "card_id": "8b487ca4-cebc-4c8a-a82b-0e59115c193a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:43.728798Z"
+  },
+  {
+    "card_id": "a2b7c404-4f3f-4736-822f-d76e1339d950",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:44.459835Z"
+  },
+  {
+    "card_id": "657ab441-e33b-46de-a717-54a407d2d2cf",
+    "rating": 2,
+    "review_time": "2026-05-27T07:48:45.30148Z"
+  },
+  {
+    "card_id": "93f37f6c-2cc8-46c0-a519-cae3196cdd23",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:46.182943Z"
+  },
+  {
+    "card_id": "d9acdf1a-750a-4128-b323-98950bff1e60",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:47.200936Z"
+  },
+  {
+    "card_id": "08a64170-3bfd-4928-ae1d-4b81785e4299",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:48.400215Z"
+  },
+  {
+    "card_id": "1990f124-e84d-4ff5-b584-d8a8e6f103b4",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:51.171923Z"
+  },
+  {
+    "card_id": "cfaadc62-e0fa-4a28-9cfc-2cb39deb69d6",
+    "rating": 2,
+    "review_time": "2026-05-27T07:48:52.086245Z"
+  },
+  {
+    "card_id": "d8eb3908-367c-4847-af67-6a09c9319fc2",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:52.960866Z"
+  },
+  {
+    "card_id": "d9fe4252-fdee-4f3b-90bd-8872d8a59a9a",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:53.899542Z"
+  },
+  {
+    "card_id": "cbb7db93-7023-425a-aee0-40642fc3f763",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:54.610743Z"
+  },
+  {
+    "card_id": "90a5b60a-28a5-4a4b-bebe-d4aaa8b6cd58",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:55.44268Z"
+  },
+  {
+    "card_id": "3f135363-44f9-449c-b44f-9851e11d5485",
+    "rating": 2,
+    "review_time": "2026-05-27T07:48:56.600372Z"
+  },
+  {
+    "card_id": "7fad5a8c-374e-488e-a105-2654f3dfac0c",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:57.408627Z"
+  },
+  {
+    "card_id": "462f4fe4-72c8-4540-965f-cfd8a4e489de",
+    "rating": 4,
+    "review_time": "2026-05-27T07:48:58.657728Z"
+  },
+  {
+    "card_id": "e1e095f7-94ed-4aa2-8fef-49bb2362789d",
+    "rating": 3,
+    "review_time": "2026-05-27T07:48:59.460798Z"
+  },
+  {
+    "card_id": "089a7ad2-bb0e-41b4-8bce-89e369e49e81",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:02.643302Z"
+  },
+  {
+    "card_id": "3771c7f5-c355-4f64-a02d-edd740207187",
+    "rating": 2,
+    "review_time": "2026-05-27T07:49:03.735463Z"
+  },
+  {
+    "card_id": "7a38a37d-934e-48e7-bbb9-eda0f14808f2",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:04.552111Z"
+  },
+  {
+    "card_id": "701b658c-c697-43c8-b94a-a94d8a1669ae",
+    "rating": 2,
+    "review_time": "2026-05-27T07:49:05.586419Z"
+  },
+  {
+    "card_id": "434f8303-3450-4949-b818-cfb497a071e8",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:06.298293Z"
+  },
+  {
+    "card_id": "ed47f638-2bc3-45f0-aabd-8544a9573b52",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:07.124801Z"
+  },
+  {
+    "card_id": "25afb109-1729-4bfe-8a69-a8c60254c25f",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:08.042062Z"
+  },
+  {
+    "card_id": "d3bf9f96-36b2-489b-b9b1-59e1e49efd08",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:08.850543Z"
+  },
+  {
+    "card_id": "635b61cc-a2c0-4d62-ad4b-d50ddcee8aa2",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:09.5954Z"
+  },
+  {
+    "card_id": "6283eab4-7776-4acb-9f91-bb10f33cc151",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:10.470462Z"
+  },
+  {
+    "card_id": "d61fc2ce-690b-44a2-9c75-36543c91b542",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:13.269247Z"
+  },
+  {
+    "card_id": "87834c18-5b66-4203-99ee-0b6e6d051741",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:14.593075Z"
+  },
+  {
+    "card_id": "3f549af0-e0bc-4dbb-9175-4307f79e2a7d",
+    "rating": 2,
+    "review_time": "2026-05-27T07:49:15.760507Z"
+  },
+  {
+    "card_id": "58dcf922-ef79-4e6d-bfd9-c9d46ee2cb4b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:16.635308Z"
+  },
+  {
+    "card_id": "faca20d7-2e6d-4d94-928b-2ae9d441f80b",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:17.703638Z"
+  },
+  {
+    "card_id": "89ee6821-6dff-46ab-ad77-37dd5863c66c",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:18.45578Z"
+  },
+  {
+    "card_id": "0349cffe-1ed8-48b5-8ebc-7df7c1f5d0ae",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:19.180703Z"
+  },
+  {
+    "card_id": "423e4826-af3d-4800-9fb2-240432137d65",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:19.993598Z"
+  },
+  {
+    "card_id": "0e970a71-00b5-4ebc-9d37-23aae7b3dac2",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:21.169136Z"
+  },
+  {
+    "card_id": "724846b8-237e-4103-ac68-d68b031d0e26",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:23.833961Z"
+  },
+  {
+    "card_id": "4a55252a-bc89-49f7-ad92-00033256eaa8",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:24.64664Z"
+  },
+  {
+    "card_id": "7551cd67-8589-49e5-b90c-1edf05260bac",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:25.543002Z"
+  },
+  {
+    "card_id": "7e6201e0-655d-44cc-bd04-11640fac3861",
+    "rating": 2,
+    "review_time": "2026-05-27T07:49:26.455055Z"
+  },
+  {
+    "card_id": "286994fd-54a7-4ab6-931d-4acdea488169",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:27.395294Z"
+  },
+  {
+    "card_id": "1910aa7c-bf51-46f9-9e66-973d23321ba8",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:28.313454Z"
+  },
+  {
+    "card_id": "c687bd8a-ac17-47ce-888c-4abe0da7b291",
+    "rating": 2,
+    "review_time": "2026-05-27T07:49:29.052905Z"
+  },
+  {
+    "card_id": "267fdc5e-4e7e-4e9f-9036-dacc3d7fd434",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:29.746819Z"
+  },
+  {
+    "card_id": "c33e6c14-40e3-495b-b9ef-4d74199a116a",
+    "rating": 4,
+    "review_time": "2026-05-27T07:49:30.757973Z"
+  },
+  {
+    "card_id": "a160c7d2-f0c4-4dee-ba3a-59c0af895904",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:31.663125Z"
+  },
+  {
+    "card_id": "76c02e20-e237-4c4f-a600-44a26946e0a6",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:34.452196Z"
+  },
+  {
+    "card_id": "5ca3bd55-47fa-4288-8724-ce2efacb3f73",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:35.342247Z"
+  },
+  {
+    "card_id": "934f215b-03df-4e4c-811c-c6a017493956",
+    "rating": 3,
+    "review_time": "2026-05-27T07:49:36.270869Z"
+  },
+  {
+    "card_id": "c1c55d34-34ee-486e-be9b-0705820e1de3",
+    "rating": 2,
+    "review_time": "2026-05-27T07:49:37.051546Z"
+  },
+  {
+    "card_id": "7e6201e0-655d-44cc-bd04-11640fac3861",
+    "rating": 2,
+    "review_time": "2026-05-27T10:02:35.422617Z"
+  },
+  {
+    "card_id": "7ca2d3a3-c6eb-4865-bfec-425166c104b3",
+    "rating": 1,
+    "review_time": "2026-05-27T14:54:21.182231Z"
+  },
+  {
+    "card_id": "42acfe55-4aff-4175-9a83-4a4e29110d9d",
+    "rating": 1,
+    "review_time": "2026-05-27T14:54:36.421964Z"
+  },
+  {
+    "card_id": "ee7950fc-fa99-4e86-9ae7-c9c59ddc391b",
+    "rating": 1,
+    "review_time": "2026-05-27T15:12:38.701963Z"
+  },
+  {
+    "card_id": "7ca2d3a3-c6eb-4865-bfec-425166c104b3",
+    "rating": 4,
+    "review_time": "2026-05-27T15:12:42.196439Z"
+  },
+  {
+    "card_id": "42acfe55-4aff-4175-9a83-4a4e29110d9d",
+    "rating": 4,
+    "review_time": "2026-05-27T15:12:45.091117Z"
+  },
+  {
+    "card_id": "53c1e8d1-c17e-445e-b5b9-c4e5f2bfc9bb",
+    "rating": 3,
+    "review_time": "2026-05-27T17:12:03.65464Z"
+  },
+  {
+    "card_id": "c687bd8a-ac17-47ce-888c-4abe0da7b291",
+    "rating": 2,
+    "review_time": "2026-05-27T17:13:28.361024Z"
+  },
+  {
+    "card_id": "ee7950fc-fa99-4e86-9ae7-c9c59ddc391b",
+    "rating": 3,
+    "review_time": "2026-05-28T01:31:51.314556Z"
+  },
+  {
+    "card_id": "118e7c17-9392-4eff-abaf-2a18c2875438",
+    "rating": 4,
+    "review_time": "2026-06-01T14:23:38.219555Z"
+  },
+  {
+    "card_id": "ee7950fc-fa99-4e86-9ae7-c9c59ddc391b",
+    "rating": 2,
+    "review_time": "2026-06-01T14:28:04.370225Z"
+  },
+  {
+    "card_id": "7ca2d3a3-c6eb-4865-bfec-425166c104b3",
+    "rating": 1,
+    "review_time": "2026-06-01T14:28:09.498065Z"
+  },
+  {
+    "card_id": "42acfe55-4aff-4175-9a83-4a4e29110d9d",
+    "rating": 4,
+    "review_time": "2026-06-01T14:28:13.385761Z"
+  },
+  {
+    "card_id": "4529bd5f-691d-411f-9c79-13b4cf20d431",
+    "rating": 2,
+    "review_time": "2026-06-01T14:29:09.242975Z"
+  },
+  {
+    "card_id": "cef10f45-9c37-4c3c-b816-adabb05d883c",
+    "rating": 4,
+    "review_time": "2026-06-01T14:29:10.661519Z"
+  },
+  {
+    "card_id": "64b05deb-2f45-4182-9557-6588369a9973",
+    "rating": 1,
+    "review_time": "2026-06-01T14:29:12.207793Z"
+  },
+  {
+    "card_id": "839c04fd-7851-48a9-84ce-a575e92464a8",
+    "rating": 1,
+    "review_time": "2026-06-01T14:29:15.924347Z"
+  },
+  {
+    "card_id": "d46d9c68-4f65-4af2-966d-b6d8c164ca98",
+    "rating": 1,
+    "review_time": "2026-06-01T14:29:21.579654Z"
+  },
+  {
+    "card_id": "e5fb2e50-9fc5-462a-bf1f-68c54a7979f0",
+    "rating": 2,
+    "review_time": "2026-06-04T15:48:26.639374Z"
+  },
+  {
+    "card_id": "267f86ca-be47-4d4e-899d-d60aecf6f9b7",
+    "rating": 2,
+    "review_time": "2026-06-04T15:48:37.099262Z"
+  },
+  {
+    "card_id": "eb1dc684-83ee-4a55-a9d0-173e923f82ce",
+    "rating": 4,
+    "review_time": "2026-06-04T15:48:40.122716Z"
+  },
+  {
+    "card_id": "53c1e8d1-c17e-445e-b5b9-c4e5f2bfc9bb",
+    "rating": 3,
+    "review_time": "2026-06-06T03:11:19.501368Z"
+  },
+  {
+    "card_id": "fa2be08d-2c11-4fe5-b592-2cc1ed090d7c",
+    "rating": 1,
+    "review_time": "2026-06-06T06:26:41.419248Z"
+  },
+  {
+    "card_id": "6bf6c762-2894-4788-b4ac-dc40987e4e08",
+    "rating": 1,
+    "review_time": "2026-06-06T07:22:42.029787Z"
+  },
+  {
+    "card_id": "9a547ab0-953b-49f5-a41e-c7b1f390a132",
+    "rating": 1,
+    "review_time": "2026-06-06T07:24:30.638982Z"
+  },
+  {
+    "card_id": "732a4816-c086-4e02-9700-08e9964c2d18",
+    "rating": 1,
+    "review_time": "2026-06-06T07:24:34.137373Z"
+  },
+  {
+    "card_id": "e641c9f1-c644-452d-b7e6-3698c148e467",
+    "rating": 1,
+    "review_time": "2026-06-06T07:24:37.672753Z"
+  },
+  {
+    "card_id": "05bfd4e1-a1b3-4a57-a687-a472201de82a",
+    "rating": 1,
+    "review_time": "2026-06-06T07:29:02.475046Z"
+  },
+  {
+    "card_id": "0af88142-337b-4f53-acc6-f9a692f0d096",
+    "rating": 1,
+    "review_time": "2026-06-06T07:30:10.554054Z"
+  },
+  {
+    "card_id": "0ce7f4bd-84dc-46ae-8670-9deef40086a7",
+    "rating": 1,
+    "review_time": "2026-06-06T07:32:59.160286Z"
+  },
+  {
+    "card_id": "416a4c1e-51a7-49b1-a0d3-dfe232c3e0db",
+    "rating": 1,
+    "review_time": "2026-06-06T07:33:06.312016Z"
+  },
+  {
+    "card_id": "b388ea42-d30b-4eac-96e5-cd721db8530e",
+    "rating": 1,
+    "review_time": "2026-06-06T07:33:10.921114Z"
+  },
+  {
+    "card_id": "840b8091-f9d3-4e73-b98d-6df1c2c4e6f7",
+    "rating": 4,
+    "review_time": "2026-06-06T07:33:16.273383Z"
+  },
+  {
+    "card_id": "9a6ef84e-3b85-42ff-99ba-81597d18d0d0",
+    "rating": 1,
+    "review_time": "2026-06-06T08:24:44.017793Z"
+  },
+  {
+    "card_id": "64b05deb-2f45-4182-9557-6588369a9973",
+    "rating": 1,
+    "review_time": "2026-06-06T08:25:24.270209Z"
+  },
+  {
+    "card_id": "839c04fd-7851-48a9-84ce-a575e92464a8",
+    "rating": 1,
+    "review_time": "2026-06-06T08:25:26.986563Z"
+  },
+  {
+    "card_id": "d46d9c68-4f65-4af2-966d-b6d8c164ca98",
+    "rating": 4,
+    "review_time": "2026-06-06T08:25:28.974233Z"
+  },
+  {
+    "card_id": "4529bd5f-691d-411f-9c79-13b4cf20d431",
+    "rating": 1,
+    "review_time": "2026-06-06T08:25:29.858186Z"
+  },
+  {
+    "card_id": "cef10f45-9c37-4c3c-b816-adabb05d883c",
+    "rating": 1,
+    "review_time": "2026-06-06T08:25:30.657189Z"
+  },
+  {
+    "card_id": "13ea1ade-f0fb-4e6a-bc9e-2806e5dfe19a",
+    "rating": 1,
+    "review_time": "2026-06-06T09:58:25.725611Z"
+  },
+  {
+    "card_id": "e91cebd0-1653-4dcb-9aef-4a6d617326e9",
+    "rating": 1,
+    "review_time": "2026-06-06T09:58:34.8906Z"
+  },
+  {
+    "card_id": "884dba6c-d8b9-4835-bb03-d08245d38d8a",
+    "rating": 1,
+    "review_time": "2026-06-06T09:58:39.36032Z"
+  },
+  {
+    "card_id": "51097230-94c4-47eb-88f4-cc042b9b94c7",
+    "rating": 2,
+    "review_time": "2026-06-06T17:12:49.89592Z"
+  },
+  {
+    "card_id": "712152c9-6944-4614-8caf-163993faf4ba",
+    "rating": 1,
+    "review_time": "2026-06-06T17:13:01.69106Z"
+  },
+  {
+    "card_id": "ab9cd737-2c2e-478c-a269-35a50d608778",
+    "rating": 1,
+    "review_time": "2026-06-06T17:13:11.117282Z"
+  },
+  {
+    "card_id": "7ca2d3a3-c6eb-4865-bfec-425166c104b3",
+    "rating": 4,
+    "review_time": "2026-06-07T10:14:08.581322Z"
+  },
+  {
+    "card_id": "b8aa1ac3-8c99-4a66-ba35-22a1daabc570",
+    "rating": 4,
+    "review_time": "2026-06-07T10:14:11.243734Z"
+  },
+  {
+    "card_id": "ee7950fc-fa99-4e86-9ae7-c9c59ddc391b",
+    "rating": 1,
+    "review_time": "2026-06-07T10:14:13.423715Z"
+  }
+]

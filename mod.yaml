@@ -1,0 +1,72 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+    run.googleapis.com/maxScale: '10'
+    run.googleapis.com/urls: '["https://moderation-fsrs-grpc-service-272885252422.asia-southeast3.run.app","https://moderation-fsrs-grpc-service-wzed7v5hbq-eu.a.run.app"]'
+  labels:
+    cloud.googleapis.com/location: asia-southeast3
+  name: moderation-fsrs-grpc-service
+  namespace: '272885252422'
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '2'
+        run.googleapis.com/client-name: gcloud
+        run.googleapis.com/client-version: 569.0.0
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/startup-cpu-boost: 'true'
+      labels:
+        client.knative.dev/nonce: drlgwwksie
+    spec:
+      containerConcurrency: 160
+      containers:
+      - env:
+        - name: HTTP_PORT
+          value: '8080'
+        - name: GRPC_PORT
+          value: '9090'
+        - name: PUBSUB_PROJECT_ID
+          value: mempan-cac51
+        - name: DECK_SERVICE_ADDR
+          value: deck-service-wzed7v5hbq-eu.a.run.app:443
+        - name: TEXT_MODEL_DIR
+          value: /models/flashcard_text_moderator
+        - name: IMAGE_MODEL_DIR
+          value: /models/flashcard_image_moderator
+        - name: PUBSUB_PUSH_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: pubsub-push-token
+        image: asia-southeast3-docker.pkg.dev/mempan-cac51/mempan-services/moderation-fsrs-service:3185ed7
+        ports:
+        - containerPort: 9090
+          name: h2c
+        resources:
+          limits:
+            cpu: '2'
+            memory: 4Gi
+        startupProbe:
+          failureThreshold: 60
+          periodSeconds: 10
+          tcpSocket:
+            port: 9090
+          timeoutSeconds: 10
+        volumeMounts:
+        - mountPath: /models
+          name: models
+      serviceAccountName: mempan-runtime@mempan-cac51.iam.gserviceaccount.com
+      timeoutSeconds: 300
+      volumes:
+      - csi:
+          driver: gcsfuse.run.googleapis.com
+          volumeAttributes:
+            bucketName: mempan-cac51-models-se3
+        name: models
+  traffic:
+  - latestRevision: true
+    percent: 100

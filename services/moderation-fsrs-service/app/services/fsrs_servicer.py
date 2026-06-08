@@ -48,20 +48,27 @@ def _run_optimizer(rows: list[dict]) -> tuple[list[float], float, str]:
         optimizer = Optimizer(float_delta_t=True)
         # Create time series (Step 2)
         optimizer.create_time_series("UTC", "2006-10-02", 4, analysis=False)
-        # Define model parameters (Step 3)
+        # Define model parameters (Step 3) — FSRS-6 uses 21 weights
         optimizer.define_model()
-        # Pretrain (Step 4)
-        optimizer.pretrain(verbose=False)
+        # Initialize parameters (Step 4) — replaces deprecated pretrain()
+        optimizer.initialize_parameters(verbose=False)
         # Train (Step 5)
         optimizer.train(verbose=False)
 
         weights = optimizer.w
         _, loss = optimizer.evaluate(save_to_file=False)
-        version = getattr(optimizer, "version", "fsrs-5")
-        return [float(w) for w in weights], float(loss), str(version)
+        # Derive version from weight count: 21 = FSRS-6, 19 = FSRS-5
+        version = "fsrs-6" if len(weights) == 21 else "fsrs-5"
+        return [float(w) for w in weights], float(loss), version
     finally:
         # Clean up generated files
-        for f in ["revlog.csv", "revlog_history.tsv", "stability_for_pretrain.tsv"]:
+        for f in [
+            "revlog.csv",
+            "revlog_history.tsv",
+            "stability_for_pretrain.tsv",
+            "dataset_for_initialization.tsv",
+            "evaluation.tsv",
+        ]:
             if os.path.exists(f):
                 try:
                     os.remove(f)
