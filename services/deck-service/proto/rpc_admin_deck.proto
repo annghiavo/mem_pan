@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pb;
 
+import "models.proto";
+
 option go_package = "mem_pan/services/deck-service/pb";
 
 message AdminUpdateDeckStatusRequest {
@@ -14,6 +16,15 @@ message AdminUpdateDeckStatusResponse {
     string status  = 2;
     string user_id = 3;
     string name    = 4;
+}
+
+message AdminReviewDeckPlusRequest {
+    string deck_id = 1;
+    string plus_status = 2;
+}
+
+message AdminReviewDeckPlusResponse {
+    Deck deck = 1;
 }
 
 message AdminDeckRecord {

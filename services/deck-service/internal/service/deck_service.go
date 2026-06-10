@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"mem_pan/services/deck-service/internal/billingclient"
 	"mem_pan/services/deck-service/internal/db"
 	"mem_pan/services/deck-service/internal/domain"
 	"mem_pan/services/deck-service/internal/publisher"
@@ -17,12 +18,12 @@ import (
 )
 
 type DeckSettings struct {
-	QuizType        string `json:"quiz_type"`
-	AnswerSide      string `json:"answer_side"`
-	StrictTyping    bool   `json:"strict_typing"`
-	PartialCorrect  bool   `json:"partial_correct"`
-	NewCardsPerDay  int32  `json:"new_cards_per_day"`
-	ReviewsPerDay   int32  `json:"reviews_per_day"`
+	QuizType       string `json:"quiz_type"`
+	AnswerSide     string `json:"answer_side"`
+	StrictTyping   bool   `json:"strict_typing"`
+	PartialCorrect bool   `json:"partial_correct"`
+	NewCardsPerDay int32  `json:"new_cards_per_day"`
+	ReviewsPerDay  int32  `json:"reviews_per_day"`
 }
 
 type CreateDeckParams struct {
@@ -46,9 +47,10 @@ type ListDecksParams struct {
 }
 
 type ListPublicDecksParams struct {
-	UserID uuid.UUID
-	Limit  int32
-	Offset int32
+	UserID      uuid.UUID
+	Limit       int32
+	Offset      int32
+	AccessLevel string
 }
 
 type DecksPage struct {
@@ -59,6 +61,15 @@ type DecksPage struct {
 type DeckStats struct {
 	DeckID     uuid.UUID
 	TotalCards int64
+}
+
+type CreatorProfileParams struct {
+	UserID            uuid.UUID
+	DisplayName       *string
+	Bio               *string
+	BankName          *string
+	BankAccountNumber *string
+	BankAccountName   *string
 }
 
 type DeckService interface {
@@ -75,24 +86,38 @@ type DeckService interface {
 	DeleteDeck(ctx context.Context, deckID, userID uuid.UUID) error
 	UpdateSettings(ctx context.Context, deckID, userID uuid.UUID, settings DeckSettings) (db.Deck, error)
 	UpdateVisibility(ctx context.Context, deckID, userID uuid.UUID, isPublic bool) (db.Deck, error)
-	CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uuid.UUID) (db.Deck, error)
+	UpdateAccessLevel(ctx context.Context, deckID, userID uuid.UUID, accessLevel string) (db.Deck, error)
+	CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uuid.UUID, role ...string) (db.Deck, error)
 	GetStats(ctx context.Context, deckID, userID uuid.UUID) (DeckStats, error)
 	AdminUpdateDeckStatus(ctx context.Context, deckID uuid.UUID, status string) (db.Deck, error)
+	AdminReviewDeckPlus(ctx context.Context, deckID uuid.UUID, plusStatus string) (db.Deck, error)
 	AdminListDecks(ctx context.Context, limit, offset int32, statusFilter string) (DecksPage, error)
+	UpsertCreatorProfile(ctx context.Context, p CreatorProfileParams) (db.CreatorProfile, error)
+	GetCreatorProfile(ctx context.Context, userID uuid.UUID) (db.CreatorProfile, error)
+	FollowCreator(ctx context.Context, creatorID, followerID uuid.UUID) error
+	UpsertDeckReview(ctx context.Context, deckID, userID uuid.UUID, rating int32) (db.DeckReview, db.Deck, error)
+	ListDeckReviews(ctx context.Context, deckID uuid.UUID, limit, offset int32) ([]db.DeckReview, error)
 }
 
 type deckService struct {
 	deckRepo repository.DeckRepository
 	cardRepo repository.CardRepository
+	billing  billingclient.Client
 	pub      publisher.EventPublisher
 }
 
-func NewDeckService(deckRepo repository.DeckRepository, cardRepo repository.CardRepository, pubs ...publisher.EventPublisher) DeckService {
+func NewDeckService(deckRepo repository.DeckRepository, cardRepo repository.CardRepository, opts ...interface{}) DeckService {
 	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
-	if len(pubs) > 0 {
-		pub = pubs[0]
+	var billing billingclient.Client
+	for _, opt := range opts {
+		switch v := opt.(type) {
+		case publisher.EventPublisher:
+			pub = v
+		case billingclient.Client:
+			billing = v
+		}
 	}
-	return &deckService{deckRepo: deckRepo, cardRepo: cardRepo, pub: pub}
+	return &deckService{deckRepo: deckRepo, cardRepo: cardRepo, billing: billing, pub: pub}
 }
 
 func (s *deckService) CreateDeck(ctx context.Context, p CreateDeckParams) (db.Deck, error) {
@@ -128,7 +153,10 @@ func (s *deckService) GetDeck(ctx context.Context, deckID, userID uuid.UUID, pub
 		return db.Deck{}, domain.ErrDeckNotFound
 	}
 	if deck.UserID != userID {
-		if !publicOK || !deck.IsPublic {
+		if !publicOK || !deck.IsPublic || deck.AccessLevel == db.DeckAccessLevelPrivate {
+			return db.Deck{}, domain.ErrForbidden
+		}
+		if deck.AccessLevel == db.DeckAccessLevelPlus && deck.PlusStatus != db.DeckPlusStatusApproved {
 			return db.Deck{}, domain.ErrForbidden
 		}
 	}
@@ -191,13 +219,14 @@ func (s *deckService) ListPublicDecks(ctx context.Context, p ListPublicDecksPara
 		return DecksPage{Decks: decks, Total: total}, nil
 	}
 	decks, err := s.deckRepo.ListPublicDecks(ctx, db.ListPublicDecksParams{
-		Limit:  p.Limit,
-		Offset: p.Offset,
+		Limit:       p.Limit,
+		Offset:      p.Offset,
+		AccessLevel: accessLevelFilter(p.AccessLevel),
 	})
 	if err != nil {
 		return DecksPage{}, err
 	}
-	total, err := s.deckRepo.CountPublicDecks(ctx)
+	total, err := s.deckRepo.CountPublicDecks(ctx, accessLevelFilter(p.AccessLevel))
 	if err != nil {
 		return DecksPage{}, err
 	}
@@ -306,7 +335,41 @@ func (s *deckService) UpdateVisibility(ctx context.Context, deckID, userID uuid.
 	return updated, nil
 }
 
-func (s *deckService) CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uuid.UUID) (db.Deck, error) {
+func (s *deckService) UpdateAccessLevel(ctx context.Context, deckID, userID uuid.UUID, accessLevel string) (db.Deck, error) {
+	level, err := parseDeckAccessLevel(accessLevel)
+	if err != nil {
+		return db.Deck{}, err
+	}
+	deck, err := s.deckRepo.GetDeckByID(ctx, deckID)
+	if err != nil {
+		return db.Deck{}, err
+	}
+	if deck.UserID != userID {
+		return db.Deck{}, domain.ErrForbidden
+	}
+	updated, err := s.deckRepo.UpdateDeckAccessLevel(ctx, db.UpdateDeckAccessLevelParams{
+		DeckID:      deckID,
+		UserID:      userID,
+		AccessLevel: level,
+	})
+	if err != nil {
+		return db.Deck{}, err
+	}
+	if pubErr := s.pub.PublishDeckUpdated(ctx, publisher.DeckUpdatedEvent{
+		DeckID:      updated.DeckID.String(),
+		UserID:      updated.UserID.String(),
+		DeckName:    updated.Name,
+		Description: nullStrVal(updated.Description),
+		IsPublic:    updated.IsPublic,
+		CardCount:   updated.CardCount,
+		UpdatedAt:   updated.UpdatedAt,
+	}); pubErr != nil {
+		log.Printf("[publisher] deck.updated (access): %v", pubErr)
+	}
+	return updated, nil
+}
+
+func (s *deckService) CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uuid.UUID, role ...string) (db.Deck, error) {
 	src, err := s.deckRepo.GetDeckByID(ctx, sourceDeckID)
 	if err != nil {
 		return db.Deck{}, err
@@ -314,8 +377,8 @@ func (s *deckService) CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uu
 	if src.Status == string(db.ContentStatusDeleted) {
 		return db.Deck{}, domain.ErrDeckNotFound
 	}
-	if !src.IsPublic && src.UserID != newOwnerID {
-		return db.Deck{}, domain.ErrForbidden
+	if err := requireFullDeckAccess(ctx, src, newOwnerID, firstRole(role), s.billing); err != nil {
+		return db.Deck{}, err
 	}
 	clonedName := "Copy of " + src.Name
 	newDeck, newCards, err := s.deckRepo.CloneDeck(ctx, src, newOwnerID, clonedName)
@@ -372,6 +435,32 @@ func (s *deckService) AdminUpdateDeckStatus(ctx context.Context, deckID uuid.UUI
 	return deck, nil
 }
 
+func (s *deckService) AdminReviewDeckPlus(ctx context.Context, deckID uuid.UUID, plusStatus string) (db.Deck, error) {
+	status, err := parseDeckPlusStatus(plusStatus)
+	if err != nil {
+		return db.Deck{}, err
+	}
+	deck, err := s.deckRepo.AdminReviewDeckPlus(ctx, db.AdminReviewDeckPlusParams{
+		DeckID:     deckID,
+		PlusStatus: status,
+	})
+	if err != nil {
+		return db.Deck{}, err
+	}
+	if pubErr := s.pub.PublishDeckUpdated(ctx, publisher.DeckUpdatedEvent{
+		DeckID:      deck.DeckID.String(),
+		UserID:      deck.UserID.String(),
+		DeckName:    deck.Name,
+		Description: nullStrVal(deck.Description),
+		IsPublic:    deck.IsPublic,
+		CardCount:   deck.CardCount,
+		UpdatedAt:   deck.UpdatedAt,
+	}); pubErr != nil {
+		log.Printf("[publisher] deck.updated (plus review): %v", pubErr)
+	}
+	return deck, nil
+}
+
 func (s *deckService) AdminListDecks(ctx context.Context, limit, offset int32, statusFilter string) (DecksPage, error) {
 	var filter sql.NullString
 	if statusFilter != "" {
@@ -392,6 +481,83 @@ func (s *deckService) AdminListDecks(ctx context.Context, limit, offset int32, s
 	return DecksPage{Decks: decks, Total: total}, nil
 }
 
+func (s *deckService) UpsertCreatorProfile(ctx context.Context, p CreatorProfileParams) (db.CreatorProfile, error) {
+	return s.deckRepo.UpsertCreatorProfile(ctx, db.UpsertCreatorProfileParams{
+		UserID:            p.UserID,
+		DisplayName:       nullStr(p.DisplayName),
+		Bio:               nullStr(p.Bio),
+		BankName:          nullStr(p.BankName),
+		BankAccountNumber: nullStr(p.BankAccountNumber),
+		BankAccountName:   nullStr(p.BankAccountName),
+	})
+}
+
+func (s *deckService) GetCreatorProfile(ctx context.Context, userID uuid.UUID) (db.CreatorProfile, error) {
+	return s.deckRepo.GetCreatorProfile(ctx, userID)
+}
+
+func (s *deckService) FollowCreator(ctx context.Context, creatorID, followerID uuid.UUID) error {
+	if creatorID == followerID {
+		return domain.ErrForbidden
+	}
+	if _, err := s.deckRepo.GetCreatorProfile(ctx, creatorID); err != nil {
+		return err
+	}
+	return s.deckRepo.FollowCreator(ctx, creatorID, followerID)
+}
+
+func (s *deckService) UpsertDeckReview(ctx context.Context, deckID, userID uuid.UUID, rating int32) (db.DeckReview, db.Deck, error) {
+	if rating < 1 || rating > 5 {
+		return db.DeckReview{}, db.Deck{}, domain.ErrReviewNotAllowed
+	}
+	deck, err := s.deckRepo.GetDeckByID(ctx, deckID)
+	if err != nil {
+		return db.DeckReview{}, db.Deck{}, err
+	}
+	if deck.UserID == userID {
+		return db.DeckReview{}, db.Deck{}, domain.ErrReviewNotAllowed
+	}
+	if deck.AccessLevel == db.DeckAccessLevelPlus {
+		if deck.PlusStatus != db.DeckPlusStatusApproved {
+			return db.DeckReview{}, db.Deck{}, domain.ErrReviewNotAllowed
+		}
+		if s.billing == nil {
+			return db.DeckReview{}, db.Deck{}, domain.ErrPlusRequired
+		}
+		active, err := s.billing.CheckPlusAccess(ctx, userID)
+		if err != nil {
+			return db.DeckReview{}, db.Deck{}, err
+		}
+		if !active {
+			return db.DeckReview{}, db.Deck{}, domain.ErrPlusRequired
+		}
+	}
+	review, err := s.deckRepo.UpsertDeckReview(ctx, db.UpsertDeckReviewParams{
+		DeckID:  deckID,
+		UserID:  userID,
+		Rating:  int16(rating),
+	})
+	if err != nil {
+		return db.DeckReview{}, db.Deck{}, err
+	}
+	updatedDeck, err := s.deckRepo.RebuildDeckRating(ctx, deckID)
+	if err != nil {
+		return db.DeckReview{}, db.Deck{}, err
+	}
+	return review, updatedDeck, nil
+}
+
+func (s *deckService) ListDeckReviews(ctx context.Context, deckID uuid.UUID, limit, offset int32) ([]db.DeckReview, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+	return s.deckRepo.ListDeckReviews(ctx, db.ListDeckReviewsParams{
+		DeckID: deckID,
+		Limit:  limit,
+		Offset: offset,
+	})
+}
+
 func (s *deckService) GetStats(ctx context.Context, deckID, userID uuid.UUID) (DeckStats, error) {
 	deck, err := s.deckRepo.GetDeckByID(ctx, deckID)
 	if err != nil {
@@ -406,4 +572,3 @@ func (s *deckService) GetStats(ctx context.Context, deckID, userID uuid.UUID) (D
 	}
 	return DeckStats{DeckID: deckID, TotalCards: total}, nil
 }
-

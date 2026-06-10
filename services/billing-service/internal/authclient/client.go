@@ -1,0 +1,72 @@
+package authclient
+
+import (
+	"context"
+	"crypto/tls"
+	"strings"
+
+	"github.com/google/uuid"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
+
+	authpb "mem_pan/services/auth-service/pb"
+)
+
+type Payload struct {
+	UserID   uuid.UUID
+	Username string
+	Role     string
+}
+
+type Client interface {
+	VerifyToken(ctx context.Context, accessToken string) (*Payload, error)
+	Close() error
+}
+
+type grpcClient struct {
+	conn    *grpc.ClientConn
+	authSvc authpb.AuthServiceClient
+}
+
+func NewGRPCClient(addr string) (Client, error) {
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(pickCreds(addr)))
+	if err != nil {
+		return nil, err
+	}
+	return &grpcClient{conn: conn, authSvc: authpb.NewAuthServiceClient(conn)}, nil
+}
+
+func (c *grpcClient) VerifyToken(ctx context.Context, accessToken string) (*Payload, error) {
+	resp, err := c.authSvc.VerifyToken(ctx, &authpb.VerifyTokenRequest{AccessToken: accessToken})
+	if err != nil {
+		if st, ok := status.FromError(err); ok && st.Code() == codes.Unauthenticated {
+			return nil, status.Error(codes.Unauthenticated, "invalid or expired access token")
+		}
+		return nil, status.Errorf(codes.Internal, "auth service unavailable: %v", err)
+	}
+
+	userID, err := uuid.Parse(resp.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "invalid user_id in token response")
+	}
+
+	return &Payload{
+		UserID:   userID,
+		Username: resp.Username,
+		Role:     resp.Role,
+	}, nil
+}
+
+func (c *grpcClient) Close() error {
+	return c.conn.Close()
+}
+
+func pickCreds(addr string) credentials.TransportCredentials {
+	if strings.HasSuffix(addr, ":443") || strings.Contains(addr, ".run.app") {
+		return credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})
+	}
+	return insecure.NewCredentials()
+}

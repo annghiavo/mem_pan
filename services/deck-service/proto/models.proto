@@ -42,6 +42,12 @@ message Deck {
     string       cloned_from = 9;
     google.protobuf.Timestamp created_at = 10;
     google.protobuf.Timestamp updated_at = 11;
+    string       access_level = 12;
+    string       plus_status = 13;
+    google.protobuf.Timestamp plus_submitted_at = 14;
+    google.protobuf.Timestamp plus_approved_at = 15;
+    double       avg_rating = 16;
+    int32        total_reviews = 17;
 }
 
 message Card {
@@ -61,4 +67,28 @@ message Card {
 message DeckStats {
     string deck_id      = 1;
     int32  total_cards  = 2;
+}
+
+message CreatorProfile {
+    string user_id = 1;
+    string display_name = 2;
+    string bio = 3;
+    string tier = 4;
+    int32 follower_count = 5;
+    string bank_name = 6;
+    string bank_account_number = 7;
+    string bank_account_name = 8;
+    google.protobuf.Timestamp bank_verified_at = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}
+
+message DeckReview {
+    string review_id = 1;
+    string deck_id = 2;
+    string user_id = 3;
+    int32 rating = 4;
+    string status = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
 }

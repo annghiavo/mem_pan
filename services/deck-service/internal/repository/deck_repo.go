@@ -19,7 +19,7 @@ type DeckRepository interface {
 	ListDecksByUser(ctx context.Context, arg db.ListDecksByUserParams) ([]db.Deck, error)
 	CountDecksByUser(ctx context.Context, userID uuid.UUID) (int64, error)
 	ListPublicDecks(ctx context.Context, arg db.ListPublicDecksParams) ([]db.Deck, error)
-	CountPublicDecks(ctx context.Context) (int64, error)
+	CountPublicDecks(ctx context.Context, accessLevel sql.NullString) (int64, error)
 	ListPublicDecksByUser(ctx context.Context, arg db.ListPublicDecksByUserParams) ([]db.Deck, error)
 	CountPublicDecksByUser(ctx context.Context, userID uuid.UUID) (int64, error)
 	UpdateDeck(ctx context.Context, arg db.UpdateDeckParams) (db.Deck, error)
@@ -27,11 +27,20 @@ type DeckRepository interface {
 	UpdateDeckVisibility(ctx context.Context, arg db.UpdateDeckVisibilityParams) (db.Deck, error)
 	SoftDeleteDeck(ctx context.Context, arg db.SoftDeleteDeckParams) error
 	AdminUpdateDeckStatus(ctx context.Context, arg db.AdminUpdateDeckStatusParams) (db.Deck, error)
+	UpdateDeckAccessLevel(ctx context.Context, arg db.UpdateDeckAccessLevelParams) (db.Deck, error)
+	AdminReviewDeckPlus(ctx context.Context, arg db.AdminReviewDeckPlusParams) (db.Deck, error)
 	AdminListDecks(ctx context.Context, arg db.AdminListDecksParams) ([]db.Deck, error)
 	AdminCountDecks(ctx context.Context, statusFilter sql.NullString) (int64, error)
 	IncrementCardCount(ctx context.Context, deckID uuid.UUID) error
 	DecrementCardCount(ctx context.Context, deckID uuid.UUID) error
 	CloneDeck(ctx context.Context, src db.Deck, newOwnerID uuid.UUID, newName string) (db.Deck, []db.ListCardsByDeckRow, error)
+	UpsertCreatorProfile(ctx context.Context, arg db.UpsertCreatorProfileParams) (db.CreatorProfile, error)
+	GetCreatorProfile(ctx context.Context, userID uuid.UUID) (db.CreatorProfile, error)
+	FollowCreator(ctx context.Context, creatorID, followerID uuid.UUID) error
+	UnfollowCreator(ctx context.Context, creatorID, followerID uuid.UUID) error
+	UpsertDeckReview(ctx context.Context, arg db.UpsertDeckReviewParams) (db.DeckReview, error)
+	RebuildDeckRating(ctx context.Context, deckID uuid.UUID) (db.Deck, error)
+	ListDeckReviews(ctx context.Context, arg db.ListDeckReviewsParams) ([]db.DeckReview, error)
 }
 
 type deckRepository struct {
@@ -67,8 +76,8 @@ func (r *deckRepository) ListPublicDecks(ctx context.Context, arg db.ListPublicD
 	return r.q.ListPublicDecks(ctx, arg)
 }
 
-func (r *deckRepository) CountPublicDecks(ctx context.Context) (int64, error) {
-	return r.q.CountPublicDecks(ctx)
+func (r *deckRepository) CountPublicDecks(ctx context.Context, accessLevel sql.NullString) (int64, error) {
+	return r.q.CountPublicDecks(ctx, accessLevel)
 }
 
 func (r *deckRepository) ListPublicDecksByUser(ctx context.Context, arg db.ListPublicDecksByUserParams) ([]db.Deck, error) {
@@ -115,6 +124,22 @@ func (r *deckRepository) AdminUpdateDeckStatus(ctx context.Context, arg db.Admin
 	return d, err
 }
 
+func (r *deckRepository) UpdateDeckAccessLevel(ctx context.Context, arg db.UpdateDeckAccessLevelParams) (db.Deck, error) {
+	d, err := r.q.UpdateDeckAccessLevel(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.Deck{}, domain.ErrDeckNotFound
+	}
+	return d, err
+}
+
+func (r *deckRepository) AdminReviewDeckPlus(ctx context.Context, arg db.AdminReviewDeckPlusParams) (db.Deck, error) {
+	d, err := r.q.AdminReviewDeckPlus(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.Deck{}, domain.ErrDeckNotFound
+	}
+	return d, err
+}
+
 func (r *deckRepository) AdminListDecks(ctx context.Context, arg db.AdminListDecksParams) ([]db.Deck, error) {
 	return r.q.AdminListDecks(ctx, arg)
 }
@@ -129,6 +154,44 @@ func (r *deckRepository) IncrementCardCount(ctx context.Context, deckID uuid.UUI
 
 func (r *deckRepository) DecrementCardCount(ctx context.Context, deckID uuid.UUID) error {
 	return r.q.DecrementCardCount(ctx, deckID)
+}
+
+func (r *deckRepository) UpsertCreatorProfile(ctx context.Context, arg db.UpsertCreatorProfileParams) (db.CreatorProfile, error) {
+	return r.q.UpsertCreatorProfile(ctx, arg)
+}
+
+func (r *deckRepository) GetCreatorProfile(ctx context.Context, userID uuid.UUID) (db.CreatorProfile, error) {
+	p, err := r.q.GetCreatorProfile(ctx, userID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.CreatorProfile{}, domain.ErrCreatorProfileNotFound
+	}
+	return p, err
+}
+
+func (r *deckRepository) FollowCreator(ctx context.Context, creatorID, followerID uuid.UUID) error {
+	return r.q.FollowCreator(ctx, db.FollowCreatorParams{
+		UserID:     creatorID,
+		FollowerID: followerID,
+	})
+}
+
+func (r *deckRepository) UnfollowCreator(ctx context.Context, creatorID, followerID uuid.UUID) error {
+	return r.q.UnfollowCreator(ctx, db.UnfollowCreatorParams{
+		UserID:     creatorID,
+		FollowerID: followerID,
+	})
+}
+
+func (r *deckRepository) UpsertDeckReview(ctx context.Context, arg db.UpsertDeckReviewParams) (db.DeckReview, error) {
+	return r.q.UpsertDeckReview(ctx, arg)
+}
+
+func (r *deckRepository) RebuildDeckRating(ctx context.Context, deckID uuid.UUID) (db.Deck, error) {
+	return r.q.RebuildDeckRating(ctx, deckID)
+}
+
+func (r *deckRepository) ListDeckReviews(ctx context.Context, arg db.ListDeckReviewsParams) ([]db.DeckReview, error) {
+	return r.q.ListDeckReviews(ctx, arg)
 }
 
 // CloneDeck duplicates a source deck under a new owner: creates a new deck row

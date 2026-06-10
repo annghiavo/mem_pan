@@ -17,6 +17,12 @@ var allowedDeckStatuses = map[string]bool{
 	"deleted": true,
 }
 
+var allowedPlusStatuses = map[string]bool{
+	"approved":  true,
+	"rejected":  true,
+	"suspended": true,
+}
+
 func (s *Server) AdminUpdateDeckStatus(ctx context.Context, req *pb.AdminUpdateDeckStatusRequest) (*pb.AdminUpdateDeckStatusResponse, error) {
 	deckID, err := uuid.Parse(req.GetDeckId())
 	if err != nil {
@@ -62,6 +68,22 @@ func (s *Server) AdminListDecks(ctx context.Context, req *pb.AdminListDecksReque
 		decks = append(decks, dbDeckToAdminPb(d))
 	}
 	return &pb.AdminListDecksResponse{Decks: decks, Total: page.Total}, nil
+}
+
+func (s *Server) AdminReviewDeckPlus(ctx context.Context, req *pb.AdminReviewDeckPlusRequest) (*pb.AdminReviewDeckPlusResponse, error) {
+	deckID, err := uuid.Parse(req.GetDeckId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid deck_id")
+	}
+	if !allowedPlusStatuses[req.GetPlusStatus()] {
+		return nil, status.Error(codes.InvalidArgument, "plus_status must be approved, rejected, or suspended")
+	}
+
+	deck, err := s.deckSvc.AdminReviewDeckPlus(ctx, deckID, req.GetPlusStatus())
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &pb.AdminReviewDeckPlusResponse{Deck: dbDeckToPb(deck)}, nil
 }
 
 func dbDeckToAdminPb(d db.Deck) *pb.AdminDeckRecord {

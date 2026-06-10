@@ -97,17 +97,20 @@ func (mr *MockDeckRepositoryMockRecorder) ListPublicDecks(ctx, arg any) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPublicDecks", reflect.TypeOf((*MockDeckRepository)(nil).ListPublicDecks), ctx, arg)
 }
 
-func (m *MockDeckRepository) CountPublicDecks(ctx context.Context) (int64, error) {
+func (m *MockDeckRepository) CountPublicDecks(ctx context.Context, accessLevel sql.NullString) (int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountPublicDecks", ctx)
+	ret := m.ctrl.Call(m, "CountPublicDecks", ctx, accessLevel)
 	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (mr *MockDeckRepositoryMockRecorder) CountPublicDecks(ctx any) *gomock.Call {
+func (mr *MockDeckRepositoryMockRecorder) CountPublicDecks(ctx any, accessLevel ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountPublicDecks", reflect.TypeOf((*MockDeckRepository)(nil).CountPublicDecks), ctx)
+	if len(accessLevel) == 0 {
+		accessLevel = []any{gomock.Any()}
+	}
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountPublicDecks", reflect.TypeOf((*MockDeckRepository)(nil).CountPublicDecks), ctx, accessLevel[0])
 }
 
 func (m *MockDeckRepository) ListPublicDecksByUser(ctx context.Context, arg db.ListPublicDecksByUserParams) ([]db.Deck, error) {
@@ -200,6 +203,32 @@ func (mr *MockDeckRepositoryMockRecorder) AdminUpdateDeckStatus(ctx, arg any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminUpdateDeckStatus", reflect.TypeOf((*MockDeckRepository)(nil).AdminUpdateDeckStatus), ctx, arg)
 }
 
+func (m *MockDeckRepository) UpdateDeckAccessLevel(ctx context.Context, arg db.UpdateDeckAccessLevelParams) (db.Deck, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateDeckAccessLevel", ctx, arg)
+	ret0, _ := ret[0].(db.Deck)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) UpdateDeckAccessLevel(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDeckAccessLevel", reflect.TypeOf((*MockDeckRepository)(nil).UpdateDeckAccessLevel), ctx, arg)
+}
+
+func (m *MockDeckRepository) AdminReviewDeckPlus(ctx context.Context, arg db.AdminReviewDeckPlusParams) (db.Deck, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AdminReviewDeckPlus", ctx, arg)
+	ret0, _ := ret[0].(db.Deck)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) AdminReviewDeckPlus(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminReviewDeckPlus", reflect.TypeOf((*MockDeckRepository)(nil).AdminReviewDeckPlus), ctx, arg)
+}
+
 func (m *MockDeckRepository) AdminListDecks(ctx context.Context, arg db.AdminListDecksParams) ([]db.Deck, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AdminListDecks", ctx, arg)
@@ -262,4 +291,93 @@ func (m *MockDeckRepository) CloneDeck(ctx context.Context, src db.Deck, newOwne
 func (mr *MockDeckRepositoryMockRecorder) CloneDeck(ctx, src, newOwnerID, newName any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CloneDeck", reflect.TypeOf((*MockDeckRepository)(nil).CloneDeck), ctx, src, newOwnerID, newName)
+}
+
+func (m *MockDeckRepository) UpsertCreatorProfile(ctx context.Context, arg db.UpsertCreatorProfileParams) (db.CreatorProfile, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpsertCreatorProfile", ctx, arg)
+	ret0, _ := ret[0].(db.CreatorProfile)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) UpsertCreatorProfile(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertCreatorProfile", reflect.TypeOf((*MockDeckRepository)(nil).UpsertCreatorProfile), ctx, arg)
+}
+
+func (m *MockDeckRepository) GetCreatorProfile(ctx context.Context, userID uuid.UUID) (db.CreatorProfile, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCreatorProfile", ctx, userID)
+	ret0, _ := ret[0].(db.CreatorProfile)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) GetCreatorProfile(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCreatorProfile", reflect.TypeOf((*MockDeckRepository)(nil).GetCreatorProfile), ctx, userID)
+}
+
+func (m *MockDeckRepository) FollowCreator(ctx context.Context, creatorID, followerID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FollowCreator", ctx, creatorID, followerID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (mr *MockDeckRepositoryMockRecorder) FollowCreator(ctx, creatorID, followerID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FollowCreator", reflect.TypeOf((*MockDeckRepository)(nil).FollowCreator), ctx, creatorID, followerID)
+}
+
+func (m *MockDeckRepository) UnfollowCreator(ctx context.Context, creatorID, followerID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UnfollowCreator", ctx, creatorID, followerID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (mr *MockDeckRepositoryMockRecorder) UnfollowCreator(ctx, creatorID, followerID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnfollowCreator", reflect.TypeOf((*MockDeckRepository)(nil).UnfollowCreator), ctx, creatorID, followerID)
+}
+
+func (m *MockDeckRepository) UpsertDeckReview(ctx context.Context, arg db.UpsertDeckReviewParams) (db.DeckReview, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpsertDeckReview", ctx, arg)
+	ret0, _ := ret[0].(db.DeckReview)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) UpsertDeckReview(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertDeckReview", reflect.TypeOf((*MockDeckRepository)(nil).UpsertDeckReview), ctx, arg)
+}
+
+func (m *MockDeckRepository) RebuildDeckRating(ctx context.Context, deckID uuid.UUID) (db.Deck, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RebuildDeckRating", ctx, deckID)
+	ret0, _ := ret[0].(db.Deck)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) RebuildDeckRating(ctx, deckID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RebuildDeckRating", reflect.TypeOf((*MockDeckRepository)(nil).RebuildDeckRating), ctx, deckID)
+}
+
+func (m *MockDeckRepository) ListDeckReviews(ctx context.Context, arg db.ListDeckReviewsParams) ([]db.DeckReview, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListDeckReviews", ctx, arg)
+	ret0, _ := ret[0].([]db.DeckReview)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckRepositoryMockRecorder) ListDeckReviews(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListDeckReviews", reflect.TypeOf((*MockDeckRepository)(nil).ListDeckReviews), ctx, arg)
 }

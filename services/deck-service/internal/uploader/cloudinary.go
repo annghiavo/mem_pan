@@ -46,4 +46,3 @@ func (u *cloudinaryUploader) Upload(ctx context.Context, file multipart.File, fo
 	}
 	return url, nil
 }
-

@@ -141,6 +141,102 @@ func (x *AdminUpdateDeckStatusResponse) GetName() string {
 	return ""
 }
 
+type AdminReviewDeckPlusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
+	PlusStatus    string                 `protobuf:"bytes,2,opt,name=plus_status,json=plusStatus,proto3" json:"plus_status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminReviewDeckPlusRequest) Reset() {
+	*x = AdminReviewDeckPlusRequest{}
+	mi := &file_rpc_admin_deck_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminReviewDeckPlusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminReviewDeckPlusRequest) ProtoMessage() {}
+
+func (x *AdminReviewDeckPlusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_admin_deck_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminReviewDeckPlusRequest.ProtoReflect.Descriptor instead.
+func (*AdminReviewDeckPlusRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_admin_deck_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *AdminReviewDeckPlusRequest) GetDeckId() string {
+	if x != nil {
+		return x.DeckId
+	}
+	return ""
+}
+
+func (x *AdminReviewDeckPlusRequest) GetPlusStatus() string {
+	if x != nil {
+		return x.PlusStatus
+	}
+	return ""
+}
+
+type AdminReviewDeckPlusResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Deck          *Deck                  `protobuf:"bytes,1,opt,name=deck,proto3" json:"deck,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminReviewDeckPlusResponse) Reset() {
+	*x = AdminReviewDeckPlusResponse{}
+	mi := &file_rpc_admin_deck_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminReviewDeckPlusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminReviewDeckPlusResponse) ProtoMessage() {}
+
+func (x *AdminReviewDeckPlusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_admin_deck_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminReviewDeckPlusResponse.ProtoReflect.Descriptor instead.
+func (*AdminReviewDeckPlusResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_admin_deck_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *AdminReviewDeckPlusResponse) GetDeck() *Deck {
+	if x != nil {
+		return x.Deck
+	}
+	return nil
+}
+
 type AdminDeckRecord struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
@@ -158,7 +254,7 @@ type AdminDeckRecord struct {
 
 func (x *AdminDeckRecord) Reset() {
 	*x = AdminDeckRecord{}
-	mi := &file_rpc_admin_deck_proto_msgTypes[2]
+	mi := &file_rpc_admin_deck_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -170,7 +266,7 @@ func (x *AdminDeckRecord) String() string {
 func (*AdminDeckRecord) ProtoMessage() {}
 
 func (x *AdminDeckRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_admin_deck_proto_msgTypes[2]
+	mi := &file_rpc_admin_deck_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -183,7 +279,7 @@ func (x *AdminDeckRecord) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminDeckRecord.ProtoReflect.Descriptor instead.
 func (*AdminDeckRecord) Descriptor() ([]byte, []int) {
-	return file_rpc_admin_deck_proto_rawDescGZIP(), []int{2}
+	return file_rpc_admin_deck_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *AdminDeckRecord) GetDeckId() string {
@@ -260,7 +356,7 @@ type AdminListDecksRequest struct {
 
 func (x *AdminListDecksRequest) Reset() {
 	*x = AdminListDecksRequest{}
-	mi := &file_rpc_admin_deck_proto_msgTypes[3]
+	mi := &file_rpc_admin_deck_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -272,7 +368,7 @@ func (x *AdminListDecksRequest) String() string {
 func (*AdminListDecksRequest) ProtoMessage() {}
 
 func (x *AdminListDecksRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_admin_deck_proto_msgTypes[3]
+	mi := &file_rpc_admin_deck_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -285,7 +381,7 @@ func (x *AdminListDecksRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListDecksRequest.ProtoReflect.Descriptor instead.
 func (*AdminListDecksRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_admin_deck_proto_rawDescGZIP(), []int{3}
+	return file_rpc_admin_deck_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *AdminListDecksRequest) GetPageSize() int32 {
@@ -319,7 +415,7 @@ type AdminListDecksResponse struct {
 
 func (x *AdminListDecksResponse) Reset() {
 	*x = AdminListDecksResponse{}
-	mi := &file_rpc_admin_deck_proto_msgTypes[4]
+	mi := &file_rpc_admin_deck_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -331,7 +427,7 @@ func (x *AdminListDecksResponse) String() string {
 func (*AdminListDecksResponse) ProtoMessage() {}
 
 func (x *AdminListDecksResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_admin_deck_proto_msgTypes[4]
+	mi := &file_rpc_admin_deck_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -344,7 +440,7 @@ func (x *AdminListDecksResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListDecksResponse.ProtoReflect.Descriptor instead.
 func (*AdminListDecksResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_admin_deck_proto_rawDescGZIP(), []int{4}
+	return file_rpc_admin_deck_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *AdminListDecksResponse) GetDecks() []*AdminDeckRecord {
@@ -365,7 +461,7 @@ var File_rpc_admin_deck_proto protoreflect.FileDescriptor
 
 const file_rpc_admin_deck_proto_rawDesc = "" +
 	"\n" +
-	"\x14rpc_admin_deck.proto\x12\x02pb\"O\n" +
+	"\x14rpc_admin_deck.proto\x12\x02pb\x1a\fmodels.proto\"O\n" +
 	"\x1cAdminUpdateDeckStatusRequest\x12\x17\n" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\"}\n" +
@@ -373,7 +469,13 @@ const file_rpc_admin_deck_proto_rawDesc = "" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\"\x8b\x02\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\"V\n" +
+	"\x1aAdminReviewDeckPlusRequest\x12\x17\n" +
+	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x1f\n" +
+	"\vplus_status\x18\x02 \x01(\tR\n" +
+	"plusStatus\";\n" +
+	"\x1bAdminReviewDeckPlusResponse\x12\x1c\n" +
+	"\x04deck\x18\x01 \x01(\v2\b.pb.DeckR\x04deck\"\x8b\x02\n" +
 	"\x0fAdminDeckRecord\x12\x17\n" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
@@ -407,21 +509,25 @@ func file_rpc_admin_deck_proto_rawDescGZIP() []byte {
 	return file_rpc_admin_deck_proto_rawDescData
 }
 
-var file_rpc_admin_deck_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_rpc_admin_deck_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_rpc_admin_deck_proto_goTypes = []any{
 	(*AdminUpdateDeckStatusRequest)(nil),  // 0: pb.AdminUpdateDeckStatusRequest
 	(*AdminUpdateDeckStatusResponse)(nil), // 1: pb.AdminUpdateDeckStatusResponse
-	(*AdminDeckRecord)(nil),               // 2: pb.AdminDeckRecord
-	(*AdminListDecksRequest)(nil),         // 3: pb.AdminListDecksRequest
-	(*AdminListDecksResponse)(nil),        // 4: pb.AdminListDecksResponse
+	(*AdminReviewDeckPlusRequest)(nil),    // 2: pb.AdminReviewDeckPlusRequest
+	(*AdminReviewDeckPlusResponse)(nil),   // 3: pb.AdminReviewDeckPlusResponse
+	(*AdminDeckRecord)(nil),               // 4: pb.AdminDeckRecord
+	(*AdminListDecksRequest)(nil),         // 5: pb.AdminListDecksRequest
+	(*AdminListDecksResponse)(nil),        // 6: pb.AdminListDecksResponse
+	(*Deck)(nil),                          // 7: pb.Deck
 }
 var file_rpc_admin_deck_proto_depIdxs = []int32{
-	2, // 0: pb.AdminListDecksResponse.decks:type_name -> pb.AdminDeckRecord
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	7, // 0: pb.AdminReviewDeckPlusResponse.deck:type_name -> pb.Deck
+	4, // 1: pb.AdminListDecksResponse.decks:type_name -> pb.AdminDeckRecord
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_rpc_admin_deck_proto_init() }
@@ -429,13 +535,14 @@ func file_rpc_admin_deck_proto_init() {
 	if File_rpc_admin_deck_proto != nil {
 		return
 	}
+	file_models_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_rpc_admin_deck_proto_rawDesc), len(file_rpc_admin_deck_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

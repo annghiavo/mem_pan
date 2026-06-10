@@ -24,3 +24,8 @@ DELETE FROM cards WHERE card_id = $1 AND user_id = $2;
 
 -- name: CountCardsByDeck :one
 SELECT COUNT(*) FROM cards WHERE deck_id = $1;
+
+-- name: UpdateCardPosition :exec
+UPDATE cards
+SET position = $1
+WHERE card_id = $2 AND user_id = $3;

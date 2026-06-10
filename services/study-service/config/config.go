@@ -7,13 +7,14 @@ import (
 )
 
 type Config struct {
-	DBUrl              string
-	GRPCServerAddress  string
-	HTTPServerAddress  string
-	AuthServiceAddress string
-	DeckServiceAddress string
-	PubSubProjectID    string
-	PubSubTopic        string
+	DBUrl                 string
+	GRPCServerAddress     string
+	HTTPServerAddress     string
+	AuthServiceAddress    string
+	DeckServiceAddress    string
+	BillingServiceAddress string
+	PubSubProjectID       string
+	PubSubTopic           string
 
 	// FSRS weight-optimization cron (POST /internal/fsrs/optimize).
 	ModerationServiceAddress string // gRPC addr of moderation-fsrs-service; empty disables the cron
@@ -24,13 +25,14 @@ type Config struct {
 
 func Load() (Config, error) {
 	cfg := Config{
-		DBUrl:              getEnv("DATABASE_URL", firstNonEmpty(os.Getenv("DB_URL"), os.Getenv("DIRECT_URL"))),
-		GRPCServerAddress:  getEnv("GRPC_SERVER_ADDRESS", ":9092"),
-		HTTPServerAddress:  getEnv("HTTP_SERVER_ADDRESS", ":8082"),
-		AuthServiceAddress: getEnv("AUTH_SERVICE_ADDRESS", "localhost:9090"),
-		DeckServiceAddress: getEnv("DECK_SERVICE_ADDRESS", "localhost:9091"),
-		PubSubProjectID:    getEnv("PUBSUB_PROJECT_ID", ""),
-		PubSubTopic:        getEnv("PUBSUB_TOPIC", "study-events"),
+		DBUrl:                 getEnv("DATABASE_URL", firstNonEmpty(os.Getenv("DB_URL"), os.Getenv("DIRECT_URL"))),
+		GRPCServerAddress:     getEnv("GRPC_SERVER_ADDRESS", ":9092"),
+		HTTPServerAddress:     getEnv("HTTP_SERVER_ADDRESS", ":8082"),
+		AuthServiceAddress:    getEnv("AUTH_SERVICE_ADDRESS", "localhost:9090"),
+		DeckServiceAddress:    getEnv("DECK_SERVICE_ADDRESS", "localhost:9091"),
+		BillingServiceAddress: getEnv("BILLING_SERVICE_ADDRESS", "localhost:9098"),
+		PubSubProjectID:       getEnv("PUBSUB_PROJECT_ID", ""),
+		PubSubTopic:           getEnv("PUBSUB_TOPIC", "study-events"),
 
 		ModerationServiceAddress: getEnv("MODERATION_SERVICE_ADDRESS", ""),
 		// 1000 is the FSRS-recommended minimum for trustworthy optimization;

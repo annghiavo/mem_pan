@@ -82,11 +82,13 @@ services:
     environment:
       - AUTH_SERVICE_ADDRESS=auth-service:9090
       - STUDY_SERVICE_ADDRESS=study-service:9092
+      - BILLING_SERVICE_ADDRESS=billing-service:9098
       - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
       - PUBSUB_PROJECT_ID=local-dev
       - PUBSUB_TOPIC=deck-events
     depends_on:
       - auth-service
+      - billing-service
       - pubsub-emulator
     expose:
       - "8081"
@@ -100,6 +102,28 @@ services:
       - gateway
     restart: unless-stopped
 
+  billing-service:
+    build:
+      context: ..
+      dockerfile: services/billing-service/Dockerfile
+    env_file:
+      - ../services/billing-service/app.env
+    environment:
+      - AUTH_SERVICE_ADDRESS=auth-service:9090
+    depends_on:
+      - auth-service
+    expose:
+      - "8088"
+      - "9098"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.billing.entrypoints=web"
+      - "traefik.http.routers.billing.rule=PathPrefix(`/v1/billing`)"
+      - "traefik.http.services.billing.loadbalancer.server.port=8088"
+    networks:
+      - gateway
+    restart: unless-stopped
+
   study-service:
     build:
       context: ..
@@ -109,6 +133,7 @@ services:
     environment:
       - AUTH_SERVICE_ADDRESS=auth-service:9090
       - DECK_SERVICE_ADDRESS=deck-service:9091
+      - BILLING_SERVICE_ADDRESS=billing-service:9098
       - PUBSUB_EMULATOR_HOST=pubsub-emulator:8085
       - PUBSUB_PROJECT_ID=local-dev
       - PUBSUB_TOPIC=study-events
@@ -120,6 +145,7 @@ services:
     depends_on:
       - auth-service
       - deck-service
+      - billing-service
       - pubsub-emulator
       - moderation-service
     expose:

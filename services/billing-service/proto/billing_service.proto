@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package billing;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "mem_pan/services/billing-service/pb";
+
+service BillingService {
+    rpc CheckPlusAccess(CheckPlusAccessRequest) returns (CheckPlusAccessResponse);
+    rpc ExpireSubscriptions(ExpireSubscriptionsRequest) returns (ExpireSubscriptionsResponse);
+}
+
+message CheckPlusAccessRequest {
+    string user_id = 1;
+}
+
+message CheckPlusAccessResponse {
+    bool active = 1;
+    string plan_code = 2;
+    google.protobuf.Timestamp current_period_end = 3;
+}
+
+message ExpireSubscriptionsRequest {}
+
+message ExpireSubscriptionsResponse {
+    bool ok = 1;
+}

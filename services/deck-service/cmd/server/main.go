@@ -26,6 +26,7 @@ import (
 	"mem_pan/services/deck-service/config"
 	"mem_pan/services/deck-service/doc"
 	"mem_pan/services/deck-service/internal/authclient"
+	"mem_pan/services/deck-service/internal/billingclient"
 	"mem_pan/services/deck-service/internal/gapi"
 	"mem_pan/services/deck-service/internal/publisher"
 	"mem_pan/services/deck-service/internal/repository"
@@ -66,6 +67,12 @@ func main() {
 	}
 	defer authClient.Close()
 
+	billingClient, err := billingclient.NewGRPCClient(cfg.BillingServiceAddress)
+	if err != nil {
+		log.Fatal("billing client:", err)
+	}
+	defer billingClient.Close()
+
 	// Optional: study-service powers the learner count on the deck detail page.
 	var studyClient studyclient.Client
 	if cfg.StudyServiceAddress != "" {
@@ -92,8 +99,8 @@ func main() {
 	}
 
 	folderSvc := service.NewFolderService(folderRepo, folderDeckRepo, deckRepo, pub)
-	deckSvc := service.NewDeckService(deckRepo, cardRepo, pub)
-	cardSvc := service.NewCardService(cardRepo, noteRepo, deckRepo, pub)
+	deckSvc := service.NewDeckService(deckRepo, cardRepo, billingClient, pub)
+	cardSvc := service.NewCardService(cardRepo, noteRepo, deckRepo, billingClient, pub)
 
 	var imageUploader uploader.ImageUploader
 	if cfg.CloudinaryURL != "" {

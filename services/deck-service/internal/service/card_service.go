@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"mem_pan/services/deck-service/internal/billingclient"
 	"mem_pan/services/deck-service/internal/db"
 	"mem_pan/services/deck-service/internal/domain"
 	"mem_pan/services/deck-service/internal/publisher"
@@ -36,8 +37,8 @@ type UpdateCardParams struct {
 type CardService interface {
 	CreateCard(ctx context.Context, p CreateCardParams) (db.GetCardByIDRow, error)
 	BulkCreateCards(ctx context.Context, userID, deckID uuid.UUID, items []CreateCardParams) ([]db.GetCardByIDRow, error)
-	GetCard(ctx context.Context, cardID, userID uuid.UUID) (db.GetCardByIDRow, error)
-	ListCardsByDeck(ctx context.Context, deckID, userID uuid.UUID) ([]db.ListCardsByDeckRow, error)
+	GetCard(ctx context.Context, cardID, userID uuid.UUID, role ...string) (db.GetCardByIDRow, error)
+	ListCardsByDeck(ctx context.Context, deckID, userID uuid.UUID, role ...string) ([]db.ListCardsByDeckRow, error)
 	UpdateCard(ctx context.Context, p UpdateCardParams) (db.GetCardByIDRow, error)
 	DeleteCard(ctx context.Context, cardID, userID uuid.UUID) error
 	// ReorderCards updates the position of each card in the provided ordered list.
@@ -49,6 +50,7 @@ type cardService struct {
 	cardRepo repository.CardRepository
 	noteRepo repository.NoteRepository
 	deckRepo repository.DeckRepository
+	billing  billingclient.Client
 	pub      publisher.EventPublisher
 }
 
@@ -56,16 +58,23 @@ func NewCardService(
 	cardRepo repository.CardRepository,
 	noteRepo repository.NoteRepository,
 	deckRepo repository.DeckRepository,
-	pubs ...publisher.EventPublisher,
+	opts ...interface{},
 ) CardService {
 	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
-	if len(pubs) > 0 {
-		pub = pubs[0]
+	var billing billingclient.Client
+	for _, opt := range opts {
+		switch v := opt.(type) {
+		case publisher.EventPublisher:
+			pub = v
+		case billingclient.Client:
+			billing = v
+		}
 	}
 	return &cardService{
 		cardRepo: cardRepo,
 		noteRepo: noteRepo,
 		deckRepo: deckRepo,
+		billing:  billing,
 		pub:      pub,
 	}
 }
@@ -218,7 +227,7 @@ func (s *cardService) BulkCreateCards(ctx context.Context, userID, deckID uuid.U
 	return results, nil
 }
 
-func (s *cardService) GetCard(ctx context.Context, cardID, userID uuid.UUID) (db.GetCardByIDRow, error) {
+func (s *cardService) GetCard(ctx context.Context, cardID, userID uuid.UUID, role ...string) (db.GetCardByIDRow, error) {
 	card, err := s.cardRepo.GetCardByID(ctx, cardID)
 	if err != nil {
 		return db.GetCardByIDRow{}, err
@@ -227,19 +236,19 @@ func (s *cardService) GetCard(ctx context.Context, cardID, userID uuid.UUID) (db
 	if err != nil {
 		return db.GetCardByIDRow{}, err
 	}
-	if deck.UserID != userID && !deck.IsPublic {
-		return db.GetCardByIDRow{}, domain.ErrForbidden
+	if err := requireFullDeckAccess(ctx, deck, userID, firstRole(role), s.billing); err != nil {
+		return db.GetCardByIDRow{}, err
 	}
 	return card, nil
 }
 
-func (s *cardService) ListCardsByDeck(ctx context.Context, deckID, userID uuid.UUID) ([]db.ListCardsByDeckRow, error) {
+func (s *cardService) ListCardsByDeck(ctx context.Context, deckID, userID uuid.UUID, role ...string) ([]db.ListCardsByDeckRow, error) {
 	deck, err := s.deckRepo.GetDeckByID(ctx, deckID)
 	if err != nil {
 		return nil, err
 	}
-	if deck.UserID != userID && !deck.IsPublic {
-		return nil, domain.ErrForbidden
+	if err := requireFullDeckAccess(ctx, deck, userID, firstRole(role), s.billing); err != nil {
+		return nil, err
 	}
 	return s.cardRepo.ListCardsByDeck(ctx, deckID)
 }

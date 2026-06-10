@@ -83,9 +83,10 @@ func (s *Server) ListPublicDecks(ctx context.Context, req *pb.ListPublicDecksReq
 	}
 
 	page, err := s.deckSvc.ListPublicDecks(ctx, service.ListPublicDecksParams{
-		UserID: userID,
-		Limit:  pageSize,
-		Offset: offset,
+		UserID:      userID,
+		Limit:       pageSize,
+		Offset:      offset,
+		AccessLevel: req.AccessLevel,
 	})
 	if err != nil {
 		return nil, toGRPCError(err)
@@ -216,6 +217,24 @@ func (s *Server) UpdateDeckVisibility(ctx context.Context, req *pb.UpdateDeckVis
 	return &pb.UpdateDeckVisibilityResponse{Deck: dbDeckToPb(deck)}, nil
 }
 
+func (s *Server) UpdateDeckAccessLevel(ctx context.Context, req *pb.UpdateDeckAccessLevelRequest) (*pb.UpdateDeckAccessLevelResponse, error) {
+	payload, err := s.authorizeUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	deckID, err := uuid.Parse(req.DeckId)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid deck_id")
+	}
+
+	deck, err := s.deckSvc.UpdateAccessLevel(ctx, deckID, payload.UserID, req.AccessLevel)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &pb.UpdateDeckAccessLevelResponse{Deck: dbDeckToPb(deck)}, nil
+}
+
 func (s *Server) CloneDeck(ctx context.Context, req *pb.CloneDeckRequest) (*pb.CloneDeckResponse, error) {
 	payload, err := s.authorizeUser(ctx)
 	if err != nil {
@@ -227,7 +246,7 @@ func (s *Server) CloneDeck(ctx context.Context, req *pb.CloneDeckRequest) (*pb.C
 		return nil, status.Error(codes.InvalidArgument, "invalid deck_id")
 	}
 
-	deck, err := s.deckSvc.CloneDeck(ctx, deckID, payload.UserID)
+	deck, err := s.deckSvc.CloneDeck(ctx, deckID, payload.UserID, payload.Role)
 	if err != nil {
 		return nil, toGRPCError(err)
 	}
@@ -268,7 +287,7 @@ func (s *Server) ListDeckCards(ctx context.Context, req *pb.ListDeckCardsRequest
 		return nil, status.Error(codes.InvalidArgument, "invalid deck_id")
 	}
 
-	cards, err := s.cardSvc.ListCardsByDeck(ctx, deckID, payload.UserID)
+	cards, err := s.cardSvc.ListCardsByDeck(ctx, deckID, payload.UserID, payload.Role)
 	if err != nil {
 		return nil, toGRPCError(err)
 	}

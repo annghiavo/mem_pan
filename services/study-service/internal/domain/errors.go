@@ -3,13 +3,14 @@ package domain
 import "errors"
 
 var (
-	ErrSessionNotFound  = errors.New("session not found")
-	ErrSessionFinished  = errors.New("session is already finished")
-	ErrCardNotInSession = errors.New("card not in session")
+	ErrSessionNotFound     = errors.New("session not found")
+	ErrSessionFinished     = errors.New("session is already finished")
+	ErrCardNotInSession    = errors.New("card not in session")
 	ErrCardAlreadyReviewed = errors.New("card already reviewed in this session")
-	ErrForbidden        = errors.New("access denied")
-	ErrInvalidRating    = errors.New("rating must be between 1 and 4")
-	ErrDeckEmpty        = errors.New("no cards available to study in this deck")
-	ErrSettingsNotFound = errors.New("deck study settings not found")
-	ErrInvalidStrictness = errors.New("strictness_level must be 'flexible' or 'strict'")
+	ErrForbidden           = errors.New("access denied")
+	ErrPlusRequired        = errors.New("active Plus subscription required")
+	ErrInvalidRating       = errors.New("rating must be between 1 and 4")
+	ErrDeckEmpty           = errors.New("no cards available to study in this deck")
+	ErrSettingsNotFound    = errors.New("deck study settings not found")
+	ErrInvalidStrictness   = errors.New("strictness_level must be 'flexible' or 'strict'")
 )

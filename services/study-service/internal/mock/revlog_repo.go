@@ -86,3 +86,18 @@ func (mr *MockRevlogRepositoryMockRecorder) ListUsersWithMinReviews(ctx, minRevi
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsersWithMinReviews", reflect.TypeOf((*MockRevlogRepository)(nil).ListUsersWithMinReviews), ctx, minReviews)
 }
+
+// SummarizeRevlogsBySession mocks base method.
+func (m *MockRevlogRepository) SummarizeRevlogsBySession(ctx context.Context, sessionID uuid.UUID) (db.SummarizeRevlogsBySessionRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SummarizeRevlogsBySession", ctx, sessionID)
+	ret0, _ := ret[0].(db.SummarizeRevlogsBySessionRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SummarizeRevlogsBySession indicates an expected call of SummarizeRevlogsBySession.
+func (mr *MockRevlogRepositoryMockRecorder) SummarizeRevlogsBySession(ctx, sessionID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SummarizeRevlogsBySession", reflect.TypeOf((*MockRevlogRepository)(nil).SummarizeRevlogsBySession), ctx, sessionID)
+}

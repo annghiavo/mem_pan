@@ -4,6 +4,7 @@ use (
 	.
 	./services/admin-service
 	./services/auth-service
+	./services/billing-service
 	./services/deck-service
 	./services/notification-service
 	./services/search-service
