@@ -461,6 +461,99 @@ paths:
       responses:
         '200':
           description: preflight
+  "/v1/billing/{path=**}":
+    parameters:
+    - in: path
+      name: path
+      required: true
+      type: string
+    get:
+      operationId: billingGet
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: billingPost
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    options:
+      operationId: opt_v1_billing_path
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: preflight
+  "/v1/admin/revenue/{path=**}":
+    parameters:
+    - in: path
+      name: path
+      required: true
+      type: string
+    get:
+      operationId: adminRevenueGet
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: adminRevenuePost
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    options:
+      operationId: opt_v1_admin_revenue_path
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: preflight
+  "/v1/creators/me/earnings":
+    get:
+      operationId: creatorEarningsGet
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    options:
+      operationId: opt_v1_creators_me_earnings
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: preflight
   "/v1/admin/{path=**}":
     parameters:
     - in: path

@@ -73,11 +73,7 @@ func firstRole(roles []string) string {
 	return roles[0]
 }
 
-type plusChecker interface {
-	CheckPlusAccess(ctx context.Context, userID uuid.UUID) (bool, error)
-}
-
-func requireFullDeckAccess(ctx context.Context, deck db.Deck, userID uuid.UUID, role string, billing plusChecker) error {
+func requireFullDeckAccess(ctx context.Context, deck db.Deck, userID uuid.UUID, role string, isPlus bool) error {
 	if deck.Status != "" && deck.Status != string(db.ContentStatusActive) && deck.Status != string(db.ContentStatusHidden) {
 		return domain.ErrDeckNotFound
 	}
@@ -93,14 +89,7 @@ func requireFullDeckAccess(ctx context.Context, deck db.Deck, userID uuid.UUID, 
 	if deck.PlusStatus != db.DeckPlusStatusApproved {
 		return domain.ErrForbidden
 	}
-	if billing == nil {
-		return domain.ErrPlusRequired
-	}
-	active, err := billing.CheckPlusAccess(ctx, userID)
-	if err != nil {
-		return err
-	}
-	if !active {
+	if !isPlus {
 		return domain.ErrPlusRequired
 	}
 	return nil

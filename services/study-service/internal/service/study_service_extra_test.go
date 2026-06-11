@@ -292,6 +292,11 @@ func TestStartSession_OnlyNewCards(t *testing.T) {
 	sc := makeSessionCard(sessionID, cardID, userCardID)
 
 	sessRepo.EXPECT().GetOngoingSessionByDeck(ctx, gomock.Any()).Return(db.StudySession{}, domain.ErrSessionNotFound)
+	deckClient.EXPECT().GetDeck(ctx, deckID, "tok").Return(deckclient.DeckInfo{
+		DeckID:      deckID,
+		UserID:      userID,
+		AccessLevel: "public",
+	}, nil)
 	deckClient.EXPECT().ListDeckCards(ctx, deckID, "tok").Return(deckCards, nil)
 	ucRepo.EXPECT().UpsertUserCard(ctx, gomock.Any()).Return(userCard, nil)
 	ucRepo.EXPECT().ListDueUserCardsByDeck(ctx, gomock.Any()).Return([]db.UserCard{}, nil) // no due cards
@@ -340,6 +345,11 @@ func TestStartSession_NoDueOrNewCards(t *testing.T) {
 	userCard := makeUserCard(userCardID, userID, cardID, deckID)
 
 	sessRepo.EXPECT().GetOngoingSessionByDeck(ctx, gomock.Any()).Return(db.StudySession{}, domain.ErrSessionNotFound)
+	deckClient.EXPECT().GetDeck(ctx, deckID, "tok").Return(deckclient.DeckInfo{
+		DeckID:      deckID,
+		UserID:      userID,
+		AccessLevel: "public",
+	}, nil)
 	deckClient.EXPECT().ListDeckCards(ctx, deckID, "tok").Return(deckCards, nil)
 	ucRepo.EXPECT().UpsertUserCard(ctx, gomock.Any()).Return(userCard, nil)
 	ucRepo.EXPECT().ListDueUserCardsByDeck(ctx, gomock.Any()).Return([]db.UserCard{}, nil)
@@ -382,6 +392,11 @@ func TestStartSession_DefaultLimits(t *testing.T) {
 	sc := makeSessionCard(sessionID, cardID, userCardID)
 
 	sessRepo.EXPECT().GetOngoingSessionByDeck(ctx, gomock.Any()).Return(db.StudySession{}, domain.ErrSessionNotFound)
+	deckClient.EXPECT().GetDeck(ctx, deckID, "tok").Return(deckclient.DeckInfo{
+		DeckID:      deckID,
+		UserID:      userID,
+		AccessLevel: "public",
+	}, nil)
 	deckClient.EXPECT().ListDeckCards(ctx, deckID, "tok").Return(deckCards, nil)
 	ucRepo.EXPECT().UpsertUserCard(ctx, gomock.Any()).Return(userCard, nil)
 

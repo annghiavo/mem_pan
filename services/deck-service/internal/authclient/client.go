@@ -21,6 +21,7 @@ type Payload struct {
 	UserID   uuid.UUID
 	Username string
 	Role     string
+	IsPlus   bool
 }
 
 // UserProfile holds public profile fields fetched from auth-service.
@@ -46,23 +47,22 @@ func NewGRPCClient(addr string) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &grpcClient{
-		conn:    conn,
-		authSvc: authpb.NewAuthServiceClient(conn),
-	}, nil
+	return &grpcClient{conn: conn, authSvc: authpb.NewAuthServiceClient(conn)}, nil
 }
 
 func (c *grpcClient) VerifyToken(ctx context.Context, accessToken string) (*Payload, error) {
 	resp, err := c.authSvc.VerifyToken(ctx, &authpb.VerifyTokenRequest{AccessToken: accessToken})
 	if err != nil {
-		// Translate auth-service Unauthenticated → Unauthenticated for the caller.
-		if st, ok := status.FromError(err); ok && st.Code() == codes.Unauthenticated {
-			return nil, status.Error(codes.Unauthenticated, "invalid or expired access token")
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.Unauthenticated:
+				return nil, status.Error(codes.Unauthenticated, "invalid or expired access token")
+			case codes.PermissionDenied:
+				return nil, err
+			}
 		}
-		// TEMP DEBUG: surface underlying error so Cloud Run logs show the real cause.
 		return nil, status.Errorf(codes.Internal, "auth service unavailable: %v", err)
 	}
-
 	userID, err := uuid.Parse(resp.UserId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "invalid user_id in token response")
@@ -72,6 +72,7 @@ func (c *grpcClient) VerifyToken(ctx context.Context, accessToken string) (*Payl
 		UserID:   userID,
 		Username: resp.Username,
 		Role:     resp.Role,
+		IsPlus:   resp.IsPlus,
 	}, nil
 }
 

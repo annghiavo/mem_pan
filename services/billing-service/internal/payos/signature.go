@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 )
@@ -59,6 +60,15 @@ func signatureValue(value any) (string, error) {
 		}
 		return string(b), nil
 	default:
+		rv := reflect.ValueOf(value)
+		switch rv.Kind() {
+		case reflect.Array, reflect.Map, reflect.Slice, reflect.Struct:
+			b, err := json.Marshal(v)
+			if err != nil {
+				return "", err
+			}
+			return string(b), nil
+		}
 		return fmt.Sprint(v), nil
 	}
 }

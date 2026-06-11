@@ -27,7 +27,6 @@ import (
 	"mem_pan/services/study-service/config"
 	"mem_pan/services/study-service/doc"
 	"mem_pan/services/study-service/internal/authclient"
-	"mem_pan/services/study-service/internal/billingclient"
 	"mem_pan/services/study-service/internal/deckclient"
 	"mem_pan/services/study-service/internal/fsrsopt"
 	"mem_pan/services/study-service/internal/gapi"
@@ -75,12 +74,6 @@ func main() {
 	}
 	defer deckClient.Close()
 
-	billingClient, err := billingclient.NewGRPCClient(cfg.BillingServiceAddress)
-	if err != nil {
-		log.Fatal("billing client:", err)
-	}
-	defer billingClient.Close()
-
 	userCardRepo := repository.NewUserCardRepository(database)
 	sessionRepo := repository.NewStudySessionRepository(database)
 	sessionCardRepo := repository.NewSessionCardRepository(database)
@@ -103,7 +96,6 @@ func main() {
 		revlogRepo,
 		weightsRepo,
 		deckClient,
-		billingClient,
 		revshareRepo,
 		pub,
 	)

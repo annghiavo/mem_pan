@@ -17,6 +17,10 @@ type Config struct {
 	PayOSChecksumKey string
 	PayOSBaseURL     string
 
+	PayOSPayoutClientID    string
+	PayOSPayoutAPIKey      string
+	PayOSPayoutChecksumKey string
+
 	AppBaseURL       string
 	DefaultReturnURL string
 	DefaultCancelURL string
@@ -38,6 +42,10 @@ func Load() (Config, error) {
 		PayOSChecksumKey: getEnv("PAYOS_CHECKSUM_KEY", ""),
 		PayOSBaseURL:     getEnv("PAYOS_BASE_URL", "https://api-merchant.payos.vn"),
 
+		PayOSPayoutClientID:    getEnv("PAYOS_PAYOUT_CLIENT_ID", ""),
+		PayOSPayoutAPIKey:      getEnv("PAYOS_PAYOUT_API_KEY", ""),
+		PayOSPayoutChecksumKey: getEnv("PAYOS_PAYOUT_CHECKSUM_KEY", ""),
+
 		AppBaseURL:       appBaseURL,
 		DefaultReturnURL: getEnv("PAYOS_RETURN_URL", appBaseURL+"/billing/return"),
 		DefaultCancelURL: getEnv("PAYOS_CANCEL_URL", appBaseURL+"/billing/cancel"),
@@ -57,6 +65,15 @@ func Load() (Config, error) {
 	}
 	if cfg.PayOSChecksumKey == "" {
 		return Config{}, fmt.Errorf("PAYOS_CHECKSUM_KEY is required")
+	}
+	if cfg.PayOSPayoutClientID == "" {
+		return Config{}, fmt.Errorf("PAYOS_PAYOUT_CLIENT_ID is required")
+	}
+	if cfg.PayOSPayoutAPIKey == "" {
+		return Config{}, fmt.Errorf("PAYOS_PAYOUT_API_KEY is required")
+	}
+	if cfg.PayOSPayoutChecksumKey == "" {
+		return Config{}, fmt.Errorf("PAYOS_PAYOUT_CHECKSUM_KEY is required")
 	}
 	return cfg, nil
 }

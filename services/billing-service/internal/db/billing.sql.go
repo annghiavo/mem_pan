@@ -8,11 +8,9 @@ package db
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sqlc-dev/pqtype"
 )
 
 const activateSubscription = `-- name: ActivateSubscription :one
@@ -70,9 +68,9 @@ type CreatePaymentTransactionParams struct {
 	ProviderPaymentID sql.NullString        `json:"provider_payment_id"`
 	ProviderOrderCode int64                 `json:"provider_order_code"`
 	IdempotencyKey    string                `json:"idempotency_key"`
-	AmountVnd         int64                 `json:"amount_vnd"`
-	CheckoutUrl       sql.NullString        `json:"checkout_url"`
-	RawPayload        pqtype.NullRawMessage `json:"raw_payload"`
+	AmountVnd         int64          `json:"amount_vnd"`
+	CheckoutUrl       sql.NullString `json:"checkout_url"`
+	RawPayload        sql.NullString `json:"raw_payload"`
 }
 
 func (q *Queries) CreatePaymentTransaction(ctx context.Context, arg CreatePaymentTransactionParams) (PaymentTransaction, error) {
@@ -263,9 +261,9 @@ RETURNING transaction_id, user_id, subscription_id, provider, provider_payment_i
 `
 
 type MarkPaymentTransactionPaidParams struct {
-	TransactionID uuid.UUID             `json:"transaction_id"`
-	PaidAt        sql.NullTime          `json:"paid_at"`
-	RawPayload    pqtype.NullRawMessage `json:"raw_payload"`
+	TransactionID uuid.UUID      `json:"transaction_id"`
+	PaidAt        sql.NullTime   `json:"paid_at"`
+	RawPayload    sql.NullString `json:"raw_payload"`
 }
 
 func (q *Queries) MarkPaymentTransactionPaid(ctx context.Context, arg MarkPaymentTransactionPaidParams) (PaymentTransaction, error) {
@@ -300,9 +298,9 @@ RETURNING transaction_id, user_id, subscription_id, provider, provider_payment_i
 `
 
 type MarkPaymentTransactionStatusParams struct {
-	TransactionID uuid.UUID             `json:"transaction_id"`
-	Status        PaymentStatus         `json:"status"`
-	RawPayload    pqtype.NullRawMessage `json:"raw_payload"`
+	TransactionID uuid.UUID      `json:"transaction_id"`
+	Status        PaymentStatus  `json:"status"`
+	RawPayload    sql.NullString `json:"raw_payload"`
 }
 
 func (q *Queries) MarkPaymentTransactionStatus(ctx context.Context, arg MarkPaymentTransactionStatusParams) (PaymentTransaction, error) {
@@ -335,8 +333,8 @@ RETURNING webhook_event_id, provider, event_key, raw_payload, processed_at
 `
 
 type RecordWebhookEventParams struct {
-	EventKey   string          `json:"event_key"`
-	RawPayload json.RawMessage `json:"raw_payload"`
+	EventKey   string `json:"event_key"`
+	RawPayload string `json:"raw_payload"`
 }
 
 func (q *Queries) RecordWebhookEvent(ctx context.Context, arg RecordWebhookEventParams) (PaymentWebhookEvent, error) {

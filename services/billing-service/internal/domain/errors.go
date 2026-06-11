@@ -9,4 +9,8 @@ var (
 	ErrInvalidWebhook       = errors.New("invalid payos webhook")
 	ErrDuplicateWebhook     = errors.New("duplicate webhook")
 	ErrAmountMismatch       = errors.New("payment amount mismatch")
+	ErrEarningNotFound      = errors.New("creator earning not found")
+	ErrInvalidPayout        = errors.New("invalid payout request")
+	ErrPayoutAmountTooSmall = errors.New("payout amount must be over 100000 VND")
+	ErrPayoutNotAllowed     = errors.New("creator earning is not eligible for payout")
 )

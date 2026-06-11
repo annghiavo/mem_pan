@@ -21,6 +21,7 @@ type UserRepository interface {
 	UpdateUserRole(ctx context.Context, arg db.UpdateUserRoleParams) (db.User, error)
 	UpdatePassword(ctx context.Context, arg db.UpdatePasswordParams) error
 	UpdateLastLogin(ctx context.Context, id uuid.UUID) error
+	UpdateUserPlusStatus(ctx context.Context, id uuid.UUID, isPlus bool) error
 	MarkEmailVerified(ctx context.Context, id uuid.UUID) error
 	BanUser(ctx context.Context, arg db.BanUserParams) error
 	UnbanUser(ctx context.Context, id uuid.UUID) error
@@ -97,6 +98,13 @@ func (r *userRepository) UpdatePassword(ctx context.Context, arg db.UpdatePasswo
 
 func (r *userRepository) UpdateLastLogin(ctx context.Context, id uuid.UUID) error {
 	return r.q.UpdateLastLogin(ctx, id)
+}
+
+func (r *userRepository) UpdateUserPlusStatus(ctx context.Context, id uuid.UUID, isPlus bool) error {
+	return r.q.UpdateUserPlusStatus(ctx, db.UpdateUserPlusStatusParams{
+		UserID: id,
+		IsPlus: isPlus,
+	})
 }
 
 func (r *userRepository) MarkEmailVerified(ctx context.Context, id uuid.UUID) error {

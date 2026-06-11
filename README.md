@@ -65,6 +65,9 @@ Direct service URLs (cho debug):
   search        → https://search-service-wzed7v5hbq-as.a.run.app
 ```
 
+Billing-service deployment and PayOS payout status:
+`doc/billing-service-deployment.md`
+
 ## CI Deploy (GitHub Actions, matrix parallel)
 
 File: `.github/workflows/deploy.yml`. Trigger:

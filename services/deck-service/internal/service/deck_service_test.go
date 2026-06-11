@@ -412,7 +412,7 @@ func TestCloneDeck_Success(t *testing.T) {
 	deckRepo.EXPECT().CloneDeck(ctx, srcDeck, newOwnerID, "Copy of "+srcDeck.Name).Return(clonedDeck, []db.ListCardsByDeckRow{}, nil)
 
 	svc := NewDeckService(deckRepo, cardRepo)
-	result, err := svc.CloneDeck(ctx, srcDeckID, newOwnerID)
+	result, err := svc.CloneDeck(ctx, srcDeckID, newOwnerID, false)
 
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
@@ -439,7 +439,7 @@ func TestCloneDeck_PrivateForbidden(t *testing.T) {
 	deckRepo.EXPECT().GetDeckByID(ctx, srcDeckID).Return(srcDeck, nil)
 
 	svc := NewDeckService(deckRepo, cardRepo)
-	_, err := svc.CloneDeck(ctx, srcDeckID, otherID)
+	_, err := svc.CloneDeck(ctx, srcDeckID, otherID, false)
 
 	if !errors.Is(err, domain.ErrForbidden) {
 		t.Errorf("expected ErrForbidden, got %v", err)

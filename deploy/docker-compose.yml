@@ -119,6 +119,15 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.billing.entrypoints=web"
       - "traefik.http.routers.billing.rule=PathPrefix(`/v1/billing`)"
+      - "traefik.http.routers.billing.service=billing"
+      - "traefik.http.routers.billing-admin-revenue.entrypoints=web"
+      - "traefik.http.routers.billing-admin-revenue.rule=PathPrefix(`/v1/admin/revenue`)"
+      - "traefik.http.routers.billing-admin-revenue.priority=100"
+      - "traefik.http.routers.billing-admin-revenue.service=billing"
+      - "traefik.http.routers.billing-creators.entrypoints=web"
+      - "traefik.http.routers.billing-creators.rule=PathPrefix(`/v1/creators`)"
+      - "traefik.http.routers.billing-creators.priority=100"
+      - "traefik.http.routers.billing-creators.service=billing"
       - "traefik.http.services.billing.loadbalancer.server.port=8088"
     networks:
       - gateway

@@ -44,6 +44,7 @@ type UserService interface {
 	ListUsers(ctx context.Context, params ListUsersParams) (ListUsersResult, error)
 	BanUser(ctx context.Context, userID uuid.UUID, reason string) (db.User, error)
 	UnbanUser(ctx context.Context, userID uuid.UUID) (db.User, error)
+	UpdateUserPlusStatus(ctx context.Context, userID uuid.UUID, isPlus bool) error
 }
 
 type userService struct {
@@ -140,4 +141,8 @@ func (s *userService) ChangePassword(ctx context.Context, params ChangePasswordP
 		UserID:       params.UserID,
 		PasswordHash: string(hashed),
 	})
+}
+
+func (s *userService) UpdateUserPlusStatus(ctx context.Context, userID uuid.UUID, isPlus bool) error {
+	return s.userRepo.UpdateUserPlusStatus(ctx, userID, isPlus)
 }

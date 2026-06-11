@@ -66,7 +66,7 @@ func (s *Server) UpsertDeckReview(ctx context.Context, req *pb.UpsertDeckReviewR
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid deck_id")
 	}
-	review, deck, err := s.deckSvc.UpsertDeckReview(ctx, deckID, payload.UserID, req.Rating)
+	review, deck, err := s.deckSvc.UpsertDeckReview(ctx, deckID, payload.UserID, req.Rating, payload.IsPlus)
 	if err != nil {
 		return nil, toGRPCError(err)
 	}

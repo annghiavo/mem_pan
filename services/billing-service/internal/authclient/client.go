@@ -23,6 +23,7 @@ type Payload struct {
 
 type Client interface {
 	VerifyToken(ctx context.Context, accessToken string) (*Payload, error)
+	UpdateUserPlusStatus(ctx context.Context, userID uuid.UUID, isPlus bool) error
 	Close() error
 }
 
@@ -58,6 +59,14 @@ func (c *grpcClient) VerifyToken(ctx context.Context, accessToken string) (*Payl
 		Username: resp.Username,
 		Role:     resp.Role,
 	}, nil
+}
+
+func (c *grpcClient) UpdateUserPlusStatus(ctx context.Context, userID uuid.UUID, isPlus bool) error {
+	_, err := c.authSvc.UpdateUserPlusStatus(ctx, &authpb.UpdateUserPlusStatusRequest{
+		UserId: userID.String(),
+		IsPlus: isPlus,
+	})
+	return err
 }
 
 func (c *grpcClient) Close() error {

@@ -246,7 +246,7 @@ func (s *Server) CloneDeck(ctx context.Context, req *pb.CloneDeckRequest) (*pb.C
 		return nil, status.Error(codes.InvalidArgument, "invalid deck_id")
 	}
 
-	deck, err := s.deckSvc.CloneDeck(ctx, deckID, payload.UserID, payload.Role)
+	deck, err := s.deckSvc.CloneDeck(ctx, deckID, payload.UserID, payload.IsPlus, payload.Role)
 	if err != nil {
 		return nil, toGRPCError(err)
 	}
@@ -287,7 +287,7 @@ func (s *Server) ListDeckCards(ctx context.Context, req *pb.ListDeckCardsRequest
 		return nil, status.Error(codes.InvalidArgument, "invalid deck_id")
 	}
 
-	cards, err := s.cardSvc.ListCardsByDeck(ctx, deckID, payload.UserID, payload.Role)
+	cards, err := s.cardSvc.ListCardsByDeck(ctx, deckID, payload.UserID, payload.IsPlus, payload.Role)
 	if err != nil {
 		return nil, toGRPCError(err)
 	}

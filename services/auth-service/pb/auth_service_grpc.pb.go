@@ -19,25 +19,26 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_RegisterUser_FullMethodName       = "/pb.AuthService/RegisterUser"
-	AuthService_LoginUser_FullMethodName          = "/pb.AuthService/LoginUser"
-	AuthService_RefreshToken_FullMethodName       = "/pb.AuthService/RefreshToken"
-	AuthService_Logout_FullMethodName             = "/pb.AuthService/Logout"
-	AuthService_VerifyEmail_FullMethodName        = "/pb.AuthService/VerifyEmail"
-	AuthService_ResendVerification_FullMethodName = "/pb.AuthService/ResendVerification"
-	AuthService_ForgotPassword_FullMethodName     = "/pb.AuthService/ForgotPassword"
-	AuthService_ResetPassword_FullMethodName      = "/pb.AuthService/ResetPassword"
-	AuthService_GetPublicProfile_FullMethodName   = "/pb.AuthService/GetPublicProfile"
-	AuthService_GetUser_FullMethodName            = "/pb.AuthService/GetUser"
-	AuthService_UpdateUser_FullMethodName         = "/pb.AuthService/UpdateUser"
-	AuthService_ChangePassword_FullMethodName     = "/pb.AuthService/ChangePassword"
-	AuthService_UploadAvatar_FullMethodName       = "/pb.AuthService/UploadAvatar"
-	AuthService_ReportUser_FullMethodName         = "/pb.AuthService/ReportUser"
-	AuthService_VerifyToken_FullMethodName        = "/pb.AuthService/VerifyToken"
-	AuthService_GetUserByID_FullMethodName        = "/pb.AuthService/GetUserByID"
-	AuthService_SetUserRole_FullMethodName        = "/pb.AuthService/SetUserRole"
-	AuthService_ListUsers_FullMethodName          = "/pb.AuthService/ListUsers"
-	AuthService_BanUser_FullMethodName            = "/pb.AuthService/BanUser"
+	AuthService_RegisterUser_FullMethodName         = "/pb.AuthService/RegisterUser"
+	AuthService_LoginUser_FullMethodName            = "/pb.AuthService/LoginUser"
+	AuthService_RefreshToken_FullMethodName         = "/pb.AuthService/RefreshToken"
+	AuthService_Logout_FullMethodName               = "/pb.AuthService/Logout"
+	AuthService_VerifyEmail_FullMethodName          = "/pb.AuthService/VerifyEmail"
+	AuthService_ResendVerification_FullMethodName   = "/pb.AuthService/ResendVerification"
+	AuthService_ForgotPassword_FullMethodName       = "/pb.AuthService/ForgotPassword"
+	AuthService_ResetPassword_FullMethodName        = "/pb.AuthService/ResetPassword"
+	AuthService_GetPublicProfile_FullMethodName     = "/pb.AuthService/GetPublicProfile"
+	AuthService_GetUser_FullMethodName              = "/pb.AuthService/GetUser"
+	AuthService_UpdateUser_FullMethodName           = "/pb.AuthService/UpdateUser"
+	AuthService_ChangePassword_FullMethodName       = "/pb.AuthService/ChangePassword"
+	AuthService_UploadAvatar_FullMethodName         = "/pb.AuthService/UploadAvatar"
+	AuthService_ReportUser_FullMethodName           = "/pb.AuthService/ReportUser"
+	AuthService_VerifyToken_FullMethodName          = "/pb.AuthService/VerifyToken"
+	AuthService_GetUserByID_FullMethodName          = "/pb.AuthService/GetUserByID"
+	AuthService_SetUserRole_FullMethodName          = "/pb.AuthService/SetUserRole"
+	AuthService_ListUsers_FullMethodName            = "/pb.AuthService/ListUsers"
+	AuthService_BanUser_FullMethodName              = "/pb.AuthService/BanUser"
+	AuthService_UpdateUserPlusStatus_FullMethodName = "/pb.AuthService/UpdateUserPlusStatus"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -70,6 +71,7 @@ type AuthServiceClient interface {
 	SetUserRole(ctx context.Context, in *SetUserRoleRequest, opts ...grpc.CallOption) (*SetUserRoleResponse, error)
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
 	BanUser(ctx context.Context, in *BanUserRequest, opts ...grpc.CallOption) (*BanUserResponse, error)
+	UpdateUserPlusStatus(ctx context.Context, in *UpdateUserPlusStatusRequest, opts ...grpc.CallOption) (*UpdateUserPlusStatusResponse, error)
 }
 
 type authServiceClient struct {
@@ -270,6 +272,16 @@ func (c *authServiceClient) BanUser(ctx context.Context, in *BanUserRequest, opt
 	return out, nil
 }
 
+func (c *authServiceClient) UpdateUserPlusStatus(ctx context.Context, in *UpdateUserPlusStatusRequest, opts ...grpc.CallOption) (*UpdateUserPlusStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUserPlusStatusResponse)
+	err := c.cc.Invoke(ctx, AuthService_UpdateUserPlusStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -300,6 +312,7 @@ type AuthServiceServer interface {
 	SetUserRole(context.Context, *SetUserRoleRequest) (*SetUserRoleResponse, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
 	BanUser(context.Context, *BanUserRequest) (*BanUserResponse, error)
+	UpdateUserPlusStatus(context.Context, *UpdateUserPlusStatusRequest) (*UpdateUserPlusStatusResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -366,6 +379,9 @@ func (UnimplementedAuthServiceServer) ListUsers(context.Context, *ListUsersReque
 }
 func (UnimplementedAuthServiceServer) BanUser(context.Context, *BanUserRequest) (*BanUserResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method BanUser not implemented")
+}
+func (UnimplementedAuthServiceServer) UpdateUserPlusStatus(context.Context, *UpdateUserPlusStatusRequest) (*UpdateUserPlusStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateUserPlusStatus not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -730,6 +746,24 @@ func _AuthService_BanUser_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_UpdateUserPlusStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserPlusStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).UpdateUserPlusStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_UpdateUserPlusStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).UpdateUserPlusStatus(ctx, req.(*UpdateUserPlusStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -812,6 +846,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "BanUser",
 			Handler:    _AuthService_BanUser_Handler,
+		},
+		{
+			MethodName: "UpdateUserPlusStatus",
+			Handler:    _AuthService_UpdateUserPlusStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

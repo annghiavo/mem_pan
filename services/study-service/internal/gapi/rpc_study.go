@@ -37,6 +37,7 @@ func (s *Server) StartSession(ctx context.Context, req *pb.StartSessionRequest) 
 		ReviewLimit:   req.ReviewLimit,
 		AccessToken:   token,
 		Role:          payload.Role,
+		IsPlus:        payload.IsPlus,
 	})
 	if err != nil {
 		return nil, toGRPCError(err)

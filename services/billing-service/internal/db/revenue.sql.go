@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,7 +23,7 @@ INSERT INTO creator_earnings (
     status
 ) VALUES (
     $1, $2, $3, $4, $5, $6
-) RETURNING earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at
+) RETURNING earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason
 `
 
 type CreateCreatorEarningParams struct {
@@ -54,6 +55,17 @@ func (q *Queries) CreateCreatorEarning(ctx context.Context, arg CreateCreatorEar
 		&i.Status,
 		&i.PaidAt,
 		&i.CreatedAt,
+		&i.PayoutReferenceID,
+		&i.PayoutIdempotencyKey,
+		&i.PayoutToBin,
+		&i.PayoutToAccountNumber,
+		&i.PayoutToAccountName,
+		&i.PayosPayoutID,
+		&i.PayosPayoutTransactionID,
+		&i.PayosPayoutState,
+		&i.PayoutRawPayload,
+		&i.PayoutRequestedAt,
+		&i.PayoutFailedReason,
 	)
 	return i, err
 }
@@ -98,8 +110,42 @@ func (q *Queries) CreateMonthlyRevenuePool(ctx context.Context, arg CreateMonthl
 	return i, err
 }
 
+const getCreatorEarningByID = `-- name: GetCreatorEarningByID :one
+SELECT earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason FROM creator_earnings
+WHERE earning_id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetCreatorEarningByID(ctx context.Context, earningID uuid.UUID) (CreatorEarning, error) {
+	row := q.db.QueryRowContext(ctx, getCreatorEarningByID, earningID)
+	var i CreatorEarning
+	err := row.Scan(
+		&i.EarningID,
+		&i.PoolMonth,
+		&i.CreatorID,
+		&i.EligibleLearners,
+		&i.WeightedScore,
+		&i.AmountVnd,
+		&i.Status,
+		&i.PaidAt,
+		&i.CreatedAt,
+		&i.PayoutReferenceID,
+		&i.PayoutIdempotencyKey,
+		&i.PayoutToBin,
+		&i.PayoutToAccountNumber,
+		&i.PayoutToAccountName,
+		&i.PayosPayoutID,
+		&i.PayosPayoutTransactionID,
+		&i.PayosPayoutState,
+		&i.PayoutRawPayload,
+		&i.PayoutRequestedAt,
+		&i.PayoutFailedReason,
+	)
+	return i, err
+}
+
 const getCreatorEarningsByMonth = `-- name: GetCreatorEarningsByMonth :many
-SELECT earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at FROM creator_earnings
+SELECT earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason FROM creator_earnings
 WHERE pool_month = $1
 ORDER BY amount_vnd DESC
 `
@@ -123,6 +169,17 @@ func (q *Queries) GetCreatorEarningsByMonth(ctx context.Context, poolMonth time.
 			&i.Status,
 			&i.PaidAt,
 			&i.CreatedAt,
+			&i.PayoutReferenceID,
+			&i.PayoutIdempotencyKey,
+			&i.PayoutToBin,
+			&i.PayoutToAccountNumber,
+			&i.PayoutToAccountName,
+			&i.PayosPayoutID,
+			&i.PayosPayoutTransactionID,
+			&i.PayosPayoutState,
+			&i.PayoutRawPayload,
+			&i.PayoutRequestedAt,
+			&i.PayoutFailedReason,
 		); err != nil {
 			return nil, err
 		}
@@ -173,7 +230,7 @@ func (q *Queries) GetMonthlyRevenuePools(ctx context.Context) ([]MonthlyRevenueP
 }
 
 const getMyEarnings = `-- name: GetMyEarnings :many
-SELECT earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at FROM creator_earnings
+SELECT earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason FROM creator_earnings
 WHERE creator_id = $1
 ORDER BY pool_month DESC
 `
@@ -197,6 +254,17 @@ func (q *Queries) GetMyEarnings(ctx context.Context, creatorID uuid.UUID) ([]Cre
 			&i.Status,
 			&i.PaidAt,
 			&i.CreatedAt,
+			&i.PayoutReferenceID,
+			&i.PayoutIdempotencyKey,
+			&i.PayoutToBin,
+			&i.PayoutToAccountNumber,
+			&i.PayoutToAccountName,
+			&i.PayosPayoutID,
+			&i.PayosPayoutTransactionID,
+			&i.PayosPayoutState,
+			&i.PayoutRawPayload,
+			&i.PayoutRequestedAt,
+			&i.PayoutFailedReason,
 		); err != nil {
 			return nil, err
 		}
@@ -211,15 +279,30 @@ func (q *Queries) GetMyEarnings(ctx context.Context, creatorID uuid.UUID) ([]Cre
 	return items, nil
 }
 
-const markCreatorEarningPaid = `-- name: MarkCreatorEarningPaid :one
+const markCreatorEarningPayoutFailed = `-- name: MarkCreatorEarningPayoutFailed :one
 UPDATE creator_earnings
-SET status = 'paid', paid_at = CURRENT_TIMESTAMP
+SET status = 'failed',
+    payos_payout_state = $2,
+    payout_raw_payload = $3,
+    payout_failed_reason = $4
 WHERE earning_id = $1
-RETURNING earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at
+RETURNING earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason
 `
 
-func (q *Queries) MarkCreatorEarningPaid(ctx context.Context, earningID uuid.UUID) (CreatorEarning, error) {
-	row := q.db.QueryRowContext(ctx, markCreatorEarningPaid, earningID)
+type MarkCreatorEarningPayoutFailedParams struct {
+	EarningID          uuid.UUID      `json:"earning_id"`
+	PayosPayoutState   sql.NullString `json:"payos_payout_state"`
+	PayoutRawPayload   sql.NullString `json:"payout_raw_payload"`
+	PayoutFailedReason sql.NullString `json:"payout_failed_reason"`
+}
+
+func (q *Queries) MarkCreatorEarningPayoutFailed(ctx context.Context, arg MarkCreatorEarningPayoutFailedParams) (CreatorEarning, error) {
+	row := q.db.QueryRowContext(ctx, markCreatorEarningPayoutFailed,
+		arg.EarningID,
+		arg.PayosPayoutState,
+		arg.PayoutRawPayload,
+		arg.PayoutFailedReason,
+	)
 	var i CreatorEarning
 	err := row.Scan(
 		&i.EarningID,
@@ -231,6 +314,133 @@ func (q *Queries) MarkCreatorEarningPaid(ctx context.Context, earningID uuid.UUI
 		&i.Status,
 		&i.PaidAt,
 		&i.CreatedAt,
+		&i.PayoutReferenceID,
+		&i.PayoutIdempotencyKey,
+		&i.PayoutToBin,
+		&i.PayoutToAccountNumber,
+		&i.PayoutToAccountName,
+		&i.PayosPayoutID,
+		&i.PayosPayoutTransactionID,
+		&i.PayosPayoutState,
+		&i.PayoutRawPayload,
+		&i.PayoutRequestedAt,
+		&i.PayoutFailedReason,
+	)
+	return i, err
+}
+
+const markCreatorEarningPayoutPaid = `-- name: MarkCreatorEarningPayoutPaid :one
+UPDATE creator_earnings
+SET status = $5,
+    paid_at = CASE WHEN $5 = 'paid' THEN CURRENT_TIMESTAMP ELSE paid_at END,
+    payos_payout_id = $2,
+    payos_payout_transaction_id = $3,
+    payos_payout_state = $4,
+    payout_raw_payload = $6,
+    payout_failed_reason = NULL
+WHERE earning_id = $1
+RETURNING earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason
+`
+
+type MarkCreatorEarningPayoutPaidParams struct {
+	EarningID                uuid.UUID      `json:"earning_id"`
+	PayosPayoutID            sql.NullString `json:"payos_payout_id"`
+	PayosPayoutTransactionID sql.NullString `json:"payos_payout_transaction_id"`
+	PayosPayoutState         sql.NullString `json:"payos_payout_state"`
+	Status                   string         `json:"status"`
+	PayoutRawPayload         sql.NullString `json:"payout_raw_payload"`
+}
+
+func (q *Queries) MarkCreatorEarningPayoutPaid(ctx context.Context, arg MarkCreatorEarningPayoutPaidParams) (CreatorEarning, error) {
+	row := q.db.QueryRowContext(ctx, markCreatorEarningPayoutPaid,
+		arg.EarningID,
+		arg.PayosPayoutID,
+		arg.PayosPayoutTransactionID,
+		arg.PayosPayoutState,
+		arg.Status,
+		arg.PayoutRawPayload,
+	)
+	var i CreatorEarning
+	err := row.Scan(
+		&i.EarningID,
+		&i.PoolMonth,
+		&i.CreatorID,
+		&i.EligibleLearners,
+		&i.WeightedScore,
+		&i.AmountVnd,
+		&i.Status,
+		&i.PaidAt,
+		&i.CreatedAt,
+		&i.PayoutReferenceID,
+		&i.PayoutIdempotencyKey,
+		&i.PayoutToBin,
+		&i.PayoutToAccountNumber,
+		&i.PayoutToAccountName,
+		&i.PayosPayoutID,
+		&i.PayosPayoutTransactionID,
+		&i.PayosPayoutState,
+		&i.PayoutRawPayload,
+		&i.PayoutRequestedAt,
+		&i.PayoutFailedReason,
+	)
+	return i, err
+}
+
+const markCreatorEarningPayoutProcessing = `-- name: MarkCreatorEarningPayoutProcessing :one
+UPDATE creator_earnings
+SET status = 'processing',
+    payout_reference_id = $2,
+    payout_idempotency_key = $3,
+    payout_to_bin = $4,
+    payout_to_account_number = $5,
+    payout_to_account_name = $6,
+    payout_requested_at = CURRENT_TIMESTAMP,
+    payout_failed_reason = NULL
+WHERE earning_id = $1
+  AND status IN ('pending', 'failed')
+RETURNING earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason
+`
+
+type MarkCreatorEarningPayoutProcessingParams struct {
+	EarningID             uuid.UUID      `json:"earning_id"`
+	PayoutReferenceID     sql.NullString `json:"payout_reference_id"`
+	PayoutIdempotencyKey  sql.NullString `json:"payout_idempotency_key"`
+	PayoutToBin           sql.NullString `json:"payout_to_bin"`
+	PayoutToAccountNumber sql.NullString `json:"payout_to_account_number"`
+	PayoutToAccountName   sql.NullString `json:"payout_to_account_name"`
+}
+
+func (q *Queries) MarkCreatorEarningPayoutProcessing(ctx context.Context, arg MarkCreatorEarningPayoutProcessingParams) (CreatorEarning, error) {
+	row := q.db.QueryRowContext(ctx, markCreatorEarningPayoutProcessing,
+		arg.EarningID,
+		arg.PayoutReferenceID,
+		arg.PayoutIdempotencyKey,
+		arg.PayoutToBin,
+		arg.PayoutToAccountNumber,
+		arg.PayoutToAccountName,
+	)
+	var i CreatorEarning
+	err := row.Scan(
+		&i.EarningID,
+		&i.PoolMonth,
+		&i.CreatorID,
+		&i.EligibleLearners,
+		&i.WeightedScore,
+		&i.AmountVnd,
+		&i.Status,
+		&i.PaidAt,
+		&i.CreatedAt,
+		&i.PayoutReferenceID,
+		&i.PayoutIdempotencyKey,
+		&i.PayoutToBin,
+		&i.PayoutToAccountNumber,
+		&i.PayoutToAccountName,
+		&i.PayosPayoutID,
+		&i.PayosPayoutTransactionID,
+		&i.PayosPayoutState,
+		&i.PayoutRawPayload,
+		&i.PayoutRequestedAt,
+		&i.PayoutFailedReason,
 	)
 	return i, err
 }

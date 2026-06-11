@@ -10,7 +10,6 @@ import (
 
 	"github.com/google/uuid"
 
-	"mem_pan/services/deck-service/internal/billingclient"
 	"mem_pan/services/deck-service/internal/db"
 	"mem_pan/services/deck-service/internal/domain"
 	"mem_pan/services/deck-service/internal/publisher"
@@ -87,7 +86,7 @@ type DeckService interface {
 	UpdateSettings(ctx context.Context, deckID, userID uuid.UUID, settings DeckSettings) (db.Deck, error)
 	UpdateVisibility(ctx context.Context, deckID, userID uuid.UUID, isPublic bool) (db.Deck, error)
 	UpdateAccessLevel(ctx context.Context, deckID, userID uuid.UUID, accessLevel string) (db.Deck, error)
-	CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uuid.UUID, role ...string) (db.Deck, error)
+	CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uuid.UUID, isPlus bool, role ...string) (db.Deck, error)
 	GetStats(ctx context.Context, deckID, userID uuid.UUID) (DeckStats, error)
 	AdminUpdateDeckStatus(ctx context.Context, deckID uuid.UUID, status string) (db.Deck, error)
 	AdminReviewDeckPlus(ctx context.Context, deckID uuid.UUID, plusStatus string) (db.Deck, error)
@@ -95,29 +94,25 @@ type DeckService interface {
 	UpsertCreatorProfile(ctx context.Context, p CreatorProfileParams) (db.CreatorProfile, error)
 	GetCreatorProfile(ctx context.Context, userID uuid.UUID) (db.CreatorProfile, error)
 	FollowCreator(ctx context.Context, creatorID, followerID uuid.UUID) error
-	UpsertDeckReview(ctx context.Context, deckID, userID uuid.UUID, rating int32) (db.DeckReview, db.Deck, error)
+	UpsertDeckReview(ctx context.Context, deckID, userID uuid.UUID, rating int32, isPlus bool) (db.DeckReview, db.Deck, error)
 	ListDeckReviews(ctx context.Context, deckID uuid.UUID, limit, offset int32) ([]db.DeckReview, error)
 }
 
 type deckService struct {
 	deckRepo repository.DeckRepository
 	cardRepo repository.CardRepository
-	billing  billingclient.Client
 	pub      publisher.EventPublisher
 }
 
 func NewDeckService(deckRepo repository.DeckRepository, cardRepo repository.CardRepository, opts ...interface{}) DeckService {
 	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
-	var billing billingclient.Client
 	for _, opt := range opts {
 		switch v := opt.(type) {
 		case publisher.EventPublisher:
 			pub = v
-		case billingclient.Client:
-			billing = v
 		}
 	}
-	return &deckService{deckRepo: deckRepo, cardRepo: cardRepo, billing: billing, pub: pub}
+	return &deckService{deckRepo: deckRepo, cardRepo: cardRepo, pub: pub}
 }
 
 func (s *deckService) CreateDeck(ctx context.Context, p CreateDeckParams) (db.Deck, error) {
@@ -369,7 +364,7 @@ func (s *deckService) UpdateAccessLevel(ctx context.Context, deckID, userID uuid
 	return updated, nil
 }
 
-func (s *deckService) CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uuid.UUID, role ...string) (db.Deck, error) {
+func (s *deckService) CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uuid.UUID, isPlus bool, role ...string) (db.Deck, error) {
 	src, err := s.deckRepo.GetDeckByID(ctx, sourceDeckID)
 	if err != nil {
 		return db.Deck{}, err
@@ -377,7 +372,7 @@ func (s *deckService) CloneDeck(ctx context.Context, sourceDeckID, newOwnerID uu
 	if src.Status == string(db.ContentStatusDeleted) {
 		return db.Deck{}, domain.ErrDeckNotFound
 	}
-	if err := requireFullDeckAccess(ctx, src, newOwnerID, firstRole(role), s.billing); err != nil {
+	if err := requireFullDeckAccess(ctx, src, newOwnerID, firstRole(role), isPlus); err != nil {
 		return db.Deck{}, err
 	}
 	clonedName := "Copy of " + src.Name
@@ -506,7 +501,7 @@ func (s *deckService) FollowCreator(ctx context.Context, creatorID, followerID u
 	return s.deckRepo.FollowCreator(ctx, creatorID, followerID)
 }
 
-func (s *deckService) UpsertDeckReview(ctx context.Context, deckID, userID uuid.UUID, rating int32) (db.DeckReview, db.Deck, error) {
+func (s *deckService) UpsertDeckReview(ctx context.Context, deckID, userID uuid.UUID, rating int32, isPlus bool) (db.DeckReview, db.Deck, error) {
 	if rating < 1 || rating > 5 {
 		return db.DeckReview{}, db.Deck{}, domain.ErrReviewNotAllowed
 	}
@@ -521,14 +516,7 @@ func (s *deckService) UpsertDeckReview(ctx context.Context, deckID, userID uuid.
 		if deck.PlusStatus != db.DeckPlusStatusApproved {
 			return db.DeckReview{}, db.Deck{}, domain.ErrReviewNotAllowed
 		}
-		if s.billing == nil {
-			return db.DeckReview{}, db.Deck{}, domain.ErrPlusRequired
-		}
-		active, err := s.billing.CheckPlusAccess(ctx, userID)
-		if err != nil {
-			return db.DeckReview{}, db.Deck{}, err
-		}
-		if !active {
+		if !isPlus {
 			return db.DeckReview{}, db.Deck{}, domain.ErrPlusRequired
 		}
 	}

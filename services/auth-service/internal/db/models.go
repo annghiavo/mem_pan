@@ -125,6 +125,7 @@ type User struct {
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	Timezone      string         `json:"timezone"`
+	IsPlus        bool           `json:"is_plus"`
 }
 
 type VerificationToken struct {

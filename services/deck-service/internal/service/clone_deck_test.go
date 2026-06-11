@@ -236,7 +236,7 @@ func TestDeckService_CloneDeck(t *testing.T) {
 			tc.setup(d)
 
 			svc := NewDeckService(d.deckRepo, d.cardRepo, d.pub)
-			got, err := svc.CloneDeck(context.Background(), tc.sourceID, tc.newOwner)
+			got, err := svc.CloneDeck(context.Background(), tc.sourceID, tc.newOwner, false)
 
 			if tc.wantErr != nil {
 				require.ErrorIs(t, err, tc.wantErr)

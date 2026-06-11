@@ -79,16 +79,20 @@ RETURNING *;
 UPDATE decks
 SET access_level = $3,
     plus_status = CASE
-        WHEN $3::deck_access_level = 'plus' THEN 'submitted'::deck_plus_status
+        WHEN $3::deck_access_level = 'plus' THEN 'approved'::deck_plus_status
         ELSE 'none'::deck_plus_status
     END,
     plus_submitted_at = CASE
+        WHEN $3::deck_access_level = 'plus' THEN COALESCE(plus_submitted_at, now())
+        ELSE NULL
+    END,
+    plus_approved_at = CASE
         WHEN $3::deck_access_level = 'plus' THEN now()
         ELSE NULL
     END,
-    plus_approved_at = NULL,
     is_public = CASE
         WHEN $3::deck_access_level = 'private' THEN FALSE
+        WHEN $3::deck_access_level = 'plus' THEN TRUE
         ELSE is_public
     END,
     updated_at = now()

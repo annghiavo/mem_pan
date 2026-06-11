@@ -22,7 +22,7 @@ func (s *Server) GetCard(ctx context.Context, req *pb.GetCardRequest) (*pb.GetCa
 		return nil, status.Error(codes.InvalidArgument, "invalid card_id")
 	}
 
-	card, err := s.cardSvc.GetCard(ctx, cardID, payload.UserID, payload.Role)
+	card, err := s.cardSvc.GetCard(ctx, cardID, payload.UserID, payload.IsPlus, payload.Role)
 	if err != nil {
 		return nil, toGRPCError(err)
 	}

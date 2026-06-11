@@ -9,11 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sqlc-dev/pqtype"
-
+	"mem_pan/services/billing-service/internal/authclient"
 	"mem_pan/services/billing-service/internal/db"
 	"mem_pan/services/billing-service/internal/domain"
 	"mem_pan/services/billing-service/internal/payos"
@@ -23,6 +23,8 @@ import (
 const (
 	PlanPlusMonthly = "plus_monthly"
 	PlanPlusYearly  = "plus_yearly"
+
+	MinimumPayoutAmountVND = int64(100000)
 )
 
 type Plan struct {
@@ -40,21 +42,21 @@ type CheckoutInput struct {
 }
 
 type CheckoutResult struct {
-	SubscriptionID string
-	TransactionID  string
-	OrderCode      int64
-	PaymentLinkID  string
-	CheckoutURL    string
-	AmountVND      int64
-	Status         string
+	SubscriptionID string `json:"subscription_id"`
+	TransactionID  string `json:"transaction_id"`
+	OrderCode      int64  `json:"order_code"`
+	PaymentLinkID  string `json:"payment_link_id"`
+	CheckoutURL    string `json:"checkout_url"`
+	AmountVND      int64  `json:"amount_vnd"`
+	Status         string `json:"status"`
 }
 
 type SubscriptionStatus struct {
-	Active           bool
-	SubscriptionID   string
-	PlanCode         string
-	Status           string
-	CurrentPeriodEnd time.Time
+	Active           bool      `json:"active"`
+	SubscriptionID   string    `json:"subscription_id,omitempty"`
+	PlanCode         string    `json:"plan_code,omitempty"`
+	Status           string    `json:"status"`
+	CurrentPeriodEnd time.Time `json:"current_period_end,omitempty"`
 }
 
 type WebhookInput struct {
@@ -70,32 +72,74 @@ type PayOSWebhook struct {
 	Signature string         `json:"signature"`
 }
 
+type PayoutInput struct {
+	EarningID       uuid.UUID
+	ToBin           string
+	ToAccountNumber string
+	ToAccountName   string
+	Description     string
+	Category        []string
+}
+
+type BatchPayoutInput struct {
+	Payouts  []PayoutInput
+	Category []string
+}
+
+type PayoutResult struct {
+	Earning       db.CreatorEarning `json:"earning"`
+	PayoutID      string            `json:"payout_id"`
+	TransactionID string            `json:"transaction_id"`
+	ReferenceID   string            `json:"reference_id"`
+	State         string            `json:"state"`
+	Status        string            `json:"status"`
+}
+
+type BatchPayoutResult struct {
+	BatchPayoutID string         `json:"batch_payout_id"`
+	ReferenceID   string         `json:"reference_id"`
+	Results       []PayoutResult `json:"results"`
+}
+
+type ConfirmPaymentResult struct {
+	Status         string `json:"status"`
+	SubscriptionID string `json:"subscription_id,omitempty"`
+	PlanCode       string `json:"plan_code,omitempty"`
+	PaidAt         string `json:"paid_at,omitempty"`
+	Active         bool   `json:"active"`
+}
+
 type BillingService interface {
 	CreateCheckout(ctx context.Context, in CheckoutInput) (CheckoutResult, error)
 	GetSubscriptionStatus(ctx context.Context, userID uuid.UUID) (SubscriptionStatus, error)
 	CheckPlusAccess(ctx context.Context, userID uuid.UUID) (SubscriptionStatus, error)
 	ProcessPayOSWebhook(ctx context.Context, in WebhookInput) error
+	ConfirmPayment(ctx context.Context, userID uuid.UUID, orderCode int64) (ConfirmPaymentResult, error)
 	ExpireSubscriptions(ctx context.Context) error
 
 	GetMonthlyRevenuePools(ctx context.Context) ([]db.MonthlyRevenuePool, error)
 	GetCreatorEarningsByMonth(ctx context.Context, poolMonth time.Time) ([]db.CreatorEarning, error)
 	GetMyEarnings(ctx context.Context, creatorID uuid.UUID) ([]db.CreatorEarning, error)
-	MarkCreatorEarningPaid(ctx context.Context, earningID uuid.UUID) (db.CreatorEarning, error)
+	PayoutCreatorEarning(ctx context.Context, in PayoutInput) (PayoutResult, error)
+	BatchPayoutCreatorEarnings(ctx context.Context, in BatchPayoutInput) (BatchPayoutResult, error)
+	GetPayoutAccountBalance(ctx context.Context) (payos.PayoutBalanceResponse, error)
 }
 
 type billingService struct {
 	repo             repository.BillingRepository
 	payosClient      *payos.Client
+	authClient       authclient.Client
 	plans            map[string]Plan
 	defaultReturnURL string
 	defaultCancelURL string
 	now              func() time.Time
 }
 
-func New(repo repository.BillingRepository, payosClient *payos.Client, monthlyAmount, yearlyAmount int64, returnURL, cancelURL string) BillingService {
+func New(repo repository.BillingRepository, payosClient *payos.Client, authClient authclient.Client, monthlyAmount, yearlyAmount int64, returnURL, cancelURL string) BillingService {
 	return &billingService{
 		repo:        repo,
 		payosClient: payosClient,
+		authClient:  authClient,
 		plans: map[string]Plan{
 			PlanPlusMonthly: {Code: PlanPlusMonthly, Name: "MemPan Plus Monthly", AmountVND: monthlyAmount, Duration: 30 * 24 * time.Hour},
 			PlanPlusYearly:  {Code: PlanPlusYearly, Name: "MemPan Plus Yearly", AmountVND: yearlyAmount, Duration: 365 * 24 * time.Hour},
@@ -175,7 +219,18 @@ func (s *billingService) GetSubscriptionStatus(ctx context.Context, userID uuid.
 	if err := s.repo.ExpireSubscriptions(ctx); err != nil {
 		return SubscriptionStatus{}, err
 	}
-	sub, err := s.repo.GetLatestSubscriptionForUser(ctx, userID)
+
+	// Always prioritize the active subscription if one exists.
+	sub, err := s.repo.GetActiveSubscriptionForUser(ctx, userID)
+	if err == nil {
+		return subscriptionStatus(sub), nil
+	}
+	if !errors.Is(err, domain.ErrSubscriptionNotFound) {
+		return SubscriptionStatus{}, err
+	}
+
+	// Fallback: get the latest created subscription (could be pending, expired, etc.)
+	sub, err = s.repo.GetLatestSubscriptionForUser(ctx, userID)
 	if err != nil {
 		if errors.Is(err, domain.ErrSubscriptionNotFound) {
 			return SubscriptionStatus{Active: false, Status: "none"}, nil
@@ -250,8 +305,18 @@ func (s *billingService) ProcessPayOSWebhook(ctx context.Context, in WebhookInpu
 			if !ok {
 				return domain.ErrInvalidPlan
 			}
-			_, err = s.repo.ActivateSubscription(ctx, sub.SubscriptionID, paidTime, paidTime.Add(plan.Duration))
-			return err
+			periodStart, periodEnd, err := s.activationPeriod(ctx, tx.UserID, sub.SubscriptionID, paidTime, plan.Duration)
+			if err != nil {
+				return err
+			}
+			_, err = s.repo.ActivateSubscription(ctx, sub.SubscriptionID, periodStart, periodEnd)
+			if err != nil {
+				return err
+			}
+			if err := s.authClient.UpdateUserPlusStatus(ctx, tx.UserID, true); err != nil {
+				return fmt.Errorf("sync plus status to auth-service: %w", err)
+			}
+			return nil
 		}
 		return nil
 	}
@@ -262,6 +327,142 @@ func (s *billingService) ProcessPayOSWebhook(ctx context.Context, in WebhookInpu
 	}
 	_, err = s.repo.MarkPaymentTransactionStatus(ctx, tx.TransactionID, status, in.RawPayload)
 	return err
+}
+
+// ConfirmPayment actively queries PayOS for the payment status and activates
+// the subscription if the payment has been completed. This is the primary
+// mechanism for subscription activation — called by the client after the user
+// returns from the PayOS checkout page.
+func (s *billingService) ConfirmPayment(ctx context.Context, userID uuid.UUID, orderCode int64) (ConfirmPaymentResult, error) {
+	// 1. Find our local payment transaction
+	tx, err := s.repo.GetPaymentTransactionByOrderCode(ctx, orderCode)
+	if err != nil {
+		return ConfirmPaymentResult{}, err
+	}
+
+	// Security: ensure the payment belongs to the requesting user
+	if tx.UserID != userID {
+		return ConfirmPaymentResult{}, domain.ErrPaymentNotFound
+	}
+
+	// If already paid, just return the current status
+	if tx.Status == db.PaymentStatusPaid {
+		var sub db.Subscription
+		if tx.SubscriptionID.Valid {
+			sub, _ = s.repo.GetSubscriptionByID(ctx, tx.SubscriptionID.UUID)
+		}
+		if sub.Status == db.SubscriptionStatusActive {
+			if err := s.authClient.UpdateUserPlusStatus(ctx, tx.UserID, true); err != nil {
+				return ConfirmPaymentResult{}, fmt.Errorf("sync plus status to auth-service: %w", err)
+			}
+		}
+		return ConfirmPaymentResult{
+			Status:         string(tx.Status),
+			SubscriptionID: uuidString(tx.SubscriptionID),
+			PlanCode:       sub.PlanCode,
+			Active:         sub.Status == db.SubscriptionStatusActive,
+		}, nil
+	}
+
+	// 2. Query PayOS for the actual payment status
+	info, raw, err := s.payosClient.GetPaymentLinkInfo(ctx, orderCode)
+	if err != nil {
+		return ConfirmPaymentResult{}, fmt.Errorf("failed to query payos: %w", err)
+	}
+
+	// 3. Process based on PayOS status
+	switch strings.ToUpper(info.Data.Status) {
+	case "PAID":
+		// Find the payment time from the first transaction
+		var paidAt *time.Time
+		if len(info.Data.Transactions) > 0 {
+			paidAt = parsePayOSTime(info.Data.Transactions[0].TransactionDateTime)
+		}
+
+		// Mark the transaction as paid
+		tx, err = s.repo.MarkPaymentTransactionPaid(ctx, tx.TransactionID, paidAt, raw)
+		if err != nil {
+			return ConfirmPaymentResult{}, err
+		}
+
+		// Activate the subscription
+		var sub db.Subscription
+		if tx.SubscriptionID.Valid {
+			paidTime := s.now().UTC()
+			if paidAt != nil {
+				paidTime = paidAt.UTC()
+			}
+			sub, err = s.repo.GetSubscriptionByID(ctx, tx.SubscriptionID.UUID)
+			if err != nil {
+				return ConfirmPaymentResult{}, err
+			}
+			plan, ok := s.plans[sub.PlanCode]
+			if !ok {
+				return ConfirmPaymentResult{}, domain.ErrInvalidPlan
+			}
+			periodStart, periodEnd, err := s.activationPeriod(ctx, tx.UserID, sub.SubscriptionID, paidTime, plan.Duration)
+			if err != nil {
+				return ConfirmPaymentResult{}, err
+			}
+			sub, err = s.repo.ActivateSubscription(ctx, sub.SubscriptionID, periodStart, periodEnd)
+			if err != nil {
+				return ConfirmPaymentResult{}, err
+			}
+			if err := s.authClient.UpdateUserPlusStatus(ctx, tx.UserID, true); err != nil {
+				return ConfirmPaymentResult{}, fmt.Errorf("sync plus status to auth-service: %w", err)
+			}
+		}
+
+		paidAtStr := ""
+		if paidAt != nil {
+			paidAtStr = paidAt.Format(time.RFC3339)
+		}
+		return ConfirmPaymentResult{
+			Status:         "paid",
+			SubscriptionID: uuidString(tx.SubscriptionID),
+			PlanCode:       sub.PlanCode,
+			PaidAt:         paidAtStr,
+			Active:         true,
+		}, nil
+
+	case "CANCELLED", "EXPIRED":
+		_, _ = s.repo.MarkPaymentTransactionStatus(ctx, tx.TransactionID, db.PaymentStatusCancelled, raw)
+		return ConfirmPaymentResult{Status: strings.ToLower(info.Data.Status)}, nil
+
+	default: // PENDING, PROCESSING
+		return ConfirmPaymentResult{Status: strings.ToLower(info.Data.Status)}, nil
+	}
+}
+
+func (s *billingService) activationPeriod(ctx context.Context, userID uuid.UUID, subscriptionID uuid.UUID, paidTime time.Time, duration time.Duration) (time.Time, time.Time, error) {
+	activeSub, err := s.repo.GetActiveSubscriptionForUser(ctx, userID)
+	if err != nil {
+		if errors.Is(err, domain.ErrSubscriptionNotFound) {
+			start, end := calculateActivationPeriod(subscriptionID, paidTime, duration, db.Subscription{}, false)
+			return start, end, nil
+		}
+		return time.Time{}, time.Time{}, err
+	}
+	start, end := calculateActivationPeriod(subscriptionID, paidTime, duration, activeSub, true)
+	return start, end, nil
+}
+
+func calculateActivationPeriod(subscriptionID uuid.UUID, paidTime time.Time, duration time.Duration, activeSub db.Subscription, hasActiveSub bool) (time.Time, time.Time) {
+	start := paidTime.UTC()
+	if !hasActiveSub {
+		return start, start.Add(duration)
+	}
+	if activeSub.SubscriptionID != subscriptionID && activeSub.CurrentPeriodEnd.After(start) {
+		start = activeSub.CurrentPeriodEnd.UTC()
+	}
+	return start, start.Add(duration)
+}
+
+func uuidString(id uuid.NullUUID) string {
+	if id.Valid {
+		return id.UUID.String()
+	}
+	return ""
 }
 
 func (s *billingService) ExpireSubscriptions(ctx context.Context) error {
@@ -280,8 +481,208 @@ func (s *billingService) GetMyEarnings(ctx context.Context, creatorID uuid.UUID)
 	return s.repo.GetMyEarnings(ctx, creatorID)
 }
 
-func (s *billingService) MarkCreatorEarningPaid(ctx context.Context, earningID uuid.UUID) (db.CreatorEarning, error) {
-	return s.repo.MarkCreatorEarningPaid(ctx, earningID)
+func (s *billingService) PayoutCreatorEarning(ctx context.Context, in PayoutInput) (PayoutResult, error) {
+	earning, err := s.validatePayoutInput(ctx, in)
+	if err != nil {
+		return PayoutResult{}, err
+	}
+
+	category := normalizePayoutCategory(in.Category)
+	description := payoutDescription(in.Description, earning)
+	referenceID := payoutReferenceID(earning.EarningID)
+	idempotencyKey := payoutIdempotencyKey(earning.EarningID)
+
+	earning, err = s.repo.MarkCreatorEarningPayoutProcessing(ctx, db.MarkCreatorEarningPayoutProcessingParams{
+		EarningID:             earning.EarningID,
+		PayoutReferenceID:     stringNull(referenceID),
+		PayoutIdempotencyKey:  stringNull(idempotencyKey),
+		PayoutToBin:           stringNull(strings.TrimSpace(in.ToBin)),
+		PayoutToAccountNumber: stringNull(strings.TrimSpace(in.ToAccountNumber)),
+		PayoutToAccountName:   stringNull(strings.TrimSpace(in.ToAccountName)),
+	})
+	if err != nil {
+		return PayoutResult{}, err
+	}
+
+	resp, raw, err := s.payosClient.CreatePayout(ctx, payos.CreatePayoutRequest{
+		ReferenceID:     referenceID,
+		Amount:          earning.AmountVnd,
+		Description:     description,
+		ToBin:           strings.TrimSpace(in.ToBin),
+		ToAccountNumber: strings.TrimSpace(in.ToAccountNumber),
+		Category:        category,
+	}, idempotencyKey)
+	if err != nil {
+		_, _ = s.repo.MarkCreatorEarningPayoutFailed(ctx, db.MarkCreatorEarningPayoutFailedParams{
+			EarningID:          earning.EarningID,
+			PayosPayoutState:   stringNull("failed"),
+			PayoutRawPayload:   rawMessage(raw),
+			PayoutFailedReason: stringNull(err.Error()),
+		})
+		return PayoutResult{}, err
+	}
+
+	tx := firstPayoutTransaction(resp.Data.Transactions)
+	state := firstNonEmpty(tx.State, resp.Data.ApprovalState, "processing")
+	status := earningStatusFromPayoutState(state)
+	earning, err = s.repo.MarkCreatorEarningPayoutPaid(ctx, db.MarkCreatorEarningPayoutPaidParams{
+		EarningID:                earning.EarningID,
+		PayosPayoutID:            stringNull(resp.Data.ID),
+		PayosPayoutTransactionID: stringNull(tx.ID),
+		PayosPayoutState:         stringNull(state),
+		Status:                   status,
+		PayoutRawPayload:         rawMessage(raw),
+	})
+	if err != nil {
+		return PayoutResult{}, err
+	}
+
+	return PayoutResult{
+		Earning:       earning,
+		PayoutID:      resp.Data.ID,
+		TransactionID: tx.ID,
+		ReferenceID:   referenceID,
+		State:         state,
+		Status:        status,
+	}, nil
+}
+
+func (s *billingService) BatchPayoutCreatorEarnings(ctx context.Context, in BatchPayoutInput) (BatchPayoutResult, error) {
+	if len(in.Payouts) == 0 {
+		return BatchPayoutResult{}, domain.ErrInvalidPayout
+	}
+
+	category := normalizePayoutCategory(in.Category)
+	batchReferenceID := "mempan-batch-" + uuid.NewString()
+	idempotencyKey := "payos:payout:batch:" + batchReferenceID
+	items := make([]payos.BatchPayoutItem, 0, len(in.Payouts))
+	earnings := make(map[string]db.CreatorEarning, len(in.Payouts))
+
+	for _, payout := range in.Payouts {
+		earning, err := s.validatePayoutInput(ctx, payout)
+		if err != nil {
+			return BatchPayoutResult{}, err
+		}
+		referenceID := payoutReferenceID(earning.EarningID)
+		earning, err = s.repo.MarkCreatorEarningPayoutProcessing(ctx, db.MarkCreatorEarningPayoutProcessingParams{
+			EarningID:             earning.EarningID,
+			PayoutReferenceID:     stringNull(referenceID),
+			PayoutIdempotencyKey:  stringNull(idempotencyKey + ":" + earning.EarningID.String()),
+			PayoutToBin:           stringNull(strings.TrimSpace(payout.ToBin)),
+			PayoutToAccountNumber: stringNull(strings.TrimSpace(payout.ToAccountNumber)),
+			PayoutToAccountName:   stringNull(strings.TrimSpace(payout.ToAccountName)),
+		})
+		if err != nil {
+			return BatchPayoutResult{}, err
+		}
+		earnings[referenceID] = earning
+		items = append(items, payos.BatchPayoutItem{
+			ReferenceID:     referenceID,
+			Amount:          earning.AmountVnd,
+			Description:     payoutDescription(payout.Description, earning),
+			ToBin:           strings.TrimSpace(payout.ToBin),
+			ToAccountNumber: strings.TrimSpace(payout.ToAccountNumber),
+		})
+	}
+
+	resp, raw, err := s.payosClient.CreateBatchPayout(ctx, payos.CreateBatchPayoutRequest{
+		ReferenceID:         batchReferenceID,
+		Category:            category,
+		ValidateDestination: true,
+		Payouts:             items,
+	}, idempotencyKey)
+	if err != nil {
+		for _, earning := range earnings {
+			_, _ = s.repo.MarkCreatorEarningPayoutFailed(ctx, db.MarkCreatorEarningPayoutFailedParams{
+				EarningID:          earning.EarningID,
+				PayosPayoutState:   stringNull("failed"),
+				PayoutRawPayload:   rawMessage(raw),
+				PayoutFailedReason: stringNull(err.Error()),
+			})
+		}
+		return BatchPayoutResult{}, err
+	}
+
+	results := make([]PayoutResult, 0, len(earnings))
+	for _, tx := range resp.Data.Transactions {
+		earning, ok := earnings[tx.ReferenceID]
+		if !ok {
+			continue
+		}
+		state := firstNonEmpty(tx.State, resp.Data.ApprovalState, "processing")
+		status := earningStatusFromPayoutState(state)
+		updated, err := s.repo.MarkCreatorEarningPayoutPaid(ctx, db.MarkCreatorEarningPayoutPaidParams{
+			EarningID:                earning.EarningID,
+			PayosPayoutID:            stringNull(resp.Data.ID),
+			PayosPayoutTransactionID: stringNull(tx.ID),
+			PayosPayoutState:         stringNull(state),
+			Status:                   status,
+			PayoutRawPayload:         rawMessage(raw),
+		})
+		if err != nil {
+			return BatchPayoutResult{}, err
+		}
+		results = append(results, PayoutResult{
+			Earning:       updated,
+			PayoutID:      resp.Data.ID,
+			TransactionID: tx.ID,
+			ReferenceID:   tx.ReferenceID,
+			State:         state,
+			Status:        status,
+		})
+		delete(earnings, tx.ReferenceID)
+	}
+	for _, earning := range earnings {
+		state := firstNonEmpty(resp.Data.ApprovalState, "processing")
+		status := earningStatusFromPayoutState(state)
+		updated, err := s.repo.MarkCreatorEarningPayoutPaid(ctx, db.MarkCreatorEarningPayoutPaidParams{
+			EarningID:        earning.EarningID,
+			PayosPayoutID:    stringNull(resp.Data.ID),
+			PayosPayoutState: stringNull(state),
+			Status:           status,
+			PayoutRawPayload: rawMessage(raw),
+		})
+		if err != nil {
+			return BatchPayoutResult{}, err
+		}
+		results = append(results, PayoutResult{
+			Earning:     updated,
+			PayoutID:    resp.Data.ID,
+			ReferenceID: earning.PayoutReferenceID.String,
+			State:       state,
+			Status:      status,
+		})
+	}
+
+	return BatchPayoutResult{
+		BatchPayoutID: resp.Data.ID,
+		ReferenceID:   batchReferenceID,
+		Results:       results,
+	}, nil
+}
+
+func (s *billingService) GetPayoutAccountBalance(ctx context.Context) (payos.PayoutBalanceResponse, error) {
+	resp, _, err := s.payosClient.GetPayoutAccountBalance(ctx)
+	return resp, err
+}
+
+func (s *billingService) validatePayoutInput(ctx context.Context, in PayoutInput) (db.CreatorEarning, error) {
+	if in.EarningID == uuid.Nil || strings.TrimSpace(in.ToBin) == "" || strings.TrimSpace(in.ToAccountNumber) == "" {
+		return db.CreatorEarning{}, domain.ErrInvalidPayout
+	}
+	earning, err := s.repo.GetCreatorEarningByID(ctx, in.EarningID)
+	if err != nil {
+		return db.CreatorEarning{}, err
+	}
+	if earning.AmountVnd <= MinimumPayoutAmountVND {
+		return db.CreatorEarning{}, domain.ErrPayoutAmountTooSmall
+	}
+	switch earning.Status {
+	case "pending", "failed":
+		return earning, nil
+	default:
+		return db.CreatorEarning{}, domain.ErrPayoutNotAllowed
+	}
 }
 
 func subscriptionStatus(sub db.Subscription) SubscriptionStatus {
@@ -320,10 +721,10 @@ func stringNull(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }
 
-func rawMessage(raw []byte) pqtype.NullRawMessage {
-	return pqtype.NullRawMessage{
-		RawMessage: json.RawMessage(raw),
-		Valid:      len(raw) > 0,
+func rawMessage(raw []byte) sql.NullString {
+	return sql.NullString{
+		String: string(raw),
+		Valid:  len(raw) > 0,
 	}
 }
 
@@ -379,4 +780,62 @@ func parsePayOSTime(value string) *time.Time {
 		}
 	}
 	return nil
+}
+
+func payoutReferenceID(earningID uuid.UUID) string {
+	return "ce-" + earningID.String()
+}
+
+func payoutIdempotencyKey(earningID uuid.UUID) string {
+	return "payos:payout:" + earningID.String()
+}
+
+func payoutDescription(description string, earning db.CreatorEarning) string {
+	if strings.TrimSpace(description) != "" {
+		return strings.TrimSpace(description)
+	}
+	return fmt.Sprintf("MemPan earning %s", earning.PoolMonth.Format("2006-01"))
+}
+
+func normalizePayoutCategory(category []string) []string {
+	if len(category) == 0 {
+		return []string{"creator_payout"}
+	}
+	out := make([]string, 0, len(category))
+	for _, item := range category {
+		item = strings.TrimSpace(item)
+		if item != "" {
+			out = append(out, item)
+		}
+	}
+	if len(out) == 0 {
+		return []string{"creator_payout"}
+	}
+	return out
+}
+
+func firstPayoutTransaction(items []payos.PayoutTransaction) payos.PayoutTransaction {
+	if len(items) == 0 {
+		return payos.PayoutTransaction{}
+	}
+	return items[0]
+}
+
+func earningStatusFromPayoutState(state string) string {
+	normalized := strings.ToLower(strings.TrimSpace(state))
+	switch normalized {
+	case "paid", "success", "succeeded", "successful", "completed", "complete", "done":
+		return "paid"
+	default:
+		return "processing"
+	}
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
 }

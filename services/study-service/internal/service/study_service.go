@@ -13,7 +13,6 @@ import (
 	gofsrs "github.com/open-spaced-repetition/go-fsrs/v4"
 	"golang.org/x/sync/errgroup"
 
-	"mem_pan/services/study-service/internal/billingclient"
 	"mem_pan/services/study-service/internal/db"
 	"mem_pan/services/study-service/internal/deckclient"
 	"mem_pan/services/study-service/internal/domain"
@@ -46,6 +45,7 @@ type StartSessionParams struct {
 	ReviewLimit   int32
 	AccessToken   string
 	Role          string
+	IsPlus        bool
 }
 
 type ReviewCardParams struct {
@@ -122,7 +122,6 @@ type studyService struct {
 	weightsRepo     repository.FsrsWeightsRepository
 	revshareRepo    repository.RevshareRepository
 	deckClient      deckclient.Client
-	billingClient   billingclient.Client
 	pub             publisher.EventPublisher
 }
 
@@ -136,14 +135,11 @@ func NewStudyService(
 	opts ...interface{},
 ) StudyService {
 	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
-	var billing billingclient.Client
 	var revshare repository.RevshareRepository
 	for _, opt := range opts {
 		switch v := opt.(type) {
 		case publisher.EventPublisher:
 			pub = v
-		case billingclient.Client:
-			billing = v
 		case repository.RevshareRepository:
 			revshare = v
 		}
@@ -156,7 +152,6 @@ func NewStudyService(
 		weightsRepo:     weightsRepo,
 		revshareRepo:    revshare,
 		deckClient:      deckClient,
-		billingClient:   billing,
 		pub:             pub,
 	}
 }
@@ -181,19 +176,13 @@ func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (
 	}
 
 	// Fetch all cards in the deck from deck-service.
-	if s.billingClient != nil {
-		deckInfo, err := s.deckClient.GetDeck(ctx, p.DeckID, p.AccessToken)
-		if err != nil {
-			return nil, err
-		}
-		if deckInfo.AccessLevel == "plus" && deckInfo.PlusStatus == "approved" && deckInfo.UserID != p.UserID && !privilegedRole(p.Role) {
-			active, err := s.billingClient.CheckPlusAccess(ctx, p.UserID)
-			if err != nil {
-				return nil, err
-			}
-			if !active {
-				return nil, domain.ErrPlusRequired
-			}
+	deckInfo, err := s.deckClient.GetDeck(ctx, p.DeckID, p.AccessToken)
+	if err != nil {
+		return nil, err
+	}
+	if deckInfo.AccessLevel == "plus" && deckInfo.PlusStatus == "approved" && deckInfo.UserID != p.UserID && !privilegedRole(p.Role) {
+		if !p.IsPlus {
+			return nil, domain.ErrPlusRequired
 		}
 	}
 

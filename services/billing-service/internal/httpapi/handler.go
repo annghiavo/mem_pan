@@ -28,10 +28,14 @@ func NewHandler(billingSvc service.BillingService, authClient authclient.Client)
 
 func (h *Handler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("/v1/billing/checkout", h.handleCheckout)
+	mux.HandleFunc("/v1/billing/confirm", h.handleConfirmPayment)
 	mux.HandleFunc("/v1/billing/subscription/me", h.handleSubscriptionMe)
 	mux.HandleFunc("/v1/billing/webhooks/payos", h.handlePayOSWebhook)
 	mux.HandleFunc("/v1/admin/revenue/pools", h.handleAdminGetPools)
 	mux.HandleFunc("/v1/admin/revenue/payouts", h.handleAdminGetPayouts)
+	mux.HandleFunc("/v1/admin/revenue/payouts/pay", h.handleAdminPayPayout)
+	mux.HandleFunc("/v1/admin/revenue/payouts/batch", h.handleAdminBatchPayPayouts)
+	mux.HandleFunc("/v1/admin/revenue/payouts/balance", h.handleAdminPayoutBalance)
 	mux.HandleFunc("/v1/admin/revenue/payouts/mark-paid", h.handleAdminMarkPaid)
 	mux.HandleFunc("/v1/creators/me/earnings", h.handleGetMyEarnings)
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
@@ -89,6 +93,36 @@ func (h *Handler) handleSubscriptionMe(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result)
 }
 
+type confirmPaymentRequest struct {
+	OrderCode int64 `json:"order_code"`
+}
+
+func (h *Handler) handleConfirmPayment(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	userID, ok := h.authorize(w, r)
+	if !ok {
+		return
+	}
+	var req confirmPaymentRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid json body")
+		return
+	}
+	if req.OrderCode == 0 {
+		writeError(w, http.StatusBadRequest, "order_code is required")
+		return
+	}
+	result, err := h.billingSvc.ConfirmPayment(r.Context(), userID, req.OrderCode)
+	if err != nil {
+		h.writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
 func (h *Handler) handlePayOSWebhook(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
@@ -124,7 +158,9 @@ func (h *Handler) handleAdminGetPools(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
-	// TODO: verify admin role from auth client
+	if _, ok := h.authorizeAdmin(w, r); !ok {
+		return
+	}
 	pools, err := h.billingSvc.GetMonthlyRevenuePools(r.Context())
 	if err != nil {
 		h.writeServiceError(w, err)
@@ -138,7 +174,9 @@ func (h *Handler) handleAdminGetPayouts(w http.ResponseWriter, r *http.Request) 
 		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
-	// TODO: verify admin role
+	if _, ok := h.authorizeAdmin(w, r); !ok {
+		return
+	}
 	monthStr := r.URL.Query().Get("month")
 	if monthStr == "" {
 		writeError(w, http.StatusBadRequest, "missing month parameter (YYYY-MM-DD)")
@@ -157,30 +195,116 @@ func (h *Handler) handleAdminGetPayouts(w http.ResponseWriter, r *http.Request) 
 	writeJSON(w, http.StatusOK, payouts)
 }
 
+type payoutRequest struct {
+	EarningID       string   `json:"earning_id"`
+	ToBin           string   `json:"to_bin"`
+	ToAccountNumber string   `json:"to_account_number"`
+	ToAccountName   string   `json:"to_account_name"`
+	Description     string   `json:"description"`
+	Category        []string `json:"category"`
+}
+
+type batchPayoutRequest struct {
+	Payouts  []payoutRequest `json:"payouts"`
+	Category []string        `json:"category"`
+}
+
+func (h *Handler) handleAdminPayPayout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	if _, ok := h.authorizeAdmin(w, r); !ok {
+		return
+	}
+	var req payoutRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid json body")
+		return
+	}
+	input, ok := payoutInputFromRequest(w, req)
+	if !ok {
+		return
+	}
+	result, err := h.billingSvc.PayoutCreatorEarning(r.Context(), input)
+	if err != nil {
+		h.writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (h *Handler) handleAdminBatchPayPayouts(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	if _, ok := h.authorizeAdmin(w, r); !ok {
+		return
+	}
+	var req batchPayoutRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid json body")
+		return
+	}
+	inputs := make([]service.PayoutInput, 0, len(req.Payouts))
+	for _, payout := range req.Payouts {
+		input, ok := payoutInputFromRequest(w, payout)
+		if !ok {
+			return
+		}
+		inputs = append(inputs, input)
+	}
+	result, err := h.billingSvc.BatchPayoutCreatorEarnings(r.Context(), service.BatchPayoutInput{
+		Payouts:  inputs,
+		Category: req.Category,
+	})
+	if err != nil {
+		h.writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (h *Handler) handleAdminPayoutBalance(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	if _, ok := h.authorizeAdmin(w, r); !ok {
+		return
+	}
+	result, err := h.billingSvc.GetPayoutAccountBalance(r.Context())
+	if err != nil {
+		h.writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
 func (h *Handler) handleAdminMarkPaid(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
-	// TODO: verify admin role
-	var req struct {
-		EarningID string `json:"earning_id"`
+	if _, ok := h.authorizeAdmin(w, r); !ok {
+		return
 	}
+	var req payoutRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid json body")
 		return
 	}
-	earningUUID, err := uuid.Parse(req.EarningID)
-	if err != nil {
-		writeError(w, http.StatusBadRequest, "invalid earning_id")
+	input, ok := payoutInputFromRequest(w, req)
+	if !ok {
 		return
 	}
-	earning, err := h.billingSvc.MarkCreatorEarningPaid(r.Context(), earningUUID)
+	result, err := h.billingSvc.PayoutCreatorEarning(r.Context(), input)
 	if err != nil {
 		h.writeServiceError(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, earning)
+	writeJSON(w, http.StatusOK, result)
 }
 
 func (h *Handler) handleGetMyEarnings(w http.ResponseWriter, r *http.Request) {
@@ -201,29 +325,67 @@ func (h *Handler) handleGetMyEarnings(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) authorize(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
-	fields := strings.Fields(r.Header.Get("Authorization"))
-	if len(fields) != 2 || !strings.EqualFold(fields[0], "bearer") {
-		writeError(w, http.StatusUnauthorized, "missing or invalid authorization header")
-		return uuid.Nil, false
-	}
-	payload, err := h.authClient.VerifyToken(r.Context(), fields[1])
-	if err != nil {
-		writeError(w, http.StatusUnauthorized, "invalid or expired access token")
+	payload, ok := h.authorizePayload(w, r)
+	if !ok {
 		return uuid.Nil, false
 	}
 	return payload.UserID, true
 }
 
+func (h *Handler) authorizePayload(w http.ResponseWriter, r *http.Request) (*authclient.Payload, bool) {
+	fields := strings.Fields(r.Header.Get("Authorization"))
+	if len(fields) != 2 || !strings.EqualFold(fields[0], "bearer") {
+		writeError(w, http.StatusUnauthorized, "missing or invalid authorization header")
+		return nil, false
+	}
+	payload, err := h.authClient.VerifyToken(r.Context(), fields[1])
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "invalid or expired access token")
+		return nil, false
+	}
+	return payload, true
+}
+
+func (h *Handler) authorizeAdmin(w http.ResponseWriter, r *http.Request) (*authclient.Payload, bool) {
+	payload, ok := h.authorizePayload(w, r)
+	if !ok {
+		return nil, false
+	}
+	if payload.Role != "admin" && payload.Role != "moderator" {
+		writeError(w, http.StatusForbidden, "admin access required")
+		return nil, false
+	}
+	return payload, true
+}
+
 func (h *Handler) writeServiceError(w http.ResponseWriter, err error) {
 	switch {
-	case errors.Is(err, domain.ErrInvalidPlan), errors.Is(err, domain.ErrInvalidWebhook), errors.Is(err, domain.ErrAmountMismatch):
+	case errors.Is(err, domain.ErrInvalidPlan), errors.Is(err, domain.ErrInvalidWebhook), errors.Is(err, domain.ErrAmountMismatch), errors.Is(err, domain.ErrInvalidPayout), errors.Is(err, domain.ErrPayoutAmountTooSmall):
 		writeError(w, http.StatusBadRequest, err.Error())
-	case errors.Is(err, domain.ErrPaymentNotFound), errors.Is(err, domain.ErrSubscriptionNotFound):
+	case errors.Is(err, domain.ErrPaymentNotFound), errors.Is(err, domain.ErrSubscriptionNotFound), errors.Is(err, domain.ErrEarningNotFound):
 		writeError(w, http.StatusNotFound, err.Error())
+	case errors.Is(err, domain.ErrPayoutNotAllowed):
+		writeError(w, http.StatusConflict, err.Error())
 	default:
 		slog.Error("billing http error", "err", err.Error())
 		writeError(w, http.StatusInternalServerError, "internal server error")
 	}
+}
+
+func payoutInputFromRequest(w http.ResponseWriter, req payoutRequest) (service.PayoutInput, bool) {
+	earningUUID, err := uuid.Parse(req.EarningID)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid earning_id")
+		return service.PayoutInput{}, false
+	}
+	return service.PayoutInput{
+		EarningID:       earningUUID,
+		ToBin:           req.ToBin,
+		ToAccountNumber: req.ToAccountNumber,
+		ToAccountName:   req.ToAccountName,
+		Description:     req.Description,
+		Category:        req.Category,
+	}, true
 }
 
 func writeJSON(w http.ResponseWriter, status int, value any) {

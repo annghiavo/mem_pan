@@ -44,7 +44,7 @@ func makeUser(id uuid.UUID) db.User {
 }
 
 func makePayload(userID uuid.UUID, tt token.TokenType) *token.Payload {
-	p, _ := token.NewPayload(userID, "testuser", "user", time.Hour, tt)
+	p, _ := token.NewPayload(userID, "testuser", "user", false, time.Hour, tt)
 	return p
 }
 
@@ -140,8 +140,8 @@ func TestLogin_Success(t *testing.T) {
 	rt := makeRefreshToken(userID)
 
 	userRepo.EXPECT().GetUserByEmail(ctx, "test@example.com").Return(user, nil)
-	maker.EXPECT().CreateToken(userID, "testuser", "user", testAccessDur, token.TokenTypeAccess).Return("access-token", accessPayload, nil)
-	maker.EXPECT().CreateToken(userID, "testuser", "user", testRefreshDur, token.TokenTypeRefresh).Return("refresh-token", refreshPayload, nil)
+	maker.EXPECT().CreateToken(userID, "testuser", "user", false, testAccessDur, token.TokenTypeAccess).Return("access-token", accessPayload, nil)
+	maker.EXPECT().CreateToken(userID, "testuser", "user", false, testRefreshDur, token.TokenTypeRefresh).Return("refresh-token", refreshPayload, nil)
 	rtRepo.EXPECT().DeleteExpiredForUser(ctx, userID).Return(nil)
 	rtRepo.EXPECT().CreateRefreshToken(ctx, userID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(rt, nil)
 	userRepo.EXPECT().UpdateLastLogin(ctx, userID).Return(nil)
@@ -254,7 +254,7 @@ func TestRefreshToken_Success(t *testing.T) {
 	maker.EXPECT().VerifyToken("refresh-token", token.TokenTypeRefresh).Return(refreshPayload, nil)
 	rtRepo.EXPECT().GetRefreshTokenByHash(ctx, gomock.Any()).Return(rt, nil)
 	userRepo.EXPECT().GetUserByID(ctx, userID).Return(user, nil)
-	maker.EXPECT().CreateToken(userID, "testuser", "user", testAccessDur, token.TokenTypeAccess).Return("new-access-token", accessPayload, nil)
+	maker.EXPECT().CreateToken(userID, "testuser", "user", false, testAccessDur, token.TokenTypeAccess).Return("new-access-token", accessPayload, nil)
 
 	svc := NewAuthService(userRepo, rtRepo, vtRepo, maker, pub, testAccessDur, testRefreshDur, testVerifyTokenDur, testResetTokenDur)
 	tokens, err := svc.RefreshToken(ctx, "refresh-token")

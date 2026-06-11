@@ -451,15 +451,34 @@ GET /v1/payouts
 POST /v1/payouts/batch
 GET /v1/payouts/{payoutId}
 POST /v1/payouts/estimate-credit
-GET /v1/payouts/balance
+GET /v1/payouts-account/balance
 ```
 
-Payout requests require the normal API credentials and additional payout headers such as:
+Payout requests require PayOS disbursement-channel credentials and additional
+payout headers such as:
 
 - `x-idempotency-key`
 - `x-signature`
 
 Use a unique idempotency key for each payout request to prevent duplicate disbursements.
+In this project, payouts use separate disbursement-channel credentials:
+
+- `PAYOS_PAYOUT_CLIENT_ID`
+- `PAYOS_PAYOUT_API_KEY`
+- `PAYOS_PAYOUT_CHECKSUM_KEY`
+
+Do not reuse payment-channel credentials (`PAYOS_CLIENT_ID`, `PAYOS_API_KEY`,
+`PAYOS_CHECKSUM_KEY`) for payout calls.
+
+Project status as of 2026-06-11:
+
+- Automatic PayOS payout creation is implemented in `billing-service`.
+- Admins can create single payouts, batch payouts, and check payout-account
+  balance through billing-service routes.
+- Backend payout validation must reject withdrawal amounts unless
+  `amount_vnd > 100000`.
+- See `doc/billing-service-deployment.md` for the deployment state and payout
+  production checklist.
 
 ## 14. Testing Checklist
 
@@ -477,6 +496,8 @@ Because there is no separate sandbox:
 10. Test duplicate webhook delivery.
 11. Test expired or cancelled payment links.
 12. Confirm database state transitions for `PENDING`, `PROCESSING`, `PAID`, and `CANCELLED`.
+13. Before enabling automatic payout, test that `100000` VND is rejected and
+    `100001` VND is accepted by backend validation.
 
 ## 15. Implementation Notes
 

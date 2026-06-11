@@ -66,8 +66,16 @@ func main() {
 	defer authClient.Close()
 
 	repo := repository.New(database)
-	payosClient := payos.NewClient(cfg.PayOSBaseURL, cfg.PayOSClientID, cfg.PayOSAPIKey, cfg.PayOSChecksumKey)
-	billingSvc := service.New(repo, payosClient, cfg.PlusMonthlyAmountVND, cfg.PlusYearlyAmountVND, cfg.DefaultReturnURL, cfg.DefaultCancelURL)
+	payosClient := payos.NewClient(payos.Config{
+		BaseURL:           cfg.PayOSBaseURL,
+		ClientID:          cfg.PayOSClientID,
+		APIKey:            cfg.PayOSAPIKey,
+		ChecksumKey:       cfg.PayOSChecksumKey,
+		PayoutClientID:    cfg.PayOSPayoutClientID,
+		PayoutAPIKey:      cfg.PayOSPayoutAPIKey,
+		PayoutChecksumKey: cfg.PayOSPayoutChecksumKey,
+	})
+	billingSvc := service.New(repo, payosClient, authClient, cfg.PlusMonthlyAmountVND, cfg.PlusYearlyAmountVND, cfg.DefaultReturnURL, cfg.DefaultCancelURL)
 
 	gapiServer := gapi.NewServer(billingSvc)
 	httpHandler := httpapi.NewHandler(billingSvc, authClient)
@@ -130,6 +138,7 @@ func runHTTPServer(cfg config.Config, api *httpapi.Handler, grpcServer *grpc.Ser
 
 	log.Printf("HTTP+gRPC server listening on %s", cfg.HTTPServerAddress)
 	log.Printf("Billing API: POST %s/v1/billing/checkout", cfg.HTTPServerAddress)
+	log.Printf("Billing API: POST %s/v1/billing/confirm", cfg.HTTPServerAddress)
 	log.Printf("PayOS webhook: POST %s/v1/billing/webhooks/payos", cfg.HTTPServerAddress)
 	if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("HTTP server failed: %v", err)

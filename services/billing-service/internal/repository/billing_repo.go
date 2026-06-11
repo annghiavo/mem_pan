@@ -3,12 +3,10 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sqlc-dev/pqtype"
 
 	"mem_pan/services/billing-service/internal/db"
 	"mem_pan/services/billing-service/internal/domain"
@@ -32,7 +30,10 @@ type BillingRepository interface {
 	GetMonthlyRevenuePools(ctx context.Context) ([]db.MonthlyRevenuePool, error)
 	GetCreatorEarningsByMonth(ctx context.Context, poolMonth time.Time) ([]db.CreatorEarning, error)
 	GetMyEarnings(ctx context.Context, creatorID uuid.UUID) ([]db.CreatorEarning, error)
-	MarkCreatorEarningPaid(ctx context.Context, earningID uuid.UUID) (db.CreatorEarning, error)
+	GetCreatorEarningByID(ctx context.Context, earningID uuid.UUID) (db.CreatorEarning, error)
+	MarkCreatorEarningPayoutProcessing(ctx context.Context, arg db.MarkCreatorEarningPayoutProcessingParams) (db.CreatorEarning, error)
+	MarkCreatorEarningPayoutPaid(ctx context.Context, arg db.MarkCreatorEarningPayoutPaidParams) (db.CreatorEarning, error)
+	MarkCreatorEarningPayoutFailed(ctx context.Context, arg db.MarkCreatorEarningPayoutFailedParams) (db.CreatorEarning, error)
 }
 
 type postgresRepo struct {
@@ -130,7 +131,7 @@ func (r *postgresRepo) MarkPaymentTransactionStatus(ctx context.Context, transac
 func (r *postgresRepo) RecordWebhookEvent(ctx context.Context, eventKey string, rawPayload []byte) error {
 	_, err := r.q.RecordWebhookEvent(ctx, db.RecordWebhookEventParams{
 		EventKey:   eventKey,
-		RawPayload: json.RawMessage(rawPayload),
+		RawPayload: string(rawPayload),
 	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.ErrDuplicateWebhook
@@ -138,10 +139,10 @@ func (r *postgresRepo) RecordWebhookEvent(ctx context.Context, eventKey string, 
 	return err
 }
 
-func nullableRaw(raw []byte) pqtype.NullRawMessage {
-	return pqtype.NullRawMessage{
-		RawMessage: json.RawMessage(raw),
-		Valid:      len(raw) > 0,
+func nullableRaw(raw []byte) sql.NullString {
+	return sql.NullString{
+		String: string(raw),
+		Valid:  len(raw) > 0,
 	}
 }
 
@@ -157,6 +158,34 @@ func (r *postgresRepo) GetMyEarnings(ctx context.Context, creatorID uuid.UUID) (
 	return r.q.GetMyEarnings(ctx, creatorID)
 }
 
-func (r *postgresRepo) MarkCreatorEarningPaid(ctx context.Context, earningID uuid.UUID) (db.CreatorEarning, error) {
-	return r.q.MarkCreatorEarningPaid(ctx, earningID)
+func (r *postgresRepo) GetCreatorEarningByID(ctx context.Context, earningID uuid.UUID) (db.CreatorEarning, error) {
+	row, err := r.q.GetCreatorEarningByID(ctx, earningID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.CreatorEarning{}, domain.ErrEarningNotFound
+	}
+	return row, err
+}
+
+func (r *postgresRepo) MarkCreatorEarningPayoutProcessing(ctx context.Context, arg db.MarkCreatorEarningPayoutProcessingParams) (db.CreatorEarning, error) {
+	row, err := r.q.MarkCreatorEarningPayoutProcessing(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.CreatorEarning{}, domain.ErrPayoutNotAllowed
+	}
+	return row, err
+}
+
+func (r *postgresRepo) MarkCreatorEarningPayoutPaid(ctx context.Context, arg db.MarkCreatorEarningPayoutPaidParams) (db.CreatorEarning, error) {
+	row, err := r.q.MarkCreatorEarningPayoutPaid(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.CreatorEarning{}, domain.ErrEarningNotFound
+	}
+	return row, err
+}
+
+func (r *postgresRepo) MarkCreatorEarningPayoutFailed(ctx context.Context, arg db.MarkCreatorEarningPayoutFailedParams) (db.CreatorEarning, error) {
+	row, err := r.q.MarkCreatorEarningPayoutFailed(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.CreatorEarning{}, domain.ErrEarningNotFound
+	}
+	return row, err
 }
