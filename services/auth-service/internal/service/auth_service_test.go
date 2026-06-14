@@ -23,8 +23,8 @@ var testPasswordHash = func() string {
 }()
 
 const (
-	testAccessDur      = 15 * time.Minute
-	testRefreshDur     = 7 * 24 * time.Hour
+	testAccessDur      = 7 * 24 * time.Hour
+	testRefreshDur     = 30 * 24 * time.Hour
 	testVerifyTokenDur = 24 * time.Hour
 	testResetTokenDur  = time.Hour
 )
@@ -53,7 +53,7 @@ func makeRefreshToken(userID uuid.UUID) db.RefreshToken {
 		TokenID:   uuid.New(),
 		UserID:    userID,
 		TokenHash: "somehash",
-		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+		ExpiresAt: time.Now().Add(30 * 24 * time.Hour),
 		CreatedAt: time.Now(),
 	}
 }
@@ -135,6 +135,7 @@ func TestLogin_Success(t *testing.T) {
 
 	userID := uuid.New()
 	user := makeUser(userID)
+	user.EmailVerified = true
 	accessPayload := makePayload(userID, token.TokenTypeAccess)
 	refreshPayload := makePayload(userID, token.TokenTypeRefresh)
 	rt := makeRefreshToken(userID)
@@ -159,6 +160,34 @@ func TestLogin_Success(t *testing.T) {
 	}
 	if resp.Tokens.AccessToken != "access-token" {
 		t.Errorf("expected access-token, got %s", resp.Tokens.AccessToken)
+	}
+}
+
+func TestLogin_EmailNotVerified(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	userRepo := mock.NewMockUserRepository(ctrl)
+	rtRepo := mock.NewMockRefreshTokenRepository(ctrl)
+	vtRepo := mock.NewMockVerificationTokenRepository(ctrl)
+	maker := mock.NewMockMaker(ctrl)
+	pub := mock.NewMockEventPublisher(ctrl)
+	ctx := context.Background()
+
+	userID := uuid.New()
+	user := makeUser(userID)
+	user.EmailVerified = false
+
+	userRepo.EXPECT().GetUserByEmail(ctx, "test@example.com").Return(user, nil)
+
+	svc := NewAuthService(userRepo, rtRepo, vtRepo, maker, pub, testAccessDur, testRefreshDur, testVerifyTokenDur, testResetTokenDur)
+	_, err := svc.Login(ctx, LoginParams{
+		Email:    "test@example.com",
+		Password: "password",
+	})
+
+	if !errors.Is(err, domain.ErrEmailNotVerified) {
+		t.Errorf("expected ErrEmailNotVerified, got %v", err)
 	}
 }
 
@@ -247,6 +276,7 @@ func TestRefreshToken_Success(t *testing.T) {
 
 	userID := uuid.New()
 	user := makeUser(userID)
+	user.EmailVerified = true
 	refreshPayload := makePayload(userID, token.TokenTypeRefresh)
 	accessPayload := makePayload(userID, token.TokenTypeAccess)
 	rt := makeRefreshToken(userID)

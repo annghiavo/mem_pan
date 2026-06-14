@@ -206,6 +206,278 @@ func (x *ExpireSubscriptionsResponse) GetOk() bool {
 	return false
 }
 
+type RevenuePool struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	PoolMonth            string                 `protobuf:"bytes,1,opt,name=pool_month,json=poolMonth,proto3" json:"pool_month,omitempty"`
+	GrossAmountVnd       int64                  `protobuf:"varint,2,opt,name=gross_amount_vnd,json=grossAmountVnd,proto3" json:"gross_amount_vnd,omitempty"`
+	CreatorPoolAmountVnd int64                  `protobuf:"varint,3,opt,name=creator_pool_amount_vnd,json=creatorPoolAmountVnd,proto3" json:"creator_pool_amount_vnd,omitempty"`
+	PlatformAmountVnd    int64                  `protobuf:"varint,4,opt,name=platform_amount_vnd,json=platformAmountVnd,proto3" json:"platform_amount_vnd,omitempty"`
+	Status               string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	FinalizedAt          *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=finalized_at,json=finalizedAt,proto3" json:"finalized_at,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *RevenuePool) Reset() {
+	*x = RevenuePool{}
+	mi := &file_billing_service_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevenuePool) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevenuePool) ProtoMessage() {}
+
+func (x *RevenuePool) ProtoReflect() protoreflect.Message {
+	mi := &file_billing_service_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevenuePool.ProtoReflect.Descriptor instead.
+func (*RevenuePool) Descriptor() ([]byte, []int) {
+	return file_billing_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *RevenuePool) GetPoolMonth() string {
+	if x != nil {
+		return x.PoolMonth
+	}
+	return ""
+}
+
+func (x *RevenuePool) GetGrossAmountVnd() int64 {
+	if x != nil {
+		return x.GrossAmountVnd
+	}
+	return 0
+}
+
+func (x *RevenuePool) GetCreatorPoolAmountVnd() int64 {
+	if x != nil {
+		return x.CreatorPoolAmountVnd
+	}
+	return 0
+}
+
+func (x *RevenuePool) GetPlatformAmountVnd() int64 {
+	if x != nil {
+		return x.PlatformAmountVnd
+	}
+	return 0
+}
+
+func (x *RevenuePool) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *RevenuePool) GetFinalizedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.FinalizedAt
+	}
+	return nil
+}
+
+type CreatorEarning struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	PoolMonth        string                 `protobuf:"bytes,1,opt,name=pool_month,json=poolMonth,proto3" json:"pool_month,omitempty"`
+	CreatorId        string                 `protobuf:"bytes,2,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
+	EligibleLearners int32                  `protobuf:"varint,3,opt,name=eligible_learners,json=eligibleLearners,proto3" json:"eligible_learners,omitempty"`
+	WeightedScore    string                 `protobuf:"bytes,4,opt,name=weighted_score,json=weightedScore,proto3" json:"weighted_score,omitempty"`
+	AmountVnd        int64                  `protobuf:"varint,5,opt,name=amount_vnd,json=amountVnd,proto3" json:"amount_vnd,omitempty"`
+	Status           string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *CreatorEarning) Reset() {
+	*x = CreatorEarning{}
+	mi := &file_billing_service_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreatorEarning) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreatorEarning) ProtoMessage() {}
+
+func (x *CreatorEarning) ProtoReflect() protoreflect.Message {
+	mi := &file_billing_service_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreatorEarning.ProtoReflect.Descriptor instead.
+func (*CreatorEarning) Descriptor() ([]byte, []int) {
+	return file_billing_service_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CreatorEarning) GetPoolMonth() string {
+	if x != nil {
+		return x.PoolMonth
+	}
+	return ""
+}
+
+func (x *CreatorEarning) GetCreatorId() string {
+	if x != nil {
+		return x.CreatorId
+	}
+	return ""
+}
+
+func (x *CreatorEarning) GetEligibleLearners() int32 {
+	if x != nil {
+		return x.EligibleLearners
+	}
+	return 0
+}
+
+func (x *CreatorEarning) GetWeightedScore() string {
+	if x != nil {
+		return x.WeightedScore
+	}
+	return ""
+}
+
+func (x *CreatorEarning) GetAmountVnd() int64 {
+	if x != nil {
+		return x.AmountVnd
+	}
+	return 0
+}
+
+func (x *CreatorEarning) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type SyncRevenuePoolRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Pool          *RevenuePool           `protobuf:"bytes,1,opt,name=pool,proto3" json:"pool,omitempty"`
+	Earnings      []*CreatorEarning      `protobuf:"bytes,2,rep,name=earnings,proto3" json:"earnings,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SyncRevenuePoolRequest) Reset() {
+	*x = SyncRevenuePoolRequest{}
+	mi := &file_billing_service_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SyncRevenuePoolRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyncRevenuePoolRequest) ProtoMessage() {}
+
+func (x *SyncRevenuePoolRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_billing_service_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SyncRevenuePoolRequest.ProtoReflect.Descriptor instead.
+func (*SyncRevenuePoolRequest) Descriptor() ([]byte, []int) {
+	return file_billing_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *SyncRevenuePoolRequest) GetPool() *RevenuePool {
+	if x != nil {
+		return x.Pool
+	}
+	return nil
+}
+
+func (x *SyncRevenuePoolRequest) GetEarnings() []*CreatorEarning {
+	if x != nil {
+		return x.Earnings
+	}
+	return nil
+}
+
+type SyncRevenuePoolResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Ok             bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	SyncedEarnings int32                  `protobuf:"varint,2,opt,name=synced_earnings,json=syncedEarnings,proto3" json:"synced_earnings,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *SyncRevenuePoolResponse) Reset() {
+	*x = SyncRevenuePoolResponse{}
+	mi := &file_billing_service_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SyncRevenuePoolResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyncRevenuePoolResponse) ProtoMessage() {}
+
+func (x *SyncRevenuePoolResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_billing_service_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SyncRevenuePoolResponse.ProtoReflect.Descriptor instead.
+func (*SyncRevenuePoolResponse) Descriptor() ([]byte, []int) {
+	return file_billing_service_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *SyncRevenuePoolResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+func (x *SyncRevenuePoolResponse) GetSyncedEarnings() int32 {
+	if x != nil {
+		return x.SyncedEarnings
+	}
+	return 0
+}
+
 var File_billing_service_proto protoreflect.FileDescriptor
 
 const file_billing_service_proto_rawDesc = "" +
@@ -219,10 +491,35 @@ const file_billing_service_proto_rawDesc = "" +
 	"\x12current_period_end\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x10currentPeriodEnd\"\x1c\n" +
 	"\x1aExpireSubscriptionsRequest\"-\n" +
 	"\x1bExpireSubscriptionsResponse\x12\x0e\n" +
-	"\x02ok\x18\x01 \x01(\bR\x02ok2\xc8\x01\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok\"\x94\x02\n" +
+	"\vRevenuePool\x12\x1d\n" +
+	"\n" +
+	"pool_month\x18\x01 \x01(\tR\tpoolMonth\x12(\n" +
+	"\x10gross_amount_vnd\x18\x02 \x01(\x03R\x0egrossAmountVnd\x125\n" +
+	"\x17creator_pool_amount_vnd\x18\x03 \x01(\x03R\x14creatorPoolAmountVnd\x12.\n" +
+	"\x13platform_amount_vnd\x18\x04 \x01(\x03R\x11platformAmountVnd\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x12=\n" +
+	"\ffinalized_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\vfinalizedAt\"\xd9\x01\n" +
+	"\x0eCreatorEarning\x12\x1d\n" +
+	"\n" +
+	"pool_month\x18\x01 \x01(\tR\tpoolMonth\x12\x1d\n" +
+	"\n" +
+	"creator_id\x18\x02 \x01(\tR\tcreatorId\x12+\n" +
+	"\x11eligible_learners\x18\x03 \x01(\x05R\x10eligibleLearners\x12%\n" +
+	"\x0eweighted_score\x18\x04 \x01(\tR\rweightedScore\x12\x1d\n" +
+	"\n" +
+	"amount_vnd\x18\x05 \x01(\x03R\tamountVnd\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\"w\n" +
+	"\x16SyncRevenuePoolRequest\x12(\n" +
+	"\x04pool\x18\x01 \x01(\v2\x14.billing.RevenuePoolR\x04pool\x123\n" +
+	"\bearnings\x18\x02 \x03(\v2\x17.billing.CreatorEarningR\bearnings\"R\n" +
+	"\x17SyncRevenuePoolResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok\x12'\n" +
+	"\x0fsynced_earnings\x18\x02 \x01(\x05R\x0esyncedEarnings2\x9e\x02\n" +
 	"\x0eBillingService\x12T\n" +
 	"\x0fCheckPlusAccess\x12\x1f.billing.CheckPlusAccessRequest\x1a .billing.CheckPlusAccessResponse\x12`\n" +
-	"\x13ExpireSubscriptions\x12#.billing.ExpireSubscriptionsRequest\x1a$.billing.ExpireSubscriptionsResponseB%Z#mem_pan/services/billing-service/pbb\x06proto3"
+	"\x13ExpireSubscriptions\x12#.billing.ExpireSubscriptionsRequest\x1a$.billing.ExpireSubscriptionsResponse\x12T\n" +
+	"\x0fSyncRevenuePool\x12\x1f.billing.SyncRevenuePoolRequest\x1a .billing.SyncRevenuePoolResponseB%Z#mem_pan/services/billing-service/pbb\x06proto3"
 
 var (
 	file_billing_service_proto_rawDescOnce sync.Once
@@ -236,25 +533,34 @@ func file_billing_service_proto_rawDescGZIP() []byte {
 	return file_billing_service_proto_rawDescData
 }
 
-var file_billing_service_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_billing_service_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_billing_service_proto_goTypes = []any{
 	(*CheckPlusAccessRequest)(nil),      // 0: billing.CheckPlusAccessRequest
 	(*CheckPlusAccessResponse)(nil),     // 1: billing.CheckPlusAccessResponse
 	(*ExpireSubscriptionsRequest)(nil),  // 2: billing.ExpireSubscriptionsRequest
 	(*ExpireSubscriptionsResponse)(nil), // 3: billing.ExpireSubscriptionsResponse
-	(*timestamppb.Timestamp)(nil),       // 4: google.protobuf.Timestamp
+	(*RevenuePool)(nil),                 // 4: billing.RevenuePool
+	(*CreatorEarning)(nil),              // 5: billing.CreatorEarning
+	(*SyncRevenuePoolRequest)(nil),      // 6: billing.SyncRevenuePoolRequest
+	(*SyncRevenuePoolResponse)(nil),     // 7: billing.SyncRevenuePoolResponse
+	(*timestamppb.Timestamp)(nil),       // 8: google.protobuf.Timestamp
 }
 var file_billing_service_proto_depIdxs = []int32{
-	4, // 0: billing.CheckPlusAccessResponse.current_period_end:type_name -> google.protobuf.Timestamp
-	0, // 1: billing.BillingService.CheckPlusAccess:input_type -> billing.CheckPlusAccessRequest
-	2, // 2: billing.BillingService.ExpireSubscriptions:input_type -> billing.ExpireSubscriptionsRequest
-	1, // 3: billing.BillingService.CheckPlusAccess:output_type -> billing.CheckPlusAccessResponse
-	3, // 4: billing.BillingService.ExpireSubscriptions:output_type -> billing.ExpireSubscriptionsResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	8, // 0: billing.CheckPlusAccessResponse.current_period_end:type_name -> google.protobuf.Timestamp
+	8, // 1: billing.RevenuePool.finalized_at:type_name -> google.protobuf.Timestamp
+	4, // 2: billing.SyncRevenuePoolRequest.pool:type_name -> billing.RevenuePool
+	5, // 3: billing.SyncRevenuePoolRequest.earnings:type_name -> billing.CreatorEarning
+	0, // 4: billing.BillingService.CheckPlusAccess:input_type -> billing.CheckPlusAccessRequest
+	2, // 5: billing.BillingService.ExpireSubscriptions:input_type -> billing.ExpireSubscriptionsRequest
+	6, // 6: billing.BillingService.SyncRevenuePool:input_type -> billing.SyncRevenuePoolRequest
+	1, // 7: billing.BillingService.CheckPlusAccess:output_type -> billing.CheckPlusAccessResponse
+	3, // 8: billing.BillingService.ExpireSubscriptions:output_type -> billing.ExpireSubscriptionsResponse
+	7, // 9: billing.BillingService.SyncRevenuePool:output_type -> billing.SyncRevenuePoolResponse
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_billing_service_proto_init() }
@@ -268,7 +574,7 @@ func file_billing_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_billing_service_proto_rawDesc), len(file_billing_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

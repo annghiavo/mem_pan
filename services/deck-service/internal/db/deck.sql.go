@@ -375,7 +375,7 @@ func (q *Queries) IncrementCardCount(ctx context.Context, deckID uuid.UUID) erro
 }
 
 const listDeckReviews = `-- name: ListDeckReviews :many
-SELECT review_id, deck_id, user_id, rating, comment, status, created_at, updated_at FROM deck_reviews
+SELECT review_id, deck_id, user_id, rating, status, created_at, updated_at, comment FROM deck_reviews
 WHERE deck_id = $1 AND status = 'active'
 ORDER BY updated_at DESC
 LIMIT $2 OFFSET $3
@@ -401,10 +401,10 @@ func (q *Queries) ListDeckReviews(ctx context.Context, arg ListDeckReviewsParams
 			&i.DeckID,
 			&i.UserID,
 			&i.Rating,
-			&i.Comment,
 			&i.Status,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Comment,
 		); err != nil {
 			return nil, err
 		}
@@ -900,40 +900,33 @@ func (q *Queries) UpsertCreatorProfile(ctx context.Context, arg UpsertCreatorPro
 }
 
 const upsertDeckReview = `-- name: UpsertDeckReview :one
-INSERT INTO deck_reviews (deck_id, user_id, rating, comment, status)
-VALUES ($1, $2, $3, $4, 'active')
+INSERT INTO deck_reviews (deck_id, user_id, rating, status)
+VALUES ($1, $2, $3, 'active')
 ON CONFLICT (deck_id, user_id) DO UPDATE
 SET rating = EXCLUDED.rating,
-    comment = EXCLUDED.comment,
     status = 'active',
     updated_at = now()
-RETURNING review_id, deck_id, user_id, rating, comment, status, created_at, updated_at
+RETURNING review_id, deck_id, user_id, rating, status, created_at, updated_at, comment
 `
 
 type UpsertDeckReviewParams struct {
-	DeckID  uuid.UUID      `json:"deck_id"`
-	UserID  uuid.UUID      `json:"user_id"`
-	Rating  int16          `json:"rating"`
-	Comment sql.NullString `json:"comment"`
+	DeckID uuid.UUID `json:"deck_id"`
+	UserID uuid.UUID `json:"user_id"`
+	Rating int16     `json:"rating"`
 }
 
 func (q *Queries) UpsertDeckReview(ctx context.Context, arg UpsertDeckReviewParams) (DeckReview, error) {
-	row := q.db.QueryRowContext(ctx, upsertDeckReview,
-		arg.DeckID,
-		arg.UserID,
-		arg.Rating,
-		arg.Comment,
-	)
+	row := q.db.QueryRowContext(ctx, upsertDeckReview, arg.DeckID, arg.UserID, arg.Rating)
 	var i DeckReview
 	err := row.Scan(
 		&i.ReviewID,
 		&i.DeckID,
 		&i.UserID,
 		&i.Rating,
-		&i.Comment,
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Comment,
 	)
 	return i, err
 }

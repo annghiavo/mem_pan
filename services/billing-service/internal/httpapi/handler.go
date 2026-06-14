@@ -7,12 +7,15 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
 
 	"mem_pan/services/billing-service/internal/authclient"
+	"mem_pan/services/billing-service/internal/db"
 	"mem_pan/services/billing-service/internal/domain"
 	"mem_pan/services/billing-service/internal/service"
 )
@@ -20,6 +23,13 @@ import (
 type Handler struct {
 	billingSvc service.BillingService
 	authClient authclient.Client
+	bankCache  bankCache
+}
+
+type bankCache struct {
+	mu        sync.Mutex
+	expiresAt time.Time
+	banks     []bankResponse
 }
 
 func NewHandler(billingSvc service.BillingService, authClient authclient.Client) *Handler {
@@ -29,6 +39,7 @@ func NewHandler(billingSvc service.BillingService, authClient authclient.Client)
 func (h *Handler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("/v1/billing/checkout", h.handleCheckout)
 	mux.HandleFunc("/v1/billing/confirm", h.handleConfirmPayment)
+	mux.HandleFunc("/v1/billing/banks", h.handleBanks)
 	mux.HandleFunc("/v1/billing/subscription/me", h.handleSubscriptionMe)
 	mux.HandleFunc("/v1/billing/webhooks/payos", h.handlePayOSWebhook)
 	mux.HandleFunc("/v1/admin/revenue/pools", h.handleAdminGetPools)
@@ -37,7 +48,11 @@ func (h *Handler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("/v1/admin/revenue/payouts/batch", h.handleAdminBatchPayPayouts)
 	mux.HandleFunc("/v1/admin/revenue/payouts/balance", h.handleAdminPayoutBalance)
 	mux.HandleFunc("/v1/admin/revenue/payouts/mark-paid", h.handleAdminMarkPaid)
+	mux.HandleFunc("/v1/creators/me/earnings/summary", h.handleGetMyEarningsSummary)
 	mux.HandleFunc("/v1/creators/me/earnings", h.handleGetMyEarnings)
+	mux.HandleFunc("/v1/creators/me/balance-history", h.handleGetMyBalanceHistory)
+	mux.HandleFunc("/v1/creators/me/payout-account", h.handleMyPayoutAccount)
+	mux.HandleFunc("/v1/creators/me/withdrawals", h.handleCreateMyWithdrawal)
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
@@ -47,6 +62,42 @@ type checkoutRequest struct {
 	PlanCode  string `json:"plan_code"`
 	ReturnURL string `json:"return_url"`
 	CancelURL string `json:"cancel_url"`
+}
+
+type vietQRBanksResponse struct {
+	Data []vietQRBank `json:"data"`
+}
+
+type vietQRBank struct {
+	Bin               string `json:"bin"`
+	Code              string `json:"code"`
+	ShortName         string `json:"shortName"`
+	Name              string `json:"name"`
+	Logo              string `json:"logo"`
+	TransferSupported int    `json:"transferSupported"`
+}
+
+type bankResponse struct {
+	Bin               string `json:"bin"`
+	Code              string `json:"code"`
+	ShortName         string `json:"short_name"`
+	Name              string `json:"name"`
+	Logo              string `json:"logo"`
+	TransferSupported bool   `json:"transfer_supported"`
+}
+
+func (h *Handler) handleBanks(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	banks, err := h.getBanks(r)
+	if err != nil {
+		slog.Error("fetch banks", "err", err.Error())
+		writeError(w, http.StatusBadGateway, "unable to load bank list")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"data": banks})
 }
 
 func (h *Handler) handleCheckout(w http.ResponseWriter, r *http.Request) {
@@ -197,6 +248,7 @@ func (h *Handler) handleAdminGetPayouts(w http.ResponseWriter, r *http.Request) 
 
 type payoutRequest struct {
 	EarningID       string   `json:"earning_id"`
+	AmountVND       int64    `json:"amount_vnd"`
 	ToBin           string   `json:"to_bin"`
 	ToAccountNumber string   `json:"to_account_number"`
 	ToAccountName   string   `json:"to_account_name"`
@@ -207,6 +259,30 @@ type payoutRequest struct {
 type batchPayoutRequest struct {
 	Payouts  []payoutRequest `json:"payouts"`
 	Category []string        `json:"category"`
+}
+
+type payoutAccountRequest struct {
+	BankBin       string `json:"bank_bin"`
+	BankCode      string `json:"bank_code"`
+	BankShortName string `json:"bank_short_name"`
+	BankName      string `json:"bank_name"`
+	BankLogo      string `json:"bank_logo"`
+	AccountNumber string `json:"account_number"`
+	AccountName   string `json:"account_name"`
+}
+
+type payoutAccountResponse struct {
+	CreatorID     string     `json:"creator_id"`
+	BankBin       string     `json:"bank_bin"`
+	BankCode      string     `json:"bank_code"`
+	BankShortName string     `json:"bank_short_name"`
+	BankName      string     `json:"bank_name"`
+	BankLogo      string     `json:"bank_logo,omitempty"`
+	AccountNumber string     `json:"account_number"`
+	AccountName   string     `json:"account_name"`
+	VerifiedAt    *time.Time `json:"verified_at,omitempty"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
 }
 
 func (h *Handler) handleAdminPayPayout(w http.ResponseWriter, r *http.Request) {
@@ -324,6 +400,119 @@ func (h *Handler) handleGetMyEarnings(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, earnings)
 }
 
+func (h *Handler) handleGetMyEarningsSummary(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	userID, ok := h.authorize(w, r)
+	if !ok {
+		return
+	}
+	summary, err := h.billingSvc.GetMyEarningsSummary(r.Context(), userID)
+	if err != nil {
+		h.writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, summary)
+}
+
+func (h *Handler) handleGetMyBalanceHistory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	userID, ok := h.authorize(w, r)
+	if !ok {
+		return
+	}
+	limit, err := int32Query(r, "limit", 80)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid limit")
+		return
+	}
+	offset, err := int32Query(r, "offset", 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid offset")
+		return
+	}
+	result, err := h.billingSvc.ListMyBalanceHistory(r.Context(), userID, limit, offset)
+	if err != nil {
+		h.writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (h *Handler) handleMyPayoutAccount(w http.ResponseWriter, r *http.Request) {
+	userID, ok := h.authorize(w, r)
+	if !ok {
+		return
+	}
+	switch r.Method {
+	case http.MethodGet:
+		account, err := h.billingSvc.GetCreatorPayoutAccount(r.Context(), userID)
+		if err != nil {
+			h.writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, payoutAccountToResponse(account))
+	case http.MethodPut:
+		var req payoutAccountRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeError(w, http.StatusBadRequest, "invalid json body")
+			return
+		}
+		account, err := h.billingSvc.UpsertCreatorPayoutAccount(r.Context(), service.PayoutAccountInput{
+			CreatorID:     userID,
+			BankBin:       req.BankBin,
+			BankCode:      req.BankCode,
+			BankShortName: req.BankShortName,
+			BankName:      req.BankName,
+			BankLogo:      req.BankLogo,
+			AccountNumber: req.AccountNumber,
+			AccountName:   req.AccountName,
+		})
+		if err != nil {
+			h.writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, payoutAccountToResponse(account))
+	default:
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+	}
+}
+
+func (h *Handler) handleCreateMyWithdrawal(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	userID, ok := h.authorize(w, r)
+	if !ok {
+		return
+	}
+	var req payoutRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid json body")
+		return
+	}
+	result, err := h.billingSvc.CreateCreatorWithdrawal(r.Context(), service.CreatorWithdrawalInput{
+		CreatorID:       userID,
+		AmountVND:       req.AmountVND,
+		ToBin:           req.ToBin,
+		ToAccountNumber: req.ToAccountNumber,
+		ToAccountName:   req.ToAccountName,
+		Description:     req.Description,
+		Category:        req.Category,
+	})
+	if err != nil {
+		h.writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, result)
+}
+
 func (h *Handler) authorize(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
 	payload, ok := h.authorizePayload(w, r)
 	if !ok {
@@ -362,9 +551,13 @@ func (h *Handler) writeServiceError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, domain.ErrInvalidPlan), errors.Is(err, domain.ErrInvalidWebhook), errors.Is(err, domain.ErrAmountMismatch), errors.Is(err, domain.ErrInvalidPayout), errors.Is(err, domain.ErrPayoutAmountTooSmall):
 		writeError(w, http.StatusBadRequest, err.Error())
-	case errors.Is(err, domain.ErrPaymentNotFound), errors.Is(err, domain.ErrSubscriptionNotFound), errors.Is(err, domain.ErrEarningNotFound):
+	case errors.Is(err, domain.ErrPaymentNotFound), errors.Is(err, domain.ErrSubscriptionNotFound), errors.Is(err, domain.ErrEarningNotFound), errors.Is(err, domain.ErrPayoutAccountNotFound), errors.Is(err, domain.ErrWithdrawalNotFound):
 		writeError(w, http.StatusNotFound, err.Error())
+	case errors.Is(err, domain.ErrPayoutForbidden):
+		writeError(w, http.StatusForbidden, err.Error())
 	case errors.Is(err, domain.ErrPayoutNotAllowed):
+		writeError(w, http.StatusConflict, err.Error())
+	case errors.Is(err, domain.ErrInsufficientBalance):
 		writeError(w, http.StatusConflict, err.Error())
 	default:
 		slog.Error("billing http error", "err", err.Error())
@@ -386,6 +579,92 @@ func payoutInputFromRequest(w http.ResponseWriter, req payoutRequest) (service.P
 		Description:     req.Description,
 		Category:        req.Category,
 	}, true
+}
+
+func int32Query(r *http.Request, key string, fallback int32) (int32, error) {
+	raw := strings.TrimSpace(r.URL.Query().Get(key))
+	if raw == "" {
+		return fallback, nil
+	}
+	value, err := strconv.ParseInt(raw, 10, 32)
+	if err != nil {
+		return 0, err
+	}
+	return int32(value), nil
+}
+
+func (h *Handler) getBanks(r *http.Request) ([]bankResponse, error) {
+	now := time.Now()
+	h.bankCache.mu.Lock()
+	if now.Before(h.bankCache.expiresAt) && len(h.bankCache.banks) > 0 {
+		banks := append([]bankResponse(nil), h.bankCache.banks...)
+		h.bankCache.mu.Unlock()
+		return banks, nil
+	}
+	h.bankCache.mu.Unlock()
+
+	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, "https://api.vietqr.io/v2/banks", nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := (&http.Client{Timeout: 8 * time.Second}).Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, errors.New("vietqr returned non-2xx status")
+	}
+
+	var payload vietQRBanksResponse
+	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+		return nil, err
+	}
+	banks := make([]bankResponse, 0, len(payload.Data))
+	for _, bank := range payload.Data {
+		if bank.TransferSupported != 1 {
+			continue
+		}
+		out := bankResponse{
+			Bin:               strings.TrimSpace(bank.Bin),
+			Code:              strings.TrimSpace(bank.Code),
+			ShortName:         strings.TrimSpace(bank.ShortName),
+			Name:              strings.TrimSpace(bank.Name),
+			Logo:              strings.TrimSpace(bank.Logo),
+			TransferSupported: true,
+		}
+		if out.Bin == "" || out.Code == "" || out.ShortName == "" || out.Name == "" {
+			continue
+		}
+		banks = append(banks, out)
+	}
+
+	h.bankCache.mu.Lock()
+	h.bankCache.banks = append([]bankResponse(nil), banks...)
+	h.bankCache.expiresAt = now.Add(24 * time.Hour)
+	h.bankCache.mu.Unlock()
+	return banks, nil
+}
+
+func payoutAccountToResponse(account db.CreatorPayoutAccount) payoutAccountResponse {
+	var verifiedAt *time.Time
+	if account.VerifiedAt.Valid {
+		t := account.VerifiedAt.Time
+		verifiedAt = &t
+	}
+	return payoutAccountResponse{
+		CreatorID:     account.CreatorID.String(),
+		BankBin:       account.BankBin,
+		BankCode:      account.BankCode,
+		BankShortName: account.BankShortName,
+		BankName:      account.BankName,
+		BankLogo:      account.BankLogo.String,
+		AccountNumber: account.AccountNumber,
+		AccountName:   account.AccountName,
+		VerifiedAt:    verifiedAt,
+		CreatedAt:     account.CreatedAt,
+		UpdatedAt:     account.UpdatedAt,
+	}
 }
 
 func writeJSON(w http.ResponseWriter, status int, value any) {

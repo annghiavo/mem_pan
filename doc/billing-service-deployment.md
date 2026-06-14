@@ -56,6 +56,7 @@ Billing-service registers these HTTP handlers:
 | Route | Purpose | Current gateway state |
 | --- | --- | --- |
 | `POST /v1/billing/checkout` | Create PayOS checkout link for Plus subscription | Published locally by Traefik |
+| `GET /v1/billing/banks` | Return cached VietQR bank list for payout account selection | Published locally by Traefik |
 | `GET /v1/billing/subscription/me` | Get current user's Plus subscription status | Published locally by Traefik |
 | `POST /v1/billing/webhooks/payos` | Receive PayOS payment webhook | Published locally by Traefik |
 | `GET /v1/admin/revenue/pools` | List monthly revenue pools | Published locally by Traefik |
@@ -65,6 +66,9 @@ Billing-service registers these HTTP handlers:
 | `GET /v1/admin/revenue/payouts/balance` | Check PayOS payout-account balance | Published locally by Traefik |
 | `POST /v1/admin/revenue/payouts/mark-paid` | Backward-compatible alias that now creates a PayOS payout | Published locally by Traefik |
 | `GET /v1/creators/me/earnings` | Creator views own earnings | Published locally by Traefik |
+| `GET /v1/creators/me/payout-account` | Creator views saved payout destination | Published locally by Traefik |
+| `PUT /v1/creators/me/payout-account` | Creator saves payout destination from selected bank details | Published locally by Traefik |
+| `POST /v1/creators/me/withdrawals` | Creator requests payout for their own eligible earning | Published locally by Traefik |
 | `GET /healthz` | Health check | Direct service only unless a gateway route is added |
 
 Local Traefik currently has:
@@ -120,6 +124,7 @@ Billing migrations currently create:
 - `payment_webhook_events`
 - `monthly_revenue_pools`
 - `creator_earnings`
+- `creator_payout_accounts`
 
 The revenue-share schema stores monthly earning amounts and PayOS payout state:
 
@@ -142,6 +147,20 @@ creator_earnings (
   payout_raw_payload JSONB,
   payout_requested_at TIMESTAMPTZ,
   payout_failed_reason TEXT
+)
+```
+
+```sql
+creator_payout_accounts (
+  creator_id UUID PRIMARY KEY,
+  bank_bin TEXT NOT NULL,
+  bank_code TEXT NOT NULL,
+  bank_short_name TEXT NOT NULL,
+  bank_name TEXT NOT NULL,
+  bank_logo TEXT,
+  account_number TEXT NOT NULL,
+  account_name TEXT NOT NULL,
+  verified_at TIMESTAMPTZ
 )
 ```
 
@@ -176,6 +195,21 @@ Implemented flow:
 
 Batch payout is available at `POST /v1/admin/revenue/payouts/batch`. Payout
 balance is available at `GET /v1/admin/revenue/payouts/balance`.
+
+Creators can view their own earning rows with `GET /v1/creators/me/earnings`
+and save their payout destination with `PUT /v1/creators/me/payout-account`.
+The saved account stores the VietQR/PayOS bank identifiers (`bank_bin`,
+`bank_code`, `bank_short_name`, `bank_name`, optional `bank_logo`) plus the
+account number and account name. The frontend should load bank options from
+`GET /v1/billing/banks`; billing-service fetches VietQR server-side and caches
+transfer-supported banks for 24 hours.
+
+Creators request a PayOS payout for one eligible row with
+`POST /v1/creators/me/withdrawals`. Billing-service checks that the selected
+earning belongs to the authenticated creator. If the withdrawal request does not
+include destination fields, billing-service uses the saved payout account.
+The PayOS payout request itself uses `toBin` and `toAccountNumber`; bank name,
+short name, and logo are stored only for product display/audit metadata.
 
 ## PayOS Automatic Payout Requirement
 
@@ -214,9 +248,10 @@ Product withdrawal rule:
 
 Automatic payout creation is implemented, but production hardening still needs:
 
-1. Creator payout destination management.
-   - A creator-facing endpoint to save and verify bank destination details.
-   - Current automatic payout requests must include destination fields.
+1. Creator payout destination verification.
+   - Billing-service stores creator payout destinations in
+     `creator_payout_accounts` and withdrawals can use the saved account.
+   - Add bank-account holder verification before marking `verified_at`.
 
 2. Payout reconciliation.
    - If PayOS supports payout callbacks, handle them idempotently.

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log"
+	"math"
 
 	"github.com/google/uuid"
 
@@ -241,6 +242,21 @@ func (s *cardService) ListCardsByDeck(ctx context.Context, deckID, userID uuid.U
 	if err != nil {
 		return nil, err
 	}
+	if canPreviewDeckCards(deck, userID, firstRole(role), isPlus) {
+		cards, err := s.cardRepo.ListCardsByDeck(ctx, deckID)
+		if err != nil {
+			return nil, err
+		}
+		totalCards := int(deck.CardCount)
+		if totalCards < len(cards) {
+			totalCards = len(cards)
+		}
+		previewLimit := plusPreviewCardLimit(totalCards)
+		if previewLimit < len(cards) {
+			return cards[:previewLimit], nil
+		}
+		return cards, nil
+	}
 	if err := requireFullDeckAccess(ctx, deck, userID, firstRole(role), isPlus); err != nil {
 		return nil, err
 	}
@@ -343,4 +359,31 @@ func (s *cardService) ReorderCards(ctx context.Context, deckID, userID uuid.UUID
 		}
 	}
 	return nil
+}
+
+func canPreviewDeckCards(deck db.Deck, userID uuid.UUID, role string, isPlus bool) bool {
+	if deck.Status != "" && deck.Status != string(db.ContentStatusActive) && deck.Status != string(db.ContentStatusHidden) {
+		return false
+	}
+	if deck.UserID == userID || privilegedRole(role) || isPlus {
+		return false
+	}
+	if !deck.IsPublic || deck.AccessLevel != db.DeckAccessLevelPlus || deck.PlusStatus != db.DeckPlusStatusApproved {
+		return false
+	}
+	return true
+}
+
+func plusPreviewCardLimit(totalCards int) int {
+	if totalCards <= 0 {
+		return 0
+	}
+	limit := int(math.Ceil(float64(totalCards) * 0.1))
+	if limit < 10 {
+		limit = 10
+	}
+	if limit > totalCards {
+		limit = totalCards
+	}
+	return limit
 }

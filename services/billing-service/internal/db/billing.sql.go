@@ -8,6 +8,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -58,19 +59,30 @@ INSERT INTO payment_transactions (
     checkout_url,
     raw_payload
 )
-VALUES ($1, $2, 'payos', $3, $4, $5, $6, 'pending', $7, $8)
+VALUES (
+    $1,
+    $2,
+    'payos',
+    $3,
+    $4,
+    $5,
+    $6,
+    'pending',
+    $7,
+    $8::jsonb
+)
 RETURNING transaction_id, user_id, subscription_id, provider, provider_payment_id, provider_order_code, idempotency_key, amount_vnd, status, checkout_url, raw_payload, paid_at, created_at, updated_at
 `
 
 type CreatePaymentTransactionParams struct {
-	UserID            uuid.UUID             `json:"user_id"`
-	SubscriptionID    uuid.NullUUID         `json:"subscription_id"`
-	ProviderPaymentID sql.NullString        `json:"provider_payment_id"`
-	ProviderOrderCode int64                 `json:"provider_order_code"`
-	IdempotencyKey    string                `json:"idempotency_key"`
-	AmountVnd         int64          `json:"amount_vnd"`
-	CheckoutUrl       sql.NullString `json:"checkout_url"`
-	RawPayload        sql.NullString `json:"raw_payload"`
+	UserID            uuid.UUID       `json:"user_id"`
+	SubscriptionID    uuid.NullUUID   `json:"subscription_id"`
+	ProviderPaymentID sql.NullString  `json:"provider_payment_id"`
+	ProviderOrderCode int64           `json:"provider_order_code"`
+	IdempotencyKey    string          `json:"idempotency_key"`
+	AmountVnd         int64           `json:"amount_vnd"`
+	CheckoutUrl       sql.NullString  `json:"checkout_url"`
+	RawPayload        json.RawMessage `json:"raw_payload"`
 }
 
 func (q *Queries) CreatePaymentTransaction(ctx context.Context, arg CreatePaymentTransactionParams) (PaymentTransaction, error) {
@@ -254,16 +266,16 @@ const markPaymentTransactionPaid = `-- name: MarkPaymentTransactionPaid :one
 UPDATE payment_transactions
 SET status = 'paid',
     paid_at = COALESCE($2, now()),
-    raw_payload = COALESCE($3, raw_payload),
+    raw_payload = COALESCE($3::jsonb, raw_payload),
     updated_at = now()
 WHERE transaction_id = $1
 RETURNING transaction_id, user_id, subscription_id, provider, provider_payment_id, provider_order_code, idempotency_key, amount_vnd, status, checkout_url, raw_payload, paid_at, created_at, updated_at
 `
 
 type MarkPaymentTransactionPaidParams struct {
-	TransactionID uuid.UUID      `json:"transaction_id"`
-	PaidAt        sql.NullTime   `json:"paid_at"`
-	RawPayload    sql.NullString `json:"raw_payload"`
+	TransactionID uuid.UUID       `json:"transaction_id"`
+	PaidAt        sql.NullTime    `json:"paid_at"`
+	RawPayload    json.RawMessage `json:"raw_payload"`
 }
 
 func (q *Queries) MarkPaymentTransactionPaid(ctx context.Context, arg MarkPaymentTransactionPaidParams) (PaymentTransaction, error) {
@@ -291,16 +303,16 @@ func (q *Queries) MarkPaymentTransactionPaid(ctx context.Context, arg MarkPaymen
 const markPaymentTransactionStatus = `-- name: MarkPaymentTransactionStatus :one
 UPDATE payment_transactions
 SET status = $2,
-    raw_payload = COALESCE($3, raw_payload),
+    raw_payload = COALESCE($3::jsonb, raw_payload),
     updated_at = now()
 WHERE transaction_id = $1
 RETURNING transaction_id, user_id, subscription_id, provider, provider_payment_id, provider_order_code, idempotency_key, amount_vnd, status, checkout_url, raw_payload, paid_at, created_at, updated_at
 `
 
 type MarkPaymentTransactionStatusParams struct {
-	TransactionID uuid.UUID      `json:"transaction_id"`
-	Status        PaymentStatus  `json:"status"`
-	RawPayload    sql.NullString `json:"raw_payload"`
+	TransactionID uuid.UUID       `json:"transaction_id"`
+	Status        PaymentStatus   `json:"status"`
+	RawPayload    json.RawMessage `json:"raw_payload"`
 }
 
 func (q *Queries) MarkPaymentTransactionStatus(ctx context.Context, arg MarkPaymentTransactionStatusParams) (PaymentTransaction, error) {
@@ -327,14 +339,18 @@ func (q *Queries) MarkPaymentTransactionStatus(ctx context.Context, arg MarkPaym
 
 const recordWebhookEvent = `-- name: RecordWebhookEvent :one
 INSERT INTO payment_webhook_events (provider, event_key, raw_payload)
-VALUES ('payos', $1, $2)
+VALUES (
+    'payos',
+    $1,
+    $2::jsonb
+)
 ON CONFLICT (provider, event_key) DO NOTHING
 RETURNING webhook_event_id, provider, event_key, raw_payload, processed_at
 `
 
 type RecordWebhookEventParams struct {
-	EventKey   string `json:"event_key"`
-	RawPayload string `json:"raw_payload"`
+	EventKey   string          `json:"event_key"`
+	RawPayload json.RawMessage `json:"raw_payload"`
 }
 
 func (q *Queries) RecordWebhookEvent(ctx context.Context, arg RecordWebhookEventParams) (PaymentWebhookEvent, error) {

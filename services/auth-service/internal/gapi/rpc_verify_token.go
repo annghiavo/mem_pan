@@ -28,6 +28,9 @@ func (s *Server) VerifyToken(ctx context.Context, req *pb.VerifyTokenRequest) (*
 	if user.IsBanned {
 		return nil, status.Error(codes.PermissionDenied, "user is banned")
 	}
+	if !user.EmailVerified {
+		return nil, status.Error(codes.PermissionDenied, "email not verified")
+	}
 
 	return &pb.VerifyTokenResponse{
 		UserId:    user.UserID.String(),

@@ -42,6 +42,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("Billing callbacks: return=%s cancel=%s", cfg.DefaultReturnURL, cfg.DefaultCancelURL)
 
 	pgxCfg, err := pgx.ParseConfig(cfg.DBUrl)
 	if err != nil {

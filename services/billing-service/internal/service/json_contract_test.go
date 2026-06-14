@@ -108,3 +108,20 @@ func TestCalculateActivationPeriodDoesNotExtendSameSubscriptionOnRetry(t *testin
 		t.Fatalf("expected same subscription retry to end at %s, got %s", wantEnd, end)
 	}
 }
+
+func TestCreatorWithdrawalStatusFromPayoutState(t *testing.T) {
+	tests := map[string]string{
+		"COMPLETED":  "paid",
+		"APPROVED":   "paid",
+		"finished":   "paid",
+		"processing": "processing",
+		"CANCELED":   "failed",
+		"rejected":   "failed",
+	}
+
+	for state, want := range tests {
+		if got := creatorWithdrawalStatusFromPayoutState(state); got != want {
+			t.Fatalf("creatorWithdrawalStatusFromPayoutState(%q) = %q, want %q", state, got, want)
+		}
+	}
+}

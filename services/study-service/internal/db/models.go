@@ -126,6 +126,8 @@ type DeckStudySetting struct {
 	RequireRetypingCorrectAnswer bool      `json:"require_retyping_correct_answer"`
 	CreatedAt                    time.Time `json:"created_at"`
 	UpdatedAt                    time.Time `json:"updated_at"`
+	NewCardLimit                 int32     `json:"new_card_limit"`
+	ReviewCardLimit              int32     `json:"review_card_limit"`
 }
 
 type MonthlyRevenuePool struct {

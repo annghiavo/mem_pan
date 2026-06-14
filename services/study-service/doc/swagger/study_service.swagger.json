@@ -7,6 +7,9 @@
   "tags": [
     {
       "name": "StudyService"
+    },
+    {
+      "name": "FsrsOptimizationService"
     }
   ],
   "consumes": [
@@ -512,36 +515,6 @@
         }
       }
     },
-    "studyCountDeckLearnersResponse": {
-      "type": "object",
-      "properties": {
-        "count": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
-    "studyCountDueForUserResponse": {
-      "type": "object",
-      "properties": {
-        "dueToday": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
-    },
-    "studyDeckLearners": {
-      "type": "object",
-      "properties": {
-        "deckId": {
-          "type": "string"
-        },
-        "learners": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
     "studyDeckProgressResponse": {
       "type": "object",
       "properties": {
@@ -570,6 +543,16 @@
             "type": "object",
             "$ref": "#/definitions/studyProgressTag"
           }
+        },
+        "nextReviewDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Soonest next_review_date among the user's non-new cards in this deck.\nUnset when the deck has no scheduled (non-new) cards yet. The client\nrenders the countdown from this absolute timestamp."
+        },
+        "dueNow": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of non-new cards already due (next_review_date \u003c= now)."
         }
       }
     },
@@ -807,18 +790,14 @@
         },
         "requireRetypingCorrectAnswer": {
           "type": "boolean"
-        }
-      }
-    },
-    "studyTopDecksByLearnersResponse": {
-      "type": "object",
-      "properties": {
-        "decks": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/studyDeckLearners"
-          }
+        },
+        "newCardLimit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "reviewCardLimit": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

@@ -58,6 +58,8 @@ func (s *Server) UpdateDeckSettings(ctx context.Context, req *pb.UpdateStudyDeck
 		QuestionTypeWritten:          req.Settings.QuestionTypeWritten,
 		StrictnessLevel:              req.Settings.StrictnessLevel,
 		RequireRetypingCorrectAnswer: req.Settings.RequireRetypingCorrectAnswer,
+		NewCardLimit:                 req.Settings.NewCardLimit,
+		ReviewCardLimit:              req.Settings.ReviewCardLimit,
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidStrictness) {

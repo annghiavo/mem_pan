@@ -122,4 +122,62 @@ create_fsrs_optimize_job() {
 
 create_fsrs_optimize_job
 
-echo "Done. Reminder jobs publish into ${STUDY_TOPIC} / ${STREAK_TOPIC}; cron-fsrs-optimize (daily) hits study-service if configured."
+# --- Monthly creator revshare calculation -----------------------------------
+# This is also an HTTP job against study-service. The payload contains the pool
+# month and gross revenue amount to distribute. Because Cloud Scheduler sends a
+# static body, the job is best suited for a once-per-month manual update where
+# you edit the env vars below before provisioning/running it.
+#
+# Requires:
+#   STUDY_SERVICE_URL
+#   CRON_SECRET
+#   SCHEDULER_SA
+#   REVSHARE_POOL_MONTH        e.g. 2026-05
+#   REVSHARE_GROSS_AMOUNT_VND  total gross revenue to split
+# Optional:
+#   REVSHARE_SCHEDULE          default "0 2 1 * *" (02:00 UTC, first day monthly)
+#   REVSHARE_POOL_RATE         default 0.5
+#   REVSHARE_MIN_LEARNERS      default 10
+#   REVSHARE_CREATOR_CAP_RATE  default 0.2
+REVSHARE_SCHEDULE="${REVSHARE_SCHEDULE:-0 2 1 * *}"
+REVSHARE_POOL_RATE="${REVSHARE_POOL_RATE:-0.5}"
+REVSHARE_MIN_LEARNERS="${REVSHARE_MIN_LEARNERS:-10}"
+REVSHARE_CREATOR_CAP_RATE="${REVSHARE_CREATOR_CAP_RATE:-0.2}"
+
+create_revshare_job() {
+  if [[ -z "${STUDY_SERVICE_URL:-}" || -z "${CRON_SECRET:-}" || -z "${SCHEDULER_SA:-}" || -z "${REVSHARE_POOL_MONTH:-}" || -z "${REVSHARE_GROSS_AMOUNT_VND:-}" ]]; then
+    echo "Skipping cron-revshare-calculate: set STUDY_SERVICE_URL, CRON_SECRET, SCHEDULER_SA, REVSHARE_POOL_MONTH and REVSHARE_GROSS_AMOUNT_VND."
+    return 0
+  fi
+
+  local NAME="cron-revshare-calculate"
+  local URI="${STUDY_SERVICE_URL%/}/internal/revshare/calculate"
+  local BODY='{"pool_month":"'"${REVSHARE_POOL_MONTH}"'","gross_amount_vnd":'"${REVSHARE_GROSS_AMOUNT_VND}"',"pool_rate":'"${REVSHARE_POOL_RATE}"',"min_learners":'"${REVSHARE_MIN_LEARNERS}"',"creator_cap_rate":'"${REVSHARE_CREATOR_CAP_RATE}"'}'
+  echo "Provisioning Cloud Scheduler job ${NAME} → ${URI}"
+
+  local -a ARGS=(
+    --location="${LOCATION}"
+    --project="${PROJECT}"
+    --schedule="${REVSHARE_SCHEDULE}"
+    --time-zone="UTC"
+    --uri="${URI}"
+    --http-method=POST
+    --headers="Content-Type=application/json,X-Cron-Secret=${CRON_SECRET}"
+    --message-body="${BODY}"
+    --oidc-service-account-email="${SCHEDULER_SA}"
+    --oidc-token-audience="${STUDY_SERVICE_URL%/}"
+    --attempt-deadline=1800s
+    --description="Monthly — study-service calculates creator revshare and syncs it to billing-service."
+  )
+
+  if gcloud scheduler jobs describe "${NAME}" \
+        --location="${LOCATION}" --project="${PROJECT}" >/dev/null 2>&1; then
+    gcloud scheduler jobs update http "${NAME}" "${ARGS[@]}"
+  else
+    gcloud scheduler jobs create http "${NAME}" "${ARGS[@]}"
+  fi
+}
+
+create_revshare_job
+
+echo "Done. Reminder jobs publish into ${STUDY_TOPIC} / ${STREAK_TOPIC}; cron-fsrs-optimize and cron-revshare-calculate hit study-service if configured."

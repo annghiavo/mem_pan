@@ -29,6 +29,8 @@ func defaultDeckStudySettings(userID, deckID uuid.UUID) db.DeckStudySetting {
 		QuestionTypeWritten:          true,
 		StrictnessLevel:              grading.StrictnessFlexible,
 		RequireRetypingCorrectAnswer: false,
+		NewCardLimit:                 20,
+		ReviewCardLimit:              200,
 	}
 }
 
@@ -44,6 +46,8 @@ type UpsertSettingsParams struct {
 	QuestionTypeWritten          bool
 	StrictnessLevel              string
 	RequireRetypingCorrectAnswer bool
+	NewCardLimit                 int32
+	ReviewCardLimit              int32
 }
 
 type CheckAnswerParams struct {
@@ -96,6 +100,8 @@ func (s *settingsService) UpsertDeckSettings(ctx context.Context, p UpsertSettin
 		QuestionTypeWritten:          p.QuestionTypeWritten,
 		StrictnessLevel:              p.StrictnessLevel,
 		RequireRetypingCorrectAnswer: p.RequireRetypingCorrectAnswer,
+		NewCardLimit:                 p.NewCardLimit,
+		ReviewCardLimit:              p.ReviewCardLimit,
 	})
 }
 

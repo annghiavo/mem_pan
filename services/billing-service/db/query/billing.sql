@@ -58,7 +58,18 @@ INSERT INTO payment_transactions (
     checkout_url,
     raw_payload
 )
-VALUES ($1, $2, 'payos', $3, $4, $5, $6, 'pending', $7, $8)
+VALUES (
+    sqlc.arg('user_id'),
+    sqlc.arg('subscription_id'),
+    'payos',
+    sqlc.arg('provider_payment_id'),
+    sqlc.arg('provider_order_code'),
+    sqlc.arg('idempotency_key'),
+    sqlc.arg('amount_vnd'),
+    'pending',
+    sqlc.arg('checkout_url'),
+    sqlc.arg('raw_payload')::jsonb
+)
 RETURNING *;
 
 -- name: GetPaymentTransactionByOrderCode :one
@@ -71,7 +82,7 @@ LIMIT 1;
 UPDATE payment_transactions
 SET status = 'paid',
     paid_at = COALESCE($2, now()),
-    raw_payload = COALESCE($3, raw_payload),
+    raw_payload = COALESCE(sqlc.arg('raw_payload')::jsonb, raw_payload),
     updated_at = now()
 WHERE transaction_id = $1
 RETURNING *;
@@ -79,13 +90,17 @@ RETURNING *;
 -- name: MarkPaymentTransactionStatus :one
 UPDATE payment_transactions
 SET status = $2,
-    raw_payload = COALESCE($3, raw_payload),
+    raw_payload = COALESCE(sqlc.arg('raw_payload')::jsonb, raw_payload),
     updated_at = now()
 WHERE transaction_id = $1
 RETURNING *;
 
 -- name: RecordWebhookEvent :one
 INSERT INTO payment_webhook_events (provider, event_key, raw_payload)
-VALUES ('payos', $1, $2)
+VALUES (
+    'payos',
+    sqlc.arg('event_key'),
+    sqlc.arg('raw_payload')::jsonb
+)
 ON CONFLICT (provider, event_key) DO NOTHING
 RETURNING *;

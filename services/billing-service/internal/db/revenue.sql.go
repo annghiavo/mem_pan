@@ -283,7 +283,7 @@ const markCreatorEarningPayoutFailed = `-- name: MarkCreatorEarningPayoutFailed 
 UPDATE creator_earnings
 SET status = 'failed',
     payos_payout_state = $2,
-    payout_raw_payload = $3,
+    payout_raw_payload = $3::text::jsonb,
     payout_failed_reason = $4
 WHERE earning_id = $1
 RETURNING earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason
@@ -292,7 +292,7 @@ RETURNING earning_id, pool_month, creator_id, eligible_learners, weighted_score,
 type MarkCreatorEarningPayoutFailedParams struct {
 	EarningID          uuid.UUID      `json:"earning_id"`
 	PayosPayoutState   sql.NullString `json:"payos_payout_state"`
-	PayoutRawPayload   sql.NullString `json:"payout_raw_payload"`
+	Column3            string         `json:"column_3"`
 	PayoutFailedReason sql.NullString `json:"payout_failed_reason"`
 }
 
@@ -300,7 +300,7 @@ func (q *Queries) MarkCreatorEarningPayoutFailed(ctx context.Context, arg MarkCr
 	row := q.db.QueryRowContext(ctx, markCreatorEarningPayoutFailed,
 		arg.EarningID,
 		arg.PayosPayoutState,
-		arg.PayoutRawPayload,
+		arg.Column3,
 		arg.PayoutFailedReason,
 	)
 	var i CreatorEarning
@@ -331,12 +331,12 @@ func (q *Queries) MarkCreatorEarningPayoutFailed(ctx context.Context, arg MarkCr
 
 const markCreatorEarningPayoutPaid = `-- name: MarkCreatorEarningPayoutPaid :one
 UPDATE creator_earnings
-SET status = $5,
-    paid_at = CASE WHEN $5 = 'paid' THEN CURRENT_TIMESTAMP ELSE paid_at END,
+SET status = $5::text,
+    paid_at = CASE WHEN $5::text = 'paid' THEN CURRENT_TIMESTAMP ELSE paid_at END,
     payos_payout_id = $2,
     payos_payout_transaction_id = $3,
     payos_payout_state = $4,
-    payout_raw_payload = $6,
+    payout_raw_payload = $6::text::jsonb,
     payout_failed_reason = NULL
 WHERE earning_id = $1
 RETURNING earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason
@@ -347,8 +347,8 @@ type MarkCreatorEarningPayoutPaidParams struct {
 	PayosPayoutID            sql.NullString `json:"payos_payout_id"`
 	PayosPayoutTransactionID sql.NullString `json:"payos_payout_transaction_id"`
 	PayosPayoutState         sql.NullString `json:"payos_payout_state"`
-	Status                   string         `json:"status"`
-	PayoutRawPayload         sql.NullString `json:"payout_raw_payload"`
+	Column5                  string         `json:"column_5"`
+	Column6                  string         `json:"column_6"`
 }
 
 func (q *Queries) MarkCreatorEarningPayoutPaid(ctx context.Context, arg MarkCreatorEarningPayoutPaidParams) (CreatorEarning, error) {
@@ -357,8 +357,8 @@ func (q *Queries) MarkCreatorEarningPayoutPaid(ctx context.Context, arg MarkCrea
 		arg.PayosPayoutID,
 		arg.PayosPayoutTransactionID,
 		arg.PayosPayoutState,
-		arg.Status,
-		arg.PayoutRawPayload,
+		arg.Column5,
+		arg.Column6,
 	)
 	var i CreatorEarning
 	err := row.Scan(
@@ -441,6 +441,125 @@ func (q *Queries) MarkCreatorEarningPayoutProcessing(ctx context.Context, arg Ma
 		&i.PayoutRawPayload,
 		&i.PayoutRequestedAt,
 		&i.PayoutFailedReason,
+	)
+	return i, err
+}
+
+const upsertCreatorEarning = `-- name: UpsertCreatorEarning :one
+INSERT INTO creator_earnings (
+    pool_month,
+    creator_id,
+    eligible_learners,
+    weighted_score,
+    amount_vnd,
+    status
+)
+VALUES (
+    $1, $2, $3, $4, $5, $6
+)
+ON CONFLICT (pool_month, creator_id) DO UPDATE
+SET eligible_learners = EXCLUDED.eligible_learners,
+    weighted_score = EXCLUDED.weighted_score,
+    amount_vnd = EXCLUDED.amount_vnd,
+    status = CASE
+        WHEN creator_earnings.status = 'paid' THEN creator_earnings.status
+        WHEN creator_earnings.status = 'processing' THEN creator_earnings.status
+        ELSE EXCLUDED.status
+    END
+RETURNING earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason
+`
+
+type UpsertCreatorEarningParams struct {
+	PoolMonth        time.Time `json:"pool_month"`
+	CreatorID        uuid.UUID `json:"creator_id"`
+	EligibleLearners int32     `json:"eligible_learners"`
+	WeightedScore    string    `json:"weighted_score"`
+	AmountVnd        int64     `json:"amount_vnd"`
+	Status           string    `json:"status"`
+}
+
+func (q *Queries) UpsertCreatorEarning(ctx context.Context, arg UpsertCreatorEarningParams) (CreatorEarning, error) {
+	row := q.db.QueryRowContext(ctx, upsertCreatorEarning,
+		arg.PoolMonth,
+		arg.CreatorID,
+		arg.EligibleLearners,
+		arg.WeightedScore,
+		arg.AmountVnd,
+		arg.Status,
+	)
+	var i CreatorEarning
+	err := row.Scan(
+		&i.EarningID,
+		&i.PoolMonth,
+		&i.CreatorID,
+		&i.EligibleLearners,
+		&i.WeightedScore,
+		&i.AmountVnd,
+		&i.Status,
+		&i.PaidAt,
+		&i.CreatedAt,
+		&i.PayoutReferenceID,
+		&i.PayoutIdempotencyKey,
+		&i.PayoutToBin,
+		&i.PayoutToAccountNumber,
+		&i.PayoutToAccountName,
+		&i.PayosPayoutID,
+		&i.PayosPayoutTransactionID,
+		&i.PayosPayoutState,
+		&i.PayoutRawPayload,
+		&i.PayoutRequestedAt,
+		&i.PayoutFailedReason,
+	)
+	return i, err
+}
+
+const upsertMonthlyRevenuePool = `-- name: UpsertMonthlyRevenuePool :one
+INSERT INTO monthly_revenue_pools (
+    pool_month,
+    gross_amount_vnd,
+    creator_pool_amount_vnd,
+    platform_amount_vnd,
+    status,
+    finalized_at
+)
+VALUES (
+    $1, $2, $3, $4, $5, $6
+)
+ON CONFLICT (pool_month) DO UPDATE
+SET gross_amount_vnd = EXCLUDED.gross_amount_vnd,
+    creator_pool_amount_vnd = EXCLUDED.creator_pool_amount_vnd,
+    platform_amount_vnd = EXCLUDED.platform_amount_vnd,
+    status = EXCLUDED.status,
+    finalized_at = EXCLUDED.finalized_at
+RETURNING pool_month, gross_amount_vnd, creator_pool_amount_vnd, platform_amount_vnd, status, finalized_at
+`
+
+type UpsertMonthlyRevenuePoolParams struct {
+	PoolMonth            time.Time    `json:"pool_month"`
+	GrossAmountVnd       int64        `json:"gross_amount_vnd"`
+	CreatorPoolAmountVnd int64        `json:"creator_pool_amount_vnd"`
+	PlatformAmountVnd    int64        `json:"platform_amount_vnd"`
+	Status               string       `json:"status"`
+	FinalizedAt          sql.NullTime `json:"finalized_at"`
+}
+
+func (q *Queries) UpsertMonthlyRevenuePool(ctx context.Context, arg UpsertMonthlyRevenuePoolParams) (MonthlyRevenuePool, error) {
+	row := q.db.QueryRowContext(ctx, upsertMonthlyRevenuePool,
+		arg.PoolMonth,
+		arg.GrossAmountVnd,
+		arg.CreatorPoolAmountVnd,
+		arg.PlatformAmountVnd,
+		arg.Status,
+		arg.FinalizedAt,
+	)
+	var i MonthlyRevenuePool
+	err := row.Scan(
+		&i.PoolMonth,
+		&i.GrossAmountVnd,
+		&i.CreatorPoolAmountVnd,
+		&i.PlatformAmountVnd,
+		&i.Status,
+		&i.FinalizedAt,
 	)
 	return i, err
 }

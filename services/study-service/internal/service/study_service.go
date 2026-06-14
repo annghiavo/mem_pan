@@ -13,6 +13,7 @@ import (
 	gofsrs "github.com/open-spaced-repetition/go-fsrs/v4"
 	"golang.org/x/sync/errgroup"
 
+	"mem_pan/services/study-service/internal/billingclient"
 	"mem_pan/services/study-service/internal/db"
 	"mem_pan/services/study-service/internal/deckclient"
 	"mem_pan/services/study-service/internal/domain"
@@ -41,8 +42,8 @@ type DeckLearners struct {
 type StartSessionParams struct {
 	UserID        uuid.UUID
 	DeckID        uuid.UUID
-	NewCardsLimit int32
-	ReviewLimit   int32
+	NewCardsLimit *int32
+	ReviewLimit   *int32
 	AccessToken   string
 	Role          string
 	IsPlus        bool
@@ -121,7 +122,9 @@ type studyService struct {
 	revlogRepo      repository.RevlogRepository
 	weightsRepo     repository.FsrsWeightsRepository
 	revshareRepo    repository.RevshareRepository
+	settingsRepo    repository.DeckSettingsRepository
 	deckClient      deckclient.Client
+	billingClient   billingclient.Client
 	pub             publisher.EventPublisher
 }
 
@@ -136,12 +139,18 @@ func NewStudyService(
 ) StudyService {
 	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
 	var revshare repository.RevshareRepository
+	var settingsRepo repository.DeckSettingsRepository
+	var billingClient billingclient.Client
 	for _, opt := range opts {
 		switch v := opt.(type) {
 		case publisher.EventPublisher:
 			pub = v
 		case repository.RevshareRepository:
 			revshare = v
+		case repository.DeckSettingsRepository:
+			settingsRepo = v
+		case billingclient.Client:
+			billingClient = v
 		}
 	}
 	return &studyService{
@@ -151,7 +160,9 @@ func NewStudyService(
 		revlogRepo:      revlogRepo,
 		weightsRepo:     weightsRepo,
 		revshareRepo:    revshare,
+		settingsRepo:    settingsRepo,
 		deckClient:      deckClient,
+		billingClient:   billingClient,
 		pub:             pub,
 	}
 }
@@ -213,13 +224,26 @@ func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (
 		return nil, err
 	}
 
-	newLimit := p.NewCardsLimit
-	if newLimit <= 0 {
-		newLimit = defaultNewCardsLimit
+	newLimit := defaultNewCardsLimit
+	reviewLimit := defaultReviewCardsLimit
+	if s.settingsRepo != nil {
+		if settings, err := s.settingsRepo.GetDeckSettings(ctx, p.UserID, p.DeckID); err == nil {
+			newLimit = settings.NewCardLimit
+			reviewLimit = settings.ReviewCardLimit
+		}
 	}
-	reviewLimit := p.ReviewLimit
-	if reviewLimit <= 0 {
-		reviewLimit = defaultReviewCardsLimit
+
+	if p.NewCardsLimit != nil {
+		newLimit = *p.NewCardsLimit
+		if newLimit < 0 {
+			newLimit = 0
+		}
+	}
+	if p.ReviewLimit != nil {
+		reviewLimit = *p.ReviewLimit
+		if reviewLimit < 0 {
+			reviewLimit = 0
+		}
 	}
 
 	// Select due review cards (not new).
@@ -480,10 +504,10 @@ func (s *studyService) recordSessionMetrics(ctx context.Context, session db.Stud
 	} else if creatorID.UUID == session.UserID {
 		eligible = false
 		invalidReason = sql.NullString{String: "creator_self_study", Valid: true}
-	} else if session.TotalCards < 5 || summary.ReviewedCards < 5 {
+	} else if session.TotalCards < 1 || summary.ReviewedCards < 1 {
 		eligible = false
 		invalidReason = sql.NullString{String: "too_few_cards", Valid: true}
-	} else if summary.TotalActiveMs < int64(summary.ReviewedCards)*500 {
+	} else if summary.TotalActiveMs < int64(summary.ReviewedCards)*100 {
 		eligible = false
 		invalidReason = sql.NullString{String: "too_fast", Valid: true}
 	}
@@ -518,7 +542,7 @@ func (s *studyService) CalculateMonthlyRevShare(ctx context.Context, poolMonth t
 		creatorCapRate = 0.2
 	}
 	if minLearners <= 0 {
-		minLearners = 10
+		minLearners = 1
 	}
 	monthStart := time.Date(poolMonth.Year(), poolMonth.Month(), 1, 0, 0, 0, 0, time.UTC)
 	monthEnd := monthStart.AddDate(0, 1, 0)
@@ -546,7 +570,15 @@ func (s *studyService) CalculateMonthlyRevShare(ctx context.Context, poolMonth t
 		return db.MonthlyRevenuePool{}, nil, err
 	}
 	pool, err = s.revshareRepo.FinalizeRevenuePool(ctx, monthStart)
-	return pool, earnings, err
+	if err != nil {
+		return db.MonthlyRevenuePool{}, nil, err
+	}
+	if s.billingClient != nil {
+		if err := s.billingClient.SyncRevenuePool(ctx, pool, earnings); err != nil {
+			return db.MonthlyRevenuePool{}, nil, err
+		}
+	}
+	return pool, earnings, nil
 }
 
 func (s *studyService) GetDueCards(ctx context.Context, userID uuid.UUID, deckID *uuid.UUID) ([]db.UserCard, error) {

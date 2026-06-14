@@ -288,6 +288,43 @@ func TestListCardsByDeck_Success(t *testing.T) {
 	}
 }
 
+func TestListCardsByDeck_PlusPreviewForNonSubscriber(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	deckRepo := mock.NewMockDeckRepository(ctrl)
+	cardRepo := mock.NewMockCardRepository(ctrl)
+	noteRepo := mock.NewMockNoteRepository(ctrl)
+	ctx := context.Background()
+
+	ownerID := uuid.New()
+	otherID := uuid.New()
+	deckID := uuid.New()
+	deck := makeDeck(deckID, ownerID)
+	deck.IsPublic = true
+	deck.AccessLevel = db.DeckAccessLevelPlus
+	deck.PlusStatus = db.DeckPlusStatusApproved
+	deck.CardCount = 208
+
+	cards := make([]db.ListCardsByDeckRow, 30)
+	for i := range cards {
+		cards[i] = db.ListCardsByDeckRow{CardID: uuid.New(), DeckID: deckID, UserID: ownerID, Position: int32(i), ContentFront: "Front", ContentBack: "Back", LangFront: "en", LangBack: "en"}
+	}
+
+	deckRepo.EXPECT().GetDeckByID(ctx, deckID).Return(deck, nil)
+	cardRepo.EXPECT().ListCardsByDeck(ctx, deckID).Return(cards, nil)
+
+	svc := NewCardService(cardRepo, noteRepo, deckRepo)
+	result, err := svc.ListCardsByDeck(ctx, deckID, otherID, false)
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(result) != 21 {
+		t.Fatalf("expected 21 preview cards, got %d", len(result))
+	}
+}
+
 func TestListCardsByDeck_Forbidden(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

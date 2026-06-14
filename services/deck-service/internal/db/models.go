@@ -294,10 +294,10 @@ type DeckReview struct {
 	DeckID    uuid.UUID      `json:"deck_id"`
 	UserID    uuid.UUID      `json:"user_id"`
 	Rating    int16          `json:"rating"`
-	Comment   sql.NullString `json:"comment"`
 	Status    string         `json:"status"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
+	Comment   sql.NullString `json:"comment"`
 }
 
 type Folder struct {

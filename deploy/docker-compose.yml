@@ -96,7 +96,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.deck.entrypoints=web"
-      - "traefik.http.routers.deck.rule=PathPrefix(`/v1/decks`) || PathPrefix(`/v1/folders`) || PathPrefix(`/v1/cards`) || PathPrefix(`/v1/import`)"
+      - "traefik.http.routers.deck.rule=PathPrefix(`/v1/decks`) || PathPrefix(`/v1/folders`) || PathPrefix(`/v1/cards`) || PathPrefix(`/v1/import`) || PathPrefix(`/v1/creators`)"
       - "traefik.http.services.deck.loadbalancer.server.port=8081"
     networks:
       - gateway
@@ -125,8 +125,8 @@ services:
       - "traefik.http.routers.billing-admin-revenue.priority=100"
       - "traefik.http.routers.billing-admin-revenue.service=billing"
       - "traefik.http.routers.billing-creators.entrypoints=web"
-      - "traefik.http.routers.billing-creators.rule=PathPrefix(`/v1/creators`)"
-      - "traefik.http.routers.billing-creators.priority=100"
+      - "traefik.http.routers.billing-creators.rule=Path(`/v1/creators/me/earnings`) || Path(`/v1/creators/me/earnings/summary`) || Path(`/v1/creators/me/balance-history`) || Path(`/v1/creators/me/payout-account`) || Path(`/v1/creators/me/withdrawals`)"
+      - "traefik.http.routers.billing-creators.priority=200"
       - "traefik.http.routers.billing-creators.service=billing"
       - "traefik.http.services.billing.loadbalancer.server.port=8088"
     networks:

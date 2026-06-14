@@ -181,17 +181,17 @@ type PaymentLinkInfoData struct {
 }
 
 type PaymentTransaction struct {
-	Reference             string `json:"reference"`
-	Amount                int64  `json:"amount"`
-	AccountNumber         string `json:"accountNumber"`
-	Description           string `json:"description"`
-	TransactionDateTime   string `json:"transactionDateTime"`
-	VirtualAccountName    string `json:"virtualAccountName"`
-	VirtualAccountNumber  string `json:"virtualAccountNumber"`
-	CounterAccountBankID  string `json:"counterAccountBankId"`
+	Reference              string `json:"reference"`
+	Amount                 int64  `json:"amount"`
+	AccountNumber          string `json:"accountNumber"`
+	Description            string `json:"description"`
+	TransactionDateTime    string `json:"transactionDateTime"`
+	VirtualAccountName     string `json:"virtualAccountName"`
+	VirtualAccountNumber   string `json:"virtualAccountNumber"`
+	CounterAccountBankID   string `json:"counterAccountBankId"`
 	CounterAccountBankName string `json:"counterAccountBankName"`
-	CounterAccountName    string `json:"counterAccountName"`
-	CounterAccountNumber  string `json:"counterAccountNumber"`
+	CounterAccountName     string `json:"counterAccountName"`
+	CounterAccountNumber   string `json:"counterAccountNumber"`
 }
 
 func (c *Client) ChecksumKey() string {
@@ -289,14 +289,18 @@ func (c *Client) SignPayout(data map[string]any) (string, error) {
 }
 
 func (c *Client) CreatePayout(ctx context.Context, req CreatePayoutRequest, idempotencyKey string) (PayoutResponse, []byte, error) {
-	signature, err := c.SignPayout(map[string]any{
+	data := map[string]any{
 		"amount":          req.Amount,
-		"category":        req.Category,
 		"description":     req.Description,
 		"referenceId":     req.ReferenceID,
 		"toAccountNumber": req.ToAccountNumber,
 		"toBin":           req.ToBin,
-	})
+	}
+	if len(req.Category) > 0 {
+		data["category"] = req.Category
+	}
+
+	signature, err := c.SignPayout(data)
 	if err != nil {
 		return PayoutResponse{}, nil, err
 	}
@@ -304,12 +308,16 @@ func (c *Client) CreatePayout(ctx context.Context, req CreatePayoutRequest, idem
 }
 
 func (c *Client) CreateBatchPayout(ctx context.Context, req CreateBatchPayoutRequest, idempotencyKey string) (PayoutResponse, []byte, error) {
-	signature, err := c.SignPayout(map[string]any{
-		"category":            req.Category,
+	data := map[string]any{
 		"payouts":             req.Payouts,
 		"referenceId":         req.ReferenceID,
 		"validateDestination": req.ValidateDestination,
-	})
+	}
+	if len(req.Category) > 0 {
+		data["category"] = req.Category
+	}
+
+	signature, err := c.SignPayout(data)
 	if err != nil {
 		return PayoutResponse{}, nil, err
 	}
@@ -376,6 +384,9 @@ func (c *Client) postPayout(ctx context.Context, path string, req any, idempoten
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return PayoutResponse{}, raw.Bytes(), fmt.Errorf("payos payout failed: status=%d code=%s desc=%s", resp.StatusCode, out.Code, out.Desc)
+	}
+	if out.Signature != "" && !VerifyAnySignature(out.Data, out.Signature, c.payoutChecksumKey) {
+		return PayoutResponse{}, raw.Bytes(), fmt.Errorf("payos payout response signature mismatch")
 	}
 	if out.Data.ID == "" {
 		return PayoutResponse{}, raw.Bytes(), fmt.Errorf("payos payout returned incomplete data")

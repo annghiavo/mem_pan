@@ -1,12 +1,13 @@
 package payos
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"reflect"
+	"net/url"
 	"sort"
 	"strings"
 )
@@ -24,11 +25,12 @@ func CreateSignature(data map[string]any, checksumKey string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		parts = append(parts, fmt.Sprintf("%s=%s", key, value))
+		parts = append(parts, fmt.Sprintf("%s=%s", encodeURIComponent(key), encodeURIComponent(value)))
 	}
 
 	mac := hmac.New(sha256.New, []byte(checksumKey))
-	mac.Write([]byte(strings.Join(parts, "&")))
+	stringToSign := strings.Join(parts, "&")
+	mac.Write([]byte(stringToSign))
 	return hex.EncodeToString(mac.Sum(nil)), nil
 }
 
@@ -37,14 +39,58 @@ func VerifySignature(data map[string]any, signature, checksumKey string) bool {
 	if err != nil {
 		return false
 	}
-	return hmac.Equal([]byte(expected), []byte(signature))
+	return strings.EqualFold(expected, signature)
+}
+
+func VerifyAnySignature(data any, signature, checksumKey string) bool {
+	payload, err := mapFromAny(data)
+	if err != nil {
+		return false
+	}
+	return VerifySignature(payload, signature, checksumKey)
+}
+
+func encodeURIComponent(str string) string {
+	escaped := url.QueryEscape(str)
+	escaped = strings.ReplaceAll(escaped, "+", "%20")
+	// JS encodeURIComponent does NOT encode: !, ', (, ), *
+	// Go QueryEscape encodes them. Let's restore them to match JS exactly.
+	escaped = strings.ReplaceAll(escaped, "%21", "!")
+	escaped = strings.ReplaceAll(escaped, "%27", "'")
+	escaped = strings.ReplaceAll(escaped, "%28", "(")
+	escaped = strings.ReplaceAll(escaped, "%29", ")")
+	escaped = strings.ReplaceAll(escaped, "%2A", "*")
+	return escaped
+}
+
+func deepSort(v any) any {
+	if v == nil {
+		return nil
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		return v
+	}
+	var out any
+	d := json.NewDecoder(bytes.NewReader(b))
+	d.UseNumber()
+	if err := d.Decode(&out); err != nil {
+		return v
+	}
+	return out
 }
 
 func signatureValue(value any) (string, error) {
 	if value == nil {
 		return "", nil
 	}
-	switch v := value.(type) {
+
+	sortedVal := deepSort(value)
+	if sortedVal == nil {
+		return "", nil
+	}
+
+	switch v := sortedVal.(type) {
 	case string:
 		return v, nil
 	case json.Number:
@@ -60,15 +106,20 @@ func signatureValue(value any) (string, error) {
 		}
 		return string(b), nil
 	default:
-		rv := reflect.ValueOf(value)
-		switch rv.Kind() {
-		case reflect.Array, reflect.Map, reflect.Slice, reflect.Struct:
-			b, err := json.Marshal(v)
-			if err != nil {
-				return "", err
-			}
-			return string(b), nil
-		}
 		return fmt.Sprint(v), nil
 	}
+}
+
+func mapFromAny(value any) (map[string]any, error) {
+	b, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+	var out map[string]any
+	d := json.NewDecoder(bytes.NewReader(b))
+	d.UseNumber()
+	if err := d.Decode(&out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }

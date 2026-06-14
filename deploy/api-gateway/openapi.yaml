@@ -389,6 +389,52 @@ paths:
       responses:
         '200':
           description: preflight
+  "/v1/creators/{path=**}":
+    parameters:
+    - in: path
+      name: path
+      required: true
+      type: string
+    get:
+      operationId: deckCreatorsGet
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: deckCreatorsPost
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    put:
+      operationId: deckCreatorsPut
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    options:
+      operationId: opt_v1_creators_path
+      x-google-backend:
+        disable_auth: true
+        address: https://deck-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: preflight
   "/v1/study/{path=**}":
     parameters:
     - in: path
@@ -497,6 +543,27 @@ paths:
       responses:
         '200':
           description: preflight
+  "/v1/billing/banks":
+    get:
+      operationId: billingBanksGet
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    options:
+      operationId: opt_v1_billing_banks
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: preflight
   "/v1/admin/revenue/{path=**}":
     parameters:
     - in: path
@@ -546,6 +613,79 @@ paths:
           description: ok
     options:
       operationId: opt_v1_creators_me_earnings
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: preflight
+  "/v1/creators/me/earnings/summary":
+    get:
+      operationId: creatorEarningsSummaryGet
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    options:
+      operationId: opt_v1_creators_me_earnings_summary
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: preflight
+  "/v1/creators/me/payout-account":
+    get:
+      operationId: creatorPayoutAccountGet
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    put:
+      operationId: creatorPayoutAccountPut
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    options:
+      operationId: opt_v1_creators_me_payout_account
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: preflight
+  "/v1/creators/me/withdrawals":
+    post:
+      operationId: creatorWithdrawalPost
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    options:
+      operationId: opt_v1_creators_me_withdrawals
       x-google-backend:
         disable_auth: true
         address: https://billing-service-wzed7v5hbq-eu.a.run.app

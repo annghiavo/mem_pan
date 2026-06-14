@@ -79,7 +79,8 @@ func toGRPCError(err error) error {
 		return status.Error(codes.AlreadyExists, err.Error())
 	case errors.Is(err, domain.ErrInvalidCredentials):
 		return status.Error(codes.Unauthenticated, err.Error())
-	case errors.Is(err, domain.ErrUserBanned):
+	case errors.Is(err, domain.ErrUserBanned),
+		errors.Is(err, domain.ErrEmailNotVerified):
 		return status.Error(codes.PermissionDenied, err.Error())
 	case errors.Is(err, domain.ErrTokenNotFound),
 		errors.Is(err, domain.ErrTokenExpired),

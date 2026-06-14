@@ -170,6 +170,10 @@ func (s *authService) Login(ctx context.Context, params LoginParams) (AuthRespon
 		return AuthResponse{}, domain.ErrInvalidCredentials
 	}
 
+	if !user.EmailVerified {
+		return AuthResponse{}, domain.ErrEmailNotVerified
+	}
+
 	accessToken, accessPayload, err := s.tokenMaker.CreateToken(
 		user.UserID, user.Username, user.Role, user.IsPlus, s.accessDur, token.TokenTypeAccess,
 	)
@@ -233,6 +237,9 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (Au
 	}
 	if user.IsBanned {
 		return AuthTokens{}, domain.ErrUserBanned
+	}
+	if !user.EmailVerified {
+		return AuthTokens{}, domain.ErrEmailNotVerified
 	}
 
 	accessToken, accessPayload, err := s.tokenMaker.CreateToken(

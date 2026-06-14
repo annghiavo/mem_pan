@@ -14,8 +14,10 @@ INSERT INTO deck_study_settings (
     question_type_multiple_choice,
     question_type_written,
     strictness_level,
-    require_retyping_correct_answer
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    require_retyping_correct_answer,
+    new_card_limit,
+    review_card_limit
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 ON CONFLICT (user_id, deck_id) DO UPDATE SET
     shuffle_terms                   = EXCLUDED.shuffle_terms,
     text_to_speech                  = EXCLUDED.text_to_speech,
@@ -26,5 +28,7 @@ ON CONFLICT (user_id, deck_id) DO UPDATE SET
     question_type_written           = EXCLUDED.question_type_written,
     strictness_level                = EXCLUDED.strictness_level,
     require_retyping_correct_answer = EXCLUDED.require_retyping_correct_answer,
+    new_card_limit                  = EXCLUDED.new_card_limit,
+    review_card_limit               = EXCLUDED.review_card_limit,
     updated_at                      = CURRENT_TIMESTAMP
 RETURNING *;

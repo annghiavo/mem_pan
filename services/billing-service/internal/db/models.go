@@ -7,10 +7,12 @@ package db
 import (
 	"database/sql"
 	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sqlc-dev/pqtype"
 )
 
 type PaymentStatus string
@@ -102,6 +104,18 @@ func (ns NullSubscriptionStatus) Value() (driver.Value, error) {
 	return string(ns.SubscriptionStatus), nil
 }
 
+type CreatorBalanceTransaction struct {
+	TransactionID uuid.UUID    `json:"transaction_id"`
+	CreatorID     uuid.UUID    `json:"creator_id"`
+	SourceType    string       `json:"source_type"`
+	SourceID      string       `json:"source_id"`
+	AmountVnd     int64        `json:"amount_vnd"`
+	Status        string       `json:"status"`
+	PoolMonth     sql.NullTime `json:"pool_month"`
+	CreatedAt     time.Time    `json:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at"`
+}
+
 type CreatorEarning struct {
 	EarningID                uuid.UUID             `json:"earning_id"`
 	PoolMonth                time.Time             `json:"pool_month"`
@@ -119,9 +133,42 @@ type CreatorEarning struct {
 	PayoutToAccountName      sql.NullString        `json:"payout_to_account_name"`
 	PayosPayoutID            sql.NullString        `json:"payos_payout_id"`
 	PayosPayoutTransactionID sql.NullString        `json:"payos_payout_transaction_id"`
-	PayosPayoutState         sql.NullString `json:"payos_payout_state"`
-	PayoutRawPayload         sql.NullString `json:"payout_raw_payload"`
-	PayoutRequestedAt        sql.NullTime   `json:"payout_requested_at"`
+	PayosPayoutState         sql.NullString        `json:"payos_payout_state"`
+	PayoutRawPayload         pqtype.NullRawMessage `json:"payout_raw_payload"`
+	PayoutRequestedAt        sql.NullTime          `json:"payout_requested_at"`
+	PayoutFailedReason       sql.NullString        `json:"payout_failed_reason"`
+}
+
+type CreatorPayoutAccount struct {
+	CreatorID     uuid.UUID      `json:"creator_id"`
+	BankBin       string         `json:"bank_bin"`
+	BankCode      string         `json:"bank_code"`
+	BankShortName string         `json:"bank_short_name"`
+	BankName      string         `json:"bank_name"`
+	BankLogo      sql.NullString `json:"bank_logo"`
+	AccountNumber string         `json:"account_number"`
+	AccountName   string         `json:"account_name"`
+	VerifiedAt    sql.NullTime   `json:"verified_at"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+}
+
+type CreatorWithdrawal struct {
+	WithdrawalID             uuid.UUID             `json:"withdrawal_id"`
+	CreatorID                uuid.UUID             `json:"creator_id"`
+	AmountVnd                int64                 `json:"amount_vnd"`
+	Status                   string                `json:"status"`
+	RequestedAt              time.Time             `json:"requested_at"`
+	PaidAt                   sql.NullTime          `json:"paid_at"`
+	PayoutReferenceID        sql.NullString        `json:"payout_reference_id"`
+	PayoutIdempotencyKey     sql.NullString        `json:"payout_idempotency_key"`
+	PayoutToBin              sql.NullString        `json:"payout_to_bin"`
+	PayoutToAccountNumber    sql.NullString        `json:"payout_to_account_number"`
+	PayoutToAccountName      sql.NullString        `json:"payout_to_account_name"`
+	PayosPayoutID            sql.NullString        `json:"payos_payout_id"`
+	PayosPayoutTransactionID sql.NullString        `json:"payos_payout_transaction_id"`
+	PayosPayoutState         sql.NullString        `json:"payos_payout_state"`
+	PayoutRawPayload         pqtype.NullRawMessage `json:"payout_raw_payload"`
 	PayoutFailedReason       sql.NullString        `json:"payout_failed_reason"`
 }
 
@@ -144,19 +191,19 @@ type PaymentTransaction struct {
 	IdempotencyKey    string                `json:"idempotency_key"`
 	AmountVnd         int64                 `json:"amount_vnd"`
 	Status            PaymentStatus         `json:"status"`
-	CheckoutUrl       sql.NullString `json:"checkout_url"`
-	RawPayload        sql.NullString `json:"raw_payload"`
-	PaidAt            sql.NullTime   `json:"paid_at"`
+	CheckoutUrl       sql.NullString        `json:"checkout_url"`
+	RawPayload        pqtype.NullRawMessage `json:"raw_payload"`
+	PaidAt            sql.NullTime          `json:"paid_at"`
 	CreatedAt         time.Time             `json:"created_at"`
 	UpdatedAt         time.Time             `json:"updated_at"`
 }
 
 type PaymentWebhookEvent struct {
-	WebhookEventID uuid.UUID `json:"webhook_event_id"`
-	Provider       string    `json:"provider"`
-	EventKey       string    `json:"event_key"`
-	RawPayload     string    `json:"raw_payload"`
-	ProcessedAt    time.Time `json:"processed_at"`
+	WebhookEventID uuid.UUID       `json:"webhook_event_id"`
+	Provider       string          `json:"provider"`
+	EventKey       string          `json:"event_key"`
+	RawPayload     json.RawMessage `json:"raw_payload"`
+	ProcessedAt    time.Time       `json:"processed_at"`
 }
 
 type Subscription struct {

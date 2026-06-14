@@ -3,10 +3,12 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sqlc-dev/pqtype"
 
 	"mem_pan/services/billing-service/internal/db"
 	"mem_pan/services/billing-service/internal/domain"
@@ -28,20 +30,31 @@ type BillingRepository interface {
 	RecordWebhookEvent(ctx context.Context, eventKey string, rawPayload []byte) error
 
 	GetMonthlyRevenuePools(ctx context.Context) ([]db.MonthlyRevenuePool, error)
+	SyncRevenuePool(ctx context.Context, pool db.UpsertMonthlyRevenuePoolParams, earnings []db.UpsertCreatorEarningParams) error
 	GetCreatorEarningsByMonth(ctx context.Context, poolMonth time.Time) ([]db.CreatorEarning, error)
 	GetMyEarnings(ctx context.Context, creatorID uuid.UUID) ([]db.CreatorEarning, error)
+	GetCreatorBalanceSummary(ctx context.Context, creatorID uuid.UUID) (db.GetCreatorBalanceSummaryRow, error)
+	ListCreatorBalanceHistory(ctx context.Context, arg db.ListCreatorBalanceHistoryParams) ([]db.ListCreatorBalanceHistoryRow, error)
 	GetCreatorEarningByID(ctx context.Context, earningID uuid.UUID) (db.CreatorEarning, error)
+	CreateCreatorWithdrawal(ctx context.Context, arg db.CreateCreatorWithdrawalParams) (db.CreatorWithdrawal, error)
+	GetCreatorWithdrawalByID(ctx context.Context, withdrawalID uuid.UUID) (db.CreatorWithdrawal, error)
+	UpdateCreatorWithdrawalStatus(ctx context.Context, arg db.UpdateCreatorWithdrawalStatusParams) (db.CreatorWithdrawal, error)
+	UpsertCreatorWithdrawalReservation(ctx context.Context, arg db.UpsertCreatorWithdrawalReservationParams) (db.CreatorBalanceTransaction, error)
+	UpdateCreatorBalanceTransactionStatus(ctx context.Context, arg db.UpdateCreatorBalanceTransactionStatusParams) (db.CreatorBalanceTransaction, error)
 	MarkCreatorEarningPayoutProcessing(ctx context.Context, arg db.MarkCreatorEarningPayoutProcessingParams) (db.CreatorEarning, error)
 	MarkCreatorEarningPayoutPaid(ctx context.Context, arg db.MarkCreatorEarningPayoutPaidParams) (db.CreatorEarning, error)
 	MarkCreatorEarningPayoutFailed(ctx context.Context, arg db.MarkCreatorEarningPayoutFailedParams) (db.CreatorEarning, error)
+	UpsertCreatorPayoutAccount(ctx context.Context, arg db.UpsertCreatorPayoutAccountParams) (db.CreatorPayoutAccount, error)
+	GetCreatorPayoutAccount(ctx context.Context, creatorID uuid.UUID) (db.CreatorPayoutAccount, error)
 }
 
 type postgresRepo struct {
-	q *db.Queries
+	db *sql.DB
+	q  *db.Queries
 }
 
 func New(database *sql.DB) BillingRepository {
-	return &postgresRepo{q: db.New(database)}
+	return &postgresRepo{db: database, q: db.New(database)}
 }
 
 func (r *postgresRepo) CreateSubscription(ctx context.Context, userID uuid.UUID, planCode string, start, end time.Time) (db.Subscription, error) {
@@ -116,7 +129,7 @@ func (r *postgresRepo) MarkPaymentTransactionPaid(ctx context.Context, transacti
 	return r.q.MarkPaymentTransactionPaid(ctx, db.MarkPaymentTransactionPaidParams{
 		TransactionID: transactionID,
 		PaidAt:        paid,
-		RawPayload:    nullableRaw(rawPayload),
+		RawPayload:    validJSONRaw(rawPayload),
 	})
 }
 
@@ -124,14 +137,14 @@ func (r *postgresRepo) MarkPaymentTransactionStatus(ctx context.Context, transac
 	return r.q.MarkPaymentTransactionStatus(ctx, db.MarkPaymentTransactionStatusParams{
 		TransactionID: transactionID,
 		Status:        status,
-		RawPayload:    nullableRaw(rawPayload),
+		RawPayload:    validJSONRaw(rawPayload),
 	})
 }
 
 func (r *postgresRepo) RecordWebhookEvent(ctx context.Context, eventKey string, rawPayload []byte) error {
 	_, err := r.q.RecordWebhookEvent(ctx, db.RecordWebhookEventParams{
 		EventKey:   eventKey,
-		RawPayload: string(rawPayload),
+		RawPayload: validJSONRaw(rawPayload),
 	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.ErrDuplicateWebhook
@@ -139,15 +152,52 @@ func (r *postgresRepo) RecordWebhookEvent(ctx context.Context, eventKey string, 
 	return err
 }
 
-func nullableRaw(raw []byte) sql.NullString {
-	return sql.NullString{
-		String: string(raw),
-		Valid:  len(raw) > 0,
+func nullableRaw(raw []byte) pqtype.NullRawMessage {
+	return pqtype.NullRawMessage{
+		RawMessage: raw,
+		Valid:      len(raw) > 0 && json.Valid(raw),
 	}
+}
+
+func validJSONRaw(raw []byte) json.RawMessage {
+	if len(raw) == 0 || !json.Valid(raw) {
+		return json.RawMessage("null")
+	}
+	return json.RawMessage(raw)
 }
 
 func (r *postgresRepo) GetMonthlyRevenuePools(ctx context.Context) ([]db.MonthlyRevenuePool, error) {
 	return r.q.GetMonthlyRevenuePools(ctx)
+}
+
+func (r *postgresRepo) SyncRevenuePool(ctx context.Context, pool db.UpsertMonthlyRevenuePoolParams, earnings []db.UpsertCreatorEarningParams) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	qtx := r.q.WithTx(tx)
+	if _, err := qtx.UpsertMonthlyRevenuePool(ctx, pool); err != nil {
+		return err
+	}
+	for _, earning := range earnings {
+		row, err := qtx.UpsertCreatorEarning(ctx, earning)
+		if err != nil {
+			return err
+		}
+		if _, err := qtx.UpsertCreatorEarningCreditTransaction(ctx, db.UpsertCreatorEarningCreditTransactionParams{
+			CreatorID: row.CreatorID,
+			SourceID:  row.EarningID.String(),
+			AmountVnd: row.AmountVnd,
+			PoolMonth: sql.NullTime{Time: row.PoolMonth, Valid: true},
+		}); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }
 
 func (r *postgresRepo) GetCreatorEarningsByMonth(ctx context.Context, poolMonth time.Time) ([]db.CreatorEarning, error) {
@@ -158,10 +208,50 @@ func (r *postgresRepo) GetMyEarnings(ctx context.Context, creatorID uuid.UUID) (
 	return r.q.GetMyEarnings(ctx, creatorID)
 }
 
+func (r *postgresRepo) GetCreatorBalanceSummary(ctx context.Context, creatorID uuid.UUID) (db.GetCreatorBalanceSummaryRow, error) {
+	return r.q.GetCreatorBalanceSummary(ctx, creatorID)
+}
+
+func (r *postgresRepo) ListCreatorBalanceHistory(ctx context.Context, arg db.ListCreatorBalanceHistoryParams) ([]db.ListCreatorBalanceHistoryRow, error) {
+	return r.q.ListCreatorBalanceHistory(ctx, arg)
+}
+
 func (r *postgresRepo) GetCreatorEarningByID(ctx context.Context, earningID uuid.UUID) (db.CreatorEarning, error) {
 	row, err := r.q.GetCreatorEarningByID(ctx, earningID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return db.CreatorEarning{}, domain.ErrEarningNotFound
+	}
+	return row, err
+}
+
+func (r *postgresRepo) CreateCreatorWithdrawal(ctx context.Context, arg db.CreateCreatorWithdrawalParams) (db.CreatorWithdrawal, error) {
+	return r.q.CreateCreatorWithdrawal(ctx, arg)
+}
+
+func (r *postgresRepo) GetCreatorWithdrawalByID(ctx context.Context, withdrawalID uuid.UUID) (db.CreatorWithdrawal, error) {
+	row, err := r.q.GetCreatorWithdrawalByID(ctx, withdrawalID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.CreatorWithdrawal{}, domain.ErrWithdrawalNotFound
+	}
+	return row, err
+}
+
+func (r *postgresRepo) UpdateCreatorWithdrawalStatus(ctx context.Context, arg db.UpdateCreatorWithdrawalStatusParams) (db.CreatorWithdrawal, error) {
+	row, err := r.q.UpdateCreatorWithdrawalStatus(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.CreatorWithdrawal{}, domain.ErrWithdrawalNotFound
+	}
+	return row, err
+}
+
+func (r *postgresRepo) UpsertCreatorWithdrawalReservation(ctx context.Context, arg db.UpsertCreatorWithdrawalReservationParams) (db.CreatorBalanceTransaction, error) {
+	return r.q.UpsertCreatorWithdrawalReservation(ctx, arg)
+}
+
+func (r *postgresRepo) UpdateCreatorBalanceTransactionStatus(ctx context.Context, arg db.UpdateCreatorBalanceTransactionStatusParams) (db.CreatorBalanceTransaction, error) {
+	row, err := r.q.UpdateCreatorBalanceTransactionStatus(ctx, arg)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.CreatorBalanceTransaction{}, domain.ErrWithdrawalNotFound
 	}
 	return row, err
 }
@@ -186,6 +276,18 @@ func (r *postgresRepo) MarkCreatorEarningPayoutFailed(ctx context.Context, arg d
 	row, err := r.q.MarkCreatorEarningPayoutFailed(ctx, arg)
 	if errors.Is(err, sql.ErrNoRows) {
 		return db.CreatorEarning{}, domain.ErrEarningNotFound
+	}
+	return row, err
+}
+
+func (r *postgresRepo) UpsertCreatorPayoutAccount(ctx context.Context, arg db.UpsertCreatorPayoutAccountParams) (db.CreatorPayoutAccount, error) {
+	return r.q.UpsertCreatorPayoutAccount(ctx, arg)
+}
+
+func (r *postgresRepo) GetCreatorPayoutAccount(ctx context.Context, creatorID uuid.UUID) (db.CreatorPayoutAccount, error) {
+	row, err := r.q.GetCreatorPayoutAccount(ctx, creatorID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return db.CreatorPayoutAccount{}, domain.ErrPayoutAccountNotFound
 	}
 	return row, err
 }

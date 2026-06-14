@@ -125,5 +125,7 @@ func dbSettingsToPb(s db.DeckStudySetting) *pb.StudySettings {
 		QuestionTypeWritten:          s.QuestionTypeWritten,
 		StrictnessLevel:              s.StrictnessLevel,
 		RequireRetypingCorrectAnswer: s.RequireRetypingCorrectAnswer,
+		NewCardLimit:                 s.NewCardLimit,
+		ReviewCardLimit:              s.ReviewCardLimit,
 	}
 }

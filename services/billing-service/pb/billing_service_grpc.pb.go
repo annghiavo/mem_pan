@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	BillingService_CheckPlusAccess_FullMethodName     = "/billing.BillingService/CheckPlusAccess"
 	BillingService_ExpireSubscriptions_FullMethodName = "/billing.BillingService/ExpireSubscriptions"
+	BillingService_SyncRevenuePool_FullMethodName     = "/billing.BillingService/SyncRevenuePool"
 )
 
 // BillingServiceClient is the client API for BillingService service.
@@ -29,6 +30,7 @@ const (
 type BillingServiceClient interface {
 	CheckPlusAccess(ctx context.Context, in *CheckPlusAccessRequest, opts ...grpc.CallOption) (*CheckPlusAccessResponse, error)
 	ExpireSubscriptions(ctx context.Context, in *ExpireSubscriptionsRequest, opts ...grpc.CallOption) (*ExpireSubscriptionsResponse, error)
+	SyncRevenuePool(ctx context.Context, in *SyncRevenuePoolRequest, opts ...grpc.CallOption) (*SyncRevenuePoolResponse, error)
 }
 
 type billingServiceClient struct {
@@ -59,12 +61,23 @@ func (c *billingServiceClient) ExpireSubscriptions(ctx context.Context, in *Expi
 	return out, nil
 }
 
+func (c *billingServiceClient) SyncRevenuePool(ctx context.Context, in *SyncRevenuePoolRequest, opts ...grpc.CallOption) (*SyncRevenuePoolResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SyncRevenuePoolResponse)
+	err := c.cc.Invoke(ctx, BillingService_SyncRevenuePool_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillingServiceServer is the server API for BillingService service.
 // All implementations must embed UnimplementedBillingServiceServer
 // for forward compatibility.
 type BillingServiceServer interface {
 	CheckPlusAccess(context.Context, *CheckPlusAccessRequest) (*CheckPlusAccessResponse, error)
 	ExpireSubscriptions(context.Context, *ExpireSubscriptionsRequest) (*ExpireSubscriptionsResponse, error)
+	SyncRevenuePool(context.Context, *SyncRevenuePoolRequest) (*SyncRevenuePoolResponse, error)
 	mustEmbedUnimplementedBillingServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedBillingServiceServer) CheckPlusAccess(context.Context, *Check
 }
 func (UnimplementedBillingServiceServer) ExpireSubscriptions(context.Context, *ExpireSubscriptionsRequest) (*ExpireSubscriptionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExpireSubscriptions not implemented")
+}
+func (UnimplementedBillingServiceServer) SyncRevenuePool(context.Context, *SyncRevenuePoolRequest) (*SyncRevenuePoolResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SyncRevenuePool not implemented")
 }
 func (UnimplementedBillingServiceServer) mustEmbedUnimplementedBillingServiceServer() {}
 func (UnimplementedBillingServiceServer) testEmbeddedByValue()                        {}
@@ -138,6 +154,24 @@ func _BillingService_ExpireSubscriptions_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_SyncRevenuePool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SyncRevenuePoolRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).SyncRevenuePool(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_SyncRevenuePool_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).SyncRevenuePool(ctx, req.(*SyncRevenuePoolRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillingService_ServiceDesc is the grpc.ServiceDesc for BillingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ExpireSubscriptions",
 			Handler:    _BillingService_ExpireSubscriptions_Handler,
+		},
+		{
+			MethodName: "SyncRevenuePool",
+			Handler:    _BillingService_SyncRevenuePool_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

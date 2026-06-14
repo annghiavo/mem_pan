@@ -27,7 +27,7 @@ func TestCreateSignatureSortsFields(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	const want = "b9c208495fda1d5748bae5dc8ebb1ff745aab6cfaa19a9808ffb0e29d808e0e3"
+	const want = "da0c6ff303c99e578de53ff2f5e99e5916f191e9852fe3a08ef299780e26993f"
 	if got != want {
 		t.Fatalf("signature mismatch: got %s, want %s", got, want)
 	}
@@ -40,8 +40,93 @@ func TestVerifySignatureRejectsMismatch(t *testing.T) {
 	}
 }
 
+func TestVerifySignatureIgnoresHexCase(t *testing.T) {
+	ok := VerifySignature(map[string]any{"amount": int64(50000)}, "68AA0B394FC676F05824CE3FA7992B3419F32C12E856B6E78399B28149CD86BF", "secret")
+	if !ok {
+		t.Fatal("expected signature match regardless of hex case")
+	}
+}
+
+func TestVerifyAnySignatureMatchesPayoutExample(t *testing.T) {
+	data := map[string]any{
+		"payouts": []any{
+			map[string]any{
+				"id":          "batch_8f9520b9341144f38b9f5fbfa317db8e",
+				"referenceId": "payout_1753061728877",
+				"transactions": []any{
+					map[string]any{
+						"id":                  "batch_txn_fdb348c0570a4cb99009da22f9504898",
+						"referenceId":         "payout_1753061728877_0",
+						"amount":              2000,
+						"description":         "batch payout",
+						"toBin":               "970422",
+						"toAccountNumber":     "0123456789",
+						"toAccountName":       "NGUYEN VAN A",
+						"reference":           "103269845",
+						"transactionDatetime": "2025-07-21T08:35:40+07:00",
+						"errorMessage":        nil,
+						"errorCode":           nil,
+						"state":               "SUCCEEDED",
+					},
+					map[string]any{
+						"id":                  "batch_txn_d94d371c079f4fc0ab7154e1576629d8",
+						"referenceId":         "payout_1753061728877_1",
+						"amount":              2000,
+						"description":         "batch payout",
+						"toBin":               "970422",
+						"toAccountNumber":     "0123456789",
+						"toAccountName":       "NGUYEN VAN A",
+						"reference":           "103269846",
+						"transactionDatetime": "2025-07-21T08:35:44+07:00",
+						"errorMessage":        nil,
+						"errorCode":           nil,
+						"state":               "SUCCEEDED",
+					},
+					map[string]any{
+						"id":                  "batch_txn_71eb922201f3442d93ec5a3c77347e9f",
+						"referenceId":         "payout_1753061728877_2",
+						"amount":              2000,
+						"description":         "batch payout",
+						"toBin":               "970422",
+						"toAccountNumber":     "0123456789",
+						"toAccountName":       "NGUYEN VAN A",
+						"reference":           "103269847",
+						"transactionDatetime": "2025-07-21T08:35:47+07:00",
+						"errorMessage":        nil,
+						"errorCode":           nil,
+						"state":               "SUCCEEDED",
+					},
+				},
+				"category":      []any{"salary"},
+				"approvalState": "COMPLETED",
+				"createdAt":     "2025-07-21T08:35:34+07:00",
+			},
+		},
+		"pagination": map[string]any{
+			"limit":   10,
+			"offset":  0,
+			"total":   1,
+			"count":   1,
+			"hasMore": false,
+		},
+	}
+	if !VerifyAnySignature(data, "34d500c4e17feaad8fab528ac3ae089353e276ca9fb4c6654c06ffdfbd88cc5d", "6e91f59952acc8918c49c4a8e380136d66d1fbbf3375926840a8a7e434d4b325") {
+		t.Fatal("expected payout example signature to verify")
+	}
+}
+
 func TestPayoutUsesDisbursementCredentials(t *testing.T) {
 	var gotClientID, gotAPIKey, gotSignature string
+	responseData := PayoutData{ID: "payout_1", ApprovalState: "PROCESSING"}
+	responseSignature, err := CreateSignature(map[string]any{
+		"approvalState": responseData.ApprovalState,
+		"id":            responseData.ID,
+		"referenceId":   responseData.ReferenceID,
+		"transactions":  responseData.Transactions,
+	}, "payout-checksum")
+	if err != nil {
+		t.Fatal(err)
+	}
 	client := NewClient(Config{
 		BaseURL:           "https://payos.test",
 		ClientID:          "payment-client",
@@ -59,9 +144,10 @@ func TestPayoutUsesDisbursementCredentials(t *testing.T) {
 		gotAPIKey = r.Header.Get("x-api-key")
 		gotSignature = r.Header.Get("x-signature")
 		body, err := json.Marshal(PayoutResponse{
-			Code: "00",
-			Desc: "success",
-			Data: PayoutData{ID: "payout_1", ApprovalState: "PROCESSING"},
+			Code:      "00",
+			Desc:      "success",
+			Data:      responseData,
+			Signature: responseSignature,
 		})
 		if err != nil {
 			t.Fatal(err)
@@ -73,7 +159,7 @@ func TestPayoutUsesDisbursementCredentials(t *testing.T) {
 		}, nil
 	})}
 
-	_, _, err := client.CreatePayout(
+	_, _, err = client.CreatePayout(
 		t.Context(),
 		CreatePayoutRequest{
 			ReferenceID:     "ref_1",

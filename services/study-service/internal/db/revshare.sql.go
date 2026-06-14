@@ -184,7 +184,13 @@ INSERT INTO monthly_revenue_pools (
     platform_amount_vnd,
     status
 )
-VALUES ($1, $2, $3, $2 - $3, 'draft')
+VALUES (
+    $1,
+    $2::bigint,
+    $3::bigint,
+    $2::bigint - $3::bigint,
+    'draft'
+)
 ON CONFLICT (pool_month) DO UPDATE
 SET gross_amount_vnd = EXCLUDED.gross_amount_vnd,
     creator_pool_amount_vnd = EXCLUDED.creator_pool_amount_vnd,

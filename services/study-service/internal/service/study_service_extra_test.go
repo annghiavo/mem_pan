@@ -368,6 +368,11 @@ func TestStartSession_NoDueOrNewCards(t *testing.T) {
 }
 
 // Zero limits are replaced with the package defaults (20 new, 200 review).
+func int32Ptr(v int32) *int32 {
+	return &v
+}
+
+// Nil limits are replaced with the package defaults (20 new, 200 review).
 func TestStartSession_DefaultLimits(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -415,17 +420,72 @@ func TestStartSession_DefaultLimits(t *testing.T) {
 	scRepo.EXPECT().InsertSessionCard(ctx, gomock.Any()).Return(sc, nil)
 
 	svc := newTestStudyService(ctrl, ucRepo, sessRepo, scRepo, revRepo, weightsRepo, deckClient)
-	// Pass zero limits to trigger the defaults.
+	// Pass nil limits (omitted) to trigger the defaults.
 	_, err := svc.StartSession(ctx, StartSessionParams{
-		UserID:        userID,
-		DeckID:        deckID,
-		AccessToken:   "tok",
-		NewCardsLimit: 0,
-		ReviewLimit:   0,
+		UserID:      userID,
+		DeckID:      deckID,
+		AccessToken: "tok",
 	})
 
 	if err != nil {
 		t.Fatalf("expected no error with default limits, got %v", err)
+	}
+}
+
+// Explicit zero limits should be respected (meaning 0 cards fetched for that limit),
+// which results in an ErrDeckEmpty error since 0 cards are selected.
+func TestStartSession_ZeroLimits(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ucRepo := mock.NewMockUserCardRepository(ctrl)
+	sessRepo := mock.NewMockStudySessionRepository(ctrl)
+	scRepo := mock.NewMockSessionCardRepository(ctrl)
+	revRepo := mock.NewMockRevlogRepository(ctrl)
+	weightsRepo := mock.NewMockFsrsWeightsRepository(ctrl)
+	deckClient := mock.NewMockDeckClient(ctrl)
+
+	ctx := context.Background()
+	userID := uuid.New()
+	deckID := uuid.New()
+	cardID := uuid.New()
+	userCardID := uuid.New()
+
+	deckCards := []deckclient.CardInfo{{CardID: cardID, DeckID: deckID}}
+	userCard := makeUserCard(userCardID, userID, cardID, deckID)
+
+	sessRepo.EXPECT().GetOngoingSessionByDeck(ctx, gomock.Any()).Return(db.StudySession{}, domain.ErrSessionNotFound)
+	deckClient.EXPECT().GetDeck(ctx, deckID, "tok").Return(deckclient.DeckInfo{
+		DeckID:      deckID,
+		UserID:      userID,
+		AccessLevel: "public",
+	}, nil)
+	deckClient.EXPECT().ListDeckCards(ctx, deckID, "tok").Return(deckCards, nil)
+	ucRepo.EXPECT().UpsertUserCard(ctx, gomock.Any()).Return(userCard, nil)
+
+	// Expect explicit limits of 0:
+	ucRepo.EXPECT().ListDueUserCardsByDeck(ctx, db.ListDueUserCardsByDeckParams{
+		UserID: userID,
+		DeckID: deckID,
+		Limit:  0,
+	}).Return([]db.UserCard{}, nil)
+	ucRepo.EXPECT().ListNewUserCardsByDeck(ctx, db.ListNewUserCardsByDeckParams{
+		UserID: userID,
+		DeckID: deckID,
+		Limit:  0,
+	}).Return([]db.UserCard{}, nil)
+
+	svc := newTestStudyService(ctrl, ucRepo, sessRepo, scRepo, revRepo, weightsRepo, deckClient)
+	_, err := svc.StartSession(ctx, StartSessionParams{
+		UserID:        userID,
+		DeckID:        deckID,
+		AccessToken:   "tok",
+		NewCardsLimit: int32Ptr(0),
+		ReviewLimit:   int32Ptr(0),
+	})
+
+	if !errors.Is(err, domain.ErrDeckEmpty) {
+		t.Fatalf("expected ErrDeckEmpty with zero limits, got %v", err)
 	}
 }
 
