@@ -79,3 +79,9 @@ LIMIT $1 OFFSET $2;
 -- name: CountUsers :one
 SELECT COUNT(*) FROM users
 WHERE (NOT sqlc.arg('filter_banned')::boolean OR is_banned = TRUE);
+
+-- name: UpdateUserPlusStatus :exec
+UPDATE users
+SET is_plus = $2,
+    updated_at = now()
+WHERE user_id = $1;

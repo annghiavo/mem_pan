@@ -43,10 +43,22 @@ func TestMultiMatchOrMatchAll(t *testing.T) {
 
 	t.Run("NonEmptyQuery_ReturnsMultiMatch", func(t *testing.T) {
 		q := MultiMatchOrMatchAll("hola", []string{"name^3", "description"})
-		mm, ok := q["multi_match"].(map[string]any)
-		require.True(t, ok, "expected multi_match clause: %v", q)
-		assert.Equal(t, "hola", mm["query"])
-		assert.Equal(t, "best_fields", mm["type"])
+		boolClause, ok := q["bool"].(map[string]any)
+		require.True(t, ok, "expected bool clause: %v", q)
+		shouldClause, ok := boolClause["should"].([]map[string]any)
+		require.True(t, ok, "expected should clause: %v", boolClause)
+		require.Len(t, shouldClause, 2)
+
+		mm1, ok := shouldClause[0]["multi_match"].(map[string]any)
+		require.True(t, ok)
+		assert.Equal(t, "hola", mm1["query"])
+		assert.Equal(t, "most_fields", mm1["type"])
+		assert.Equal(t, "AUTO", mm1["fuzziness"])
+
+		mm2, ok := shouldClause[1]["multi_match"].(map[string]any)
+		require.True(t, ok)
+		assert.Equal(t, "hola", mm2["query"])
+		assert.Equal(t, "phrase_prefix", mm2["type"])
 	})
 }
 

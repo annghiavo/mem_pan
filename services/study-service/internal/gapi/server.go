@@ -37,6 +37,8 @@ func toGRPCError(err error) error {
 		return status.Error(codes.NotFound, err.Error())
 	case errors.Is(err, domain.ErrForbidden):
 		return status.Error(codes.PermissionDenied, err.Error())
+	case errors.Is(err, domain.ErrPlusRequired):
+		return status.Error(codes.PermissionDenied, err.Error())
 	case errors.Is(err, domain.ErrSessionFinished):
 		return status.Error(codes.FailedPrecondition, err.Error())
 	case errors.Is(err, domain.ErrCardNotInSession):
@@ -94,16 +96,16 @@ func sessionCardToPb(sc db.SessionCard) *pb.SessionCardItem {
 
 func userCardToPb(uc db.UserCard) *pb.UserCardState {
 	out := &pb.UserCardState{
-		UserCardId:    uc.UserCardID.String(),
-		UserId:        uc.UserID.String(),
-		CardId:        uc.CardID.String(),
-		DeckId:        uc.DeckID.String(),
-		State:         uc.State,
-		Stability:     uc.Stability,
-		Difficulty:    uc.Difficulty,
-		Reps:          uc.Reps,
-		Lapses:        uc.Lapses,
-		ScheduledDays: uc.ScheduledDays,
+		UserCardId:     uc.UserCardID.String(),
+		UserId:         uc.UserID.String(),
+		CardId:         uc.CardID.String(),
+		DeckId:         uc.DeckID.String(),
+		State:          uc.State,
+		Stability:      uc.Stability,
+		Difficulty:     uc.Difficulty,
+		Reps:           uc.Reps,
+		Lapses:         uc.Lapses,
+		ScheduledDays:  uc.ScheduledDays,
 		NextReviewDate: timestamppb.New(uc.NextReviewDate),
 	}
 	if uc.LastReviewDate.Valid {
@@ -123,5 +125,7 @@ func dbSettingsToPb(s db.DeckStudySetting) *pb.StudySettings {
 		QuestionTypeWritten:          s.QuestionTypeWritten,
 		StrictnessLevel:              s.StrictnessLevel,
 		RequireRetypingCorrectAnswer: s.RequireRetypingCorrectAnswer,
+		NewCardLimit:                 s.NewCardLimit,
+		ReviewCardLimit:              s.ReviewCardLimit,
 	}
 }

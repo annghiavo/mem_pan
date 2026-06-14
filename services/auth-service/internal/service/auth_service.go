@@ -170,15 +170,19 @@ func (s *authService) Login(ctx context.Context, params LoginParams) (AuthRespon
 		return AuthResponse{}, domain.ErrInvalidCredentials
 	}
 
+	if !user.EmailVerified {
+		return AuthResponse{}, domain.ErrEmailNotVerified
+	}
+
 	accessToken, accessPayload, err := s.tokenMaker.CreateToken(
-		user.UserID, user.Username, user.Role, s.accessDur, token.TokenTypeAccess,
+		user.UserID, user.Username, user.Role, user.IsPlus, s.accessDur, token.TokenTypeAccess,
 	)
 	if err != nil {
 		return AuthResponse{}, err
 	}
 
 	refreshToken, refreshPayload, err := s.tokenMaker.CreateToken(
-		user.UserID, user.Username, user.Role, s.refreshDur, token.TokenTypeRefresh,
+		user.UserID, user.Username, user.Role, user.IsPlus, s.refreshDur, token.TokenTypeRefresh,
 	)
 	if err != nil {
 		return AuthResponse{}, err
@@ -234,9 +238,12 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (Au
 	if user.IsBanned {
 		return AuthTokens{}, domain.ErrUserBanned
 	}
+	if !user.EmailVerified {
+		return AuthTokens{}, domain.ErrEmailNotVerified
+	}
 
 	accessToken, accessPayload, err := s.tokenMaker.CreateToken(
-		user.UserID, user.Username, user.Role, s.accessDur, token.TokenTypeAccess,
+		user.UserID, user.Username, user.Role, user.IsPlus, s.accessDur, token.TokenTypeAccess,
 	)
 	if err != nil {
 		return AuthTokens{}, err

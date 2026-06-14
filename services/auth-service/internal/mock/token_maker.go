@@ -31,18 +31,18 @@ func (m *MockMaker) EXPECT() *MockMakerMockRecorder {
 	return m.recorder
 }
 
-func (m *MockMaker) CreateToken(userID uuid.UUID, username, role string, duration time.Duration, tokenType token.TokenType) (string, *token.Payload, error) {
+func (m *MockMaker) CreateToken(userID uuid.UUID, username, role string, isPlus bool, duration time.Duration, tokenType token.TokenType) (string, *token.Payload, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateToken", userID, username, role, duration, tokenType)
+	ret := m.ctrl.Call(m, "CreateToken", userID, username, role, isPlus, duration, tokenType)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(*token.Payload)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
-func (mr *MockMakerMockRecorder) CreateToken(userID, username, role, duration, tokenType any) *gomock.Call {
+func (mr *MockMakerMockRecorder) CreateToken(userID, username, role, isPlus, duration, tokenType any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateToken", reflect.TypeOf((*MockMaker)(nil).CreateToken), userID, username, role, duration, tokenType)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateToken", reflect.TypeOf((*MockMaker)(nil).CreateToken), userID, username, role, isPlus, duration, tokenType)
 }
 
 func (m *MockMaker) VerifyToken(tok string, tokenType token.TokenType) (*token.Payload, error) {

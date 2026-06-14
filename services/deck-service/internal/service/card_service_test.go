@@ -232,7 +232,7 @@ func TestGetCard_Success(t *testing.T) {
 	deckRepo.EXPECT().GetDeckByID(ctx, deckID).Return(deck, nil)
 
 	svc := NewCardService(cardRepo, noteRepo, deckRepo)
-	result, err := svc.GetCard(ctx, cardID, userID)
+	result, err := svc.GetCard(ctx, cardID, userID, false)
 
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
@@ -255,7 +255,7 @@ func TestGetCard_NotFound(t *testing.T) {
 	cardRepo.EXPECT().GetCardByID(ctx, cardID).Return(db.GetCardByIDRow{}, domain.ErrCardNotFound)
 
 	svc := NewCardService(cardRepo, noteRepo, deckRepo)
-	_, err := svc.GetCard(ctx, cardID, uuid.New())
+	_, err := svc.GetCard(ctx, cardID, uuid.New(), false)
 
 	if !errors.Is(err, domain.ErrCardNotFound) {
 		t.Errorf("expected ErrCardNotFound, got %v", err)
@@ -281,10 +281,47 @@ func TestListCardsByDeck_Success(t *testing.T) {
 	cardRepo.EXPECT().ListCardsByDeck(ctx, deckID).Return([]db.ListCardsByDeckRow{}, nil)
 
 	svc := NewCardService(cardRepo, noteRepo, deckRepo)
-	_, err := svc.ListCardsByDeck(ctx, deckID, userID)
+	_, err := svc.ListCardsByDeck(ctx, deckID, userID, false)
 
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
+	}
+}
+
+func TestListCardsByDeck_PlusPreviewForNonSubscriber(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	deckRepo := mock.NewMockDeckRepository(ctrl)
+	cardRepo := mock.NewMockCardRepository(ctrl)
+	noteRepo := mock.NewMockNoteRepository(ctrl)
+	ctx := context.Background()
+
+	ownerID := uuid.New()
+	otherID := uuid.New()
+	deckID := uuid.New()
+	deck := makeDeck(deckID, ownerID)
+	deck.IsPublic = true
+	deck.AccessLevel = db.DeckAccessLevelPlus
+	deck.PlusStatus = db.DeckPlusStatusApproved
+	deck.CardCount = 208
+
+	cards := make([]db.ListCardsByDeckRow, 30)
+	for i := range cards {
+		cards[i] = db.ListCardsByDeckRow{CardID: uuid.New(), DeckID: deckID, UserID: ownerID, Position: int32(i), ContentFront: "Front", ContentBack: "Back", LangFront: "en", LangBack: "en"}
+	}
+
+	deckRepo.EXPECT().GetDeckByID(ctx, deckID).Return(deck, nil)
+	cardRepo.EXPECT().ListCardsByDeck(ctx, deckID).Return(cards, nil)
+
+	svc := NewCardService(cardRepo, noteRepo, deckRepo)
+	result, err := svc.ListCardsByDeck(ctx, deckID, otherID, false)
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(result) != 21 {
+		t.Fatalf("expected 21 preview cards, got %d", len(result))
 	}
 }
 
@@ -306,7 +343,7 @@ func TestListCardsByDeck_Forbidden(t *testing.T) {
 	deckRepo.EXPECT().GetDeckByID(ctx, deckID).Return(deck, nil)
 
 	svc := NewCardService(cardRepo, noteRepo, deckRepo)
-	_, err := svc.ListCardsByDeck(ctx, deckID, otherID)
+	_, err := svc.ListCardsByDeck(ctx, deckID, otherID, false)
 
 	if !errors.Is(err, domain.ErrForbidden) {
 		t.Errorf("expected ErrForbidden, got %v", err)

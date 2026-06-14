@@ -23,6 +23,7 @@ import "rpc_set_user_role.proto";
 import "rpc_report_user.proto";
 import "rpc_list_users.proto";
 import "rpc_ban_user.proto";
+import "rpc_update_user_plus_status.proto";
 
 option go_package = "mem_pan/services/auth-service/pb";
 
@@ -255,4 +256,5 @@ service AuthService {
     rpc SetUserRole (SetUserRoleRequest) returns (SetUserRoleResponse) {}
     rpc ListUsers (ListUsersRequest) returns (ListUsersResponse) {}
     rpc BanUser (BanUserRequest) returns (BanUserResponse) {}
+    rpc UpdateUserPlusStatus (UpdateUserPlusStatusRequest) returns (UpdateUserPlusStatusResponse) {}
 }

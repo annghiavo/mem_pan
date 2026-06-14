@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "mem_pan/services/auth-service/pb";
+
+message UpdateUserPlusStatusRequest {
+    string user_id = 1;
+    bool is_plus = 2;
+}
+
+message UpdateUserPlusStatusResponse {
+    bool success = 1;
+}

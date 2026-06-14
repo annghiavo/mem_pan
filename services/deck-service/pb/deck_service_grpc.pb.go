@@ -37,17 +37,24 @@ const (
 	DeckService_DeleteDeck_FullMethodName             = "/pb.DeckService/DeleteDeck"
 	DeckService_UpdateDeckSettings_FullMethodName     = "/pb.DeckService/UpdateDeckSettings"
 	DeckService_UpdateDeckVisibility_FullMethodName   = "/pb.DeckService/UpdateDeckVisibility"
+	DeckService_UpdateDeckAccessLevel_FullMethodName  = "/pb.DeckService/UpdateDeckAccessLevel"
 	DeckService_CloneDeck_FullMethodName              = "/pb.DeckService/CloneDeck"
 	DeckService_GetDeckStats_FullMethodName           = "/pb.DeckService/GetDeckStats"
 	DeckService_ListDeckCards_FullMethodName          = "/pb.DeckService/ListDeckCards"
 	DeckService_CreateCard_FullMethodName             = "/pb.DeckService/CreateCard"
 	DeckService_BulkCreateCards_FullMethodName        = "/pb.DeckService/BulkCreateCards"
+	DeckService_UpsertCreatorProfile_FullMethodName   = "/pb.DeckService/UpsertCreatorProfile"
+	DeckService_GetCreatorProfile_FullMethodName      = "/pb.DeckService/GetCreatorProfile"
+	DeckService_FollowCreator_FullMethodName          = "/pb.DeckService/FollowCreator"
+	DeckService_UpsertDeckReview_FullMethodName       = "/pb.DeckService/UpsertDeckReview"
+	DeckService_ListDeckReviews_FullMethodName        = "/pb.DeckService/ListDeckReviews"
 	DeckService_ParseImportFile_FullMethodName        = "/pb.DeckService/ParseImportFile"
 	DeckService_GetCard_FullMethodName                = "/pb.DeckService/GetCard"
 	DeckService_UpdateCard_FullMethodName             = "/pb.DeckService/UpdateCard"
 	DeckService_DeleteCard_FullMethodName             = "/pb.DeckService/DeleteCard"
 	DeckService_AdminUpdateDeckStatus_FullMethodName  = "/pb.DeckService/AdminUpdateDeckStatus"
 	DeckService_AdminListDecks_FullMethodName         = "/pb.DeckService/AdminListDecks"
+	DeckService_AdminReviewDeckPlus_FullMethodName    = "/pb.DeckService/AdminReviewDeckPlus"
 	DeckService_ReportDeck_FullMethodName             = "/pb.DeckService/ReportDeck"
 )
 
@@ -90,11 +97,17 @@ type DeckServiceClient interface {
 	DeleteDeck(ctx context.Context, in *DeleteDeckRequest, opts ...grpc.CallOption) (*DeleteDeckResponse, error)
 	UpdateDeckSettings(ctx context.Context, in *UpdateDeckSettingsRequest, opts ...grpc.CallOption) (*UpdateDeckSettingsResponse, error)
 	UpdateDeckVisibility(ctx context.Context, in *UpdateDeckVisibilityRequest, opts ...grpc.CallOption) (*UpdateDeckVisibilityResponse, error)
+	UpdateDeckAccessLevel(ctx context.Context, in *UpdateDeckAccessLevelRequest, opts ...grpc.CallOption) (*UpdateDeckAccessLevelResponse, error)
 	CloneDeck(ctx context.Context, in *CloneDeckRequest, opts ...grpc.CallOption) (*CloneDeckResponse, error)
 	GetDeckStats(ctx context.Context, in *GetDeckStatsRequest, opts ...grpc.CallOption) (*GetDeckStatsResponse, error)
 	ListDeckCards(ctx context.Context, in *ListDeckCardsRequest, opts ...grpc.CallOption) (*ListDeckCardsResponse, error)
 	CreateCard(ctx context.Context, in *CreateCardRequest, opts ...grpc.CallOption) (*CreateCardResponse, error)
 	BulkCreateCards(ctx context.Context, in *BulkCreateCardsRequest, opts ...grpc.CallOption) (*BulkCreateCardsResponse, error)
+	UpsertCreatorProfile(ctx context.Context, in *UpsertCreatorProfileRequest, opts ...grpc.CallOption) (*UpsertCreatorProfileResponse, error)
+	GetCreatorProfile(ctx context.Context, in *GetCreatorProfileRequest, opts ...grpc.CallOption) (*GetCreatorProfileResponse, error)
+	FollowCreator(ctx context.Context, in *FollowCreatorRequest, opts ...grpc.CallOption) (*FollowCreatorResponse, error)
+	UpsertDeckReview(ctx context.Context, in *UpsertDeckReviewRequest, opts ...grpc.CallOption) (*UpsertDeckReviewResponse, error)
+	ListDeckReviews(ctx context.Context, in *ListDeckReviewsRequest, opts ...grpc.CallOption) (*ListDeckReviewsResponse, error)
 	// Import
 	ParseImportFile(ctx context.Context, in *ParseImportFileRequest, opts ...grpc.CallOption) (*ParseImportFileResponse, error)
 	// Cards
@@ -104,6 +117,7 @@ type DeckServiceClient interface {
 	// Admin RPC — internal service-to-service, not exposed via HTTP gateway.
 	AdminUpdateDeckStatus(ctx context.Context, in *AdminUpdateDeckStatusRequest, opts ...grpc.CallOption) (*AdminUpdateDeckStatusResponse, error)
 	AdminListDecks(ctx context.Context, in *AdminListDecksRequest, opts ...grpc.CallOption) (*AdminListDecksResponse, error)
+	AdminReviewDeckPlus(ctx context.Context, in *AdminReviewDeckPlusRequest, opts ...grpc.CallOption) (*AdminReviewDeckPlusResponse, error)
 	// Reports — publish a report.submitted event consumed by admin-service.
 	ReportDeck(ctx context.Context, in *ReportDeckRequest, opts ...grpc.CallOption) (*ReportDeckResponse, error)
 }
@@ -296,6 +310,16 @@ func (c *deckServiceClient) UpdateDeckVisibility(ctx context.Context, in *Update
 	return out, nil
 }
 
+func (c *deckServiceClient) UpdateDeckAccessLevel(ctx context.Context, in *UpdateDeckAccessLevelRequest, opts ...grpc.CallOption) (*UpdateDeckAccessLevelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateDeckAccessLevelResponse)
+	err := c.cc.Invoke(ctx, DeckService_UpdateDeckAccessLevel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *deckServiceClient) CloneDeck(ctx context.Context, in *CloneDeckRequest, opts ...grpc.CallOption) (*CloneDeckResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CloneDeckResponse)
@@ -340,6 +364,56 @@ func (c *deckServiceClient) BulkCreateCards(ctx context.Context, in *BulkCreateC
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(BulkCreateCardsResponse)
 	err := c.cc.Invoke(ctx, DeckService_BulkCreateCards_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deckServiceClient) UpsertCreatorProfile(ctx context.Context, in *UpsertCreatorProfileRequest, opts ...grpc.CallOption) (*UpsertCreatorProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpsertCreatorProfileResponse)
+	err := c.cc.Invoke(ctx, DeckService_UpsertCreatorProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deckServiceClient) GetCreatorProfile(ctx context.Context, in *GetCreatorProfileRequest, opts ...grpc.CallOption) (*GetCreatorProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCreatorProfileResponse)
+	err := c.cc.Invoke(ctx, DeckService_GetCreatorProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deckServiceClient) FollowCreator(ctx context.Context, in *FollowCreatorRequest, opts ...grpc.CallOption) (*FollowCreatorResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FollowCreatorResponse)
+	err := c.cc.Invoke(ctx, DeckService_FollowCreator_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deckServiceClient) UpsertDeckReview(ctx context.Context, in *UpsertDeckReviewRequest, opts ...grpc.CallOption) (*UpsertDeckReviewResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpsertDeckReviewResponse)
+	err := c.cc.Invoke(ctx, DeckService_UpsertDeckReview_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *deckServiceClient) ListDeckReviews(ctx context.Context, in *ListDeckReviewsRequest, opts ...grpc.CallOption) (*ListDeckReviewsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDeckReviewsResponse)
+	err := c.cc.Invoke(ctx, DeckService_ListDeckReviews_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -406,6 +480,16 @@ func (c *deckServiceClient) AdminListDecks(ctx context.Context, in *AdminListDec
 	return out, nil
 }
 
+func (c *deckServiceClient) AdminReviewDeckPlus(ctx context.Context, in *AdminReviewDeckPlusRequest, opts ...grpc.CallOption) (*AdminReviewDeckPlusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminReviewDeckPlusResponse)
+	err := c.cc.Invoke(ctx, DeckService_AdminReviewDeckPlus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *deckServiceClient) ReportDeck(ctx context.Context, in *ReportDeckRequest, opts ...grpc.CallOption) (*ReportDeckResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ReportDeckResponse)
@@ -455,11 +539,17 @@ type DeckServiceServer interface {
 	DeleteDeck(context.Context, *DeleteDeckRequest) (*DeleteDeckResponse, error)
 	UpdateDeckSettings(context.Context, *UpdateDeckSettingsRequest) (*UpdateDeckSettingsResponse, error)
 	UpdateDeckVisibility(context.Context, *UpdateDeckVisibilityRequest) (*UpdateDeckVisibilityResponse, error)
+	UpdateDeckAccessLevel(context.Context, *UpdateDeckAccessLevelRequest) (*UpdateDeckAccessLevelResponse, error)
 	CloneDeck(context.Context, *CloneDeckRequest) (*CloneDeckResponse, error)
 	GetDeckStats(context.Context, *GetDeckStatsRequest) (*GetDeckStatsResponse, error)
 	ListDeckCards(context.Context, *ListDeckCardsRequest) (*ListDeckCardsResponse, error)
 	CreateCard(context.Context, *CreateCardRequest) (*CreateCardResponse, error)
 	BulkCreateCards(context.Context, *BulkCreateCardsRequest) (*BulkCreateCardsResponse, error)
+	UpsertCreatorProfile(context.Context, *UpsertCreatorProfileRequest) (*UpsertCreatorProfileResponse, error)
+	GetCreatorProfile(context.Context, *GetCreatorProfileRequest) (*GetCreatorProfileResponse, error)
+	FollowCreator(context.Context, *FollowCreatorRequest) (*FollowCreatorResponse, error)
+	UpsertDeckReview(context.Context, *UpsertDeckReviewRequest) (*UpsertDeckReviewResponse, error)
+	ListDeckReviews(context.Context, *ListDeckReviewsRequest) (*ListDeckReviewsResponse, error)
 	// Import
 	ParseImportFile(context.Context, *ParseImportFileRequest) (*ParseImportFileResponse, error)
 	// Cards
@@ -469,6 +559,7 @@ type DeckServiceServer interface {
 	// Admin RPC — internal service-to-service, not exposed via HTTP gateway.
 	AdminUpdateDeckStatus(context.Context, *AdminUpdateDeckStatusRequest) (*AdminUpdateDeckStatusResponse, error)
 	AdminListDecks(context.Context, *AdminListDecksRequest) (*AdminListDecksResponse, error)
+	AdminReviewDeckPlus(context.Context, *AdminReviewDeckPlusRequest) (*AdminReviewDeckPlusResponse, error)
 	// Reports — publish a report.submitted event consumed by admin-service.
 	ReportDeck(context.Context, *ReportDeckRequest) (*ReportDeckResponse, error)
 	mustEmbedUnimplementedDeckServiceServer()
@@ -535,6 +626,9 @@ func (UnimplementedDeckServiceServer) UpdateDeckSettings(context.Context, *Updat
 func (UnimplementedDeckServiceServer) UpdateDeckVisibility(context.Context, *UpdateDeckVisibilityRequest) (*UpdateDeckVisibilityResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateDeckVisibility not implemented")
 }
+func (UnimplementedDeckServiceServer) UpdateDeckAccessLevel(context.Context, *UpdateDeckAccessLevelRequest) (*UpdateDeckAccessLevelResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateDeckAccessLevel not implemented")
+}
 func (UnimplementedDeckServiceServer) CloneDeck(context.Context, *CloneDeckRequest) (*CloneDeckResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CloneDeck not implemented")
 }
@@ -549,6 +643,21 @@ func (UnimplementedDeckServiceServer) CreateCard(context.Context, *CreateCardReq
 }
 func (UnimplementedDeckServiceServer) BulkCreateCards(context.Context, *BulkCreateCardsRequest) (*BulkCreateCardsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method BulkCreateCards not implemented")
+}
+func (UnimplementedDeckServiceServer) UpsertCreatorProfile(context.Context, *UpsertCreatorProfileRequest) (*UpsertCreatorProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpsertCreatorProfile not implemented")
+}
+func (UnimplementedDeckServiceServer) GetCreatorProfile(context.Context, *GetCreatorProfileRequest) (*GetCreatorProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCreatorProfile not implemented")
+}
+func (UnimplementedDeckServiceServer) FollowCreator(context.Context, *FollowCreatorRequest) (*FollowCreatorResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method FollowCreator not implemented")
+}
+func (UnimplementedDeckServiceServer) UpsertDeckReview(context.Context, *UpsertDeckReviewRequest) (*UpsertDeckReviewResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpsertDeckReview not implemented")
+}
+func (UnimplementedDeckServiceServer) ListDeckReviews(context.Context, *ListDeckReviewsRequest) (*ListDeckReviewsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDeckReviews not implemented")
 }
 func (UnimplementedDeckServiceServer) ParseImportFile(context.Context, *ParseImportFileRequest) (*ParseImportFileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ParseImportFile not implemented")
@@ -567,6 +676,9 @@ func (UnimplementedDeckServiceServer) AdminUpdateDeckStatus(context.Context, *Ad
 }
 func (UnimplementedDeckServiceServer) AdminListDecks(context.Context, *AdminListDecksRequest) (*AdminListDecksResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AdminListDecks not implemented")
+}
+func (UnimplementedDeckServiceServer) AdminReviewDeckPlus(context.Context, *AdminReviewDeckPlusRequest) (*AdminReviewDeckPlusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AdminReviewDeckPlus not implemented")
 }
 func (UnimplementedDeckServiceServer) ReportDeck(context.Context, *ReportDeckRequest) (*ReportDeckResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ReportDeck not implemented")
@@ -916,6 +1028,24 @@ func _DeckService_UpdateDeckVisibility_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeckService_UpdateDeckAccessLevel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDeckAccessLevelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).UpdateDeckAccessLevel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_UpdateDeckAccessLevel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).UpdateDeckAccessLevel(ctx, req.(*UpdateDeckAccessLevelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DeckService_CloneDeck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CloneDeckRequest)
 	if err := dec(in); err != nil {
@@ -1002,6 +1132,96 @@ func _DeckService_BulkCreateCards_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DeckServiceServer).BulkCreateCards(ctx, req.(*BulkCreateCardsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeckService_UpsertCreatorProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertCreatorProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).UpsertCreatorProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_UpsertCreatorProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).UpsertCreatorProfile(ctx, req.(*UpsertCreatorProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeckService_GetCreatorProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCreatorProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).GetCreatorProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_GetCreatorProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).GetCreatorProfile(ctx, req.(*GetCreatorProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeckService_FollowCreator_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FollowCreatorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).FollowCreator(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_FollowCreator_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).FollowCreator(ctx, req.(*FollowCreatorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeckService_UpsertDeckReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertDeckReviewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).UpsertDeckReview(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_UpsertDeckReview_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).UpsertDeckReview(ctx, req.(*UpsertDeckReviewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DeckService_ListDeckReviews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDeckReviewsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).ListDeckReviews(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_ListDeckReviews_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).ListDeckReviews(ctx, req.(*ListDeckReviewsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1114,6 +1334,24 @@ func _DeckService_AdminListDecks_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeckService_AdminReviewDeckPlus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminReviewDeckPlusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeckServiceServer).AdminReviewDeckPlus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DeckService_AdminReviewDeckPlus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeckServiceServer).AdminReviewDeckPlus(ctx, req.(*AdminReviewDeckPlusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DeckService_ReportDeck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReportDeckRequest)
 	if err := dec(in); err != nil {
@@ -1212,6 +1450,10 @@ var DeckService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DeckService_UpdateDeckVisibility_Handler,
 		},
 		{
+			MethodName: "UpdateDeckAccessLevel",
+			Handler:    _DeckService_UpdateDeckAccessLevel_Handler,
+		},
+		{
 			MethodName: "CloneDeck",
 			Handler:    _DeckService_CloneDeck_Handler,
 		},
@@ -1230,6 +1472,26 @@ var DeckService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "BulkCreateCards",
 			Handler:    _DeckService_BulkCreateCards_Handler,
+		},
+		{
+			MethodName: "UpsertCreatorProfile",
+			Handler:    _DeckService_UpsertCreatorProfile_Handler,
+		},
+		{
+			MethodName: "GetCreatorProfile",
+			Handler:    _DeckService_GetCreatorProfile_Handler,
+		},
+		{
+			MethodName: "FollowCreator",
+			Handler:    _DeckService_FollowCreator_Handler,
+		},
+		{
+			MethodName: "UpsertDeckReview",
+			Handler:    _DeckService_UpsertDeckReview_Handler,
+		},
+		{
+			MethodName: "ListDeckReviews",
+			Handler:    _DeckService_ListDeckReviews_Handler,
 		},
 		{
 			MethodName: "ParseImportFile",
@@ -1254,6 +1516,10 @@ var DeckService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminListDecks",
 			Handler:    _DeckService_AdminListDecks_Handler,
+		},
+		{
+			MethodName: "AdminReviewDeckPlus",
+			Handler:    _DeckService_AdminReviewDeckPlus_Handler,
 		},
 		{
 			MethodName: "ReportDeck",

@@ -251,20 +251,26 @@ func (x *DeckSettings) GetReviewsPerDay() int32 {
 }
 
 type Deck struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	IsPublic      bool                   `protobuf:"varint,5,opt,name=is_public,json=isPublic,proto3" json:"is_public,omitempty"`
-	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	Settings      *DeckSettings          `protobuf:"bytes,7,opt,name=settings,proto3" json:"settings,omitempty"`
-	CardCount     int32                  `protobuf:"varint,8,opt,name=card_count,json=cardCount,proto3" json:"card_count,omitempty"`
-	ClonedFrom    string                 `protobuf:"bytes,9,opt,name=cloned_from,json=clonedFrom,proto3" json:"cloned_from,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	DeckId          string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
+	UserId          string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Name            string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description     string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	IsPublic        bool                   `protobuf:"varint,5,opt,name=is_public,json=isPublic,proto3" json:"is_public,omitempty"`
+	Status          string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	Settings        *DeckSettings          `protobuf:"bytes,7,opt,name=settings,proto3" json:"settings,omitempty"`
+	CardCount       int32                  `protobuf:"varint,8,opt,name=card_count,json=cardCount,proto3" json:"card_count,omitempty"`
+	ClonedFrom      string                 `protobuf:"bytes,9,opt,name=cloned_from,json=clonedFrom,proto3" json:"cloned_from,omitempty"`
+	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt       *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	AccessLevel     string                 `protobuf:"bytes,12,opt,name=access_level,json=accessLevel,proto3" json:"access_level,omitempty"`
+	PlusStatus      string                 `protobuf:"bytes,13,opt,name=plus_status,json=plusStatus,proto3" json:"plus_status,omitempty"`
+	PlusSubmittedAt *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=plus_submitted_at,json=plusSubmittedAt,proto3" json:"plus_submitted_at,omitempty"`
+	PlusApprovedAt  *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=plus_approved_at,json=plusApprovedAt,proto3" json:"plus_approved_at,omitempty"`
+	AvgRating       float64                `protobuf:"fixed64,16,opt,name=avg_rating,json=avgRating,proto3" json:"avg_rating,omitempty"`
+	TotalReviews    int32                  `protobuf:"varint,17,opt,name=total_reviews,json=totalReviews,proto3" json:"total_reviews,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Deck) Reset() {
@@ -372,6 +378,48 @@ func (x *Deck) GetUpdatedAt() *timestamppb.Timestamp {
 		return x.UpdatedAt
 	}
 	return nil
+}
+
+func (x *Deck) GetAccessLevel() string {
+	if x != nil {
+		return x.AccessLevel
+	}
+	return ""
+}
+
+func (x *Deck) GetPlusStatus() string {
+	if x != nil {
+		return x.PlusStatus
+	}
+	return ""
+}
+
+func (x *Deck) GetPlusSubmittedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.PlusSubmittedAt
+	}
+	return nil
+}
+
+func (x *Deck) GetPlusApprovedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.PlusApprovedAt
+	}
+	return nil
+}
+
+func (x *Deck) GetAvgRating() float64 {
+	if x != nil {
+		return x.AvgRating
+	}
+	return 0
+}
+
+func (x *Deck) GetTotalReviews() int32 {
+	if x != nil {
+		return x.TotalReviews
+	}
+	return 0
 }
 
 type Card struct {
@@ -550,6 +598,230 @@ func (x *DeckStats) GetTotalCards() int32 {
 	return 0
 }
 
+type CreatorProfile struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	UserId            string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DisplayName       string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Bio               string                 `protobuf:"bytes,3,opt,name=bio,proto3" json:"bio,omitempty"`
+	Tier              string                 `protobuf:"bytes,4,opt,name=tier,proto3" json:"tier,omitempty"`
+	FollowerCount     int32                  `protobuf:"varint,5,opt,name=follower_count,json=followerCount,proto3" json:"follower_count,omitempty"`
+	BankName          string                 `protobuf:"bytes,6,opt,name=bank_name,json=bankName,proto3" json:"bank_name,omitempty"`
+	BankAccountNumber string                 `protobuf:"bytes,7,opt,name=bank_account_number,json=bankAccountNumber,proto3" json:"bank_account_number,omitempty"`
+	BankAccountName   string                 `protobuf:"bytes,8,opt,name=bank_account_name,json=bankAccountName,proto3" json:"bank_account_name,omitempty"`
+	BankVerifiedAt    *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=bank_verified_at,json=bankVerifiedAt,proto3" json:"bank_verified_at,omitempty"`
+	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *CreatorProfile) Reset() {
+	*x = CreatorProfile{}
+	mi := &file_models_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreatorProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreatorProfile) ProtoMessage() {}
+
+func (x *CreatorProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_models_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreatorProfile.ProtoReflect.Descriptor instead.
+func (*CreatorProfile) Descriptor() ([]byte, []int) {
+	return file_models_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CreatorProfile) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *CreatorProfile) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *CreatorProfile) GetBio() string {
+	if x != nil {
+		return x.Bio
+	}
+	return ""
+}
+
+func (x *CreatorProfile) GetTier() string {
+	if x != nil {
+		return x.Tier
+	}
+	return ""
+}
+
+func (x *CreatorProfile) GetFollowerCount() int32 {
+	if x != nil {
+		return x.FollowerCount
+	}
+	return 0
+}
+
+func (x *CreatorProfile) GetBankName() string {
+	if x != nil {
+		return x.BankName
+	}
+	return ""
+}
+
+func (x *CreatorProfile) GetBankAccountNumber() string {
+	if x != nil {
+		return x.BankAccountNumber
+	}
+	return ""
+}
+
+func (x *CreatorProfile) GetBankAccountName() string {
+	if x != nil {
+		return x.BankAccountName
+	}
+	return ""
+}
+
+func (x *CreatorProfile) GetBankVerifiedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.BankVerifiedAt
+	}
+	return nil
+}
+
+func (x *CreatorProfile) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *CreatorProfile) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+type DeckReview struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ReviewId      string                 `protobuf:"bytes,1,opt,name=review_id,json=reviewId,proto3" json:"review_id,omitempty"`
+	DeckId        string                 `protobuf:"bytes,2,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Rating        int32                  `protobuf:"varint,4,opt,name=rating,proto3" json:"rating,omitempty"`
+	Comment       string                 `protobuf:"bytes,5,opt,name=comment,proto3" json:"comment,omitempty"`
+	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeckReview) Reset() {
+	*x = DeckReview{}
+	mi := &file_models_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeckReview) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeckReview) ProtoMessage() {}
+
+func (x *DeckReview) ProtoReflect() protoreflect.Message {
+	mi := &file_models_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeckReview.ProtoReflect.Descriptor instead.
+func (*DeckReview) Descriptor() ([]byte, []int) {
+	return file_models_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DeckReview) GetReviewId() string {
+	if x != nil {
+		return x.ReviewId
+	}
+	return ""
+}
+
+func (x *DeckReview) GetDeckId() string {
+	if x != nil {
+		return x.DeckId
+	}
+	return ""
+}
+
+func (x *DeckReview) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *DeckReview) GetRating() int32 {
+	if x != nil {
+		return x.Rating
+	}
+	return 0
+}
+
+func (x *DeckReview) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *DeckReview) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *DeckReview) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *DeckReview) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
 var File_models_proto protoreflect.FileDescriptor
 
 const file_models_proto_rawDesc = "" +
@@ -576,7 +848,7 @@ const file_models_proto_rawDesc = "" +
 	"\rstrict_typing\x18\x03 \x01(\bR\fstrictTyping\x12'\n" +
 	"\x0fpartial_correct\x18\x04 \x01(\bR\x0epartialCorrect\x12)\n" +
 	"\x11new_cards_per_day\x18\x05 \x01(\x05R\x0enewCardsPerDay\x12&\n" +
-	"\x0freviews_per_day\x18\x06 \x01(\x05R\rreviewsPerDay\"\x87\x03\n" +
+	"\x0freviews_per_day\x18\x06 \x01(\x05R\rreviewsPerDay\"\x9d\x05\n" +
 	"\x04Deck\x12\x17\n" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
@@ -593,7 +865,15 @@ const file_models_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xe2\x02\n" +
+	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12!\n" +
+	"\faccess_level\x18\f \x01(\tR\vaccessLevel\x12\x1f\n" +
+	"\vplus_status\x18\r \x01(\tR\n" +
+	"plusStatus\x12F\n" +
+	"\x11plus_submitted_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\x0fplusSubmittedAt\x12D\n" +
+	"\x10plus_approved_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\x0eplusApprovedAt\x12\x1d\n" +
+	"\n" +
+	"avg_rating\x18\x10 \x01(\x01R\tavgRating\x12#\n" +
+	"\rtotal_reviews\x18\x11 \x01(\x05R\ftotalReviews\"\xe2\x02\n" +
 	"\x04Card\x12\x17\n" +
 	"\acard_id\x18\x01 \x01(\tR\x06cardId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x17\n" +
@@ -612,7 +892,34 @@ const file_models_proto_rawDesc = "" +
 	"\tDeckStats\x12\x17\n" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x1f\n" +
 	"\vtotal_cards\x18\x02 \x01(\x05R\n" +
-	"totalCardsB\"Z mem_pan/services/deck-service/pbb\x06proto3"
+	"totalCards\"\xce\x03\n" +
+	"\x0eCreatorProfile\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x10\n" +
+	"\x03bio\x18\x03 \x01(\tR\x03bio\x12\x12\n" +
+	"\x04tier\x18\x04 \x01(\tR\x04tier\x12%\n" +
+	"\x0efollower_count\x18\x05 \x01(\x05R\rfollowerCount\x12\x1b\n" +
+	"\tbank_name\x18\x06 \x01(\tR\bbankName\x12.\n" +
+	"\x13bank_account_number\x18\a \x01(\tR\x11bankAccountNumber\x12*\n" +
+	"\x11bank_account_name\x18\b \x01(\tR\x0fbankAccountName\x12D\n" +
+	"\x10bank_verified_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\x0ebankVerifiedAt\x129\n" +
+	"\n" +
+	"created_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x9b\x02\n" +
+	"\n" +
+	"DeckReview\x12\x1b\n" +
+	"\treview_id\x18\x01 \x01(\tR\breviewId\x12\x17\n" +
+	"\adeck_id\x18\x02 \x01(\tR\x06deckId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x16\n" +
+	"\x06rating\x18\x04 \x01(\x05R\x06rating\x12\x18\n" +
+	"\acomment\x18\x05 \x01(\tR\acomment\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x129\n" +
+	"\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\"Z mem_pan/services/deck-service/pbb\x06proto3"
 
 var (
 	file_models_proto_rawDescOnce sync.Once
@@ -626,7 +933,7 @@ func file_models_proto_rawDescGZIP() []byte {
 	return file_models_proto_rawDescData
 }
 
-var file_models_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_models_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_models_proto_goTypes = []any{
 	(*Folder)(nil),                // 0: pb.Folder
 	(*FolderWithDecks)(nil),       // 1: pb.FolderWithDecks
@@ -634,22 +941,31 @@ var file_models_proto_goTypes = []any{
 	(*Deck)(nil),                  // 3: pb.Deck
 	(*Card)(nil),                  // 4: pb.Card
 	(*DeckStats)(nil),             // 5: pb.DeckStats
-	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(*CreatorProfile)(nil),        // 6: pb.CreatorProfile
+	(*DeckReview)(nil),            // 7: pb.DeckReview
+	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
 }
 var file_models_proto_depIdxs = []int32{
-	6, // 0: pb.Folder.created_at:type_name -> google.protobuf.Timestamp
-	6, // 1: pb.Folder.updated_at:type_name -> google.protobuf.Timestamp
-	0, // 2: pb.FolderWithDecks.folder:type_name -> pb.Folder
-	3, // 3: pb.FolderWithDecks.decks:type_name -> pb.Deck
-	2, // 4: pb.Deck.settings:type_name -> pb.DeckSettings
-	6, // 5: pb.Deck.created_at:type_name -> google.protobuf.Timestamp
-	6, // 6: pb.Deck.updated_at:type_name -> google.protobuf.Timestamp
-	6, // 7: pb.Card.created_at:type_name -> google.protobuf.Timestamp
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	8,  // 0: pb.Folder.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 1: pb.Folder.updated_at:type_name -> google.protobuf.Timestamp
+	0,  // 2: pb.FolderWithDecks.folder:type_name -> pb.Folder
+	3,  // 3: pb.FolderWithDecks.decks:type_name -> pb.Deck
+	2,  // 4: pb.Deck.settings:type_name -> pb.DeckSettings
+	8,  // 5: pb.Deck.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 6: pb.Deck.updated_at:type_name -> google.protobuf.Timestamp
+	8,  // 7: pb.Deck.plus_submitted_at:type_name -> google.protobuf.Timestamp
+	8,  // 8: pb.Deck.plus_approved_at:type_name -> google.protobuf.Timestamp
+	8,  // 9: pb.Card.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 10: pb.CreatorProfile.bank_verified_at:type_name -> google.protobuf.Timestamp
+	8,  // 11: pb.CreatorProfile.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 12: pb.CreatorProfile.updated_at:type_name -> google.protobuf.Timestamp
+	8,  // 13: pb.DeckReview.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 14: pb.DeckReview.updated_at:type_name -> google.protobuf.Timestamp
+	15, // [15:15] is the sub-list for method output_type
+	15, // [15:15] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_models_proto_init() }
@@ -663,7 +979,7 @@ func file_models_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_models_proto_rawDesc), len(file_models_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

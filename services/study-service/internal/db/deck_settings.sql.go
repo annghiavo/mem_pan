@@ -12,7 +12,7 @@ import (
 )
 
 const getDeckStudySettings = `-- name: GetDeckStudySettings :one
-SELECT user_id, deck_id, shuffle_terms, text_to_speech, answer_with_term, answer_with_definition, question_type_flashcards, question_type_multiple_choice, question_type_written, strictness_level, require_retyping_correct_answer, created_at, updated_at FROM deck_study_settings
+SELECT user_id, deck_id, shuffle_terms, text_to_speech, answer_with_term, answer_with_definition, question_type_flashcards, question_type_multiple_choice, question_type_written, strictness_level, require_retyping_correct_answer, created_at, updated_at, new_card_limit, review_card_limit FROM deck_study_settings
 WHERE user_id = $1 AND deck_id = $2
 `
 
@@ -38,6 +38,8 @@ func (q *Queries) GetDeckStudySettings(ctx context.Context, arg GetDeckStudySett
 		&i.RequireRetypingCorrectAnswer,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.NewCardLimit,
+		&i.ReviewCardLimit,
 	)
 	return i, err
 }
@@ -54,8 +56,10 @@ INSERT INTO deck_study_settings (
     question_type_multiple_choice,
     question_type_written,
     strictness_level,
-    require_retyping_correct_answer
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    require_retyping_correct_answer,
+    new_card_limit,
+    review_card_limit
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 ON CONFLICT (user_id, deck_id) DO UPDATE SET
     shuffle_terms                   = EXCLUDED.shuffle_terms,
     text_to_speech                  = EXCLUDED.text_to_speech,
@@ -66,8 +70,10 @@ ON CONFLICT (user_id, deck_id) DO UPDATE SET
     question_type_written           = EXCLUDED.question_type_written,
     strictness_level                = EXCLUDED.strictness_level,
     require_retyping_correct_answer = EXCLUDED.require_retyping_correct_answer,
+    new_card_limit                  = EXCLUDED.new_card_limit,
+    review_card_limit               = EXCLUDED.review_card_limit,
     updated_at                      = CURRENT_TIMESTAMP
-RETURNING user_id, deck_id, shuffle_terms, text_to_speech, answer_with_term, answer_with_definition, question_type_flashcards, question_type_multiple_choice, question_type_written, strictness_level, require_retyping_correct_answer, created_at, updated_at
+RETURNING user_id, deck_id, shuffle_terms, text_to_speech, answer_with_term, answer_with_definition, question_type_flashcards, question_type_multiple_choice, question_type_written, strictness_level, require_retyping_correct_answer, created_at, updated_at, new_card_limit, review_card_limit
 `
 
 type UpsertDeckStudySettingsParams struct {
@@ -82,6 +88,8 @@ type UpsertDeckStudySettingsParams struct {
 	QuestionTypeWritten          bool      `json:"question_type_written"`
 	StrictnessLevel              string    `json:"strictness_level"`
 	RequireRetypingCorrectAnswer bool      `json:"require_retyping_correct_answer"`
+	NewCardLimit                 int32     `json:"new_card_limit"`
+	ReviewCardLimit              int32     `json:"review_card_limit"`
 }
 
 func (q *Queries) UpsertDeckStudySettings(ctx context.Context, arg UpsertDeckStudySettingsParams) (DeckStudySetting, error) {
@@ -97,6 +105,8 @@ func (q *Queries) UpsertDeckStudySettings(ctx context.Context, arg UpsertDeckStu
 		arg.QuestionTypeWritten,
 		arg.StrictnessLevel,
 		arg.RequireRetypingCorrectAnswer,
+		arg.NewCardLimit,
+		arg.ReviewCardLimit,
 	)
 	var i DeckStudySetting
 	err := row.Scan(
@@ -113,6 +123,8 @@ func (q *Queries) UpsertDeckStudySettings(ctx context.Context, arg UpsertDeckStu
 		&i.RequireRetypingCorrectAnswer,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.NewCardLimit,
+		&i.ReviewCardLimit,
 	)
 	return i, err
 }

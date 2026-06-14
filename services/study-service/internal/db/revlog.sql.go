@@ -212,3 +212,23 @@ func (q *Queries) ListUsersWithMinReviews(ctx context.Context, minReviews int64)
 	}
 	return items, nil
 }
+
+const summarizeRevlogsBySession = `-- name: SummarizeRevlogsBySession :one
+SELECT
+    COUNT(*)::integer AS reviewed_cards,
+    COALESCE(SUM(duration_ms), 0)::bigint AS total_active_ms
+FROM revlogs
+WHERE session_id = $1
+`
+
+type SummarizeRevlogsBySessionRow struct {
+	ReviewedCards int32 `json:"reviewed_cards"`
+	TotalActiveMs int64 `json:"total_active_ms"`
+}
+
+func (q *Queries) SummarizeRevlogsBySession(ctx context.Context, sessionID uuid.NullUUID) (SummarizeRevlogsBySessionRow, error) {
+	row := q.db.QueryRowContext(ctx, summarizeRevlogsBySession, sessionID)
+	var i SummarizeRevlogsBySessionRow
+	err := row.Scan(&i.ReviewedCards, &i.TotalActiveMs)
+	return i, err
+}

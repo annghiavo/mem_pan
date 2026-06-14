@@ -133,6 +133,18 @@ func (mr *MockUserRepositoryMockRecorder) UpdateLastLogin(ctx, id any) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateLastLogin", reflect.TypeOf((*MockUserRepository)(nil).UpdateLastLogin), ctx, id)
 }
 
+func (m *MockUserRepository) UpdateUserPlusStatus(ctx context.Context, id uuid.UUID, isPlus bool) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserPlusStatus", ctx, id, isPlus)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (mr *MockUserRepositoryMockRecorder) UpdateUserPlusStatus(ctx, id, isPlus any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserPlusStatus", reflect.TypeOf((*MockUserRepository)(nil).UpdateUserPlusStatus), ctx, id, isPlus)
+}
+
 func (m *MockUserRepository) MarkEmailVerified(ctx context.Context, id uuid.UUID) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MarkEmailVerified", ctx, id)

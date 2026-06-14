@@ -27,6 +27,7 @@ import (
 	"mem_pan/services/study-service/config"
 	"mem_pan/services/study-service/doc"
 	"mem_pan/services/study-service/internal/authclient"
+	"mem_pan/services/study-service/internal/billingclient"
 	"mem_pan/services/study-service/internal/deckclient"
 	"mem_pan/services/study-service/internal/fsrsopt"
 	"mem_pan/services/study-service/internal/gapi"
@@ -74,12 +75,19 @@ func main() {
 	}
 	defer deckClient.Close()
 
+	billingClient, err := billingclient.NewGRPCClient(cfg.BillingServiceAddress)
+	if err != nil {
+		log.Fatal("billing client:", err)
+	}
+	defer billingClient.Close()
+
 	userCardRepo := repository.NewUserCardRepository(database)
 	sessionRepo := repository.NewStudySessionRepository(database)
 	sessionCardRepo := repository.NewSessionCardRepository(database)
 	revlogRepo := repository.NewRevlogRepository(database)
 	weightsRepo := repository.NewFsrsWeightsRepository(database)
 	deckSettingsRepo := repository.NewDeckSettingsRepository(database)
+	revshareRepo := repository.NewRevshareRepository(database)
 
 	var pub publisher.EventPublisher
 	if cfg.PubSubProjectID != "" {
@@ -95,7 +103,10 @@ func main() {
 		revlogRepo,
 		weightsRepo,
 		deckClient,
+		billingClient,
+		revshareRepo,
 		pub,
+		deckSettingsRepo,
 	)
 	settingsSvc := service.NewSettingsService(deckSettingsRepo)
 
@@ -124,7 +135,7 @@ func main() {
 	if cfg.GRPCServerAddress != "" && cfg.GRPCServerAddress != cfg.HTTPServerAddress {
 		go runStandaloneGRPC(grpcServer, cfg.GRPCServerAddress)
 	}
-	go runHTTPGateway(cfg, gapiServer, grpcServer, optimizer, slogger)
+	go runHTTPGateway(cfg, gapiServer, grpcServer, optimizer, studySvc, slogger)
 
 	<-quit
 	log.Println("study-service shutting down")
@@ -148,7 +159,7 @@ func runStandaloneGRPC(grpcServer *grpc.Server, addr string) {
 	}
 }
 
-func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server, grpcServer *grpc.Server, optimizer *fsrsopt.Optimizer, logger *slog.Logger) {
+func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server, grpcServer *grpc.Server, optimizer *fsrsopt.Optimizer, studySvc service.StudyService, logger *slog.Logger) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -165,6 +176,7 @@ func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server, grpcServer *grpc
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/swagger/", http.StripPrefix("/swagger/", http.FileServer(http.FS(swaggerFiles))))
 	httpMux.HandleFunc("/internal/fsrs/optimize", fsrsOptimizeHandler(cfg, optimizer))
+	httpMux.HandleFunc("/internal/revshare/calculate", revshareCalculateHandler(cfg, studySvc))
 	httpMux.Handle("/", grpcMux)
 
 	wrapped := middleware.HTTPLogger(logger)(withCORS(httpMux))
@@ -188,6 +200,48 @@ func runHTTPGateway(cfg config.Config, gapiServer *gapi.Server, grpcServer *grpc
 	log.Printf("Swagger UI available at http://%s/swagger/", cfg.HTTPServerAddress)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("HTTP gateway failed: %v", err)
+	}
+}
+
+type revshareCalculateRequest struct {
+	PoolMonth      string  `json:"pool_month"`
+	GrossAmountVND int64   `json:"gross_amount_vnd"`
+	PoolRate       float64 `json:"pool_rate"`
+	MinLearners    int32   `json:"min_learners"`
+	CreatorCapRate float64 `json:"creator_cap_rate"`
+}
+
+func revshareCalculateHandler(cfg config.Config, studySvc service.StudyService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		if cfg.CronSecret != "" && r.Header.Get("X-Cron-Secret") != cfg.CronSecret {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		var req revshareCalculateRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "invalid json body", http.StatusBadRequest)
+			return
+		}
+		month, err := time.Parse("2006-01", req.PoolMonth)
+		if err != nil {
+			http.Error(w, "pool_month must be YYYY-MM", http.StatusBadRequest)
+			return
+		}
+		pool, earnings, err := studySvc.CalculateMonthlyRevShare(r.Context(), month, req.GrossAmountVND, req.PoolRate, req.MinLearners, req.CreatorCapRate)
+		if err != nil {
+			log.Printf("[revshare] calculate failed: %v", err)
+			http.Error(w, "revshare calculation failed", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"pool":     pool,
+			"earnings": earnings,
+		})
 	}
 }
 

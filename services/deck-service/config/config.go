@@ -6,28 +6,30 @@ import (
 )
 
 type Config struct {
-	DBUrl               string
-	GRPCServerAddress   string
-	HTTPServerAddress   string
-	AuthServiceAddress  string
-	StudyServiceAddress string
-	CloudinaryURL       string
-	PubSubProjectID     string
-	PubSubTopic         string
+	DBUrl                 string
+	GRPCServerAddress     string
+	HTTPServerAddress     string
+	AuthServiceAddress    string
+	StudyServiceAddress   string
+	BillingServiceAddress string
+	CloudinaryURL         string
+	PubSubProjectID       string
+	PubSubTopic           string
 }
 
 func Load() (Config, error) {
 	cfg := Config{
-		DBUrl:              getEnv("DATABASE_URL", firstNonEmpty(os.Getenv("DB_URL"), os.Getenv("DIRECT_URL"))),
-		GRPCServerAddress:  getEnv("GRPC_SERVER_ADDRESS", ":9091"),
-		HTTPServerAddress:  getEnv("HTTP_SERVER_ADDRESS", ":8081"),
-		AuthServiceAddress: getEnv("AUTH_SERVICE_ADDRESS", "localhost:9090"),
+		DBUrl:                 getEnv("DATABASE_URL", firstNonEmpty(os.Getenv("DB_URL"), os.Getenv("DIRECT_URL"))),
+		GRPCServerAddress:     getEnv("GRPC_SERVER_ADDRESS", ":9091"),
+		HTTPServerAddress:     getEnv("HTTP_SERVER_ADDRESS", ":8081"),
+		AuthServiceAddress:    getEnv("AUTH_SERVICE_ADDRESS", "localhost:9090"),
+		BillingServiceAddress: getEnv("BILLING_SERVICE_ADDRESS", "localhost:9098"),
 		// Optional: enables the learner count on the deck detail page. When
 		// empty the count is simply omitted (left at 0).
 		StudyServiceAddress: os.Getenv("STUDY_SERVICE_ADDRESS"),
 		CloudinaryURL:       os.Getenv("CLOUDINARY_URL"),
-		PubSubProjectID:    getEnv("PUBSUB_PROJECT_ID", ""),
-		PubSubTopic:        getEnv("PUBSUB_TOPIC", "deck-events"),
+		PubSubProjectID:     getEnv("PUBSUB_PROJECT_ID", ""),
+		PubSubTopic:         getEnv("PUBSUB_TOPIC", "deck-events"),
 	}
 	if cfg.DBUrl == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")

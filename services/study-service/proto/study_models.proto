@@ -85,4 +85,6 @@ message StudySettings {
     bool   question_type_written           = 7;
     string strictness_level                = 8;
     bool   require_retyping_correct_answer = 9;
+    int32  new_card_limit                  = 10;
+    int32  review_card_limit               = 11;
 }

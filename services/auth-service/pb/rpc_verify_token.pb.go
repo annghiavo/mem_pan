@@ -73,6 +73,7 @@ type VerifyTokenResponse struct {
 	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
 	TokenId       string                 `protobuf:"bytes,4,opt,name=token_id,json=tokenId,proto3" json:"token_id,omitempty"`
 	ExpiredAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
+	IsPlus        bool                   `protobuf:"varint,6,opt,name=is_plus,json=isPlus,proto3" json:"is_plus,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -142,20 +143,28 @@ func (x *VerifyTokenResponse) GetExpiredAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *VerifyTokenResponse) GetIsPlus() bool {
+	if x != nil {
+		return x.IsPlus
+	}
+	return false
+}
+
 var File_rpc_verify_token_proto protoreflect.FileDescriptor
 
 const file_rpc_verify_token_proto_rawDesc = "" +
 	"\n" +
 	"\x16rpc_verify_token.proto\x12\x02pb\x1a\x1fgoogle/protobuf/timestamp.proto\"7\n" +
 	"\x12VerifyTokenRequest\x12!\n" +
-	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"\xb4\x01\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"\xcd\x01\n" +
 	"\x13VerifyTokenResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x12\n" +
 	"\x04role\x18\x03 \x01(\tR\x04role\x12\x19\n" +
 	"\btoken_id\x18\x04 \x01(\tR\atokenId\x129\n" +
 	"\n" +
-	"expired_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\texpiredAtB\"Z mem_pan/services/auth-service/pbb\x06proto3"
+	"expired_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\texpiredAt\x12\x17\n" +
+	"\ais_plus\x18\x06 \x01(\bR\x06isPlusB\"Z mem_pan/services/auth-service/pbb\x06proto3"
 
 var (
 	file_rpc_verify_token_proto_rawDescOnce sync.Once

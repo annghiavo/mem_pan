@@ -190,6 +190,14 @@ service DeckService {
         };
     }
 
+    rpc UpdateDeckAccessLevel (UpdateDeckAccessLevelRequest) returns (UpdateDeckAccessLevelResponse) {
+        option (google.api.http) = { patch: "/v1/decks/{deck_id}/access"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Update deck access level"; tags: "decks";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
     rpc CloneDeck (CloneDeckRequest) returns (CloneDeckResponse) {
         option (google.api.http) = { post: "/v1/decks/{deck_id}/clone"; body: "*" };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -230,6 +238,44 @@ service DeckService {
         };
     }
 
+    rpc UpsertCreatorProfile (UpsertCreatorProfileRequest) returns (UpsertCreatorProfileResponse) {
+        option (google.api.http) = { put: "/v1/creators/me"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Upsert creator profile"; tags: "creators";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc GetCreatorProfile (GetCreatorProfileRequest) returns (GetCreatorProfileResponse) {
+        option (google.api.http) = { get: "/v1/creators/{user_id}" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Get creator profile"; tags: "creators";
+        };
+    }
+
+    rpc FollowCreator (FollowCreatorRequest) returns (FollowCreatorResponse) {
+        option (google.api.http) = { post: "/v1/creators/{creator_id}/follow"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Follow creator"; tags: "creators";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc UpsertDeckReview (UpsertDeckReviewRequest) returns (UpsertDeckReviewResponse) {
+        option (google.api.http) = { put: "/v1/decks/{deck_id}/review"; body: "*" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Create or update deck review"; tags: "reviews";
+            security: { security_requirement: { key: "BearerAuth"; value: {} } };
+        };
+    }
+
+    rpc ListDeckReviews (ListDeckReviewsRequest) returns (ListDeckReviewsResponse) {
+        option (google.api.http) = { get: "/v1/decks/{deck_id}/reviews" };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "List deck reviews"; tags: "reviews";
+        };
+    }
+
     // Import
     rpc ParseImportFile (ParseImportFileRequest) returns (ParseImportFileResponse) {
         option (google.api.http) = { post: "/v1/import/parse"; body: "*" };
@@ -267,6 +313,7 @@ service DeckService {
     // Admin RPC — internal service-to-service, not exposed via HTTP gateway.
     rpc AdminUpdateDeckStatus (AdminUpdateDeckStatusRequest) returns (AdminUpdateDeckStatusResponse) {}
     rpc AdminListDecks (AdminListDecksRequest) returns (AdminListDecksResponse) {}
+    rpc AdminReviewDeckPlus (AdminReviewDeckPlusRequest) returns (AdminReviewDeckPlusResponse) {}
 
     // Reports — publish a report.submitted event consumed by admin-service.
     rpc ReportDeck (ReportDeckRequest) returns (ReportDeckResponse) {

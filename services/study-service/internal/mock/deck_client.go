@@ -31,6 +31,19 @@ func (m *MockDeckClient) EXPECT() *MockDeckClientMockRecorder {
 	return m.recorder
 }
 
+func (m *MockDeckClient) GetDeck(ctx context.Context, deckID uuid.UUID, accessToken string) (deckclient.DeckInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDeck", ctx, deckID, accessToken)
+	ret0, _ := ret[0].(deckclient.DeckInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockDeckClientMockRecorder) GetDeck(ctx, deckID, accessToken any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDeck", reflect.TypeOf((*MockDeckClient)(nil).GetDeck), ctx, deckID, accessToken)
+}
+
 func (m *MockDeckClient) ListDeckCards(ctx context.Context, deckID uuid.UUID, accessToken string) ([]deckclient.CardInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListDeckCards", ctx, deckID, accessToken)

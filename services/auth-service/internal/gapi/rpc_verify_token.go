@@ -21,11 +21,23 @@ func (s *Server) VerifyToken(ctx context.Context, req *pb.VerifyTokenRequest) (*
 		return nil, status.Error(codes.Unauthenticated, "invalid or expired token")
 	}
 
+	user, err := s.userSvc.GetProfile(ctx, payload.UserID)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	if user.IsBanned {
+		return nil, status.Error(codes.PermissionDenied, "user is banned")
+	}
+	if !user.EmailVerified {
+		return nil, status.Error(codes.PermissionDenied, "email not verified")
+	}
+
 	return &pb.VerifyTokenResponse{
-		UserId:    payload.UserID.String(),
-		Username:  payload.Username,
-		Role:      payload.Role,
+		UserId:    user.UserID.String(),
+		Username:  user.Username,
+		Role:      user.Role,
 		TokenId:   payload.TokenID.String(),
 		ExpiredAt: timestamppb.New(payload.ExpiredAt),
+		IsPlus:    user.IsPlus,
 	}, nil
 }

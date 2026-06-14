@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package billing;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "mem_pan/services/billing-service/pb";
+
+service BillingService {
+    rpc CheckPlusAccess(CheckPlusAccessRequest) returns (CheckPlusAccessResponse);
+    rpc ExpireSubscriptions(ExpireSubscriptionsRequest) returns (ExpireSubscriptionsResponse);
+    rpc SyncRevenuePool(SyncRevenuePoolRequest) returns (SyncRevenuePoolResponse);
+}
+
+message CheckPlusAccessRequest {
+    string user_id = 1;
+}
+
+message CheckPlusAccessResponse {
+    bool active = 1;
+    string plan_code = 2;
+    google.protobuf.Timestamp current_period_end = 3;
+}
+
+message ExpireSubscriptionsRequest {}
+
+message ExpireSubscriptionsResponse {
+    bool ok = 1;
+}
+
+message RevenuePool {
+    string pool_month = 1;
+    int64 gross_amount_vnd = 2;
+    int64 creator_pool_amount_vnd = 3;
+    int64 platform_amount_vnd = 4;
+    string status = 5;
+    google.protobuf.Timestamp finalized_at = 6;
+}
+
+message CreatorEarning {
+    string pool_month = 1;
+    string creator_id = 2;
+    int32 eligible_learners = 3;
+    string weighted_score = 4;
+    int64 amount_vnd = 5;
+    string status = 6;
+}
+
+message SyncRevenuePoolRequest {
+    RevenuePool pool = 1;
+    repeated CreatorEarning earnings = 2;
+}
+
+message SyncRevenuePoolResponse {
+    bool ok = 1;
+    int32 synced_earnings = 2;
+}

@@ -24,8 +24,8 @@ const (
 type StartSessionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
-	NewCardsLimit int32                  `protobuf:"varint,2,opt,name=new_cards_limit,json=newCardsLimit,proto3" json:"new_cards_limit,omitempty"`
-	ReviewLimit   int32                  `protobuf:"varint,3,opt,name=review_limit,json=reviewLimit,proto3" json:"review_limit,omitempty"`
+	NewCardsLimit *int32                 `protobuf:"varint,2,opt,name=new_cards_limit,json=newCardsLimit,proto3,oneof" json:"new_cards_limit,omitempty"`
+	ReviewLimit   *int32                 `protobuf:"varint,3,opt,name=review_limit,json=reviewLimit,proto3,oneof" json:"review_limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -68,15 +68,15 @@ func (x *StartSessionRequest) GetDeckId() string {
 }
 
 func (x *StartSessionRequest) GetNewCardsLimit() int32 {
-	if x != nil {
-		return x.NewCardsLimit
+	if x != nil && x.NewCardsLimit != nil {
+		return *x.NewCardsLimit
 	}
 	return 0
 }
 
 func (x *StartSessionRequest) GetReviewLimit() int32 {
-	if x != nil {
-		return x.ReviewLimit
+	if x != nil && x.ReviewLimit != nil {
+		return *x.ReviewLimit
 	}
 	return 0
 }
@@ -1023,11 +1023,13 @@ var File_rpc_study_proto protoreflect.FileDescriptor
 
 const file_rpc_study_proto_rawDesc = "" +
 	"\n" +
-	"\x0frpc_study.proto\x12\x05study\x1a\x12study_models.proto\"y\n" +
+	"\x0frpc_study.proto\x12\x05study\x1a\x12study_models.proto\"\xa8\x01\n" +
 	"\x13StartSessionRequest\x12\x17\n" +
-	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12&\n" +
-	"\x0fnew_cards_limit\x18\x02 \x01(\x05R\rnewCardsLimit\x12!\n" +
-	"\freview_limit\x18\x03 \x01(\x05R\vreviewLimit\"E\n" +
+	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12+\n" +
+	"\x0fnew_cards_limit\x18\x02 \x01(\x05H\x00R\rnewCardsLimit\x88\x01\x01\x12&\n" +
+	"\freview_limit\x18\x03 \x01(\x05H\x01R\vreviewLimit\x88\x01\x01B\x12\n" +
+	"\x10_new_cards_limitB\x0f\n" +
+	"\r_review_limit\"E\n" +
 	"\x14StartSessionResponse\x12-\n" +
 	"\asession\x18\x01 \x01(\v2\x13.study.StudySessionR\asession\"2\n" +
 	"\x11GetSessionRequest\x12\x1d\n" +
@@ -1147,6 +1149,7 @@ func file_rpc_study_proto_init() {
 		return
 	}
 	file_study_models_proto_init()
+	file_rpc_study_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

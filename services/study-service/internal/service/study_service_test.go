@@ -94,6 +94,11 @@ func TestStartSession_AbandonsOngoingAndCreatesNew(t *testing.T) {
 		DeckID: deckID,
 	}).Return(oldSession, nil)
 	sessRepo.EXPECT().AbandonStudySession(ctx, oldSessionID).Return(oldSession, nil)
+	deckClient.EXPECT().GetDeck(ctx, deckID, "token123").Return(deckclient.DeckInfo{
+		DeckID:      deckID,
+		UserID:      userID,
+		AccessLevel: "public",
+	}, nil)
 	deckClient.EXPECT().ListDeckCards(ctx, deckID, "token123").Return(deckCards, nil)
 	ucRepo.EXPECT().UpsertUserCard(ctx, db.UpsertUserCardParams{
 		UserID: userID,
@@ -150,6 +155,11 @@ func TestStartSession_NewSession(t *testing.T) {
 	sc := makeSessionCard(sessionID, cardID, userCardID)
 
 	sessRepo.EXPECT().GetOngoingSessionByDeck(ctx, gomock.Any()).Return(db.StudySession{}, domain.ErrSessionNotFound)
+	deckClient.EXPECT().GetDeck(ctx, deckID, "token123").Return(deckclient.DeckInfo{
+		DeckID:      deckID,
+		UserID:      userID,
+		AccessLevel: "public",
+	}, nil)
 	deckClient.EXPECT().ListDeckCards(ctx, deckID, "token123").Return(deckCards, nil)
 	ucRepo.EXPECT().UpsertUserCard(ctx, db.UpsertUserCardParams{
 		UserID: userID,
@@ -196,6 +206,11 @@ func TestStartSession_EmptyDeck(t *testing.T) {
 	deckID := uuid.New()
 
 	sessRepo.EXPECT().GetOngoingSessionByDeck(ctx, gomock.Any()).Return(db.StudySession{}, domain.ErrSessionNotFound)
+	deckClient.EXPECT().GetDeck(ctx, deckID, "token").Return(deckclient.DeckInfo{
+		DeckID:      deckID,
+		UserID:      userID,
+		AccessLevel: "public",
+	}, nil)
 	deckClient.EXPECT().ListDeckCards(ctx, deckID, "token").Return([]deckclient.CardInfo{}, nil)
 
 	svc := newTestStudyService(ctrl, ucRepo, sessRepo, scRepo, revRepo, weightsRepo, deckClient)

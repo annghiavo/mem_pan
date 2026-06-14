@@ -137,7 +137,7 @@ const file_deck_service_proto_rawDesc = "" +
 	"\x0freason_category\x18\x02 \x01(\tR\x0ereasonCategory\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\".\n" +
 	"\x12ReportDeckResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\xb5\"\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2\xf6*\n" +
 	"\vDeckService\x12\x7f\n" +
 	"\vListFolders\x12\x16.pb.ListFoldersRequest\x1a\x17.pb.ListFoldersResponse\"?\x92A)\n" +
 	"\afolders\x12\fList foldersb\x10\n" +
@@ -222,7 +222,12 @@ const file_deck_service_proto_rawDesc = "" +
 	"\x05decks\x12\x16Toggle deck visibilityb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02#:\x01*2\x1e/v1/decks/{deck_id}/visibility\x12\x88\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02#:\x01*2\x1e/v1/decks/{deck_id}/visibility\x12\xb9\x01\n" +
+	"\x15UpdateDeckAccessLevel\x12 .pb.UpdateDeckAccessLevelRequest\x1a!.pb.UpdateDeckAccessLevelResponse\"[\x92A3\n" +
+	"\x05decks\x12\x18Update deck access levelb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1f:\x01*2\x1a/v1/decks/{deck_id}/access\x12\x88\x01\n" +
 	"\tCloneDeck\x12\x14.pb.CloneDeckRequest\x1a\x15.pb.CloneDeckResponse\"N\x92A'\n" +
 	"\x05decks\x12\fClone a deckb\x10\n" +
 	"\x0e\n" +
@@ -248,7 +253,26 @@ const file_deck_service_proto_rawDesc = "" +
 	"\x05decks\x12\x11Bulk import cardsb\x10\n" +
 	"\x0e\n" +
 	"\n" +
-	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/decks/{deck_id}/cards/bulk\x12\xaa\x01\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/decks/{deck_id}/cards/bulk\x12\xac\x01\n" +
+	"\x14UpsertCreatorProfile\x12\x1f.pb.UpsertCreatorProfileRequest\x1a .pb.UpsertCreatorProfileResponse\"Q\x92A4\n" +
+	"\bcreators\x12\x16Upsert creator profileb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x14:\x01*\x1a\x0f/v1/creators/me\x12\x92\x01\n" +
+	"\x11GetCreatorProfile\x12\x1c.pb.GetCreatorProfileRequest\x1a\x1d.pb.GetCreatorProfileResponse\"@\x92A\x1f\n" +
+	"\bcreators\x12\x13Get creator profile\x82\xd3\xe4\x93\x02\x18\x12\x16/v1/creators/{user_id}\x12\xa0\x01\n" +
+	"\rFollowCreator\x12\x18.pb.FollowCreatorRequest\x1a\x19.pb.FollowCreatorResponse\"Z\x92A,\n" +
+	"\bcreators\x12\x0eFollow creatorb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02%:\x01*\" /v1/creators/{creator_id}/follow\x12\xb0\x01\n" +
+	"\x10UpsertDeckReview\x12\x1b.pb.UpsertDeckReviewRequest\x1a\x1c.pb.UpsertDeckReviewResponse\"a\x92A9\n" +
+	"\areviews\x12\x1cCreate or update deck reviewb\x10\n" +
+	"\x0e\n" +
+	"\n" +
+	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x1f:\x01*\x1a\x1a/v1/decks/{deck_id}/review\x12\x8e\x01\n" +
+	"\x0fListDeckReviews\x12\x1a.pb.ListDeckReviewsRequest\x1a\x1b.pb.ListDeckReviewsResponse\"B\x92A\x1c\n" +
+	"\areviews\x12\x11List deck reviews\x82\xd3\xe4\x93\x02\x1d\x12\x1b/v1/decks/{deck_id}/reviews\x12\xaa\x01\n" +
 	"\x0fParseImportFile\x12\x1a.pb.ParseImportFileRequest\x1a\x1b.pb.ParseImportFileResponse\"^\x92A@\n" +
 	"\x06import\x12$Parse CSV/PDF file and preview cardsb\x10\n" +
 	"\x0e\n" +
@@ -272,7 +296,8 @@ const file_deck_service_proto_rawDesc = "" +
 	"\n" +
 	"BearerAuth\x12\x00\x82\xd3\xe4\x93\x02\x15*\x13/v1/cards/{card_id}\x12^\n" +
 	"\x15AdminUpdateDeckStatus\x12 .pb.AdminUpdateDeckStatusRequest\x1a!.pb.AdminUpdateDeckStatusResponse\"\x00\x12I\n" +
-	"\x0eAdminListDecks\x12\x19.pb.AdminListDecksRequest\x1a\x1a.pb.AdminListDecksResponse\"\x00\x12\x9f\x01\n" +
+	"\x0eAdminListDecks\x12\x19.pb.AdminListDecksRequest\x1a\x1a.pb.AdminListDecksResponse\"\x00\x12X\n" +
+	"\x13AdminReviewDeckPlus\x12\x1e.pb.AdminReviewDeckPlusRequest\x1a\x1f.pb.AdminReviewDeckPlusResponse\"\x00\x12\x9f\x01\n" +
 	"\n" +
 	"ReportDeck\x12\x15.pb.ReportDeckRequest\x1a\x16.pb.ReportDeckResponse\"b\x92A9\n" +
 	"\areports\x12\x1cReport a deck for moderationb\x10\n" +
@@ -318,46 +343,60 @@ var file_deck_service_proto_goTypes = []any{
 	(*DeleteDeckRequest)(nil),              // 17: pb.DeleteDeckRequest
 	(*UpdateDeckSettingsRequest)(nil),      // 18: pb.UpdateDeckSettingsRequest
 	(*UpdateDeckVisibilityRequest)(nil),    // 19: pb.UpdateDeckVisibilityRequest
-	(*CloneDeckRequest)(nil),               // 20: pb.CloneDeckRequest
-	(*GetDeckStatsRequest)(nil),            // 21: pb.GetDeckStatsRequest
-	(*ListDeckCardsRequest)(nil),           // 22: pb.ListDeckCardsRequest
-	(*CreateCardRequest)(nil),              // 23: pb.CreateCardRequest
-	(*BulkCreateCardsRequest)(nil),         // 24: pb.BulkCreateCardsRequest
-	(*ParseImportFileRequest)(nil),         // 25: pb.ParseImportFileRequest
-	(*GetCardRequest)(nil),                 // 26: pb.GetCardRequest
-	(*UpdateCardRequest)(nil),              // 27: pb.UpdateCardRequest
-	(*DeleteCardRequest)(nil),              // 28: pb.DeleteCardRequest
-	(*AdminUpdateDeckStatusRequest)(nil),   // 29: pb.AdminUpdateDeckStatusRequest
-	(*AdminListDecksRequest)(nil),          // 30: pb.AdminListDecksRequest
-	(*ListFoldersResponse)(nil),            // 31: pb.ListFoldersResponse
-	(*CreateFolderResponse)(nil),           // 32: pb.CreateFolderResponse
-	(*GetFolderResponse)(nil),              // 33: pb.GetFolderResponse
-	(*ListPublicFoldersResponse)(nil),      // 34: pb.ListPublicFoldersResponse
-	(*UpdateFolderVisibilityResponse)(nil), // 35: pb.UpdateFolderVisibilityResponse
-	(*UpdateFolderResponse)(nil),           // 36: pb.UpdateFolderResponse
-	(*DeleteFolderResponse)(nil),           // 37: pb.DeleteFolderResponse
-	(*AddDeckToFolderResponse)(nil),        // 38: pb.AddDeckToFolderResponse
-	(*RemoveDeckFromFolderResponse)(nil),   // 39: pb.RemoveDeckFromFolderResponse
-	(*ListDecksResponse)(nil),              // 40: pb.ListDecksResponse
-	(*CreateDeckResponse)(nil),             // 41: pb.CreateDeckResponse
-	(*GetDeckResponse)(nil),                // 42: pb.GetDeckResponse
-	(*ListPublicDecksResponse)(nil),        // 43: pb.ListPublicDecksResponse
-	(*ListTopPublicDecksResponse)(nil),     // 44: pb.ListTopPublicDecksResponse
-	(*UpdateDeckResponse)(nil),             // 45: pb.UpdateDeckResponse
-	(*DeleteDeckResponse)(nil),             // 46: pb.DeleteDeckResponse
-	(*UpdateDeckSettingsResponse)(nil),     // 47: pb.UpdateDeckSettingsResponse
-	(*UpdateDeckVisibilityResponse)(nil),   // 48: pb.UpdateDeckVisibilityResponse
-	(*CloneDeckResponse)(nil),              // 49: pb.CloneDeckResponse
-	(*GetDeckStatsResponse)(nil),           // 50: pb.GetDeckStatsResponse
-	(*ListDeckCardsResponse)(nil),          // 51: pb.ListDeckCardsResponse
-	(*CreateCardResponse)(nil),             // 52: pb.CreateCardResponse
-	(*BulkCreateCardsResponse)(nil),        // 53: pb.BulkCreateCardsResponse
-	(*ParseImportFileResponse)(nil),        // 54: pb.ParseImportFileResponse
-	(*GetCardResponse)(nil),                // 55: pb.GetCardResponse
-	(*UpdateCardResponse)(nil),             // 56: pb.UpdateCardResponse
-	(*DeleteCardResponse)(nil),             // 57: pb.DeleteCardResponse
-	(*AdminUpdateDeckStatusResponse)(nil),  // 58: pb.AdminUpdateDeckStatusResponse
-	(*AdminListDecksResponse)(nil),         // 59: pb.AdminListDecksResponse
+	(*UpdateDeckAccessLevelRequest)(nil),   // 20: pb.UpdateDeckAccessLevelRequest
+	(*CloneDeckRequest)(nil),               // 21: pb.CloneDeckRequest
+	(*GetDeckStatsRequest)(nil),            // 22: pb.GetDeckStatsRequest
+	(*ListDeckCardsRequest)(nil),           // 23: pb.ListDeckCardsRequest
+	(*CreateCardRequest)(nil),              // 24: pb.CreateCardRequest
+	(*BulkCreateCardsRequest)(nil),         // 25: pb.BulkCreateCardsRequest
+	(*UpsertCreatorProfileRequest)(nil),    // 26: pb.UpsertCreatorProfileRequest
+	(*GetCreatorProfileRequest)(nil),       // 27: pb.GetCreatorProfileRequest
+	(*FollowCreatorRequest)(nil),           // 28: pb.FollowCreatorRequest
+	(*UpsertDeckReviewRequest)(nil),        // 29: pb.UpsertDeckReviewRequest
+	(*ListDeckReviewsRequest)(nil),         // 30: pb.ListDeckReviewsRequest
+	(*ParseImportFileRequest)(nil),         // 31: pb.ParseImportFileRequest
+	(*GetCardRequest)(nil),                 // 32: pb.GetCardRequest
+	(*UpdateCardRequest)(nil),              // 33: pb.UpdateCardRequest
+	(*DeleteCardRequest)(nil),              // 34: pb.DeleteCardRequest
+	(*AdminUpdateDeckStatusRequest)(nil),   // 35: pb.AdminUpdateDeckStatusRequest
+	(*AdminListDecksRequest)(nil),          // 36: pb.AdminListDecksRequest
+	(*AdminReviewDeckPlusRequest)(nil),     // 37: pb.AdminReviewDeckPlusRequest
+	(*ListFoldersResponse)(nil),            // 38: pb.ListFoldersResponse
+	(*CreateFolderResponse)(nil),           // 39: pb.CreateFolderResponse
+	(*GetFolderResponse)(nil),              // 40: pb.GetFolderResponse
+	(*ListPublicFoldersResponse)(nil),      // 41: pb.ListPublicFoldersResponse
+	(*UpdateFolderVisibilityResponse)(nil), // 42: pb.UpdateFolderVisibilityResponse
+	(*UpdateFolderResponse)(nil),           // 43: pb.UpdateFolderResponse
+	(*DeleteFolderResponse)(nil),           // 44: pb.DeleteFolderResponse
+	(*AddDeckToFolderResponse)(nil),        // 45: pb.AddDeckToFolderResponse
+	(*RemoveDeckFromFolderResponse)(nil),   // 46: pb.RemoveDeckFromFolderResponse
+	(*ListDecksResponse)(nil),              // 47: pb.ListDecksResponse
+	(*CreateDeckResponse)(nil),             // 48: pb.CreateDeckResponse
+	(*GetDeckResponse)(nil),                // 49: pb.GetDeckResponse
+	(*ListPublicDecksResponse)(nil),        // 50: pb.ListPublicDecksResponse
+	(*ListTopPublicDecksResponse)(nil),     // 51: pb.ListTopPublicDecksResponse
+	(*UpdateDeckResponse)(nil),             // 52: pb.UpdateDeckResponse
+	(*DeleteDeckResponse)(nil),             // 53: pb.DeleteDeckResponse
+	(*UpdateDeckSettingsResponse)(nil),     // 54: pb.UpdateDeckSettingsResponse
+	(*UpdateDeckVisibilityResponse)(nil),   // 55: pb.UpdateDeckVisibilityResponse
+	(*UpdateDeckAccessLevelResponse)(nil),  // 56: pb.UpdateDeckAccessLevelResponse
+	(*CloneDeckResponse)(nil),              // 57: pb.CloneDeckResponse
+	(*GetDeckStatsResponse)(nil),           // 58: pb.GetDeckStatsResponse
+	(*ListDeckCardsResponse)(nil),          // 59: pb.ListDeckCardsResponse
+	(*CreateCardResponse)(nil),             // 60: pb.CreateCardResponse
+	(*BulkCreateCardsResponse)(nil),        // 61: pb.BulkCreateCardsResponse
+	(*UpsertCreatorProfileResponse)(nil),   // 62: pb.UpsertCreatorProfileResponse
+	(*GetCreatorProfileResponse)(nil),      // 63: pb.GetCreatorProfileResponse
+	(*FollowCreatorResponse)(nil),          // 64: pb.FollowCreatorResponse
+	(*UpsertDeckReviewResponse)(nil),       // 65: pb.UpsertDeckReviewResponse
+	(*ListDeckReviewsResponse)(nil),        // 66: pb.ListDeckReviewsResponse
+	(*ParseImportFileResponse)(nil),        // 67: pb.ParseImportFileResponse
+	(*GetCardResponse)(nil),                // 68: pb.GetCardResponse
+	(*UpdateCardResponse)(nil),             // 69: pb.UpdateCardResponse
+	(*DeleteCardResponse)(nil),             // 70: pb.DeleteCardResponse
+	(*AdminUpdateDeckStatusResponse)(nil),  // 71: pb.AdminUpdateDeckStatusResponse
+	(*AdminListDecksResponse)(nil),         // 72: pb.AdminListDecksResponse
+	(*AdminReviewDeckPlusResponse)(nil),    // 73: pb.AdminReviewDeckPlusResponse
 }
 var file_deck_service_proto_depIdxs = []int32{
 	2,  // 0: pb.DeckService.ListFolders:input_type -> pb.ListFoldersRequest
@@ -378,50 +417,64 @@ var file_deck_service_proto_depIdxs = []int32{
 	17, // 15: pb.DeckService.DeleteDeck:input_type -> pb.DeleteDeckRequest
 	18, // 16: pb.DeckService.UpdateDeckSettings:input_type -> pb.UpdateDeckSettingsRequest
 	19, // 17: pb.DeckService.UpdateDeckVisibility:input_type -> pb.UpdateDeckVisibilityRequest
-	20, // 18: pb.DeckService.CloneDeck:input_type -> pb.CloneDeckRequest
-	21, // 19: pb.DeckService.GetDeckStats:input_type -> pb.GetDeckStatsRequest
-	22, // 20: pb.DeckService.ListDeckCards:input_type -> pb.ListDeckCardsRequest
-	23, // 21: pb.DeckService.CreateCard:input_type -> pb.CreateCardRequest
-	24, // 22: pb.DeckService.BulkCreateCards:input_type -> pb.BulkCreateCardsRequest
-	25, // 23: pb.DeckService.ParseImportFile:input_type -> pb.ParseImportFileRequest
-	26, // 24: pb.DeckService.GetCard:input_type -> pb.GetCardRequest
-	27, // 25: pb.DeckService.UpdateCard:input_type -> pb.UpdateCardRequest
-	28, // 26: pb.DeckService.DeleteCard:input_type -> pb.DeleteCardRequest
-	29, // 27: pb.DeckService.AdminUpdateDeckStatus:input_type -> pb.AdminUpdateDeckStatusRequest
-	30, // 28: pb.DeckService.AdminListDecks:input_type -> pb.AdminListDecksRequest
-	0,  // 29: pb.DeckService.ReportDeck:input_type -> pb.ReportDeckRequest
-	31, // 30: pb.DeckService.ListFolders:output_type -> pb.ListFoldersResponse
-	32, // 31: pb.DeckService.CreateFolder:output_type -> pb.CreateFolderResponse
-	33, // 32: pb.DeckService.GetFolder:output_type -> pb.GetFolderResponse
-	34, // 33: pb.DeckService.ListPublicFolders:output_type -> pb.ListPublicFoldersResponse
-	35, // 34: pb.DeckService.UpdateFolderVisibility:output_type -> pb.UpdateFolderVisibilityResponse
-	36, // 35: pb.DeckService.UpdateFolder:output_type -> pb.UpdateFolderResponse
-	37, // 36: pb.DeckService.DeleteFolder:output_type -> pb.DeleteFolderResponse
-	38, // 37: pb.DeckService.AddDeckToFolder:output_type -> pb.AddDeckToFolderResponse
-	39, // 38: pb.DeckService.RemoveDeckFromFolder:output_type -> pb.RemoveDeckFromFolderResponse
-	40, // 39: pb.DeckService.ListDecks:output_type -> pb.ListDecksResponse
-	41, // 40: pb.DeckService.CreateDeck:output_type -> pb.CreateDeckResponse
-	42, // 41: pb.DeckService.GetDeck:output_type -> pb.GetDeckResponse
-	43, // 42: pb.DeckService.ListPublicDecks:output_type -> pb.ListPublicDecksResponse
-	44, // 43: pb.DeckService.ListTopPublicDecks:output_type -> pb.ListTopPublicDecksResponse
-	45, // 44: pb.DeckService.UpdateDeck:output_type -> pb.UpdateDeckResponse
-	46, // 45: pb.DeckService.DeleteDeck:output_type -> pb.DeleteDeckResponse
-	47, // 46: pb.DeckService.UpdateDeckSettings:output_type -> pb.UpdateDeckSettingsResponse
-	48, // 47: pb.DeckService.UpdateDeckVisibility:output_type -> pb.UpdateDeckVisibilityResponse
-	49, // 48: pb.DeckService.CloneDeck:output_type -> pb.CloneDeckResponse
-	50, // 49: pb.DeckService.GetDeckStats:output_type -> pb.GetDeckStatsResponse
-	51, // 50: pb.DeckService.ListDeckCards:output_type -> pb.ListDeckCardsResponse
-	52, // 51: pb.DeckService.CreateCard:output_type -> pb.CreateCardResponse
-	53, // 52: pb.DeckService.BulkCreateCards:output_type -> pb.BulkCreateCardsResponse
-	54, // 53: pb.DeckService.ParseImportFile:output_type -> pb.ParseImportFileResponse
-	55, // 54: pb.DeckService.GetCard:output_type -> pb.GetCardResponse
-	56, // 55: pb.DeckService.UpdateCard:output_type -> pb.UpdateCardResponse
-	57, // 56: pb.DeckService.DeleteCard:output_type -> pb.DeleteCardResponse
-	58, // 57: pb.DeckService.AdminUpdateDeckStatus:output_type -> pb.AdminUpdateDeckStatusResponse
-	59, // 58: pb.DeckService.AdminListDecks:output_type -> pb.AdminListDecksResponse
-	1,  // 59: pb.DeckService.ReportDeck:output_type -> pb.ReportDeckResponse
-	30, // [30:60] is the sub-list for method output_type
-	0,  // [0:30] is the sub-list for method input_type
+	20, // 18: pb.DeckService.UpdateDeckAccessLevel:input_type -> pb.UpdateDeckAccessLevelRequest
+	21, // 19: pb.DeckService.CloneDeck:input_type -> pb.CloneDeckRequest
+	22, // 20: pb.DeckService.GetDeckStats:input_type -> pb.GetDeckStatsRequest
+	23, // 21: pb.DeckService.ListDeckCards:input_type -> pb.ListDeckCardsRequest
+	24, // 22: pb.DeckService.CreateCard:input_type -> pb.CreateCardRequest
+	25, // 23: pb.DeckService.BulkCreateCards:input_type -> pb.BulkCreateCardsRequest
+	26, // 24: pb.DeckService.UpsertCreatorProfile:input_type -> pb.UpsertCreatorProfileRequest
+	27, // 25: pb.DeckService.GetCreatorProfile:input_type -> pb.GetCreatorProfileRequest
+	28, // 26: pb.DeckService.FollowCreator:input_type -> pb.FollowCreatorRequest
+	29, // 27: pb.DeckService.UpsertDeckReview:input_type -> pb.UpsertDeckReviewRequest
+	30, // 28: pb.DeckService.ListDeckReviews:input_type -> pb.ListDeckReviewsRequest
+	31, // 29: pb.DeckService.ParseImportFile:input_type -> pb.ParseImportFileRequest
+	32, // 30: pb.DeckService.GetCard:input_type -> pb.GetCardRequest
+	33, // 31: pb.DeckService.UpdateCard:input_type -> pb.UpdateCardRequest
+	34, // 32: pb.DeckService.DeleteCard:input_type -> pb.DeleteCardRequest
+	35, // 33: pb.DeckService.AdminUpdateDeckStatus:input_type -> pb.AdminUpdateDeckStatusRequest
+	36, // 34: pb.DeckService.AdminListDecks:input_type -> pb.AdminListDecksRequest
+	37, // 35: pb.DeckService.AdminReviewDeckPlus:input_type -> pb.AdminReviewDeckPlusRequest
+	0,  // 36: pb.DeckService.ReportDeck:input_type -> pb.ReportDeckRequest
+	38, // 37: pb.DeckService.ListFolders:output_type -> pb.ListFoldersResponse
+	39, // 38: pb.DeckService.CreateFolder:output_type -> pb.CreateFolderResponse
+	40, // 39: pb.DeckService.GetFolder:output_type -> pb.GetFolderResponse
+	41, // 40: pb.DeckService.ListPublicFolders:output_type -> pb.ListPublicFoldersResponse
+	42, // 41: pb.DeckService.UpdateFolderVisibility:output_type -> pb.UpdateFolderVisibilityResponse
+	43, // 42: pb.DeckService.UpdateFolder:output_type -> pb.UpdateFolderResponse
+	44, // 43: pb.DeckService.DeleteFolder:output_type -> pb.DeleteFolderResponse
+	45, // 44: pb.DeckService.AddDeckToFolder:output_type -> pb.AddDeckToFolderResponse
+	46, // 45: pb.DeckService.RemoveDeckFromFolder:output_type -> pb.RemoveDeckFromFolderResponse
+	47, // 46: pb.DeckService.ListDecks:output_type -> pb.ListDecksResponse
+	48, // 47: pb.DeckService.CreateDeck:output_type -> pb.CreateDeckResponse
+	49, // 48: pb.DeckService.GetDeck:output_type -> pb.GetDeckResponse
+	50, // 49: pb.DeckService.ListPublicDecks:output_type -> pb.ListPublicDecksResponse
+	51, // 50: pb.DeckService.ListTopPublicDecks:output_type -> pb.ListTopPublicDecksResponse
+	52, // 51: pb.DeckService.UpdateDeck:output_type -> pb.UpdateDeckResponse
+	53, // 52: pb.DeckService.DeleteDeck:output_type -> pb.DeleteDeckResponse
+	54, // 53: pb.DeckService.UpdateDeckSettings:output_type -> pb.UpdateDeckSettingsResponse
+	55, // 54: pb.DeckService.UpdateDeckVisibility:output_type -> pb.UpdateDeckVisibilityResponse
+	56, // 55: pb.DeckService.UpdateDeckAccessLevel:output_type -> pb.UpdateDeckAccessLevelResponse
+	57, // 56: pb.DeckService.CloneDeck:output_type -> pb.CloneDeckResponse
+	58, // 57: pb.DeckService.GetDeckStats:output_type -> pb.GetDeckStatsResponse
+	59, // 58: pb.DeckService.ListDeckCards:output_type -> pb.ListDeckCardsResponse
+	60, // 59: pb.DeckService.CreateCard:output_type -> pb.CreateCardResponse
+	61, // 60: pb.DeckService.BulkCreateCards:output_type -> pb.BulkCreateCardsResponse
+	62, // 61: pb.DeckService.UpsertCreatorProfile:output_type -> pb.UpsertCreatorProfileResponse
+	63, // 62: pb.DeckService.GetCreatorProfile:output_type -> pb.GetCreatorProfileResponse
+	64, // 63: pb.DeckService.FollowCreator:output_type -> pb.FollowCreatorResponse
+	65, // 64: pb.DeckService.UpsertDeckReview:output_type -> pb.UpsertDeckReviewResponse
+	66, // 65: pb.DeckService.ListDeckReviews:output_type -> pb.ListDeckReviewsResponse
+	67, // 66: pb.DeckService.ParseImportFile:output_type -> pb.ParseImportFileResponse
+	68, // 67: pb.DeckService.GetCard:output_type -> pb.GetCardResponse
+	69, // 68: pb.DeckService.UpdateCard:output_type -> pb.UpdateCardResponse
+	70, // 69: pb.DeckService.DeleteCard:output_type -> pb.DeleteCardResponse
+	71, // 70: pb.DeckService.AdminUpdateDeckStatus:output_type -> pb.AdminUpdateDeckStatusResponse
+	72, // 71: pb.DeckService.AdminListDecks:output_type -> pb.AdminListDecksResponse
+	73, // 72: pb.DeckService.AdminReviewDeckPlus:output_type -> pb.AdminReviewDeckPlusResponse
+	1,  // 73: pb.DeckService.ReportDeck:output_type -> pb.ReportDeckResponse
+	37, // [37:74] is the sub-list for method output_type
+	0,  // [0:37] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

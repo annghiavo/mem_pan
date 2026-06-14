@@ -21,7 +21,16 @@ type CardInfo struct {
 	DeckID uuid.UUID
 }
 
+type DeckInfo struct {
+	DeckID      uuid.UUID
+	UserID      uuid.UUID
+	AccessLevel string
+	PlusStatus  string
+	IsPublic    bool
+}
+
 type Client interface {
+	GetDeck(ctx context.Context, deckID uuid.UUID, accessToken string) (DeckInfo, error)
 	ListDeckCards(ctx context.Context, deckID uuid.UUID, accessToken string) ([]CardInfo, error)
 	Close() error
 }
@@ -39,6 +48,34 @@ func NewGRPCClient(addr string) (Client, error) {
 	return &grpcClient{
 		conn:    conn,
 		deckSvc: deckpb.NewDeckServiceClient(conn),
+	}, nil
+}
+
+func (c *grpcClient) GetDeck(ctx context.Context, deckID uuid.UUID, accessToken string) (DeckInfo, error) {
+	md := metadata.Pairs("authorization", "Bearer "+accessToken)
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
+	resp, err := c.deckSvc.GetDeck(ctx, &deckpb.GetDeckRequest{DeckId: deckID.String()})
+	if err != nil {
+		return DeckInfo{}, fmt.Errorf("deck-service GetDeck: %w", err)
+	}
+	if resp.Deck == nil {
+		return DeckInfo{}, fmt.Errorf("deck-service GetDeck: missing deck")
+	}
+	userID, err := uuid.Parse(resp.Deck.UserId)
+	if err != nil {
+		return DeckInfo{}, fmt.Errorf("deck-service GetDeck: invalid user_id")
+	}
+	dID, err := uuid.Parse(resp.Deck.DeckId)
+	if err != nil {
+		return DeckInfo{}, fmt.Errorf("deck-service GetDeck: invalid deck_id")
+	}
+	return DeckInfo{
+		DeckID:      dID,
+		UserID:      userID,
+		AccessLevel: resp.Deck.AccessLevel,
+		PlusStatus:  resp.Deck.PlusStatus,
+		IsPublic:    resp.Deck.IsPublic,
 	}, nil
 }
 

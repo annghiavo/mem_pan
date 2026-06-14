@@ -101,6 +101,17 @@ func (ns NullSessionStatus) Value() (driver.Value, error) {
 	return string(ns.SessionStatus), nil
 }
 
+type CreatorEarning struct {
+	EarningID        uuid.UUID `json:"earning_id"`
+	PoolMonth        time.Time `json:"pool_month"`
+	CreatorID        uuid.UUID `json:"creator_id"`
+	EligibleLearners int32     `json:"eligible_learners"`
+	WeightedScore    string    `json:"weighted_score"`
+	AmountVnd        int64     `json:"amount_vnd"`
+	Status           string    `json:"status"`
+	CreatedAt        time.Time `json:"created_at"`
+}
+
 type DeckStudySetting struct {
 	UserID                       uuid.UUID `json:"user_id"`
 	DeckID                       uuid.UUID `json:"deck_id"`
@@ -115,6 +126,17 @@ type DeckStudySetting struct {
 	RequireRetypingCorrectAnswer bool      `json:"require_retyping_correct_answer"`
 	CreatedAt                    time.Time `json:"created_at"`
 	UpdatedAt                    time.Time `json:"updated_at"`
+	NewCardLimit                 int32     `json:"new_card_limit"`
+	ReviewCardLimit              int32     `json:"review_card_limit"`
+}
+
+type MonthlyRevenuePool struct {
+	PoolMonth            time.Time    `json:"pool_month"`
+	GrossAmountVnd       int64        `json:"gross_amount_vnd"`
+	CreatorPoolAmountVnd int64        `json:"creator_pool_amount_vnd"`
+	PlatformAmountVnd    int64        `json:"platform_amount_vnd"`
+	Status               string       `json:"status"`
+	FinalizedAt          sql.NullTime `json:"finalized_at"`
 }
 
 type Revlog struct {
@@ -156,6 +178,21 @@ type StudySession struct {
 	StartedAt          time.Time    `json:"started_at"`
 	FinishedAt         sql.NullTime `json:"finished_at"`
 	LastAccessedAt     time.Time    `json:"last_accessed_at"`
+}
+
+type StudySessionMetric struct {
+	SessionID          uuid.UUID      `json:"session_id"`
+	UserID             uuid.UUID      `json:"user_id"`
+	DeckID             uuid.UUID      `json:"deck_id"`
+	CreatorID          uuid.NullUUID  `json:"creator_id"`
+	CardViews          int32          `json:"card_views"`
+	ReviewedCards      int32          `json:"reviewed_cards"`
+	TotalActiveMs      int64          `json:"total_active_ms"`
+	MaxGapMs           int32          `json:"max_gap_ms"`
+	WeightedScore      string         `json:"weighted_score"`
+	IsRevshareEligible bool           `json:"is_revshare_eligible"`
+	InvalidReason      sql.NullString `json:"invalid_reason"`
+	CreatedAt          time.Time      `json:"created_at"`
 }
 
 type UserCard struct {

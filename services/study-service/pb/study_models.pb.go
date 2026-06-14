@@ -641,6 +641,8 @@ type StudySettings struct {
 	QuestionTypeWritten          bool                   `protobuf:"varint,7,opt,name=question_type_written,json=questionTypeWritten,proto3" json:"question_type_written,omitempty"`
 	StrictnessLevel              string                 `protobuf:"bytes,8,opt,name=strictness_level,json=strictnessLevel,proto3" json:"strictness_level,omitempty"`
 	RequireRetypingCorrectAnswer bool                   `protobuf:"varint,9,opt,name=require_retyping_correct_answer,json=requireRetypingCorrectAnswer,proto3" json:"require_retyping_correct_answer,omitempty"`
+	NewCardLimit                 int32                  `protobuf:"varint,10,opt,name=new_card_limit,json=newCardLimit,proto3" json:"new_card_limit,omitempty"`
+	ReviewCardLimit              int32                  `protobuf:"varint,11,opt,name=review_card_limit,json=reviewCardLimit,proto3" json:"review_card_limit,omitempty"`
 	unknownFields                protoimpl.UnknownFields
 	sizeCache                    protoimpl.SizeCache
 }
@@ -738,6 +740,20 @@ func (x *StudySettings) GetRequireRetypingCorrectAnswer() bool {
 	return false
 }
 
+func (x *StudySettings) GetNewCardLimit() int32 {
+	if x != nil {
+		return x.NewCardLimit
+	}
+	return 0
+}
+
+func (x *StudySettings) GetReviewCardLimit() int32 {
+	if x != nil {
+		return x.ReviewCardLimit
+	}
+	return 0
+}
+
 var File_study_models_proto protoreflect.FileDescriptor
 
 const file_study_models_proto_rawDesc = "" +
@@ -805,7 +821,7 @@ const file_study_models_proto_rawDesc = "" +
 	"totalCount\x12&\n" +
 	"\x04tags\x18\x06 \x03(\v2\x12.study.ProgressTagR\x04tags\x12D\n" +
 	"\x10next_review_date\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x0enextReviewDate\x12\x17\n" +
-	"\adue_now\x18\b \x01(\x05R\x06dueNow\"\xdd\x03\n" +
+	"\adue_now\x18\b \x01(\x05R\x06dueNow\"\xaf\x04\n" +
 	"\rStudySettings\x12#\n" +
 	"\rshuffle_terms\x18\x01 \x01(\bR\fshuffleTerms\x12$\n" +
 	"\x0etext_to_speech\x18\x02 \x01(\bR\ftextToSpeech\x12(\n" +
@@ -815,7 +831,10 @@ const file_study_models_proto_rawDesc = "" +
 	"\x1dquestion_type_multiple_choice\x18\x06 \x01(\bR\x1aquestionTypeMultipleChoice\x122\n" +
 	"\x15question_type_written\x18\a \x01(\bR\x13questionTypeWritten\x12)\n" +
 	"\x10strictness_level\x18\b \x01(\tR\x0fstrictnessLevel\x12E\n" +
-	"\x1frequire_retyping_correct_answer\x18\t \x01(\bR\x1crequireRetypingCorrectAnswerB#Z!mem_pan/services/study-service/pbb\x06proto3"
+	"\x1frequire_retyping_correct_answer\x18\t \x01(\bR\x1crequireRetypingCorrectAnswer\x12$\n" +
+	"\x0enew_card_limit\x18\n" +
+	" \x01(\x05R\fnewCardLimit\x12*\n" +
+	"\x11review_card_limit\x18\v \x01(\x05R\x0freviewCardLimitB#Z!mem_pan/services/study-service/pbb\x06proto3"
 
 var (
 	file_study_models_proto_rawDescOnce sync.Once

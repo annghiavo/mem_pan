@@ -3,6 +3,7 @@ package gapi
 import (
 	"encoding/json"
 	"errors"
+	"strconv"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -61,6 +62,16 @@ func toGRPCError(err error) error {
 		return status.Error(codes.NotFound, err.Error())
 	case errors.Is(err, domain.ErrForbidden):
 		return status.Error(codes.PermissionDenied, err.Error())
+	case errors.Is(err, domain.ErrPlusRequired):
+		return status.Error(codes.PermissionDenied, err.Error())
+	case errors.Is(err, domain.ErrInvalidAccessLevel):
+		return status.Error(codes.InvalidArgument, err.Error())
+	case errors.Is(err, domain.ErrInvalidPlusStatus):
+		return status.Error(codes.InvalidArgument, err.Error())
+	case errors.Is(err, domain.ErrReviewNotAllowed):
+		return status.Error(codes.FailedPrecondition, err.Error())
+	case errors.Is(err, domain.ErrCreatorProfileNotFound):
+		return status.Error(codes.NotFound, err.Error())
 	case errors.Is(err, domain.ErrDeckAlreadyInFolder):
 		return status.Error(codes.AlreadyExists, err.Error())
 	case errors.Is(err, domain.ErrDeckNotInFolder):
@@ -89,14 +100,20 @@ func dbFolderToPb(f db.Folder) *pb.Folder {
 
 func dbDeckToPb(d db.Deck) *pb.Deck {
 	r := &pb.Deck{
-		DeckId:    d.DeckID.String(),
-		UserId:    d.UserID.String(),
-		Name:      d.Name,
-		IsPublic:  d.IsPublic,
-		Status:    d.Status,
-		CardCount: d.CardCount,
-		CreatedAt: timestamppb.New(d.CreatedAt),
-		UpdatedAt: timestamppb.New(d.UpdatedAt),
+		DeckId:       d.DeckID.String(),
+		UserId:       d.UserID.String(),
+		Name:         d.Name,
+		IsPublic:     d.IsPublic,
+		Status:       d.Status,
+		CardCount:    d.CardCount,
+		CreatedAt:    timestamppb.New(d.CreatedAt),
+		UpdatedAt:    timestamppb.New(d.UpdatedAt),
+		AccessLevel:  string(d.AccessLevel),
+		PlusStatus:   string(d.PlusStatus),
+		TotalReviews: d.TotalReviews,
+	}
+	if avg, err := strconv.ParseFloat(d.AvgRating, 64); err == nil {
+		r.AvgRating = avg
 	}
 	if d.Description.Valid {
 		r.Description = d.Description.String
@@ -106,6 +123,54 @@ func dbDeckToPb(d db.Deck) *pb.Deck {
 	}
 	if len(d.Settings) > 0 {
 		r.Settings = rawSettingsToPb(d.Settings)
+	}
+	if d.PlusSubmittedAt.Valid {
+		r.PlusSubmittedAt = timestamppb.New(d.PlusSubmittedAt.Time)
+	}
+	if d.PlusApprovedAt.Valid {
+		r.PlusApprovedAt = timestamppb.New(d.PlusApprovedAt.Time)
+	}
+	return r
+}
+
+func dbCreatorProfileToPb(p db.CreatorProfile) *pb.CreatorProfile {
+	r := &pb.CreatorProfile{
+		UserId:        p.UserID.String(),
+		Tier:          string(p.Tier),
+		FollowerCount: p.FollowerCount,
+		CreatedAt:     timestamppb.New(p.CreatedAt),
+		UpdatedAt:     timestamppb.New(p.UpdatedAt),
+	}
+	if p.DisplayName.Valid {
+		r.DisplayName = p.DisplayName.String
+	}
+	if p.Bio.Valid {
+		r.Bio = p.Bio.String
+	}
+	if p.BankName.Valid {
+		r.BankName = p.BankName.String
+	}
+	if p.BankAccountNumber.Valid {
+		r.BankAccountNumber = p.BankAccountNumber.String
+	}
+	if p.BankAccountName.Valid {
+		r.BankAccountName = p.BankAccountName.String
+	}
+	if p.BankVerifiedAt.Valid {
+		r.BankVerifiedAt = timestamppb.New(p.BankVerifiedAt.Time)
+	}
+	return r
+}
+
+func dbDeckReviewToPb(rw db.DeckReview) *pb.DeckReview {
+	r := &pb.DeckReview{
+		ReviewId:  rw.ReviewID.String(),
+		DeckId:    rw.DeckID.String(),
+		UserId:    rw.UserID.String(),
+		Rating:    int32(rw.Rating),
+		Status:    rw.Status,
+		CreatedAt: timestamppb.New(rw.CreatedAt),
+		UpdatedAt: timestamppb.New(rw.UpdatedAt),
 	}
 	return r
 }
@@ -169,4 +234,3 @@ func nullStrFromProto(s string) *string {
 	}
 	return &s
 }
-

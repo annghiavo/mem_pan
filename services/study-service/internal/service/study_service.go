@@ -4,14 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"sort"
 	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/sync/errgroup"
 	gofsrs "github.com/open-spaced-repetition/go-fsrs/v4"
+	"golang.org/x/sync/errgroup"
 
+	"mem_pan/services/study-service/internal/billingclient"
 	"mem_pan/services/study-service/internal/db"
 	"mem_pan/services/study-service/internal/deckclient"
 	"mem_pan/services/study-service/internal/domain"
@@ -40,9 +42,11 @@ type DeckLearners struct {
 type StartSessionParams struct {
 	UserID        uuid.UUID
 	DeckID        uuid.UUID
-	NewCardsLimit int32
-	ReviewLimit   int32
+	NewCardsLimit *int32
+	ReviewLimit   *int32
 	AccessToken   string
+	Role          string
+	IsPlus        bool
 }
 
 type ReviewCardParams struct {
@@ -91,7 +95,7 @@ type StudyService interface {
 	StartSession(ctx context.Context, p StartSessionParams) (*SessionResult, error)
 	GetSession(ctx context.Context, sessionID, userID uuid.UUID) (*SessionResult, error)
 	ReviewCard(ctx context.Context, p ReviewCardParams) (db.UserCard, error)
-	FinishSession(ctx context.Context, sessionID, userID uuid.UUID) (*SessionResult, error)
+	FinishSession(ctx context.Context, sessionID, userID uuid.UUID, accessToken ...string) (*SessionResult, error)
 	GetDueCards(ctx context.Context, userID uuid.UUID, deckID *uuid.UUID) ([]db.UserCard, error)
 	// CountDueByEndOfDay returns the number of non-new cards whose
 	// next_review_date is on or before the end of "today" in the given IANA
@@ -108,6 +112,7 @@ type StudyService interface {
 	// windowDays days (trending). Consumed by deck-service, which filters the
 	// result down to public decks. Returns at most limit rows.
 	TopDecksByLearners(ctx context.Context, windowDays, limit int32) ([]DeckLearners, error)
+	CalculateMonthlyRevShare(ctx context.Context, poolMonth time.Time, grossAmountVND int64, poolRate float64, minLearners int32, creatorCapRate float64) (db.MonthlyRevenuePool, []db.CreatorEarning, error)
 }
 
 type studyService struct {
@@ -116,7 +121,10 @@ type studyService struct {
 	sessionCardRepo repository.SessionCardRepository
 	revlogRepo      repository.RevlogRepository
 	weightsRepo     repository.FsrsWeightsRepository
+	revshareRepo    repository.RevshareRepository
+	settingsRepo    repository.DeckSettingsRepository
 	deckClient      deckclient.Client
+	billingClient   billingclient.Client
 	pub             publisher.EventPublisher
 }
 
@@ -127,11 +135,23 @@ func NewStudyService(
 	revlogRepo repository.RevlogRepository,
 	weightsRepo repository.FsrsWeightsRepository,
 	deckClient deckclient.Client,
-	pubs ...publisher.EventPublisher,
+	opts ...interface{},
 ) StudyService {
 	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
-	if len(pubs) > 0 {
-		pub = pubs[0]
+	var revshare repository.RevshareRepository
+	var settingsRepo repository.DeckSettingsRepository
+	var billingClient billingclient.Client
+	for _, opt := range opts {
+		switch v := opt.(type) {
+		case publisher.EventPublisher:
+			pub = v
+		case repository.RevshareRepository:
+			revshare = v
+		case repository.DeckSettingsRepository:
+			settingsRepo = v
+		case billingclient.Client:
+			billingClient = v
+		}
 	}
 	return &studyService{
 		userCardRepo:    userCardRepo,
@@ -139,7 +159,10 @@ func NewStudyService(
 		sessionCardRepo: sessionCardRepo,
 		revlogRepo:      revlogRepo,
 		weightsRepo:     weightsRepo,
+		revshareRepo:    revshare,
+		settingsRepo:    settingsRepo,
 		deckClient:      deckClient,
+		billingClient:   billingClient,
 		pub:             pub,
 	}
 }
@@ -164,6 +187,16 @@ func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (
 	}
 
 	// Fetch all cards in the deck from deck-service.
+	deckInfo, err := s.deckClient.GetDeck(ctx, p.DeckID, p.AccessToken)
+	if err != nil {
+		return nil, err
+	}
+	if deckInfo.AccessLevel == "plus" && deckInfo.PlusStatus == "approved" && deckInfo.UserID != p.UserID && !privilegedRole(p.Role) {
+		if !p.IsPlus {
+			return nil, domain.ErrPlusRequired
+		}
+	}
+
 	deckCards, err := s.deckClient.ListDeckCards(ctx, p.DeckID, p.AccessToken)
 	if err != nil {
 		return nil, err
@@ -173,13 +206,13 @@ func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (
 	}
 
 	// Upsert user_card records for every card in the deck concurrently.
-	g, gCtx := errgroup.WithContext(ctx)
+	g, _ := errgroup.WithContext(ctx)
 	g.SetLimit(20) // Avoid exhausting DB connection pool
 	for _, dc := range deckCards {
 		cardID := dc.CardID
 		deckID := dc.DeckID
 		g.Go(func() error {
-			_, err := s.userCardRepo.UpsertUserCard(gCtx, db.UpsertUserCardParams{
+			_, err := s.userCardRepo.UpsertUserCard(ctx, db.UpsertUserCardParams{
 				UserID: p.UserID,
 				CardID: cardID,
 				DeckID: deckID,
@@ -191,13 +224,26 @@ func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (
 		return nil, err
 	}
 
-	newLimit := p.NewCardsLimit
-	if newLimit <= 0 {
-		newLimit = defaultNewCardsLimit
+	newLimit := defaultNewCardsLimit
+	reviewLimit := defaultReviewCardsLimit
+	if s.settingsRepo != nil {
+		if settings, err := s.settingsRepo.GetDeckSettings(ctx, p.UserID, p.DeckID); err == nil {
+			newLimit = settings.NewCardLimit
+			reviewLimit = settings.ReviewCardLimit
+		}
 	}
-	reviewLimit := p.ReviewLimit
-	if reviewLimit <= 0 {
-		reviewLimit = defaultReviewCardsLimit
+
+	if p.NewCardsLimit != nil {
+		newLimit = *p.NewCardsLimit
+		if newLimit < 0 {
+			newLimit = 0
+		}
+	}
+	if p.ReviewLimit != nil {
+		reviewLimit = *p.ReviewLimit
+		if reviewLimit < 0 {
+			reviewLimit = 0
+		}
 	}
 
 	// Select due review cards (not new).
@@ -235,7 +281,7 @@ func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (
 	}
 
 	sessionCards := make([]db.SessionCard, len(selected))
-	g2, gCtx2 := errgroup.WithContext(ctx)
+	g2, _ := errgroup.WithContext(ctx)
 	g2.SetLimit(20)
 
 	for i, uc := range selected {
@@ -243,7 +289,7 @@ func (s *studyService) StartSession(ctx context.Context, p StartSessionParams) (
 		cardID := uc.CardID
 		userCardID := uc.UserCardID
 		g2.Go(func() error {
-			sc, err := s.sessionCardRepo.InsertSessionCard(gCtx2, db.InsertSessionCardParams{
+			sc, err := s.sessionCardRepo.InsertSessionCard(ctx, db.InsertSessionCardParams{
 				SessionID:  session.SessionID,
 				Position:   int32(idx),
 				CardID:     cardID,
@@ -400,7 +446,7 @@ func (s *studyService) ReviewCard(ctx context.Context, p ReviewCardParams) (db.U
 	return updatedUC, nil
 }
 
-func (s *studyService) FinishSession(ctx context.Context, sessionID, userID uuid.UUID) (*SessionResult, error) {
+func (s *studyService) FinishSession(ctx context.Context, sessionID, userID uuid.UUID, accessToken ...string) (*SessionResult, error) {
 	session, err := s.sessionRepo.GetStudySession(ctx, sessionID)
 	if err != nil {
 		return nil, err
@@ -417,6 +463,7 @@ func (s *studyService) FinishSession(ctx context.Context, sessionID, userID uuid
 		if err != nil {
 			return nil, err
 		}
+		_ = s.recordSessionMetrics(ctx, session, firstString(accessToken))
 		return &SessionResult{Session: session, Cards: cards}, nil
 	}
 
@@ -429,7 +476,109 @@ func (s *studyService) FinishSession(ctx context.Context, sessionID, userID uuid
 	if err != nil {
 		return nil, err
 	}
+	_ = s.recordSessionMetrics(ctx, finished, firstString(accessToken))
 	return &SessionResult{Session: finished, Cards: cards}, nil
+}
+
+func (s *studyService) recordSessionMetrics(ctx context.Context, session db.StudySession, accessToken string) error {
+	if s.revshareRepo == nil {
+		return nil
+	}
+	summary, err := s.revlogRepo.SummarizeRevlogsBySession(ctx, session.SessionID)
+	if err != nil {
+		return err
+	}
+
+	var creatorID uuid.NullUUID
+	if accessToken != "" {
+		if deckInfo, err := s.deckClient.GetDeck(ctx, session.DeckID, accessToken); err == nil {
+			creatorID = uuid.NullUUID{UUID: deckInfo.UserID, Valid: true}
+		}
+	}
+
+	eligible := true
+	invalidReason := sql.NullString{}
+	if !creatorID.Valid {
+		eligible = false
+		invalidReason = sql.NullString{String: "creator_unknown", Valid: true}
+	} else if creatorID.UUID == session.UserID {
+		eligible = false
+		invalidReason = sql.NullString{String: "creator_self_study", Valid: true}
+	} else if session.TotalCards < 1 || summary.ReviewedCards < 1 {
+		eligible = false
+		invalidReason = sql.NullString{String: "too_few_cards", Valid: true}
+	} else if summary.TotalActiveMs < int64(summary.ReviewedCards)*100 {
+		eligible = false
+		invalidReason = sql.NullString{String: "too_fast", Valid: true}
+	}
+
+	weightedScore := float64(summary.ReviewedCards)
+	if summary.TotalActiveMs > 0 {
+		weightedScore *= 1.5
+	}
+	_, err = s.revshareRepo.UpsertStudySessionMetrics(ctx, db.UpsertStudySessionMetricsParams{
+		SessionID:          session.SessionID,
+		UserID:             session.UserID,
+		DeckID:             session.DeckID,
+		CreatorID:          creatorID,
+		CardViews:          session.TotalCards,
+		ReviewedCards:      summary.ReviewedCards,
+		TotalActiveMs:      summary.TotalActiveMs,
+		WeightedScore:      fmt.Sprintf("%.4f", weightedScore),
+		IsRevshareEligible: eligible,
+		InvalidReason:      invalidReason,
+	})
+	return err
+}
+
+func (s *studyService) CalculateMonthlyRevShare(ctx context.Context, poolMonth time.Time, grossAmountVND int64, poolRate float64, minLearners int32, creatorCapRate float64) (db.MonthlyRevenuePool, []db.CreatorEarning, error) {
+	if s.revshareRepo == nil {
+		return db.MonthlyRevenuePool{}, nil, domain.ErrForbidden
+	}
+	if poolRate <= 0 || poolRate > 1 {
+		poolRate = 0.5
+	}
+	if creatorCapRate <= 0 || creatorCapRate > 1 {
+		creatorCapRate = 0.2
+	}
+	if minLearners <= 0 {
+		minLearners = 1
+	}
+	monthStart := time.Date(poolMonth.Year(), poolMonth.Month(), 1, 0, 0, 0, 0, time.UTC)
+	monthEnd := monthStart.AddDate(0, 1, 0)
+	creatorPool := int64(float64(grossAmountVND) * poolRate)
+	pool, err := s.revshareRepo.UpsertMonthlyRevenuePool(ctx, db.UpsertMonthlyRevenuePoolParams{
+		PoolMonth:            monthStart,
+		GrossAmountVnd:       grossAmountVND,
+		CreatorPoolAmountVnd: creatorPool,
+	})
+	if err != nil {
+		return db.MonthlyRevenuePool{}, nil, err
+	}
+	if err := s.revshareRepo.DeleteCreatorEarningsForMonth(ctx, monthStart); err != nil {
+		return db.MonthlyRevenuePool{}, nil, err
+	}
+	earnings, err := s.revshareRepo.InsertCreatorEarningsForMonth(ctx, db.InsertCreatorEarningsForMonthParams{
+		MonthStart:           monthStart,
+		MonthEnd:             monthEnd,
+		MinLearners:          minLearners,
+		PoolMonth:            monthStart,
+		CreatorPoolAmountVnd: fmt.Sprintf("%d", creatorPool),
+		CreatorCapAmountVnd:  int64(float64(creatorPool) * creatorCapRate),
+	})
+	if err != nil {
+		return db.MonthlyRevenuePool{}, nil, err
+	}
+	pool, err = s.revshareRepo.FinalizeRevenuePool(ctx, monthStart)
+	if err != nil {
+		return db.MonthlyRevenuePool{}, nil, err
+	}
+	if s.billingClient != nil {
+		if err := s.billingClient.SyncRevenuePool(ctx, pool, earnings); err != nil {
+			return db.MonthlyRevenuePool{}, nil, err
+		}
+	}
+	return pool, earnings, nil
 }
 
 func (s *studyService) GetDueCards(ctx context.Context, userID uuid.UUID, deckID *uuid.UUID) ([]db.UserCard, error) {
@@ -563,4 +712,15 @@ func (s *studyService) GetDeckProgress(ctx context.Context, userID, deckID uuid.
 		{Label: "memorized", Count: progress.MemorizedCount, CardIDs: memorizedIDs},
 	}
 	return progress, nil
+}
+
+func privilegedRole(role string) bool {
+	return role == "admin" || role == "moderator"
+}
+
+func firstString(values []string) string {
+	if len(values) == 0 {
+		return ""
+	}
+	return values[0]
 }

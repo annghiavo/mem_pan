@@ -16,4 +16,5 @@ message VerifyTokenResponse {
     string role      = 3;
     string token_id  = 4;
     google.protobuf.Timestamp expired_at = 5;
+    bool is_plus     = 6;
 }

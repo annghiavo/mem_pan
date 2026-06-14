@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log"
+	"math"
 
 	"github.com/google/uuid"
 
@@ -36,8 +37,8 @@ type UpdateCardParams struct {
 type CardService interface {
 	CreateCard(ctx context.Context, p CreateCardParams) (db.GetCardByIDRow, error)
 	BulkCreateCards(ctx context.Context, userID, deckID uuid.UUID, items []CreateCardParams) ([]db.GetCardByIDRow, error)
-	GetCard(ctx context.Context, cardID, userID uuid.UUID) (db.GetCardByIDRow, error)
-	ListCardsByDeck(ctx context.Context, deckID, userID uuid.UUID) ([]db.ListCardsByDeckRow, error)
+	GetCard(ctx context.Context, cardID, userID uuid.UUID, isPlus bool, role ...string) (db.GetCardByIDRow, error)
+	ListCardsByDeck(ctx context.Context, deckID, userID uuid.UUID, isPlus bool, role ...string) ([]db.ListCardsByDeckRow, error)
 	UpdateCard(ctx context.Context, p UpdateCardParams) (db.GetCardByIDRow, error)
 	DeleteCard(ctx context.Context, cardID, userID uuid.UUID) error
 	// ReorderCards updates the position of each card in the provided ordered list.
@@ -56,11 +57,14 @@ func NewCardService(
 	cardRepo repository.CardRepository,
 	noteRepo repository.NoteRepository,
 	deckRepo repository.DeckRepository,
-	pubs ...publisher.EventPublisher,
+	opts ...interface{},
 ) CardService {
 	var pub publisher.EventPublisher = publisher.NewNoopPublisher()
-	if len(pubs) > 0 {
-		pub = pubs[0]
+	for _, opt := range opts {
+		switch v := opt.(type) {
+		case publisher.EventPublisher:
+			pub = v
+		}
 	}
 	return &cardService{
 		cardRepo: cardRepo,
@@ -218,7 +222,7 @@ func (s *cardService) BulkCreateCards(ctx context.Context, userID, deckID uuid.U
 	return results, nil
 }
 
-func (s *cardService) GetCard(ctx context.Context, cardID, userID uuid.UUID) (db.GetCardByIDRow, error) {
+func (s *cardService) GetCard(ctx context.Context, cardID, userID uuid.UUID, isPlus bool, role ...string) (db.GetCardByIDRow, error) {
 	card, err := s.cardRepo.GetCardByID(ctx, cardID)
 	if err != nil {
 		return db.GetCardByIDRow{}, err
@@ -227,19 +231,34 @@ func (s *cardService) GetCard(ctx context.Context, cardID, userID uuid.UUID) (db
 	if err != nil {
 		return db.GetCardByIDRow{}, err
 	}
-	if deck.UserID != userID && !deck.IsPublic {
-		return db.GetCardByIDRow{}, domain.ErrForbidden
+	if err := requireFullDeckAccess(ctx, deck, userID, firstRole(role), isPlus); err != nil {
+		return db.GetCardByIDRow{}, err
 	}
 	return card, nil
 }
 
-func (s *cardService) ListCardsByDeck(ctx context.Context, deckID, userID uuid.UUID) ([]db.ListCardsByDeckRow, error) {
+func (s *cardService) ListCardsByDeck(ctx context.Context, deckID, userID uuid.UUID, isPlus bool, role ...string) ([]db.ListCardsByDeckRow, error) {
 	deck, err := s.deckRepo.GetDeckByID(ctx, deckID)
 	if err != nil {
 		return nil, err
 	}
-	if deck.UserID != userID && !deck.IsPublic {
-		return nil, domain.ErrForbidden
+	if canPreviewDeckCards(deck, userID, firstRole(role), isPlus) {
+		cards, err := s.cardRepo.ListCardsByDeck(ctx, deckID)
+		if err != nil {
+			return nil, err
+		}
+		totalCards := int(deck.CardCount)
+		if totalCards < len(cards) {
+			totalCards = len(cards)
+		}
+		previewLimit := plusPreviewCardLimit(totalCards)
+		if previewLimit < len(cards) {
+			return cards[:previewLimit], nil
+		}
+		return cards, nil
+	}
+	if err := requireFullDeckAccess(ctx, deck, userID, firstRole(role), isPlus); err != nil {
+		return nil, err
 	}
 	return s.cardRepo.ListCardsByDeck(ctx, deckID)
 }
@@ -340,4 +359,31 @@ func (s *cardService) ReorderCards(ctx context.Context, deckID, userID uuid.UUID
 		}
 	}
 	return nil
+}
+
+func canPreviewDeckCards(deck db.Deck, userID uuid.UUID, role string, isPlus bool) bool {
+	if deck.Status != "" && deck.Status != string(db.ContentStatusActive) && deck.Status != string(db.ContentStatusHidden) {
+		return false
+	}
+	if deck.UserID == userID || privilegedRole(role) || isPlus {
+		return false
+	}
+	if !deck.IsPublic || deck.AccessLevel != db.DeckAccessLevelPlus || deck.PlusStatus != db.DeckPlusStatusApproved {
+		return false
+	}
+	return true
+}
+
+func plusPreviewCardLimit(totalCards int) int {
+	if totalCards <= 0 {
+		return 0
+	}
+	limit := int(math.Ceil(float64(totalCards) * 0.1))
+	if limit < 10 {
+		limit = 10
+	}
+	if limit > totalCards {
+		limit = totalCards
+	}
+	return limit
 }

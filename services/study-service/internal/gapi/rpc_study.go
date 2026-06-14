@@ -36,6 +36,8 @@ func (s *Server) StartSession(ctx context.Context, req *pb.StartSessionRequest) 
 		NewCardsLimit: req.NewCardsLimit,
 		ReviewLimit:   req.ReviewLimit,
 		AccessToken:   token,
+		Role:          payload.Role,
+		IsPlus:        payload.IsPlus,
 	})
 	if err != nil {
 		return nil, toGRPCError(err)
@@ -98,13 +100,14 @@ func (s *Server) FinishSession(ctx context.Context, req *pb.FinishSessionRequest
 	if err != nil {
 		return nil, err
 	}
+	token, _ := extractBearerToken(ctx)
 
 	sessionID, err := uuid.Parse(req.SessionId)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid session_id")
 	}
 
-	result, err := s.studySvc.FinishSession(ctx, sessionID, payload.UserID)
+	result, err := s.studySvc.FinishSession(ctx, sessionID, payload.UserID, token)
 	if err != nil {
 		return nil, toGRPCError(err)
 	}

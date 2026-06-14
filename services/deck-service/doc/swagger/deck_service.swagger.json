@@ -128,6 +128,119 @@
         ]
       }
     },
+    "/v1/creators/me": {
+      "put": {
+        "summary": "Upsert creator profile",
+        "operationId": "DeckService_UpsertCreatorProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUpsertCreatorProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbUpsertCreatorProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "creators"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/creators/{creatorId}/follow": {
+      "post": {
+        "summary": "Follow creator",
+        "operationId": "DeckService_FollowCreator",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbFollowCreatorResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeckServiceFollowCreatorBody"
+            }
+          }
+        ],
+        "tags": [
+          "creators"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/creators/{userId}": {
+      "get": {
+        "summary": "Get creator profile",
+        "operationId": "DeckService_GetCreatorProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbGetCreatorProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "creators"
+        ]
+      }
+    },
     "/v1/decks": {
       "get": {
         "summary": "List my decks",
@@ -243,6 +356,12 @@
           },
           {
             "name": "userId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accessLevel",
             "in": "query",
             "required": false,
             "type": "string"
@@ -393,6 +512,50 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/DeckServiceUpdateDeckBody"
+            }
+          }
+        ],
+        "tags": [
+          "decks"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/decks/{deckId}/access": {
+      "patch": {
+        "summary": "Update deck access level",
+        "operationId": "DeckService_UpdateDeckAccessLevel",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUpdateDeckAccessLevelResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeckServiceUpdateDeckAccessLevelBody"
             }
           }
         ],
@@ -613,6 +776,95 @@
           {
             "BearerAuth": []
           }
+        ]
+      }
+    },
+    "/v1/decks/{deckId}/review": {
+      "put": {
+        "summary": "Create or update deck review",
+        "operationId": "DeckService_UpsertDeckReview",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbUpsertDeckReviewResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeckServiceUpsertDeckReviewBody"
+            }
+          }
+        ],
+        "tags": [
+          "reviews"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/v1/decks/{deckId}/reviews": {
+      "get": {
+        "summary": "List deck reviews",
+        "operationId": "DeckService_ListDeckReviews",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbListDeckReviewsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deckId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "reviews"
         ]
       }
     },
@@ -1177,6 +1429,9 @@
         }
       }
     },
+    "DeckServiceFollowCreatorBody": {
+      "type": "object"
+    },
     "DeckServiceReportDeckBody": {
       "type": "object",
       "properties": {
@@ -1205,6 +1460,14 @@
           "type": "string"
         },
         "langBack": {
+          "type": "string"
+        }
+      }
+    },
+    "DeckServiceUpdateDeckAccessLevelBody": {
+      "type": "object",
+      "properties": {
+        "accessLevel": {
           "type": "string"
         }
       }
@@ -1255,77 +1518,23 @@
         }
       }
     },
+    "DeckServiceUpsertDeckReviewBody": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
     "pbAddDeckToFolderResponse": {
       "type": "object",
       "properties": {
         "success": {
           "type": "boolean"
-        }
-      }
-    },
-    "pbAdminDeckRecord": {
-      "type": "object",
-      "properties": {
-        "deckId": {
-          "type": "string"
-        },
-        "userId": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "isPublic": {
-          "type": "boolean"
-        },
-        "status": {
-          "type": "string"
-        },
-        "cardCount": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "createdAt": {
-          "type": "string"
-        },
-        "updatedAt": {
-          "type": "string"
-        }
-      }
-    },
-    "pbAdminListDecksResponse": {
-      "type": "object",
-      "properties": {
-        "decks": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/pbAdminDeckRecord"
-          }
-        },
-        "total": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
-    "pbAdminUpdateDeckStatusResponse": {
-      "type": "object",
-      "properties": {
-        "deckId": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string"
-        },
-        "userId": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
         }
       }
     },
@@ -1465,6 +1674,48 @@
         }
       }
     },
+    "pbCreatorProfile": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "bio": {
+          "type": "string"
+        },
+        "tier": {
+          "type": "string"
+        },
+        "followerCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "bankName": {
+          "type": "string"
+        },
+        "bankAccountNumber": {
+          "type": "string"
+        },
+        "bankAccountName": {
+          "type": "string"
+        },
+        "bankVerifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
     "pbDeck": {
       "type": "object",
       "properties": {
@@ -1494,6 +1745,60 @@
           "format": "int32"
         },
         "clonedFrom": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "accessLevel": {
+          "type": "string"
+        },
+        "plusStatus": {
+          "type": "string"
+        },
+        "plusSubmittedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "plusApprovedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "avgRating": {
+          "type": "number",
+          "format": "double"
+        },
+        "totalReviews": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "pbDeckReview": {
+      "type": "object",
+      "properties": {
+        "reviewId": {
+          "type": "string"
+        },
+        "deckId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "status": {
           "type": "string"
         },
         "createdAt": {
@@ -1610,11 +1915,27 @@
         }
       }
     },
+    "pbFollowCreatorResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
     "pbGetCardResponse": {
       "type": "object",
       "properties": {
         "card": {
           "$ref": "#/definitions/pbCard"
+        }
+      }
+    },
+    "pbGetCreatorProfileResponse": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/definitions/pbCreatorProfile"
         }
       }
     },
@@ -1661,6 +1982,18 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/pbCard"
+          }
+        }
+      }
+    },
+    "pbListDeckReviewsResponse": {
+      "type": "object",
+      "properties": {
+        "reviews": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/pbDeckReview"
           }
         }
       }
@@ -1814,6 +2147,14 @@
         }
       }
     },
+    "pbUpdateDeckAccessLevelResponse": {
+      "type": "object",
+      "properties": {
+        "deck": {
+          "$ref": "#/definitions/pbDeck"
+        }
+      }
+    },
     "pbUpdateDeckResponse": {
       "type": "object",
       "properties": {
@@ -1851,6 +2192,45 @@
       "properties": {
         "folder": {
           "$ref": "#/definitions/pbFolder"
+        }
+      }
+    },
+    "pbUpsertCreatorProfileRequest": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "bio": {
+          "type": "string"
+        },
+        "bankName": {
+          "type": "string"
+        },
+        "bankAccountNumber": {
+          "type": "string"
+        },
+        "bankAccountName": {
+          "type": "string"
+        }
+      }
+    },
+    "pbUpsertCreatorProfileResponse": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/definitions/pbCreatorProfile"
+        }
+      }
+    },
+    "pbUpsertDeckReviewResponse": {
+      "type": "object",
+      "properties": {
+        "review": {
+          "$ref": "#/definitions/pbDeckReview"
+        },
+        "deck": {
+          "$ref": "#/definitions/pbDeck"
         }
       }
     },

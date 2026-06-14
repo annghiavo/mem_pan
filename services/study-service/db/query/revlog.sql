@@ -30,3 +30,10 @@ SELECT card_id, rating, elapsed_days, review_time
 FROM revlogs
 WHERE user_id = $1
 ORDER BY review_time ASC;
+
+-- name: SummarizeRevlogsBySession :one
+SELECT
+    COUNT(*)::integer AS reviewed_cards,
+    COALESCE(SUM(duration_ms), 0)::bigint AS total_active_ms
+FROM revlogs
+WHERE session_id = $1;

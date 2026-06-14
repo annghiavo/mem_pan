@@ -234,6 +234,7 @@ type ListPublicDecksRequest struct {
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	AccessLevel   string                 `protobuf:"bytes,4,opt,name=access_level,json=accessLevel,proto3" json:"access_level,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -285,6 +286,13 @@ func (x *ListPublicDecksRequest) GetPageSize() int32 {
 func (x *ListPublicDecksRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
+	}
+	return ""
+}
+
+func (x *ListPublicDecksRequest) GetAccessLevel() string {
+	if x != nil {
+		return x.AccessLevel
 	}
 	return ""
 }
@@ -987,6 +995,102 @@ func (x *UpdateDeckVisibilityResponse) GetDeck() *Deck {
 	return nil
 }
 
+type UpdateDeckAccessLevelRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
+	AccessLevel   string                 `protobuf:"bytes,2,opt,name=access_level,json=accessLevel,proto3" json:"access_level,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateDeckAccessLevelRequest) Reset() {
+	*x = UpdateDeckAccessLevelRequest{}
+	mi := &file_rpc_deck_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDeckAccessLevelRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDeckAccessLevelRequest) ProtoMessage() {}
+
+func (x *UpdateDeckAccessLevelRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDeckAccessLevelRequest.ProtoReflect.Descriptor instead.
+func (*UpdateDeckAccessLevelRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *UpdateDeckAccessLevelRequest) GetDeckId() string {
+	if x != nil {
+		return x.DeckId
+	}
+	return ""
+}
+
+func (x *UpdateDeckAccessLevelRequest) GetAccessLevel() string {
+	if x != nil {
+		return x.AccessLevel
+	}
+	return ""
+}
+
+type UpdateDeckAccessLevelResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Deck          *Deck                  `protobuf:"bytes,1,opt,name=deck,proto3" json:"deck,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateDeckAccessLevelResponse) Reset() {
+	*x = UpdateDeckAccessLevelResponse{}
+	mi := &file_rpc_deck_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDeckAccessLevelResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDeckAccessLevelResponse) ProtoMessage() {}
+
+func (x *UpdateDeckAccessLevelResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDeckAccessLevelResponse.ProtoReflect.Descriptor instead.
+func (*UpdateDeckAccessLevelResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *UpdateDeckAccessLevelResponse) GetDeck() *Deck {
+	if x != nil {
+		return x.Deck
+	}
+	return nil
+}
+
 type CloneDeckRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
@@ -996,7 +1100,7 @@ type CloneDeckRequest struct {
 
 func (x *CloneDeckRequest) Reset() {
 	*x = CloneDeckRequest{}
-	mi := &file_rpc_deck_proto_msgTypes[19]
+	mi := &file_rpc_deck_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1008,7 +1112,7 @@ func (x *CloneDeckRequest) String() string {
 func (*CloneDeckRequest) ProtoMessage() {}
 
 func (x *CloneDeckRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[19]
+	mi := &file_rpc_deck_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1021,7 +1125,7 @@ func (x *CloneDeckRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloneDeckRequest.ProtoReflect.Descriptor instead.
 func (*CloneDeckRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{19}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *CloneDeckRequest) GetDeckId() string {
@@ -1040,7 +1144,7 @@ type CloneDeckResponse struct {
 
 func (x *CloneDeckResponse) Reset() {
 	*x = CloneDeckResponse{}
-	mi := &file_rpc_deck_proto_msgTypes[20]
+	mi := &file_rpc_deck_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1052,7 +1156,7 @@ func (x *CloneDeckResponse) String() string {
 func (*CloneDeckResponse) ProtoMessage() {}
 
 func (x *CloneDeckResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[20]
+	mi := &file_rpc_deck_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1065,7 +1169,7 @@ func (x *CloneDeckResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloneDeckResponse.ProtoReflect.Descriptor instead.
 func (*CloneDeckResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{20}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CloneDeckResponse) GetDeck() *Deck {
@@ -1084,7 +1188,7 @@ type GetDeckStatsRequest struct {
 
 func (x *GetDeckStatsRequest) Reset() {
 	*x = GetDeckStatsRequest{}
-	mi := &file_rpc_deck_proto_msgTypes[21]
+	mi := &file_rpc_deck_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1096,7 +1200,7 @@ func (x *GetDeckStatsRequest) String() string {
 func (*GetDeckStatsRequest) ProtoMessage() {}
 
 func (x *GetDeckStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[21]
+	mi := &file_rpc_deck_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1109,7 +1213,7 @@ func (x *GetDeckStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDeckStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetDeckStatsRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{21}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *GetDeckStatsRequest) GetDeckId() string {
@@ -1128,7 +1232,7 @@ type GetDeckStatsResponse struct {
 
 func (x *GetDeckStatsResponse) Reset() {
 	*x = GetDeckStatsResponse{}
-	mi := &file_rpc_deck_proto_msgTypes[22]
+	mi := &file_rpc_deck_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1140,7 +1244,7 @@ func (x *GetDeckStatsResponse) String() string {
 func (*GetDeckStatsResponse) ProtoMessage() {}
 
 func (x *GetDeckStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[22]
+	mi := &file_rpc_deck_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1153,7 +1257,7 @@ func (x *GetDeckStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDeckStatsResponse.ProtoReflect.Descriptor instead.
 func (*GetDeckStatsResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{22}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetDeckStatsResponse) GetStats() *DeckStats {
@@ -1172,7 +1276,7 @@ type ListDeckCardsRequest struct {
 
 func (x *ListDeckCardsRequest) Reset() {
 	*x = ListDeckCardsRequest{}
-	mi := &file_rpc_deck_proto_msgTypes[23]
+	mi := &file_rpc_deck_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1184,7 +1288,7 @@ func (x *ListDeckCardsRequest) String() string {
 func (*ListDeckCardsRequest) ProtoMessage() {}
 
 func (x *ListDeckCardsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[23]
+	mi := &file_rpc_deck_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1197,7 +1301,7 @@ func (x *ListDeckCardsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDeckCardsRequest.ProtoReflect.Descriptor instead.
 func (*ListDeckCardsRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{23}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListDeckCardsRequest) GetDeckId() string {
@@ -1216,7 +1320,7 @@ type ListDeckCardsResponse struct {
 
 func (x *ListDeckCardsResponse) Reset() {
 	*x = ListDeckCardsResponse{}
-	mi := &file_rpc_deck_proto_msgTypes[24]
+	mi := &file_rpc_deck_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1228,7 +1332,7 @@ func (x *ListDeckCardsResponse) String() string {
 func (*ListDeckCardsResponse) ProtoMessage() {}
 
 func (x *ListDeckCardsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[24]
+	mi := &file_rpc_deck_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1241,7 +1345,7 @@ func (x *ListDeckCardsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDeckCardsResponse.ProtoReflect.Descriptor instead.
 func (*ListDeckCardsResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{24}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ListDeckCardsResponse) GetCards() []*Card {
@@ -1266,7 +1370,7 @@ type CreateCardRequest struct {
 
 func (x *CreateCardRequest) Reset() {
 	*x = CreateCardRequest{}
-	mi := &file_rpc_deck_proto_msgTypes[25]
+	mi := &file_rpc_deck_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1278,7 +1382,7 @@ func (x *CreateCardRequest) String() string {
 func (*CreateCardRequest) ProtoMessage() {}
 
 func (x *CreateCardRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[25]
+	mi := &file_rpc_deck_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1291,7 +1395,7 @@ func (x *CreateCardRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCardRequest.ProtoReflect.Descriptor instead.
 func (*CreateCardRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{25}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *CreateCardRequest) GetDeckId() string {
@@ -1352,7 +1456,7 @@ type CreateCardResponse struct {
 
 func (x *CreateCardResponse) Reset() {
 	*x = CreateCardResponse{}
-	mi := &file_rpc_deck_proto_msgTypes[26]
+	mi := &file_rpc_deck_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1364,7 +1468,7 @@ func (x *CreateCardResponse) String() string {
 func (*CreateCardResponse) ProtoMessage() {}
 
 func (x *CreateCardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[26]
+	mi := &file_rpc_deck_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1377,7 +1481,7 @@ func (x *CreateCardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCardResponse.ProtoReflect.Descriptor instead.
 func (*CreateCardResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{26}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *CreateCardResponse) GetCard() *Card {
@@ -1400,7 +1504,7 @@ type BulkCardItem struct {
 
 func (x *BulkCardItem) Reset() {
 	*x = BulkCardItem{}
-	mi := &file_rpc_deck_proto_msgTypes[27]
+	mi := &file_rpc_deck_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1412,7 +1516,7 @@ func (x *BulkCardItem) String() string {
 func (*BulkCardItem) ProtoMessage() {}
 
 func (x *BulkCardItem) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[27]
+	mi := &file_rpc_deck_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1425,7 +1529,7 @@ func (x *BulkCardItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BulkCardItem.ProtoReflect.Descriptor instead.
 func (*BulkCardItem) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{27}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *BulkCardItem) GetContentFront() string {
@@ -1473,7 +1577,7 @@ type BulkCreateCardsRequest struct {
 
 func (x *BulkCreateCardsRequest) Reset() {
 	*x = BulkCreateCardsRequest{}
-	mi := &file_rpc_deck_proto_msgTypes[28]
+	mi := &file_rpc_deck_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1485,7 +1589,7 @@ func (x *BulkCreateCardsRequest) String() string {
 func (*BulkCreateCardsRequest) ProtoMessage() {}
 
 func (x *BulkCreateCardsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[28]
+	mi := &file_rpc_deck_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1498,7 +1602,7 @@ func (x *BulkCreateCardsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BulkCreateCardsRequest.ProtoReflect.Descriptor instead.
 func (*BulkCreateCardsRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{28}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *BulkCreateCardsRequest) GetDeckId() string {
@@ -1525,7 +1629,7 @@ type BulkCreateCardsResponse struct {
 
 func (x *BulkCreateCardsResponse) Reset() {
 	*x = BulkCreateCardsResponse{}
-	mi := &file_rpc_deck_proto_msgTypes[29]
+	mi := &file_rpc_deck_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1537,7 +1641,7 @@ func (x *BulkCreateCardsResponse) String() string {
 func (*BulkCreateCardsResponse) ProtoMessage() {}
 
 func (x *BulkCreateCardsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_deck_proto_msgTypes[29]
+	mi := &file_rpc_deck_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1550,7 +1654,7 @@ func (x *BulkCreateCardsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BulkCreateCardsResponse.ProtoReflect.Descriptor instead.
 func (*BulkCreateCardsResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_deck_proto_rawDescGZIP(), []int{29}
+	return file_rpc_deck_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *BulkCreateCardsResponse) GetCards() []*Card {
@@ -1565,6 +1669,518 @@ func (x *BulkCreateCardsResponse) GetCreated() int32 {
 		return x.Created
 	}
 	return 0
+}
+
+type UpsertCreatorProfileRequest struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	DisplayName       string                 `protobuf:"bytes,1,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Bio               string                 `protobuf:"bytes,2,opt,name=bio,proto3" json:"bio,omitempty"`
+	BankName          string                 `protobuf:"bytes,3,opt,name=bank_name,json=bankName,proto3" json:"bank_name,omitempty"`
+	BankAccountNumber string                 `protobuf:"bytes,4,opt,name=bank_account_number,json=bankAccountNumber,proto3" json:"bank_account_number,omitempty"`
+	BankAccountName   string                 `protobuf:"bytes,5,opt,name=bank_account_name,json=bankAccountName,proto3" json:"bank_account_name,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *UpsertCreatorProfileRequest) Reset() {
+	*x = UpsertCreatorProfileRequest{}
+	mi := &file_rpc_deck_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertCreatorProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertCreatorProfileRequest) ProtoMessage() {}
+
+func (x *UpsertCreatorProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertCreatorProfileRequest.ProtoReflect.Descriptor instead.
+func (*UpsertCreatorProfileRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *UpsertCreatorProfileRequest) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *UpsertCreatorProfileRequest) GetBio() string {
+	if x != nil {
+		return x.Bio
+	}
+	return ""
+}
+
+func (x *UpsertCreatorProfileRequest) GetBankName() string {
+	if x != nil {
+		return x.BankName
+	}
+	return ""
+}
+
+func (x *UpsertCreatorProfileRequest) GetBankAccountNumber() string {
+	if x != nil {
+		return x.BankAccountNumber
+	}
+	return ""
+}
+
+func (x *UpsertCreatorProfileRequest) GetBankAccountName() string {
+	if x != nil {
+		return x.BankAccountName
+	}
+	return ""
+}
+
+type UpsertCreatorProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *CreatorProfile        `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpsertCreatorProfileResponse) Reset() {
+	*x = UpsertCreatorProfileResponse{}
+	mi := &file_rpc_deck_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertCreatorProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertCreatorProfileResponse) ProtoMessage() {}
+
+func (x *UpsertCreatorProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertCreatorProfileResponse.ProtoReflect.Descriptor instead.
+func (*UpsertCreatorProfileResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *UpsertCreatorProfileResponse) GetProfile() *CreatorProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type GetCreatorProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCreatorProfileRequest) Reset() {
+	*x = GetCreatorProfileRequest{}
+	mi := &file_rpc_deck_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCreatorProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCreatorProfileRequest) ProtoMessage() {}
+
+func (x *GetCreatorProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCreatorProfileRequest.ProtoReflect.Descriptor instead.
+func (*GetCreatorProfileRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *GetCreatorProfileRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type GetCreatorProfileResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profile       *CreatorProfile        `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCreatorProfileResponse) Reset() {
+	*x = GetCreatorProfileResponse{}
+	mi := &file_rpc_deck_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCreatorProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCreatorProfileResponse) ProtoMessage() {}
+
+func (x *GetCreatorProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCreatorProfileResponse.ProtoReflect.Descriptor instead.
+func (*GetCreatorProfileResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *GetCreatorProfileResponse) GetProfile() *CreatorProfile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type FollowCreatorRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CreatorId     string                 `protobuf:"bytes,1,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FollowCreatorRequest) Reset() {
+	*x = FollowCreatorRequest{}
+	mi := &file_rpc_deck_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FollowCreatorRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FollowCreatorRequest) ProtoMessage() {}
+
+func (x *FollowCreatorRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FollowCreatorRequest.ProtoReflect.Descriptor instead.
+func (*FollowCreatorRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *FollowCreatorRequest) GetCreatorId() string {
+	if x != nil {
+		return x.CreatorId
+	}
+	return ""
+}
+
+type FollowCreatorResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FollowCreatorResponse) Reset() {
+	*x = FollowCreatorResponse{}
+	mi := &file_rpc_deck_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FollowCreatorResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FollowCreatorResponse) ProtoMessage() {}
+
+func (x *FollowCreatorResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FollowCreatorResponse.ProtoReflect.Descriptor instead.
+func (*FollowCreatorResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *FollowCreatorResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type UpsertDeckReviewRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
+	Rating        int32                  `protobuf:"varint,2,opt,name=rating,proto3" json:"rating,omitempty"`
+	Comment       string                 `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpsertDeckReviewRequest) Reset() {
+	*x = UpsertDeckReviewRequest{}
+	mi := &file_rpc_deck_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertDeckReviewRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertDeckReviewRequest) ProtoMessage() {}
+
+func (x *UpsertDeckReviewRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertDeckReviewRequest.ProtoReflect.Descriptor instead.
+func (*UpsertDeckReviewRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *UpsertDeckReviewRequest) GetDeckId() string {
+	if x != nil {
+		return x.DeckId
+	}
+	return ""
+}
+
+func (x *UpsertDeckReviewRequest) GetRating() int32 {
+	if x != nil {
+		return x.Rating
+	}
+	return 0
+}
+
+func (x *UpsertDeckReviewRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+type UpsertDeckReviewResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Review        *DeckReview            `protobuf:"bytes,1,opt,name=review,proto3" json:"review,omitempty"`
+	Deck          *Deck                  `protobuf:"bytes,2,opt,name=deck,proto3" json:"deck,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpsertDeckReviewResponse) Reset() {
+	*x = UpsertDeckReviewResponse{}
+	mi := &file_rpc_deck_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertDeckReviewResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertDeckReviewResponse) ProtoMessage() {}
+
+func (x *UpsertDeckReviewResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertDeckReviewResponse.ProtoReflect.Descriptor instead.
+func (*UpsertDeckReviewResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *UpsertDeckReviewResponse) GetReview() *DeckReview {
+	if x != nil {
+		return x.Review
+	}
+	return nil
+}
+
+func (x *UpsertDeckReviewResponse) GetDeck() *Deck {
+	if x != nil {
+		return x.Deck
+	}
+	return nil
+}
+
+type ListDeckReviewsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeckId        string                 `protobuf:"bytes,1,opt,name=deck_id,json=deckId,proto3" json:"deck_id,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDeckReviewsRequest) Reset() {
+	*x = ListDeckReviewsRequest{}
+	mi := &file_rpc_deck_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDeckReviewsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDeckReviewsRequest) ProtoMessage() {}
+
+func (x *ListDeckReviewsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDeckReviewsRequest.ProtoReflect.Descriptor instead.
+func (*ListDeckReviewsRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *ListDeckReviewsRequest) GetDeckId() string {
+	if x != nil {
+		return x.DeckId
+	}
+	return ""
+}
+
+func (x *ListDeckReviewsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListDeckReviewsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ListDeckReviewsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Reviews       []*DeckReview          `protobuf:"bytes,1,rep,name=reviews,proto3" json:"reviews,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDeckReviewsResponse) Reset() {
+	*x = ListDeckReviewsResponse{}
+	mi := &file_rpc_deck_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDeckReviewsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDeckReviewsResponse) ProtoMessage() {}
+
+func (x *ListDeckReviewsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_deck_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDeckReviewsResponse.ProtoReflect.Descriptor instead.
+func (*ListDeckReviewsResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_deck_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *ListDeckReviewsResponse) GetReviews() []*DeckReview {
+	if x != nil {
+		return x.Reviews
+	}
+	return nil
 }
 
 var File_rpc_deck_proto protoreflect.FileDescriptor
@@ -1583,11 +2199,12 @@ const file_rpc_deck_proto_rawDesc = "" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1b\n" +
 	"\tis_public\x18\x03 \x01(\bR\bisPublic\"2\n" +
 	"\x12CreateDeckResponse\x12\x1c\n" +
-	"\x04deck\x18\x01 \x01(\v2\b.pb.DeckR\x04deck\"b\n" +
+	"\x04deck\x18\x01 \x01(\v2\b.pb.DeckR\x04deck\"\x85\x01\n" +
 	"\x16ListPublicDecksRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x17\n" +
-	"\auser_id\x18\x03 \x01(\tR\x06userId\"O\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12!\n" +
+	"\faccess_level\x18\x04 \x01(\tR\vaccessLevel\"O\n" +
 	"\x17ListPublicDecksResponse\x12\x1e\n" +
 	"\x05decks\x18\x01 \x03(\v2\b.pb.DeckR\x05decks\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\"R\n" +
@@ -1626,6 +2243,11 @@ const file_rpc_deck_proto_rawDesc = "" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x1b\n" +
 	"\tis_public\x18\x02 \x01(\bR\bisPublic\"<\n" +
 	"\x1cUpdateDeckVisibilityResponse\x12\x1c\n" +
+	"\x04deck\x18\x01 \x01(\v2\b.pb.DeckR\x04deck\"Z\n" +
+	"\x1cUpdateDeckAccessLevelRequest\x12\x17\n" +
+	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12!\n" +
+	"\faccess_level\x18\x02 \x01(\tR\vaccessLevel\"=\n" +
+	"\x1dUpdateDeckAccessLevelResponse\x12\x1c\n" +
 	"\x04deck\x18\x01 \x01(\v2\b.pb.DeckR\x04deck\"+\n" +
 	"\x10CloneDeckRequest\x12\x17\n" +
 	"\adeck_id\x18\x01 \x01(\tR\x06deckId\"1\n" +
@@ -1662,7 +2284,37 @@ const file_rpc_deck_proto_rawDesc = "" +
 	"\x05cards\x18\x02 \x03(\v2\x10.pb.BulkCardItemR\x05cards\"S\n" +
 	"\x17BulkCreateCardsResponse\x12\x1e\n" +
 	"\x05cards\x18\x01 \x03(\v2\b.pb.CardR\x05cards\x12\x18\n" +
-	"\acreated\x18\x02 \x01(\x05R\acreatedB\"Z mem_pan/services/deck-service/pbb\x06proto3"
+	"\acreated\x18\x02 \x01(\x05R\acreated\"\xcb\x01\n" +
+	"\x1bUpsertCreatorProfileRequest\x12!\n" +
+	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName\x12\x10\n" +
+	"\x03bio\x18\x02 \x01(\tR\x03bio\x12\x1b\n" +
+	"\tbank_name\x18\x03 \x01(\tR\bbankName\x12.\n" +
+	"\x13bank_account_number\x18\x04 \x01(\tR\x11bankAccountNumber\x12*\n" +
+	"\x11bank_account_name\x18\x05 \x01(\tR\x0fbankAccountName\"L\n" +
+	"\x1cUpsertCreatorProfileResponse\x12,\n" +
+	"\aprofile\x18\x01 \x01(\v2\x12.pb.CreatorProfileR\aprofile\"3\n" +
+	"\x18GetCreatorProfileRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"I\n" +
+	"\x19GetCreatorProfileResponse\x12,\n" +
+	"\aprofile\x18\x01 \x01(\v2\x12.pb.CreatorProfileR\aprofile\"5\n" +
+	"\x14FollowCreatorRequest\x12\x1d\n" +
+	"\n" +
+	"creator_id\x18\x01 \x01(\tR\tcreatorId\"1\n" +
+	"\x15FollowCreatorResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"d\n" +
+	"\x17UpsertDeckReviewRequest\x12\x17\n" +
+	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x16\n" +
+	"\x06rating\x18\x02 \x01(\x05R\x06rating\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\"`\n" +
+	"\x18UpsertDeckReviewResponse\x12&\n" +
+	"\x06review\x18\x01 \x01(\v2\x0e.pb.DeckReviewR\x06review\x12\x1c\n" +
+	"\x04deck\x18\x02 \x01(\v2\b.pb.DeckR\x04deck\"b\n" +
+	"\x16ListDeckReviewsRequest\x12\x17\n" +
+	"\adeck_id\x18\x01 \x01(\tR\x06deckId\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"C\n" +
+	"\x17ListDeckReviewsResponse\x12(\n" +
+	"\areviews\x18\x01 \x03(\v2\x0e.pb.DeckReviewR\areviewsB\"Z mem_pan/services/deck-service/pbb\x06proto3"
 
 var (
 	file_rpc_deck_proto_rawDescOnce sync.Once
@@ -1676,65 +2328,85 @@ func file_rpc_deck_proto_rawDescGZIP() []byte {
 	return file_rpc_deck_proto_rawDescData
 }
 
-var file_rpc_deck_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
+var file_rpc_deck_proto_msgTypes = make([]protoimpl.MessageInfo, 42)
 var file_rpc_deck_proto_goTypes = []any{
-	(*ListDecksRequest)(nil),             // 0: pb.ListDecksRequest
-	(*ListDecksResponse)(nil),            // 1: pb.ListDecksResponse
-	(*CreateDeckRequest)(nil),            // 2: pb.CreateDeckRequest
-	(*CreateDeckResponse)(nil),           // 3: pb.CreateDeckResponse
-	(*ListPublicDecksRequest)(nil),       // 4: pb.ListPublicDecksRequest
-	(*ListPublicDecksResponse)(nil),      // 5: pb.ListPublicDecksResponse
-	(*ListTopPublicDecksRequest)(nil),    // 6: pb.ListTopPublicDecksRequest
-	(*RankedPublicDeck)(nil),             // 7: pb.RankedPublicDeck
-	(*ListTopPublicDecksResponse)(nil),   // 8: pb.ListTopPublicDecksResponse
-	(*GetDeckRequest)(nil),               // 9: pb.GetDeckRequest
-	(*GetDeckResponse)(nil),              // 10: pb.GetDeckResponse
-	(*UpdateDeckRequest)(nil),            // 11: pb.UpdateDeckRequest
-	(*UpdateDeckResponse)(nil),           // 12: pb.UpdateDeckResponse
-	(*DeleteDeckRequest)(nil),            // 13: pb.DeleteDeckRequest
-	(*DeleteDeckResponse)(nil),           // 14: pb.DeleteDeckResponse
-	(*UpdateDeckSettingsRequest)(nil),    // 15: pb.UpdateDeckSettingsRequest
-	(*UpdateDeckSettingsResponse)(nil),   // 16: pb.UpdateDeckSettingsResponse
-	(*UpdateDeckVisibilityRequest)(nil),  // 17: pb.UpdateDeckVisibilityRequest
-	(*UpdateDeckVisibilityResponse)(nil), // 18: pb.UpdateDeckVisibilityResponse
-	(*CloneDeckRequest)(nil),             // 19: pb.CloneDeckRequest
-	(*CloneDeckResponse)(nil),            // 20: pb.CloneDeckResponse
-	(*GetDeckStatsRequest)(nil),          // 21: pb.GetDeckStatsRequest
-	(*GetDeckStatsResponse)(nil),         // 22: pb.GetDeckStatsResponse
-	(*ListDeckCardsRequest)(nil),         // 23: pb.ListDeckCardsRequest
-	(*ListDeckCardsResponse)(nil),        // 24: pb.ListDeckCardsResponse
-	(*CreateCardRequest)(nil),            // 25: pb.CreateCardRequest
-	(*CreateCardResponse)(nil),           // 26: pb.CreateCardResponse
-	(*BulkCardItem)(nil),                 // 27: pb.BulkCardItem
-	(*BulkCreateCardsRequest)(nil),       // 28: pb.BulkCreateCardsRequest
-	(*BulkCreateCardsResponse)(nil),      // 29: pb.BulkCreateCardsResponse
-	(*Deck)(nil),                         // 30: pb.Deck
-	(*DeckSettings)(nil),                 // 31: pb.DeckSettings
-	(*DeckStats)(nil),                    // 32: pb.DeckStats
-	(*Card)(nil),                         // 33: pb.Card
+	(*ListDecksRequest)(nil),              // 0: pb.ListDecksRequest
+	(*ListDecksResponse)(nil),             // 1: pb.ListDecksResponse
+	(*CreateDeckRequest)(nil),             // 2: pb.CreateDeckRequest
+	(*CreateDeckResponse)(nil),            // 3: pb.CreateDeckResponse
+	(*ListPublicDecksRequest)(nil),        // 4: pb.ListPublicDecksRequest
+	(*ListPublicDecksResponse)(nil),       // 5: pb.ListPublicDecksResponse
+	(*ListTopPublicDecksRequest)(nil),     // 6: pb.ListTopPublicDecksRequest
+	(*RankedPublicDeck)(nil),              // 7: pb.RankedPublicDeck
+	(*ListTopPublicDecksResponse)(nil),    // 8: pb.ListTopPublicDecksResponse
+	(*GetDeckRequest)(nil),                // 9: pb.GetDeckRequest
+	(*GetDeckResponse)(nil),               // 10: pb.GetDeckResponse
+	(*UpdateDeckRequest)(nil),             // 11: pb.UpdateDeckRequest
+	(*UpdateDeckResponse)(nil),            // 12: pb.UpdateDeckResponse
+	(*DeleteDeckRequest)(nil),             // 13: pb.DeleteDeckRequest
+	(*DeleteDeckResponse)(nil),            // 14: pb.DeleteDeckResponse
+	(*UpdateDeckSettingsRequest)(nil),     // 15: pb.UpdateDeckSettingsRequest
+	(*UpdateDeckSettingsResponse)(nil),    // 16: pb.UpdateDeckSettingsResponse
+	(*UpdateDeckVisibilityRequest)(nil),   // 17: pb.UpdateDeckVisibilityRequest
+	(*UpdateDeckVisibilityResponse)(nil),  // 18: pb.UpdateDeckVisibilityResponse
+	(*UpdateDeckAccessLevelRequest)(nil),  // 19: pb.UpdateDeckAccessLevelRequest
+	(*UpdateDeckAccessLevelResponse)(nil), // 20: pb.UpdateDeckAccessLevelResponse
+	(*CloneDeckRequest)(nil),              // 21: pb.CloneDeckRequest
+	(*CloneDeckResponse)(nil),             // 22: pb.CloneDeckResponse
+	(*GetDeckStatsRequest)(nil),           // 23: pb.GetDeckStatsRequest
+	(*GetDeckStatsResponse)(nil),          // 24: pb.GetDeckStatsResponse
+	(*ListDeckCardsRequest)(nil),          // 25: pb.ListDeckCardsRequest
+	(*ListDeckCardsResponse)(nil),         // 26: pb.ListDeckCardsResponse
+	(*CreateCardRequest)(nil),             // 27: pb.CreateCardRequest
+	(*CreateCardResponse)(nil),            // 28: pb.CreateCardResponse
+	(*BulkCardItem)(nil),                  // 29: pb.BulkCardItem
+	(*BulkCreateCardsRequest)(nil),        // 30: pb.BulkCreateCardsRequest
+	(*BulkCreateCardsResponse)(nil),       // 31: pb.BulkCreateCardsResponse
+	(*UpsertCreatorProfileRequest)(nil),   // 32: pb.UpsertCreatorProfileRequest
+	(*UpsertCreatorProfileResponse)(nil),  // 33: pb.UpsertCreatorProfileResponse
+	(*GetCreatorProfileRequest)(nil),      // 34: pb.GetCreatorProfileRequest
+	(*GetCreatorProfileResponse)(nil),     // 35: pb.GetCreatorProfileResponse
+	(*FollowCreatorRequest)(nil),          // 36: pb.FollowCreatorRequest
+	(*FollowCreatorResponse)(nil),         // 37: pb.FollowCreatorResponse
+	(*UpsertDeckReviewRequest)(nil),       // 38: pb.UpsertDeckReviewRequest
+	(*UpsertDeckReviewResponse)(nil),      // 39: pb.UpsertDeckReviewResponse
+	(*ListDeckReviewsRequest)(nil),        // 40: pb.ListDeckReviewsRequest
+	(*ListDeckReviewsResponse)(nil),       // 41: pb.ListDeckReviewsResponse
+	(*Deck)(nil),                          // 42: pb.Deck
+	(*DeckSettings)(nil),                  // 43: pb.DeckSettings
+	(*DeckStats)(nil),                     // 44: pb.DeckStats
+	(*Card)(nil),                          // 45: pb.Card
+	(*CreatorProfile)(nil),                // 46: pb.CreatorProfile
+	(*DeckReview)(nil),                    // 47: pb.DeckReview
 }
 var file_rpc_deck_proto_depIdxs = []int32{
-	30, // 0: pb.ListDecksResponse.decks:type_name -> pb.Deck
-	30, // 1: pb.CreateDeckResponse.deck:type_name -> pb.Deck
-	30, // 2: pb.ListPublicDecksResponse.decks:type_name -> pb.Deck
-	30, // 3: pb.RankedPublicDeck.deck:type_name -> pb.Deck
+	42, // 0: pb.ListDecksResponse.decks:type_name -> pb.Deck
+	42, // 1: pb.CreateDeckResponse.deck:type_name -> pb.Deck
+	42, // 2: pb.ListPublicDecksResponse.decks:type_name -> pb.Deck
+	42, // 3: pb.RankedPublicDeck.deck:type_name -> pb.Deck
 	7,  // 4: pb.ListTopPublicDecksResponse.decks:type_name -> pb.RankedPublicDeck
-	30, // 5: pb.GetDeckResponse.deck:type_name -> pb.Deck
-	30, // 6: pb.UpdateDeckResponse.deck:type_name -> pb.Deck
-	31, // 7: pb.UpdateDeckSettingsRequest.settings:type_name -> pb.DeckSettings
-	30, // 8: pb.UpdateDeckSettingsResponse.deck:type_name -> pb.Deck
-	30, // 9: pb.UpdateDeckVisibilityResponse.deck:type_name -> pb.Deck
-	30, // 10: pb.CloneDeckResponse.deck:type_name -> pb.Deck
-	32, // 11: pb.GetDeckStatsResponse.stats:type_name -> pb.DeckStats
-	33, // 12: pb.ListDeckCardsResponse.cards:type_name -> pb.Card
-	33, // 13: pb.CreateCardResponse.card:type_name -> pb.Card
-	27, // 14: pb.BulkCreateCardsRequest.cards:type_name -> pb.BulkCardItem
-	33, // 15: pb.BulkCreateCardsResponse.cards:type_name -> pb.Card
-	16, // [16:16] is the sub-list for method output_type
-	16, // [16:16] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	42, // 5: pb.GetDeckResponse.deck:type_name -> pb.Deck
+	42, // 6: pb.UpdateDeckResponse.deck:type_name -> pb.Deck
+	43, // 7: pb.UpdateDeckSettingsRequest.settings:type_name -> pb.DeckSettings
+	42, // 8: pb.UpdateDeckSettingsResponse.deck:type_name -> pb.Deck
+	42, // 9: pb.UpdateDeckVisibilityResponse.deck:type_name -> pb.Deck
+	42, // 10: pb.UpdateDeckAccessLevelResponse.deck:type_name -> pb.Deck
+	42, // 11: pb.CloneDeckResponse.deck:type_name -> pb.Deck
+	44, // 12: pb.GetDeckStatsResponse.stats:type_name -> pb.DeckStats
+	45, // 13: pb.ListDeckCardsResponse.cards:type_name -> pb.Card
+	45, // 14: pb.CreateCardResponse.card:type_name -> pb.Card
+	29, // 15: pb.BulkCreateCardsRequest.cards:type_name -> pb.BulkCardItem
+	45, // 16: pb.BulkCreateCardsResponse.cards:type_name -> pb.Card
+	46, // 17: pb.UpsertCreatorProfileResponse.profile:type_name -> pb.CreatorProfile
+	46, // 18: pb.GetCreatorProfileResponse.profile:type_name -> pb.CreatorProfile
+	47, // 19: pb.UpsertDeckReviewResponse.review:type_name -> pb.DeckReview
+	42, // 20: pb.UpsertDeckReviewResponse.deck:type_name -> pb.Deck
+	47, // 21: pb.ListDeckReviewsResponse.reviews:type_name -> pb.DeckReview
+	22, // [22:22] is the sub-list for method output_type
+	22, // [22:22] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_rpc_deck_proto_init() }
@@ -1749,7 +2421,7 @@ func file_rpc_deck_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_rpc_deck_proto_rawDesc), len(file_rpc_deck_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   30,
+			NumMessages:   42,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

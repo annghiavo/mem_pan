@@ -17,6 +17,7 @@ type RevlogRepository interface {
 	// ListReviewLogsForOptimize returns one user's review logs (oldest first) as
 	// training samples for the optimizer.
 	ListReviewLogsForOptimize(ctx context.Context, userID uuid.UUID) ([]db.ListReviewLogsForOptimizeRow, error)
+	SummarizeRevlogsBySession(ctx context.Context, sessionID uuid.UUID) (db.SummarizeRevlogsBySessionRow, error)
 }
 
 type revlogRepository struct {
@@ -37,4 +38,8 @@ func (r *revlogRepository) ListUsersWithMinReviews(ctx context.Context, minRevie
 
 func (r *revlogRepository) ListReviewLogsForOptimize(ctx context.Context, userID uuid.UUID) ([]db.ListReviewLogsForOptimizeRow, error) {
 	return r.q.ListReviewLogsForOptimize(ctx, userID)
+}
+
+func (r *revlogRepository) SummarizeRevlogsBySession(ctx context.Context, sessionID uuid.UUID) (db.SummarizeRevlogsBySessionRow, error) {
+	return r.q.SummarizeRevlogsBySession(ctx, uuid.NullUUID{UUID: sessionID, Valid: true})
 }

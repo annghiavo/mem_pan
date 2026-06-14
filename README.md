@@ -18,7 +18,7 @@ CSV/TSV — two-column rows, auto-detected separator, blank rows skipped, BOM-sa
 
   ./scripts/reset-data.sh
 
-  docker compose restart search-service
+  docker compose restart deck-service
 
 
 
@@ -64,6 +64,9 @@ Direct service URLs (cho debug):
   notification  → https://notification-service-wzed7v5hbq-as.a.run.app
   search        → https://search-service-wzed7v5hbq-as.a.run.app
 ```
+
+Billing-service deployment and PayOS payout status:
+`doc/billing-service-deployment.md`
 
 ## CI Deploy (GitHub Actions, matrix parallel)
 
