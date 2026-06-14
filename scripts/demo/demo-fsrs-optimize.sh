@@ -8,9 +8,16 @@
 
 set -euo pipefail
 
-# Các giá trị mặc định cho môi trường production hiện tại
+# Retrieve the secret dynamically from Google Secret Manager
+echo "Fetching cron secret from Secret Manager..."
+PROJECT_ID="mempan-cac51"
 STUDY_SERVICE_URL="${STUDY_SERVICE_URL:-https://study-service-272885252422.asia-southeast3.run.app}"
-CRON_SECRET="${CRON_SECRET:-6a2289792dba0a6bc2a1082e1457f1d7ff9f46e0c74c20f652b808121da88614}"
+CRON_SECRET=$(gcloud secrets versions access latest --secret="pubsub-push-token" --project="$PROJECT_ID")
+
+if [ -z "$CRON_SECRET" ]; then
+  echo "Error: Failed to fetch cron secret from Secret Manager."
+  exit 1
+fi
 
 URI="${STUDY_SERVICE_URL%/}/internal/fsrs/optimize"
 

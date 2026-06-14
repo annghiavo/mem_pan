@@ -26,6 +26,8 @@ on:
           - admin-service
           - notification-service
           - search-service
+          - billing-service
+
 
 concurrency:
   # One deploy at a time per service to avoid revision races; allow different
@@ -67,7 +69,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          ALL='["auth-service","deck-service","study-service","stats-service","admin-service","notification-service","search-service"]'
+          ALL='["auth-service","deck-service","study-service","stats-service","admin-service","notification-service","search-service","billing-service"]'
 
           # Manual dispatch: honour the input.
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -99,7 +101,7 @@ jobs:
           fi
 
           touched=()
-          for svc in auth-service deck-service study-service stats-service admin-service notification-service search-service; do
+          for svc in auth-service deck-service study-service stats-service admin-service notification-service search-service billing-service; do
             if echo "$diff" | grep -q "^services/$svc/"; then
               touched+=("\"$svc\"")
             fi
@@ -114,6 +116,7 @@ jobs:
             echo "services=[$joined]" >> "$GITHUB_OUTPUT"
             echo "any=true" >> "$GITHUB_OUTPUT"
           fi
+
 
   # ─────────────────────────────────────────────────────────────────────────
   # 2. build-and-deploy — runs once per changed service, in parallel.
@@ -196,15 +199,15 @@ jobs:
           case "${{ matrix.service }}" in
             auth-service)
               SECRET_STR="DATABASE_URL=auth-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,CLOUDINARY_URL=auth-cloudinary-url:latest"
-              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=user-events,ACCESS_TOKEN_DURATION=15m,REFRESH_TOKEN_DURATION=168h,VERIFICATION_TOKEN_DURATION=24h,RESET_TOKEN_DURATION=1h"
+              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=user-events,ACCESS_TOKEN_DURATION=168h,REFRESH_TOKEN_DURATION=720h,VERIFICATION_TOKEN_DURATION=24h,RESET_TOKEN_DURATION=1h"
               ;;
             deck-service)
               SECRET_STR="DATABASE_URL=deck-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,CLOUDINARY_URL=deck-cloudinary-url:latest"
-              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=deck-events,AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-eu.a.run.app:443,STUDY_SERVICE_ADDRESS=study-service-wzed7v5hbq-eu.a.run.app:443"
+              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=deck-events,AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-eu.a.run.app:443,STUDY_SERVICE_ADDRESS=study-service-wzed7v5hbq-eu.a.run.app:443,BILLING_SERVICE_ADDRESS=billing-service-272885252422.asia-southeast3.run.app:443"
               ;;
             study-service)
               SECRET_STR="DATABASE_URL=study-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest"
-              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=study-events,AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-eu.a.run.app:443,DECK_SERVICE_ADDRESS=deck-service-wzed7v5hbq-eu.a.run.app:443"
+              ENV_VARS="${BASE_ENV},PUBSUB_TOPIC=study-events,AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-eu.a.run.app:443,DECK_SERVICE_ADDRESS=deck-service-wzed7v5hbq-eu.a.run.app:443,BILLING_SERVICE_ADDRESS=billing-service-272885252422.asia-southeast3.run.app:443"
               ;;
             stats-service)
               SECRET_STR="DATABASE_URL=stats-db-url:latest,PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,PUBSUB_PUSH_SECRET=pubsub-push-token:latest"
@@ -221,6 +224,10 @@ jobs:
             search-service)
               SECRET_STR="PASETO_SYMMETRIC_KEY=paseto-symmetric-key:latest,ELASTICSEARCH_URL=es-url:latest,ELASTICSEARCH_API_KEY=es-api-key:latest,PUBSUB_PUSH_SECRET=pubsub-push-token:latest"
               ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-eu.a.run.app:443,ES_DECK_INDEX=mempan-decks,ES_FOLDER_INDEX=mempan-folders,ES_CARD_INDEX=mempan-cards,ES_USER_INDEX=mempan-users"
+              ;;
+            billing-service)
+              SECRET_STR="DATABASE_URL=billing-db-url:latest,PAYOS_CLIENT_ID=payos-client-id:latest,PAYOS_API_KEY=payos-api-key:latest,PAYOS_CHECKSUM_KEY=payos-checksum-key:latest,PAYOS_PAYOUT_CLIENT_ID=payos-payout-client-id:latest,PAYOS_PAYOUT_API_KEY=payos-payout-api-key:latest,PAYOS_PAYOUT_CHECKSUM_KEY=payos-payout-checksum-key:latest"
+              ENV_VARS="${BASE_ENV},AUTH_SERVICE_ADDRESS=auth-service-wzed7v5hbq-eu.a.run.app:443,PAYOS_BASE_URL=https://api-merchant.payos.vn,APP_BASE_URL=https://mem-pan-mb.vercel.app,PAYOS_RETURN_URL=https://mem-pan-mb.vercel.app/billing/return,PAYOS_CANCEL_URL=https://mem-pan-mb.vercel.app/billing/cancel,PLUS_MONTHLY_AMOUNT_VND=25000,PLUS_YEARLY_AMOUNT_VND=250000"
               ;;
           esac
 

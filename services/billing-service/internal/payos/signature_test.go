@@ -33,6 +33,27 @@ func TestCreateSignatureSortsFields(t *testing.T) {
 	}
 }
 
+func TestSignCreatePaymentLink(t *testing.T) {
+	client := NewClient(Config{
+		ChecksumKey: "secret",
+	})
+	req := &CreatePaymentLinkRequest{
+		Amount:      50000,
+		CancelURL:   "https://example.com/cancel",
+		Description: "ORDER123",
+		OrderCode:   123456,
+		ReturnURL:   "https://example.com/return",
+	}
+	err := client.SignCreatePaymentLink(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const want = "b9c208495fda1d5748bae5dc8ebb1ff745aab6cfaa19a9808ffb0e29d808e0e3"
+	if req.Signature != want {
+		t.Fatalf("signature mismatch: got %s, want %s", req.Signature, want)
+	}
+}
+
 func TestVerifySignatureRejectsMismatch(t *testing.T) {
 	ok := VerifySignature(map[string]any{"amount": int64(50000)}, "bad-signature", "secret")
 	if ok {

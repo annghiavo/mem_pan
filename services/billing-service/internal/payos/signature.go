@@ -53,8 +53,6 @@ func VerifyAnySignature(data any, signature, checksumKey string) bool {
 func encodeURIComponent(str string) string {
 	escaped := url.QueryEscape(str)
 	escaped = strings.ReplaceAll(escaped, "+", "%20")
-	// JS encodeURIComponent does NOT encode: !, ', (, ), *
-	// Go QueryEscape encodes them. Let's restore them to match JS exactly.
 	escaped = strings.ReplaceAll(escaped, "%21", "!")
 	escaped = strings.ReplaceAll(escaped, "%27", "'")
 	escaped = strings.ReplaceAll(escaped, "%28", "(")

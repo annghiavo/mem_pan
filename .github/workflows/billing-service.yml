@@ -1,0 +1,72 @@
+name: billing-service
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/billing-service/**'
+      - 'go.work'
+      - 'go.work.sum'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'services/billing-service/**'
+      - 'go.work'
+      - 'go.work.sum'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: billing-service
+    defaults:
+      run:
+        working-directory: services/billing-service
+    env:
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.26'
+          cache-dependency-path: services/billing-service/go.sum
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Resolve DB URL
+        run: |
+          # Prefer DIRECT_URL; fall back to DATABASE_URL. Strip "-pooler" so
+          # the URL points at Neon's direct endpoint.
+          DB_URL="${DIRECT_URL:-$DATABASE_URL}"
+          DB_URL="${DB_URL/-pooler./.}"
+          if [ -n "$DB_URL" ]; then
+            echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
+            echo "HAS_DB_URL=true" >> "$GITHUB_ENV"
+          else
+            echo "HAS_DB_URL=false" >> "$GITHUB_ENV"
+            echo "No database secret found. Migration step will be skipped."
+          fi
+
+      - name: Install golang-migrate
+        if: env.HAS_DB_URL == 'true'
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.19.1/migrate.linux-amd64.tar.gz | tar xvz
+          sudo mv migrate /usr/local/bin/migrate
+
+      - name: Run migrations
+        if: env.HAS_DB_URL == 'true'
+        run: make migrateup
+
+      - name: Test
+        run: go test -v -cover -coverprofile=coverage.out ./...
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-billing
+          path: services/billing-service/coverage.out
+          retention-days: 7

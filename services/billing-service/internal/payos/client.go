@@ -3,7 +3,10 @@ package payos
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
 	"encoding/json"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"strings"
@@ -229,16 +232,17 @@ func (c *Client) GetPaymentLinkInfo(ctx context.Context, orderCode int64) (Payme
 }
 
 func (c *Client) SignCreatePaymentLink(req *CreatePaymentLinkRequest) error {
-	sig, err := CreateSignature(map[string]any{
-		"amount":      req.Amount,
-		"cancelUrl":   req.CancelURL,
-		"description": req.Description,
-		"orderCode":   req.OrderCode,
-		"returnUrl":   req.ReturnURL,
-	}, c.checksumKey)
-	if err != nil {
-		return err
-	}
+	signedData := fmt.Sprintf(
+		"amount=%d&cancelUrl=%s&description=%s&orderCode=%d&returnUrl=%s",
+		req.Amount,
+		req.CancelURL,
+		req.Description,
+		req.OrderCode,
+		req.ReturnURL,
+	)
+	mac := hmac.New(sha256.New, []byte(c.checksumKey))
+	mac.Write([]byte(signedData))
+	sig := hex.EncodeToString(mac.Sum(nil))
 	req.Signature = sig
 	return nil
 }
@@ -278,8 +282,23 @@ func (c *Client) CreatePaymentLink(ctx context.Context, req CreatePaymentLinkReq
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return CreatePaymentLinkResponse{}, raw.Bytes(), fmt.Errorf("payos create payment link failed: status=%d code=%s desc=%s", resp.StatusCode, out.Code, out.Desc)
 	}
-	if out.Data.CheckoutURL == "" || out.Data.PaymentLinkID == "" {
-		return CreatePaymentLinkResponse{}, raw.Bytes(), fmt.Errorf("payos create payment link returned incomplete data")
+	if strings.TrimSpace(out.Code) != "" && out.Code != "00" {
+		return CreatePaymentLinkResponse{}, raw.Bytes(), fmt.Errorf(
+			"payos create payment link rejected: code=%s desc=%s",
+			out.Code,
+			out.Desc,
+		)
+	}
+	if out.Data.OrderCode == 0 || out.Data.CheckoutURL == "" {
+		return CreatePaymentLinkResponse{}, raw.Bytes(), fmt.Errorf(
+			"payos create payment link returned incomplete data: code=%s desc=%s order_code=%d checkout_url_present=%t payment_link_id_present=%t raw=%s",
+			out.Code,
+			out.Desc,
+			out.Data.OrderCode,
+			out.Data.CheckoutURL != "",
+			out.Data.PaymentLinkID != "",
+			strings.TrimSpace(raw.String()),
+		)
 	}
 	return out, raw.Bytes(), nil
 }

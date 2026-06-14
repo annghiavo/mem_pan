@@ -517,7 +517,7 @@ paths:
       operationId: billingGet
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -527,7 +527,7 @@ paths:
       operationId: billingPost
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -537,7 +537,7 @@ paths:
       operationId: opt_v1_billing_path
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -548,7 +548,7 @@ paths:
       operationId: billingBanksGet
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -558,7 +558,7 @@ paths:
       operationId: opt_v1_billing_banks
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -574,7 +574,7 @@ paths:
       operationId: adminRevenueGet
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -584,7 +584,7 @@ paths:
       operationId: adminRevenuePost
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -594,7 +594,7 @@ paths:
       operationId: opt_v1_admin_revenue_path
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -605,7 +605,7 @@ paths:
       operationId: creatorEarningsGet
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -615,7 +615,7 @@ paths:
       operationId: opt_v1_creators_me_earnings
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -626,7 +626,7 @@ paths:
       operationId: creatorEarningsSummaryGet
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -636,7 +636,7 @@ paths:
       operationId: opt_v1_creators_me_earnings_summary
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -647,7 +647,7 @@ paths:
       operationId: creatorPayoutAccountGet
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -657,7 +657,7 @@ paths:
       operationId: creatorPayoutAccountPut
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -667,7 +667,28 @@ paths:
       operationId: opt_v1_creators_me_payout_account
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: preflight
+  "/v1/creators/me/balance-history":
+    get:
+      operationId: creatorBalanceHistoryGet
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-272885252422.asia-southeast3.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        deadline: 30.0
+      responses:
+        '200':
+          description: ok
+    options:
+      operationId: opt_v1_creators_me_balance_history
+      x-google-backend:
+        disable_auth: true
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -678,7 +699,7 @@ paths:
       operationId: creatorWithdrawalPost
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
@@ -688,7 +709,7 @@ paths:
       operationId: opt_v1_creators_me_withdrawals
       x-google-backend:
         disable_auth: true
-        address: https://billing-service-wzed7v5hbq-eu.a.run.app
+        address: https://billing-service-272885252422.asia-southeast3.run.app
         path_translation: APPEND_PATH_TO_ADDRESS
         deadline: 30.0
       responses:
