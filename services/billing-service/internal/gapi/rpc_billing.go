@@ -91,3 +91,13 @@ func (s *Server) SyncRevenuePool(ctx context.Context, req *pb.SyncRevenuePoolReq
 		SyncedEarnings: int32(len(earnings)),
 	}, nil
 }
+
+func (s *Server) GetAllocatedRevenue(ctx context.Context, req *pb.GetAllocatedRevenueRequest) (*pb.GetAllocatedRevenueResponse, error) {
+	amount, err := s.billingSvc.GetAllocatedRevenue(ctx, req.GetPoolMonth())
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &pb.GetAllocatedRevenueResponse{
+		AllocatedGrossAmountVnd: amount,
+	}, nil
+}

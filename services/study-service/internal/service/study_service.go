@@ -538,7 +538,7 @@ func (s *studyService) CalculateMonthlyRevShare(ctx context.Context, poolMonth t
 	if poolRate <= 0 || poolRate > 1 {
 		poolRate = 0.5
 	}
-	if creatorCapRate <= 0 || creatorCapRate > 1 {
+	if creatorCapRate <= 0 || creatorCapRate > 0.2 {
 		creatorCapRate = 0.2
 	}
 	if minLearners <= 0 {
@@ -546,6 +546,13 @@ func (s *studyService) CalculateMonthlyRevShare(ctx context.Context, poolMonth t
 	}
 	monthStart := time.Date(poolMonth.Year(), poolMonth.Month(), 1, 0, 0, 0, 0, time.UTC)
 	monthEnd := monthStart.AddDate(0, 1, 0)
+
+	if grossAmountVND <= 0 && s.billingClient != nil {
+		if val, err := s.billingClient.GetAllocatedRevenue(ctx, monthStart.Format("2006-01")); err == nil {
+			grossAmountVND = val
+		}
+	}
+
 	creatorPool := int64(float64(grossAmountVND) * poolRate)
 	pool, err := s.revshareRepo.UpsertMonthlyRevenuePool(ctx, db.UpsertMonthlyRevenuePoolParams{
 		PoolMonth:            monthStart,

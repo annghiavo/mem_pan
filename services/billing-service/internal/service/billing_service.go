@@ -201,6 +201,7 @@ type BillingService interface {
 	SyncRevenuePool(ctx context.Context, in RevenuePoolSyncInput) error
 
 	GetMonthlyRevenuePools(ctx context.Context) ([]db.MonthlyRevenuePool, error)
+	GetAllocatedRevenue(ctx context.Context, poolMonth string) (int64, error)
 	GetCreatorEarningsByMonth(ctx context.Context, poolMonth time.Time) ([]db.CreatorEarning, error)
 	GetMyEarnings(ctx context.Context, creatorID uuid.UUID) ([]db.CreatorEarning, error)
 	GetMyEarningsSummary(ctx context.Context, creatorID uuid.UUID) (CreatorEarningsSummary, error)
@@ -571,6 +572,16 @@ func (s *billingService) SyncRevenuePool(ctx context.Context, in RevenuePoolSync
 
 func (s *billingService) GetMonthlyRevenuePools(ctx context.Context) ([]db.MonthlyRevenuePool, error) {
 	return s.repo.GetMonthlyRevenuePools(ctx)
+}
+
+func (s *billingService) GetAllocatedRevenue(ctx context.Context, poolMonth string) (int64, error) {
+	t, err := time.Parse("2006-01", poolMonth)
+	if err != nil {
+		return 0, fmt.Errorf("%w: invalid pool month format (must be YYYY-MM)", domain.ErrInvalidPayout)
+	}
+	start := time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, time.UTC)
+	end := start.AddDate(0, 1, 0)
+	return s.repo.GetAllocatedRevenueForMonth(ctx, start, end)
 }
 
 func (s *billingService) GetCreatorEarningsByMonth(ctx context.Context, poolMonth time.Time) ([]db.CreatorEarning, error) {

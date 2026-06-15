@@ -10,6 +10,15 @@ service BillingService {
     rpc CheckPlusAccess(CheckPlusAccessRequest) returns (CheckPlusAccessResponse);
     rpc ExpireSubscriptions(ExpireSubscriptionsRequest) returns (ExpireSubscriptionsResponse);
     rpc SyncRevenuePool(SyncRevenuePoolRequest) returns (SyncRevenuePoolResponse);
+    rpc GetAllocatedRevenue(GetAllocatedRevenueRequest) returns (GetAllocatedRevenueResponse);
+}
+
+message GetAllocatedRevenueRequest {
+    string pool_month = 1;
+}
+
+message GetAllocatedRevenueResponse {
+    int64 allocated_gross_amount_vnd = 1;
 }
 
 message CheckPlusAccessRequest {

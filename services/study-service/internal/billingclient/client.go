@@ -18,6 +18,7 @@ import (
 
 type Client interface {
 	SyncRevenuePool(ctx context.Context, pool studb.MonthlyRevenuePool, earnings []studb.CreatorEarning) error
+	GetAllocatedRevenue(ctx context.Context, poolMonth string) (int64, error)
 	Close() error
 }
 
@@ -67,6 +68,16 @@ func (c *grpcClient) SyncRevenuePool(ctx context.Context, pool studb.MonthlyReve
 		return fmt.Errorf("billing-service SyncRevenuePool: %w", err)
 	}
 	return nil
+}
+
+func (c *grpcClient) GetAllocatedRevenue(ctx context.Context, poolMonth string) (int64, error) {
+	resp, err := c.billingSvc.GetAllocatedRevenue(ctx, &billingpb.GetAllocatedRevenueRequest{
+		PoolMonth: poolMonth,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return resp.GetAllocatedGrossAmountVnd(), nil
 }
 
 func (c *grpcClient) Close() error {

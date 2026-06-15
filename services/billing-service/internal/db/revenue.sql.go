@@ -110,6 +110,44 @@ func (q *Queries) CreateMonthlyRevenuePool(ctx context.Context, arg CreateMonthl
 	return i, err
 }
 
+const getAllocatedRevenueForMonth = `-- name: GetAllocatedRevenueForMonth :one
+WITH subscription_periods AS (
+    SELECT 
+        s.subscription_id,
+        p.amount_vnd,
+        s.current_period_start,
+        s.current_period_end,
+        EXTRACT(EPOCH FROM (s.current_period_end - s.current_period_start))/86400.0 AS total_days,
+        GREATEST(s.current_period_start, $1::timestamptz) AS active_start,
+        LEAST(s.current_period_end, $2::timestamptz) AS active_end
+    FROM subscriptions s
+    JOIN payment_transactions p ON s.subscription_id = p.subscription_id
+    WHERE p.status = 'paid'
+      AND s.current_period_start < $2::timestamptz
+      AND s.current_period_end > $1::timestamptz
+)
+SELECT 
+    COALESCE(
+        SUM(
+            amount_vnd * (EXTRACT(EPOCH FROM (active_end - active_start))/86400.0) / 
+            CASE WHEN total_days <= 0 THEN 1.0 ELSE total_days END
+        ), 0
+    )::bigint AS allocated_gross_amount_vnd
+FROM subscription_periods
+`
+
+type GetAllocatedRevenueForMonthParams struct {
+	Column1 time.Time `json:"column_1"`
+	Column2 time.Time `json:"column_2"`
+}
+
+func (q *Queries) GetAllocatedRevenueForMonth(ctx context.Context, arg GetAllocatedRevenueForMonthParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getAllocatedRevenueForMonth, arg.Column1, arg.Column2)
+	var allocated_gross_amount_vnd int64
+	err := row.Scan(&allocated_gross_amount_vnd)
+	return allocated_gross_amount_vnd, err
+}
+
 const getCreatorEarningByID = `-- name: GetCreatorEarningByID :one
 SELECT earning_id, pool_month, creator_id, eligible_learners, weighted_score, amount_vnd, status, paid_at, created_at, payout_reference_id, payout_idempotency_key, payout_to_bin, payout_to_account_number, payout_to_account_name, payos_payout_id, payos_payout_transaction_id, payos_payout_state, payout_raw_payload, payout_requested_at, payout_failed_reason FROM creator_earnings
 WHERE earning_id = $1

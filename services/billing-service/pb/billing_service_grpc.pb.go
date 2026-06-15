@@ -22,6 +22,7 @@ const (
 	BillingService_CheckPlusAccess_FullMethodName     = "/billing.BillingService/CheckPlusAccess"
 	BillingService_ExpireSubscriptions_FullMethodName = "/billing.BillingService/ExpireSubscriptions"
 	BillingService_SyncRevenuePool_FullMethodName     = "/billing.BillingService/SyncRevenuePool"
+	BillingService_GetAllocatedRevenue_FullMethodName = "/billing.BillingService/GetAllocatedRevenue"
 )
 
 // BillingServiceClient is the client API for BillingService service.
@@ -31,6 +32,7 @@ type BillingServiceClient interface {
 	CheckPlusAccess(ctx context.Context, in *CheckPlusAccessRequest, opts ...grpc.CallOption) (*CheckPlusAccessResponse, error)
 	ExpireSubscriptions(ctx context.Context, in *ExpireSubscriptionsRequest, opts ...grpc.CallOption) (*ExpireSubscriptionsResponse, error)
 	SyncRevenuePool(ctx context.Context, in *SyncRevenuePoolRequest, opts ...grpc.CallOption) (*SyncRevenuePoolResponse, error)
+	GetAllocatedRevenue(ctx context.Context, in *GetAllocatedRevenueRequest, opts ...grpc.CallOption) (*GetAllocatedRevenueResponse, error)
 }
 
 type billingServiceClient struct {
@@ -71,6 +73,16 @@ func (c *billingServiceClient) SyncRevenuePool(ctx context.Context, in *SyncReve
 	return out, nil
 }
 
+func (c *billingServiceClient) GetAllocatedRevenue(ctx context.Context, in *GetAllocatedRevenueRequest, opts ...grpc.CallOption) (*GetAllocatedRevenueResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAllocatedRevenueResponse)
+	err := c.cc.Invoke(ctx, BillingService_GetAllocatedRevenue_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BillingServiceServer is the server API for BillingService service.
 // All implementations must embed UnimplementedBillingServiceServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type BillingServiceServer interface {
 	CheckPlusAccess(context.Context, *CheckPlusAccessRequest) (*CheckPlusAccessResponse, error)
 	ExpireSubscriptions(context.Context, *ExpireSubscriptionsRequest) (*ExpireSubscriptionsResponse, error)
 	SyncRevenuePool(context.Context, *SyncRevenuePoolRequest) (*SyncRevenuePoolResponse, error)
+	GetAllocatedRevenue(context.Context, *GetAllocatedRevenueRequest) (*GetAllocatedRevenueResponse, error)
 	mustEmbedUnimplementedBillingServiceServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedBillingServiceServer) ExpireSubscriptions(context.Context, *E
 }
 func (UnimplementedBillingServiceServer) SyncRevenuePool(context.Context, *SyncRevenuePoolRequest) (*SyncRevenuePoolResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SyncRevenuePool not implemented")
+}
+func (UnimplementedBillingServiceServer) GetAllocatedRevenue(context.Context, *GetAllocatedRevenueRequest) (*GetAllocatedRevenueResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAllocatedRevenue not implemented")
 }
 func (UnimplementedBillingServiceServer) mustEmbedUnimplementedBillingServiceServer() {}
 func (UnimplementedBillingServiceServer) testEmbeddedByValue()                        {}
@@ -172,6 +188,24 @@ func _BillingService_SyncRevenuePool_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BillingService_GetAllocatedRevenue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllocatedRevenueRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BillingServiceServer).GetAllocatedRevenue(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BillingService_GetAllocatedRevenue_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BillingServiceServer).GetAllocatedRevenue(ctx, req.(*GetAllocatedRevenueRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BillingService_ServiceDesc is the grpc.ServiceDesc for BillingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var BillingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SyncRevenuePool",
 			Handler:    _BillingService_SyncRevenuePool_Handler,
+		},
+		{
+			MethodName: "GetAllocatedRevenue",
+			Handler:    _BillingService_GetAllocatedRevenue_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

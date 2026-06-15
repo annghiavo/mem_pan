@@ -30,6 +30,7 @@ type BillingRepository interface {
 	RecordWebhookEvent(ctx context.Context, eventKey string, rawPayload []byte) error
 
 	GetMonthlyRevenuePools(ctx context.Context) ([]db.MonthlyRevenuePool, error)
+	GetAllocatedRevenueForMonth(ctx context.Context, start, end time.Time) (int64, error)
 	SyncRevenuePool(ctx context.Context, pool db.UpsertMonthlyRevenuePoolParams, earnings []db.UpsertCreatorEarningParams) error
 	GetCreatorEarningsByMonth(ctx context.Context, poolMonth time.Time) ([]db.CreatorEarning, error)
 	GetMyEarnings(ctx context.Context, creatorID uuid.UUID) ([]db.CreatorEarning, error)
@@ -183,6 +184,44 @@ func (r *postgresRepo) SyncRevenuePool(ctx context.Context, pool db.UpsertMonthl
 	if _, err := qtx.UpsertMonthlyRevenuePool(ctx, pool); err != nil {
 		return err
 	}
+
+	oldEarnings, err := qtx.GetCreatorEarningsByMonth(ctx, pool.PoolMonth)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+
+	newCreators := make(map[uuid.UUID]bool)
+	for _, earning := range earnings {
+		newCreators[earning.CreatorID] = true
+	}
+
+	for _, old := range oldEarnings {
+		if _, ok := newCreators[old.CreatorID]; !ok {
+			if old.Status == "paid" || old.Status == "processing" {
+				continue
+			}
+			row, err := qtx.UpsertCreatorEarning(ctx, db.UpsertCreatorEarningParams{
+				PoolMonth:        old.PoolMonth,
+				CreatorID:        old.CreatorID,
+				EligibleLearners: 0,
+				WeightedScore:    "0.0000",
+				AmountVnd:        0,
+				Status:           "failed",
+			})
+			if err != nil {
+				return err
+			}
+			if _, err := qtx.UpsertCreatorEarningCreditTransaction(ctx, db.UpsertCreatorEarningCreditTransactionParams{
+				CreatorID: row.CreatorID,
+				SourceID:  row.EarningID.String(),
+				AmountVnd: 0,
+				PoolMonth: sql.NullTime{Time: row.PoolMonth, Valid: true},
+			}); err != nil {
+				return err
+			}
+		}
+	}
+
 	for _, earning := range earnings {
 		row, err := qtx.UpsertCreatorEarning(ctx, earning)
 		if err != nil {
@@ -290,4 +329,11 @@ func (r *postgresRepo) GetCreatorPayoutAccount(ctx context.Context, creatorID uu
 		return db.CreatorPayoutAccount{}, domain.ErrPayoutAccountNotFound
 	}
 	return row, err
+}
+
+func (r *postgresRepo) GetAllocatedRevenueForMonth(ctx context.Context, start, end time.Time) (int64, error) {
+	return r.q.GetAllocatedRevenueForMonth(ctx, db.GetAllocatedRevenueForMonthParams{
+		Column1: start,
+		Column2: end,
+	})
 }
